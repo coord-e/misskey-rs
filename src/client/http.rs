@@ -1,11 +1,21 @@
 use crate::api::ApiRequest;
-use crate::error::Result;
 
 use super::Client;
 
+use err_derive::Error;
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use serde_json::value::{self, Value};
 use url::Url;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error(display = "network error: {}", _0)]
+    Network(#[error(source)] reqwest::Error),
+    #[error(display = "JSON error: {}", _0)]
+    Json(#[error(source)] serde_json::Error),
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
 
 pub struct HttpClient {
     url: Url,
@@ -33,6 +43,8 @@ impl HttpClient {
 
 #[async_trait::async_trait]
 impl Client for HttpClient {
+    type Error = Error;
+
     async fn request<R: ApiRequest + Send>(&mut self, request: R) -> Result<R::Response> {
         let url = self
             .url
