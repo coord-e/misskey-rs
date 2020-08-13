@@ -1,15 +1,4 @@
-[package]
-name = "misskey"
-version = "0.1.0"
-authors = ["coord.e <me@coord-e.com>"]
-edition = "2018"
-
-[dependencies]
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-chrono = { version = "0.4.13", features = ["serde"] }
-err-derive = "0.2.4"
-url = "2.1.1"
-reqwest = { version = "0.10.6", default-features = false, features = ["blocking", "rustls-tls"] }
-derivative = "2.1.1"
-async-trait = "0.1.36"
+[workspace]
+members = [
+  "misskey",
+]

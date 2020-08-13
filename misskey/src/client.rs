@@ -4,6 +4,7 @@ use crate::api::{self, ApiRequest};
 use crate::model::note::{Note, NoteId, ReactionType, Visibility};
 
 pub mod http;
+pub use http::HttpClient;
 
 #[async_trait::async_trait]
 pub trait Client {
