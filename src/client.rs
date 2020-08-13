@@ -7,7 +7,16 @@ pub mod http;
 #[async_trait::async_trait]
 pub trait Client {
     async fn request<R: ApiRequest + Send>(&mut self, request: R) -> Result<R::Response>;
+}
 
+#[async_trait::async_trait]
+pub trait ClientExt {
+    async fn list_notes(&mut self) -> Result<Vec<Note>>;
+    async fn create_note(&mut self, text: String) -> Result<Note>;
+}
+
+#[async_trait::async_trait]
+impl<T: Client + Send> ClientExt for T {
     async fn list_notes(&mut self) -> Result<Vec<Note>> {
         let request = api::notes::Request {
             local: false,
