@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::model::{
     file::{DriveFile, FileId},
     user::{User, UserId},
@@ -46,6 +48,12 @@ pub struct Poll {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Emoji {
+    pub name: String,
+    pub url: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Note {
     pub id: NoteId,
@@ -80,6 +88,12 @@ pub struct Note {
     pub tags: Vec<Tag>,
     #[serde(default)]
     pub poll: Option<Poll>,
+    #[serde(default)]
+    pub reactions: HashMap<ReactionType, u64>,
+    #[serde(default)]
+    pub emojis: Vec<Emoji>,
+    pub renote_count: u64,
+    pub replies_count: u64,
 }
 
 fn default_false() -> bool {
