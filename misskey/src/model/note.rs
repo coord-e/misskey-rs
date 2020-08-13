@@ -8,6 +8,7 @@ use crate::model::{
 use chrono::{DateTime, Utc};
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
 #[derivative(Debug = "transparent")]
@@ -50,7 +51,7 @@ pub struct Poll {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Emoji {
     pub name: String,
-    pub url: String,
+    pub url: Url,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

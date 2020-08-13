@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
 #[derivative(Debug = "transparent")]
@@ -20,7 +21,7 @@ pub struct DriveFile {
     pub type_: String,
     pub md5: String,
     pub size: u64,
-    pub url: Option<String>,
+    pub url: Option<Url>,
     pub folder_id: Option<FolderId>,
     pub is_sensitive: bool,
 }

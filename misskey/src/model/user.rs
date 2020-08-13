@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc};
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
+use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
 #[derivative(Debug = "transparent")]
@@ -16,11 +17,11 @@ pub struct User {
     pub username: String,
     pub name: Option<String>,
     #[serde(default)]
-    pub url: Option<String>,
-    pub avatar_url: Option<String>,
+    pub url: Option<Url>,
+    pub avatar_url: Option<Url>,
     pub avatar_blurhash: Option<Value>,
     #[serde(default)]
-    pub banner_url: Option<String>,
+    pub banner_url: Option<Url>,
     #[serde(default)]
     pub banner_blurhash: Option<Value>,
     pub emojis: Option<Value>,
