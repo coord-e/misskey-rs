@@ -4,6 +4,7 @@ use crate::model::note::{Note, NoteId};
 use serde::Serialize;
 
 pub mod create;
+pub mod reactions;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
