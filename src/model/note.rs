@@ -15,6 +15,10 @@ pub struct NoteId(pub String);
 #[derivative(Debug = "transparent")]
 pub struct Tag(pub String);
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[derivative(Debug = "transparent")]
+pub struct ReactionType(pub String);
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub enum Visibility {

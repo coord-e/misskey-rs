@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::api::{self, ApiRequest};
-use crate::model::note::{Note, Visibility};
+use crate::model::note::{Note, NoteId, ReactionType, Visibility};
 
 pub mod http;
 
@@ -19,6 +19,11 @@ pub trait Client {
 pub trait ClientExt: Client {
     async fn list_notes(&mut self) -> Result<Vec<Note>, Self::Error>;
     async fn create_note(&mut self, text: String) -> Result<Note, Self::Error>;
+    async fn create_reaction(
+        &mut self,
+        note_id: NoteId,
+        reaction: ReactionType,
+    ) -> Result<(), Self::Error>;
 }
 
 #[async_trait::async_trait]
@@ -55,5 +60,14 @@ impl<T: Client + Send> ClientExt for T {
         };
         let response = self.request(request).await?;
         Ok(response.created_note)
+    }
+
+    async fn create_reaction(
+        &mut self,
+        note_id: NoteId,
+        reaction: ReactionType,
+    ) -> Result<(), T::Error> {
+        let request = api::notes::reactions::create::Request { note_id, reaction };
+        self.request(request).await
     }
 }

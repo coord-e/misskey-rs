@@ -1,5 +1,5 @@
 use crate::api::ApiRequest;
-use crate::model::note::NoteId;
+use crate::model::note::{NoteId, ReactionType};
 
 use serde::Serialize;
 
@@ -7,7 +7,7 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub note_id: NoteId,
-    pub reaction: String,
+    pub reaction: ReactionType,
 }
 
 impl ApiRequest for Request {
