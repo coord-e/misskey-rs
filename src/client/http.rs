@@ -52,7 +52,12 @@ impl Client for HttpClient {
             .bytes()
             .await?;
 
-        let response = serde_json::from_slice(&response_bytes)?;
+        let json_bytes = if response_bytes.is_empty() {
+            b"null"
+        } else {
+            response_bytes.as_ref()
+        };
+        let response = serde_json::from_slice(json_bytes)?;
         Ok(response)
     }
 }
