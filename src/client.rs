@@ -2,7 +2,6 @@ use crate::api::{self, ApiRequest};
 use crate::error::Result;
 use crate::model::note::{Note, Visibility};
 
-mod auth;
 pub mod http;
 
 #[async_trait::async_trait]

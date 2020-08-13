@@ -1,9 +1,10 @@
 use crate::api::ApiRequest;
 use crate::error::Result;
 
-use super::{auth, Client};
+use super::Client;
 
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
+use serde_json::value::{self, Value};
 use url::Url;
 
 pub struct HttpClient {
@@ -38,7 +39,7 @@ impl Client for HttpClient {
             .join(R::ENDPOINT)
             .expect("ApiRequest::ENDPOINT must be a fragment of valid URL");
 
-        let body = auth::to_json_with_api_key(request, &self.api_key)?.to_string();
+        let body = to_json_with_api_key(request, &self.api_key)?.to_string();
 
         use reqwest::header::CONTENT_TYPE;
         let response_bytes = self
@@ -60,4 +61,18 @@ impl Client for HttpClient {
         let response = serde_json::from_slice(json_bytes)?;
         Ok(response)
     }
+}
+
+pub fn to_json_with_api_key<T: ApiRequest>(data: T, api_key: &str) -> Result<Value> {
+    let mut value = value::to_value(data)?;
+
+    let obj = value.as_object_mut().expect("ApiRequest must be an object");
+    if obj
+        .insert("i".to_string(), Value::String(api_key.to_string()))
+        .is_some()
+    {
+        panic!("ApiRequest must not have 'i' key");
+    }
+
+    Ok(value)
 }
