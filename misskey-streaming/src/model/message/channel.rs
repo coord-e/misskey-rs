@@ -1,6 +1,9 @@
 use crate::model::ChannelId;
 
-use misskey::model::note::{Note, NoteId};
+use misskey::model::{
+    note::{Note, NoteId},
+    user::User,
+};
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -35,6 +38,8 @@ pub enum MainStreamEvent {
     Notification {},
     MeUpdated {},
     UnreadMention(NoteId),
+    UnreadSpecifiedNote(NoteId),
+    UnreadMessagingMessage {},
     UnreadNotification {},
     MessagingMessage {},
     ReadAntenna {},
@@ -52,13 +57,9 @@ pub enum MainStreamEvent {
     Unfollow {},
     UnreadAntenna {},
     Follow {},
-    Reply {
-        #[serde(flatten)]
-        note: Note,
-    },
-    Mention {
-        #[serde(flatten)]
-        note: Note,
-    },
+    Followed(User),
+    Reply(Note),
+    Mention(Note),
+    Renote(Note),
     DriveFileCreated {},
 }
