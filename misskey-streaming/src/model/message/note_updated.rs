@@ -1,0 +1,32 @@
+use chrono::{DateTime, Utc};
+use misskey::model::{
+    note::{NoteId, ReactionType},
+    user::UserId,
+};
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+pub struct NoteUpdatedMessage {
+    pub id: NoteId,
+    #[serde(flatten)]
+    pub event: NoteUpdateEvent,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase", tag = "type", content = "body")]
+pub enum NoteUpdateEvent {
+    #[serde(rename_all = "camelCase")]
+    Reacted {
+        reaction: ReactionType,
+        user_id: UserId,
+    },
+    #[serde(rename_all = "camelCase")]
+    Unreacted {
+        reaction: ReactionType,
+        user_id: UserId,
+    },
+    #[serde(rename_all = "camelCase")]
+    Deleted { deleted_at: DateTime<Utc> },
+    #[serde(rename_all = "camelCase")]
+    PollVoted { choice: u64, user_id: UserId },
+}
