@@ -5,6 +5,7 @@ use crate::broker::{
     channel::{ControlSender, ResponseStreamReceiver},
     model::BrokerControl,
 };
+use crate::error::Result;
 use crate::model::message::note_updated::NoteUpdateEvent;
 
 use futures::stream::Stream;
@@ -17,15 +18,20 @@ pub struct NoteUpdate {
 }
 
 impl Stream for NoteUpdate {
-    type Item = NoteUpdateEvent;
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<NoteUpdateEvent>> {
+    type Item = Result<NoteUpdateEvent>;
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Option<Result<NoteUpdateEvent>>> {
         Pin::new(&mut self.response_rx).poll_next(cx)
     }
 }
 
 impl Drop for NoteUpdate {
     fn drop(&mut self) {
-        self.broker_tx
+        // if the broker is dead, we don't need to unsubscribe anyway...
+        let _ = self
+            .broker_tx
             .send(BrokerControl::UnsubscribeNote(self.id.clone()));
     }
 }

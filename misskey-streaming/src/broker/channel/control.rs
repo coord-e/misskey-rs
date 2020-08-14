@@ -1,20 +1,30 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use crate::broker::model::BrokerControl;
+use crate::broker::model::{BrokerControl, SharedBrokerState};
+use crate::error::Result;
 
 use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use futures::stream::Stream;
 
 /// Sender channel that the client uses to communicate with broker
 #[derive(Debug, Clone)]
-pub struct ControlSender(UnboundedSender<BrokerControl>);
+pub struct ControlSender {
+    inner: UnboundedSender<BrokerControl>,
+    state: SharedBrokerState,
+}
 
 impl ControlSender {
-    pub fn send(&mut self, ctrl: BrokerControl) {
-        self.0
-            .unbounded_send(ctrl)
-            .expect("broker channel unexpectedly closed")
+    pub async fn send(&mut self, ctrl: BrokerControl) -> Result<()> {
+        if let Err(_) = self.inner.unbounded_send(ctrl) {
+            let state = self.state.read().await;
+            let err = state
+                .dead()
+                .expect("broker control channel unexpectedly closed");
+            Err(err.clone())
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -39,7 +49,13 @@ impl Stream for ControlReceiver {
     }
 }
 
-pub fn control_channel() -> (ControlSender, ControlReceiver) {
+pub fn control_channel(state: SharedBrokerState) -> (ControlSender, ControlReceiver) {
     let (sender, receiver) = mpsc::unbounded();
-    (ControlSender(sender), ControlReceiver(receiver))
+    (
+        ControlSender {
+            inner: sender,
+            state,
+        },
+        ControlReceiver(receiver),
+    )
 }

@@ -5,6 +5,7 @@ use crate::broker::{
     channel::{ControlSender, ResponseStreamReceiver},
     model::BrokerControl,
 };
+use crate::error::Result;
 use crate::model::{message::channel::MainStreamEvent, ChannelId};
 
 use futures::stream::Stream;
@@ -16,15 +17,20 @@ pub struct MainStream {
 }
 
 impl Stream for MainStream {
-    type Item = MainStreamEvent;
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<MainStreamEvent>> {
+    type Item = Result<MainStreamEvent>;
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Option<Result<MainStreamEvent>>> {
         Pin::new(&mut self.response_rx).poll_next(cx)
     }
 }
 
 impl Drop for MainStream {
     fn drop(&mut self) {
-        self.broker_tx
-            .send(BrokerControl::UnsubscribeChannel(self.id.clone()))
+        // if the broker is dead, we don't need to unsubscribe anyway...
+        let _ = self
+            .broker_tx
+            .send(BrokerControl::UnsubscribeChannel(self.id.clone()));
     }
 }

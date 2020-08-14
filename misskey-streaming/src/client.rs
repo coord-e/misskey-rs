@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use crate::broker::{
-    channel::{control_channel, response_channel, response_stream_channel, ControlSender},
-    model::BrokerControl,
+    channel::{response_channel, response_stream_channel, ControlSender},
+    model::{BrokerControl, SharedBrokerState},
     Broker,
 };
 use crate::channel::{connect_websocket, WebSocketSender};
@@ -24,29 +26,31 @@ use stream::{MainStream, NoteUpdate, Timeline};
 pub struct WebSocketClient {
     websocket_tx: WebSocketSender,
     broker_tx: ControlSender,
+    state: SharedBrokerState,
 }
 
 impl WebSocketClient {
     pub async fn connect(url: Url) -> Result<WebSocketClient> {
         let (websocket_tx, websocket_rx) = connect_websocket(url).await?;
-        let (broker_tx, broker_rx) = control_channel();
-
-        Broker::new(websocket_rx, broker_rx).spawn();
+        let (broker_tx, state) = Broker::spawn(websocket_rx);
 
         Ok(WebSocketClient {
             websocket_tx,
             broker_tx,
+            state,
         })
     }
 
     pub async fn timeline(&mut self, timeline: TimelineType) -> Result<Timeline> {
         let id = ChannelId::new();
 
-        let (tx, rx) = response_stream_channel();
-        self.broker_tx.send(BrokerControl::SubscribeTimeline {
-            id: id.clone(),
-            sender: tx,
-        });
+        let (tx, rx) = response_stream_channel(Arc::clone(&self.state));
+        self.broker_tx
+            .send(BrokerControl::SubscribeTimeline {
+                id: id.clone(),
+                sender: tx,
+            })
+            .await?;
 
         let req = Request::Connect {
             id: id.clone(),
@@ -64,11 +68,13 @@ impl WebSocketClient {
     pub async fn main_stream(&mut self) -> Result<MainStream> {
         let id = ChannelId::new();
 
-        let (tx, rx) = response_stream_channel();
-        self.broker_tx.send(BrokerControl::SubscribeMainStream {
-            id: id.clone(),
-            sender: tx,
-        });
+        let (tx, rx) = response_stream_channel(Arc::clone(&self.state));
+        self.broker_tx
+            .send(BrokerControl::SubscribeMainStream {
+                id: id.clone(),
+                sender: tx,
+            })
+            .await?;
 
         let req = Request::Connect {
             id: id.clone(),
@@ -84,11 +90,13 @@ impl WebSocketClient {
     }
 
     pub async fn capture_note(&mut self, note_id: NoteId) -> Result<NoteUpdate> {
-        let (tx, rx) = response_stream_channel();
-        self.broker_tx.send(BrokerControl::SubscribeNote {
-            id: note_id.clone(),
-            sender: tx,
-        });
+        let (tx, rx) = response_stream_channel(Arc::clone(&self.state));
+        self.broker_tx
+            .send(BrokerControl::SubscribeNote {
+                id: note_id.clone(),
+                sender: tx,
+            })
+            .await?;
 
         let req = Request::SubNote {
             id: note_id.clone(),
@@ -110,11 +118,13 @@ impl Client for WebSocketClient {
     async fn request<R: ApiRequest + Send>(&mut self, request: R) -> Result<R::Response> {
         let id = ChannelId::new();
 
-        let (tx, rx) = response_channel();
-        self.broker_tx.send(BrokerControl::HandleApiResponse {
-            id: id.clone(),
-            sender: tx,
-        });
+        let (tx, rx) = response_channel(Arc::clone(&self.state));
+        self.broker_tx
+            .send(BrokerControl::HandleApiResponse {
+                id: id.clone(),
+                sender: tx,
+            })
+            .await?;
 
         let req = Request::Api {
             id,
@@ -123,7 +133,7 @@ impl Client for WebSocketClient {
         };
         self.websocket_tx.send_json(&req).await?;
 
-        let x = rx.recv().await;
+        let x = rx.recv().await?;
         Ok(value::from_value(x)?)
     }
 }

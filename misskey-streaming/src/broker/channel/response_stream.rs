@@ -1,6 +1,9 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+use crate::broker::model::SharedBrokerState;
+use crate::error::Result;
+
 use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use futures::stream::{FusedStream, Stream};
 
@@ -16,27 +19,50 @@ impl<T> ResponseStreamSender<T> {
 }
 
 /// Receiver channel that the client uses to receive the response from broker
-/// The channel is expected to be alive through the lifetime of `ResponseStreamReceiver`
 #[derive(Debug)]
-pub struct ResponseStreamReceiver<T>(UnboundedReceiver<T>);
+pub struct ResponseStreamReceiver<T> {
+    inner: UnboundedReceiver<T>,
+    state: SharedBrokerState,
+    is_terminated: bool,
+}
 
 impl<T> Stream for ResponseStreamReceiver<T> {
-    type Item = T;
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<T>> {
-        Pin::new(&mut self.0).poll_next(cx)
+    type Item = Result<T>;
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<T>>> {
+        if self.is_terminated {
+            return Poll::Ready(None);
+        }
+
+        let state = match self.state.try_read() {
+            None => return Poll::Pending,
+            Some(lock) => lock.dead().cloned(),
+        };
+
+        if let Some(err) = state {
+            self.is_terminated = true;
+            Poll::Ready(Some(Err(err)))
+        } else {
+            Pin::new(&mut self.inner).poll_next(cx).map(|x| x.map(Ok))
+        }
     }
 }
 
 impl<T> FusedStream for ResponseStreamReceiver<T> {
     fn is_terminated(&self) -> bool {
-        self.0.is_terminated()
+        self.is_terminated
     }
 }
 
-pub fn response_stream_channel<T>() -> (ResponseStreamSender<T>, ResponseStreamReceiver<T>) {
+pub fn response_stream_channel<T>(
+    state: SharedBrokerState,
+) -> (ResponseStreamSender<T>, ResponseStreamReceiver<T>) {
     let (sender, receiver) = mpsc::unbounded();
     (
         ResponseStreamSender(sender),
-        ResponseStreamReceiver(receiver),
+        ResponseStreamReceiver {
+            inner: receiver,
+            is_terminated: false,
+            state,
+        },
     )
 }
