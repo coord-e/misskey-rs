@@ -18,15 +18,15 @@ pub struct WebSocketReceriver(
 impl WebSocketReceriver {
     pub async fn recv(&mut self) -> Result<WsMessage> {
         match self.0.next().await {
-            Some(x) => x.map_err(Error::WebSocket),
-            None => Err(Error::WebSocket(WsError::ConnectionClosed)),
+            Some(x) => Ok(x?),
+            None => Err(Error::WebSocket(WsError::ConnectionClosed.into())),
         }
     }
 
     pub async fn recv_json<T: DeserializeOwned>(&mut self) -> Result<T> {
         loop {
             match self.recv().await? {
-                WsMessage::Text(t) => return serde_json::from_str(&t).map_err(Error::Json),
+                WsMessage::Text(t) => return Ok(serde_json::from_str(&t)?),
                 // tungstenite automatically handles ping/pong
                 WsMessage::Ping(_) => continue,
                 WsMessage::Pong(_) => continue,
@@ -45,7 +45,7 @@ pub struct WebSocketSender(
 
 impl WebSocketSender {
     pub async fn send(&mut self, msg: WsMessage) -> Result<()> {
-        self.0.send(msg).await.map_err(Error::WebSocket)
+        Ok(self.0.send(msg).await?)
     }
 
     pub async fn send_json<T: Serialize>(&mut self, x: &T) -> Result<()> {

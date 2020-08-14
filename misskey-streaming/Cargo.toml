@@ -18,3 +18,5 @@ tokio-tungstenite = { version = "0.11.0", features = ["tls"] }
 tokio = "0.2"
 tokio-native-tls = "0.1"
 log = "0.4.11"
+derive_more = "0.99.9"
+derivative = "2.1.1"
