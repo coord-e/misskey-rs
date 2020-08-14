@@ -3,8 +3,19 @@ use std::error::Error;
 use crate::api::{self, ApiRequest};
 use crate::model::note::{Note, NoteId, ReactionType, Visibility};
 
+use url::Url;
+
 pub mod http;
 pub use http::HttpClient;
+
+#[async_trait::async_trait]
+pub trait ClientBuilder {
+    type Client: Client;
+
+    fn new(url: Url) -> Self;
+    fn token<'a, S: Into<String>>(&'a mut self, token: S) -> &'a mut Self;
+    async fn build(&self) -> Result<Self::Client, <Self::Client as Client>::Error>;
+}
 
 #[async_trait::async_trait]
 pub trait Client {

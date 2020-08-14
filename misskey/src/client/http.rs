@@ -1,6 +1,6 @@
 use crate::api::ApiRequest;
 
-use super::Client;
+use super::{Client, ClientBuilder};
 
 use err_derive::Error;
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
@@ -17,28 +17,51 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-pub struct HttpClient {
+pub struct HttpClientBuilder {
     url: Url,
-    api_key: String,
-    client: reqwest::Client,
+    token: Option<String>,
     additional_headers: HeaderMap,
 }
 
-impl HttpClient {
-    pub fn new(url: Url, api_key: String) -> HttpClient {
-        let client = reqwest::Client::new();
+#[async_trait::async_trait]
+impl ClientBuilder for HttpClientBuilder {
+    type Client = HttpClient;
 
-        HttpClient {
+    fn new(url: Url) -> Self {
+        HttpClientBuilder {
             url,
-            api_key,
-            client,
+            token: None,
             additional_headers: HeaderMap::new(),
         }
     }
 
-    pub fn add_header<K: IntoHeaderName>(&mut self, key: K, value: HeaderValue) {
-        self.additional_headers.insert(key, value);
+    fn token<'a, S: Into<String>>(&'a mut self, token: S) -> &'a mut Self {
+        self.token = Some(token.into());
+        self
     }
+
+    async fn build(&self) -> Result<HttpClient> {
+        Ok(HttpClient {
+            url: self.url.clone(),
+            token: self.token.clone(),
+            additional_headers: self.additional_headers.clone(),
+            client: reqwest::Client::new(),
+        })
+    }
+}
+
+impl HttpClientBuilder {
+    pub fn header<'a, K: IntoHeaderName>(&'a mut self, key: K, value: HeaderValue) -> &'a mut Self {
+        self.additional_headers.insert(key, value);
+        self
+    }
+}
+
+pub struct HttpClient {
+    url: Url,
+    token: Option<String>,
+    client: reqwest::Client,
+    additional_headers: HeaderMap,
 }
 
 #[async_trait::async_trait]
@@ -51,7 +74,11 @@ impl Client for HttpClient {
             .join(R::ENDPOINT)
             .expect("ApiRequest::ENDPOINT must be a fragment of valid URL");
 
-        let body = to_json_with_api_key(request, &self.api_key)?.to_string();
+        let body = if let Some(token) = &self.token {
+            serde_json::to_vec(&to_json_with_api_key(request, token)?)?
+        } else {
+            serde_json::to_vec(&request)?
+        };
 
         use reqwest::header::CONTENT_TYPE;
         let response_bytes = self
