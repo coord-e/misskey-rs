@@ -1,3 +1,9 @@
+pub mod antenna;
 pub mod file;
+pub mod messaging;
 pub mod note;
+pub mod notification;
+pub mod signin;
 pub mod user;
+pub mod user_group;
+pub mod user_list;

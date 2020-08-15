@@ -1,10 +1,16 @@
 use crate::model::ChannelId;
 
 use misskey::model::{
+    antenna::Antenna,
+    file::DriveFile,
+    messaging::MessagingMessage,
     note::{Note, NoteId},
+    notification::Notification,
+    signin::Signin,
     user::User,
 };
 use serde::Deserialize;
+use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
@@ -33,33 +39,38 @@ pub enum NotePostedMessage {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MainStreamEvent {
-    ClientSettingUpdated {},
-    ReceiveFollowRequest {},
-    Notification {},
-    MeUpdated {},
-    UnreadMention(NoteId),
-    UnreadSpecifiedNote(NoteId),
-    UnreadMessagingMessage {},
-    UnreadNotification {},
-    MessagingMessage {},
-    ReadAntenna {},
+    ClientSettingUpdated {
+        key: String,
+        value: Value,
+    },
+    ReceiveFollowRequest(User),
+    Notification(Notification),
+    MeUpdated(User),
+    MessagingMessage(MessagingMessage),
     ReadAllNotifications,
     ReadAllUnreadMentions,
     ReadAllAntennas,
     ReadAllUnreadSpecifiedNotes,
-    ReversiNoInvites,
-    ReversiInvited {},
-    MyTokenRegenerated,
-    PageEvent {},
-    Signin {},
     ReadAllMessagingMessages,
     ReadAllAnnouncements,
-    Unfollow {},
-    UnreadAntenna {},
-    Follow {},
+    MyTokenRegenerated,
+    ReversiNoInvites,
+    /// TODO: Implement
+    ReversiInvited {},
+    /// TODO: Implement
+    PageEvent {},
+    Signin(Signin),
+    Unfollow(User),
+    Follow(User),
     Followed(User),
     Reply(Note),
     Mention(Note),
     Renote(Note),
-    DriveFileCreated {},
+    ReadAntenna(Antenna),
+    UnreadMention(NoteId),
+    UnreadSpecifiedNote(NoteId),
+    UnreadMessagingMessage(MessagingMessage),
+    UnreadNotification(Notification),
+    UnreadAntenna(Antenna),
+    DriveFileCreated(DriveFile),
 }
