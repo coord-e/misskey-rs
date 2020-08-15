@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
 use crate::broker::{
-    channel::{response_channel, response_stream_channel, ControlSender},
+    channel::{response_channel, ControlSender},
     model::{BrokerControl, SharedBrokerState},
     Broker,
 };
 use crate::channel::{connect_websocket, WebSocketSender};
 use crate::error::{Error, Result};
 use crate::model::{
-    request::{ConnectChannel, MainType, Request, TimelineType},
+    request::{Request, TimelineType},
     ChannelId,
 };
 
@@ -41,73 +41,33 @@ impl WebSocketClient {
         })
     }
 
-    pub async fn timeline(&mut self, timeline: TimelineType) -> Result<Timeline> {
-        let id = ChannelId::new();
-
-        let (tx, rx) = response_stream_channel(Arc::clone(&self.state));
-        self.broker_tx
-            .send(BrokerControl::SubscribeTimeline {
-                id: id.clone(),
-                sender: tx,
-            })
-            .await?;
-
-        let req = Request::Connect {
-            id: id.clone(),
-            channel: ConnectChannel::Timeline(timeline),
-        };
-        self.websocket_tx.send_json(&req).await?;
-
-        Ok(Timeline {
-            id,
-            broker_tx: self.broker_tx.clone(),
-            response_rx: rx,
-        })
+    pub async fn timeline<'a>(&'a mut self, timeline: TimelineType) -> Result<Timeline<'a>> {
+        Timeline::subscribe(
+            timeline,
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+            &mut self.websocket_tx,
+        )
+        .await
     }
 
-    pub async fn main_stream(&mut self) -> Result<MainStream> {
-        let id = ChannelId::new();
-
-        let (tx, rx) = response_stream_channel(Arc::clone(&self.state));
-        self.broker_tx
-            .send(BrokerControl::SubscribeMainStream {
-                id: id.clone(),
-                sender: tx,
-            })
-            .await?;
-
-        let req = Request::Connect {
-            id: id.clone(),
-            channel: ConnectChannel::Main(MainType::Main),
-        };
-        self.websocket_tx.send_json(&req).await?;
-
-        Ok(MainStream {
-            id,
-            broker_tx: self.broker_tx.clone(),
-            response_rx: rx,
-        })
+    pub async fn main_stream<'a>(&'a mut self) -> Result<MainStream<'a>> {
+        MainStream::subscribe(
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+            &mut self.websocket_tx,
+        )
+        .await
     }
 
-    pub async fn capture_note(&mut self, note_id: NoteId) -> Result<NoteUpdate> {
-        let (tx, rx) = response_stream_channel(Arc::clone(&self.state));
-        self.broker_tx
-            .send(BrokerControl::SubscribeNote {
-                id: note_id.clone(),
-                sender: tx,
-            })
-            .await?;
-
-        let req = Request::SubNote {
-            id: note_id.clone(),
-        };
-        self.websocket_tx.send_json(&req).await?;
-
-        Ok(NoteUpdate {
-            id: note_id,
-            broker_tx: self.broker_tx.clone(),
-            response_rx: rx,
-        })
+    pub async fn capture_note<'a>(&'a mut self, note_id: NoteId) -> Result<NoteUpdate<'a>> {
+        NoteUpdate::subscribe(
+            note_id,
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+            &mut self.websocket_tx,
+        )
+        .await
     }
 }
 
