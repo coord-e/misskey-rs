@@ -1,5 +1,8 @@
+use std::sync::Arc;
+
 use crate::error::{Error, Result};
 
+use async_std::sync::Mutex;
 use futures::sink::SinkExt;
 use futures::stream::{SplitSink, SplitStream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
@@ -52,6 +55,8 @@ impl WebSocketSender {
         self.send(WsMessage::Text(serde_json::to_string(x)?)).await
     }
 }
+
+pub type SharedWebSocketSender = Arc<Mutex<WebSocketSender>>;
 
 pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceriver)> {
     let (ws, _) = tokio_tungstenite::connect_async(url).await?;

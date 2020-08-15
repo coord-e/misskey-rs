@@ -5,7 +5,7 @@ use crate::broker::{
     channel::{response_stream_channel, ControlSender, ResponseStreamReceiver},
     model::{BrokerControl, SharedBrokerState},
 };
-use crate::channel::WebSocketSender;
+use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
 use crate::model::{
     message::channel::MainStreamEvent,
@@ -18,20 +18,20 @@ use futures::{
     stream::{FusedStream, Stream},
 };
 
-pub struct MainStream<'a> {
+pub struct MainStream {
     id: ChannelId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<MainStreamEvent>,
-    websocket_tx: &'a mut WebSocketSender,
+    websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
 }
 
-impl MainStream<'_> {
-    pub(crate) async fn subscribe<'a>(
+impl MainStream {
+    pub(crate) async fn subscribe(
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-        websocket_tx: &'a mut WebSocketSender,
-    ) -> Result<MainStream<'a>> {
+        websocket_tx: SharedWebSocketSender,
+    ) -> Result<MainStream> {
         let id = ChannelId::new();
 
         let (response_tx, response_rx) = response_stream_channel(state);
@@ -46,7 +46,7 @@ impl MainStream<'_> {
             id: id.clone(),
             channel: ConnectChannel::Main(MainType::Main),
         };
-        websocket_tx.send_json(&req).await?;
+        websocket_tx.lock().await.send_json(&req).await?;
 
         Ok(MainStream {
             id,
@@ -59,6 +59,8 @@ impl MainStream<'_> {
 
     pub async fn unsubscribe(&mut self) -> Result<()> {
         self.websocket_tx
+            .lock()
+            .await
             .send_json(&Request::Disconnect {
                 id: self.id.clone(),
             })
@@ -74,7 +76,7 @@ impl MainStream<'_> {
     }
 }
 
-impl Stream for MainStream<'_> {
+impl Stream for MainStream {
     type Item = Result<MainStreamEvent>;
     fn poll_next(
         mut self: Pin<&mut Self>,
@@ -88,13 +90,13 @@ impl Stream for MainStream<'_> {
     }
 }
 
-impl FusedStream for MainStream<'_> {
+impl FusedStream for MainStream {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl Drop for MainStream<'_> {
+impl Drop for MainStream {
     fn drop(&mut self) {
         executor::block_on(async {
             // If the broker or websocket connection is dead, we don't need to unsubscribe anyway

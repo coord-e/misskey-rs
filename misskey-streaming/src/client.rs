@@ -5,13 +5,14 @@ use crate::broker::{
     model::{BrokerControl, SharedBrokerState},
     Broker,
 };
-use crate::channel::{connect_websocket, WebSocketSender};
+use crate::channel::{connect_websocket, SharedWebSocketSender};
 use crate::error::{Error, Result};
 use crate::model::{
     request::{Request, TimelineType},
     ChannelId,
 };
 
+use async_std::sync::Mutex;
 use misskey::api::ApiRequest;
 use misskey::client::Client;
 use misskey::model::note::NoteId;
@@ -24,7 +25,7 @@ pub mod stream;
 use stream::{MainStream, NoteUpdate, Timeline};
 
 pub struct WebSocketClient {
-    websocket_tx: WebSocketSender,
+    websocket_tx: SharedWebSocketSender,
     broker_tx: ControlSender,
     state: SharedBrokerState,
 }
@@ -32,6 +33,8 @@ pub struct WebSocketClient {
 impl WebSocketClient {
     pub async fn connect(url: Url) -> Result<WebSocketClient> {
         let (websocket_tx, websocket_rx) = connect_websocket(url).await?;
+        let websocket_tx = Arc::new(Mutex::new(websocket_tx));
+
         let (broker_tx, state) = Broker::spawn(websocket_rx);
 
         Ok(WebSocketClient {
@@ -41,31 +44,31 @@ impl WebSocketClient {
         })
     }
 
-    pub async fn timeline<'a>(&'a mut self, timeline: TimelineType) -> Result<Timeline<'a>> {
+    pub async fn timeline(&mut self, timeline: TimelineType) -> Result<Timeline> {
         Timeline::subscribe(
             timeline,
             self.broker_tx.clone(),
             Arc::clone(&self.state),
-            &mut self.websocket_tx,
+            Arc::clone(&self.websocket_tx),
         )
         .await
     }
 
-    pub async fn main_stream<'a>(&'a mut self) -> Result<MainStream<'a>> {
+    pub async fn main_stream(&mut self) -> Result<MainStream> {
         MainStream::subscribe(
             self.broker_tx.clone(),
             Arc::clone(&self.state),
-            &mut self.websocket_tx,
+            Arc::clone(&self.websocket_tx),
         )
         .await
     }
 
-    pub async fn capture_note<'a>(&'a mut self, note_id: NoteId) -> Result<NoteUpdate<'a>> {
+    pub async fn capture_note(&mut self, note_id: NoteId) -> Result<NoteUpdate> {
         NoteUpdate::subscribe(
             note_id,
             self.broker_tx.clone(),
             Arc::clone(&self.state),
-            &mut self.websocket_tx,
+            Arc::clone(&self.websocket_tx),
         )
         .await
     }
@@ -91,7 +94,7 @@ impl Client for WebSocketClient {
             endpoint: R::ENDPOINT.to_string(),
             data: value::to_value(request)?,
         };
-        self.websocket_tx.send_json(&req).await?;
+        self.websocket_tx.lock().await.send_json(&req).await?;
 
         let x = rx.recv().await?;
         Ok(value::from_value(x)?)

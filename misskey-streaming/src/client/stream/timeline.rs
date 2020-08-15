@@ -5,7 +5,7 @@ use crate::broker::{
     channel::{response_stream_channel, ControlSender, ResponseStreamReceiver},
     model::{BrokerControl, SharedBrokerState},
 };
-use crate::channel::WebSocketSender;
+use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
 use crate::model::{
     request::{ConnectChannel, Request, TimelineType},
@@ -18,21 +18,21 @@ use futures::{
 };
 use misskey::model::note::Note;
 
-pub struct Timeline<'a> {
+pub struct Timeline {
     id: ChannelId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<Note>,
-    websocket_tx: &'a mut WebSocketSender,
+    websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
 }
 
-impl Timeline<'_> {
-    pub(crate) async fn subscribe<'a>(
+impl Timeline {
+    pub(crate) async fn subscribe(
         timeline: TimelineType,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-        websocket_tx: &'a mut WebSocketSender,
-    ) -> Result<Timeline<'a>> {
+        websocket_tx: SharedWebSocketSender,
+    ) -> Result<Timeline> {
         let id = ChannelId::new();
 
         let (response_tx, response_rx) = response_stream_channel(state);
@@ -47,7 +47,7 @@ impl Timeline<'_> {
             id: id.clone(),
             channel: ConnectChannel::Timeline(timeline),
         };
-        websocket_tx.send_json(&req).await?;
+        websocket_tx.lock().await.send_json(&req).await?;
 
         Ok(Timeline {
             id,
@@ -60,6 +60,8 @@ impl Timeline<'_> {
 
     pub async fn unsubscribe(&mut self) -> Result<()> {
         self.websocket_tx
+            .lock()
+            .await
             .send_json(&Request::Disconnect {
                 id: self.id.clone(),
             })
@@ -75,7 +77,7 @@ impl Timeline<'_> {
     }
 }
 
-impl Stream for Timeline<'_> {
+impl Stream for Timeline {
     type Item = Result<Note>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<Note>>> {
         if self.is_terminated {
@@ -86,13 +88,13 @@ impl Stream for Timeline<'_> {
     }
 }
 
-impl FusedStream for Timeline<'_> {
+impl FusedStream for Timeline {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl Drop for Timeline<'_> {
+impl Drop for Timeline {
     fn drop(&mut self) {
         executor::block_on(async {
             // If the broker or websocket connection is dead, we don't need to unsubscribe anyway

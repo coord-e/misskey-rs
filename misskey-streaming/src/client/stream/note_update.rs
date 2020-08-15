@@ -5,7 +5,7 @@ use crate::broker::{
     channel::{response_stream_channel, ControlSender, ResponseStreamReceiver},
     model::{BrokerControl, SharedBrokerState},
 };
-use crate::channel::WebSocketSender;
+use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
 use crate::model::{message::note_updated::NoteUpdateEvent, request::Request};
 
@@ -15,21 +15,21 @@ use futures::{
 };
 use misskey::model::note::NoteId;
 
-pub struct NoteUpdate<'a> {
+pub struct NoteUpdate {
     id: NoteId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<NoteUpdateEvent>,
-    websocket_tx: &'a mut WebSocketSender,
+    websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
 }
 
-impl NoteUpdate<'_> {
-    pub(crate) async fn subscribe<'a>(
+impl NoteUpdate {
+    pub(crate) async fn subscribe(
         note_id: NoteId,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-        websocket_tx: &'a mut WebSocketSender,
-    ) -> Result<NoteUpdate<'a>> {
+        websocket_tx: SharedWebSocketSender,
+    ) -> Result<NoteUpdate> {
         let (response_tx, response_rx) = response_stream_channel(state);
 
         broker_tx
@@ -42,7 +42,7 @@ impl NoteUpdate<'_> {
         let req = Request::SubNote {
             id: note_id.clone(),
         };
-        websocket_tx.send_json(&req).await?;
+        websocket_tx.lock().await.send_json(&req).await?;
 
         Ok(NoteUpdate {
             id: note_id,
@@ -55,6 +55,8 @@ impl NoteUpdate<'_> {
 
     pub async fn unsubscribe(&mut self) -> Result<()> {
         self.websocket_tx
+            .lock()
+            .await
             .send_json(&Request::UnsubNote {
                 id: self.id.clone(),
             })
@@ -70,7 +72,7 @@ impl NoteUpdate<'_> {
     }
 }
 
-impl Stream for NoteUpdate<'_> {
+impl Stream for NoteUpdate {
     type Item = Result<NoteUpdateEvent>;
     fn poll_next(
         mut self: Pin<&mut Self>,
@@ -84,13 +86,13 @@ impl Stream for NoteUpdate<'_> {
     }
 }
 
-impl FusedStream for NoteUpdate<'_> {
+impl FusedStream for NoteUpdate {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl Drop for NoteUpdate<'_> {
+impl Drop for NoteUpdate {
     fn drop(&mut self) {
         executor::block_on(async {
             // If the broker or websocket connection is dead, we don't need to unsubscribe anyway
