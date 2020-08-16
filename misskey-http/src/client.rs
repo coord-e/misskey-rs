@@ -1,7 +1,7 @@
 use crate::error::{Error, Result};
 
 use misskey::api::ApiRequest;
-use misskey::client::Client;
+use misskey::Client;
 use reqwest::header::HeaderMap;
 use serde_json::value::{self, Value};
 use url::Url;

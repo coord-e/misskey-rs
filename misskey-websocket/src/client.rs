@@ -14,8 +14,8 @@ use crate::model::{
 
 use async_std::sync::Mutex;
 use misskey::api::ApiRequest;
-use misskey::client::Client;
 use misskey::model::note::NoteId;
+use misskey::Client;
 use serde_json::value;
 use url::Url;
 

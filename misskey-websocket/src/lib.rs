@@ -1,10 +1,11 @@
 mod broker;
 mod channel;
-pub mod client;
-mod error;
+mod client;
+pub mod error;
 mod model;
 
-pub use client::{builder::WebSocketClientBuilder, WebSocketClient};
-pub use error::{Error, Result};
-pub use misskey;
-pub use model::request::TimelineType;
+pub use client::{builder::WebSocketClientBuilder, stream, WebSocketClient};
+pub use model::{
+    message::{channel::MainStreamEvent, note_updated::NoteUpdateEvent},
+    request::TimelineType,
+};

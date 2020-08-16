@@ -11,7 +11,7 @@ pub mod channel;
 pub mod handler;
 pub mod model;
 
-use channel::control::{control_channel, ControlReceiver, ControlSender};
+use channel::{control_channel, ControlReceiver, ControlSender};
 use handler::Handler;
 use model::{BrokerState, SharedBrokerState};
 

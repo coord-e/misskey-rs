@@ -1,6 +1,6 @@
-pub mod main_stream;
-pub mod note_update;
-pub mod timeline;
+mod main_stream;
+mod note_update;
+mod timeline;
 
 pub use main_stream::MainStream;
 pub use note_update::NoteUpdate;

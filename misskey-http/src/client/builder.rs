@@ -1,7 +1,7 @@
 use crate::client::HttpClient;
 use crate::error::Result;
 
-use misskey::client::ClientBuilder;
+use misskey::ClientBuilder;
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use url::Url;
 

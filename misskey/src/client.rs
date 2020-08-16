@@ -1,7 +1,4 @@
-use std::error::Error;
-
-use crate::api::{self, ApiRequest};
-use crate::model::note::{Note, NoteId, ReactionType, Visibility};
+use crate::api::ApiRequest;
 
 use url::Url;
 
