@@ -1,0 +1,18 @@
+use crate::api::ApiRequest;
+use crate::model::messaging::MessagingMessage;
+
+use serde::Serialize;
+
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Request {
+    pub group: bool,
+    /// 1 .. 100
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u8>,
+}
+
+impl ApiRequest for Request {
+    type Response = Vec<MessagingMessage>;
+    const ENDPOINT: &'static str = "messaging/history";
+}
