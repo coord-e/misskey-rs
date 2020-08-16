@@ -11,14 +11,17 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct NoteId(pub String);
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct Tag(pub String);
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct ReactionType(pub String);
 

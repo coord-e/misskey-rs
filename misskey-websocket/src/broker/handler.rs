@@ -8,7 +8,7 @@ use crate::error::Result;
 use crate::model::{
     message::{
         api::ApiMessage,
-        channel::{ChannelMessage, MainStreamEvent, NotePostedMessage},
+        channel::{ChannelMessage, MainStreamEvent},
         note_updated::{NoteUpdateEvent, NoteUpdatedMessage},
         Message, MessageType,
     },
@@ -78,12 +78,9 @@ impl Handler {
                         }
                     }
                 }
-                ChannelMessage::Timeline {
-                    id,
-                    note_posted: NotePostedMessage::Note { note },
-                } => {
+                ChannelMessage::Timeline { id, note_posted } => {
                     if let Some(sender) = self.timeline.get_mut(&id) {
-                        if sender.try_send(note).is_err() {
+                        if sender.try_send(note_posted.body).is_err() {
                             warn!("stale timeline handler {:?}, deleted", id);
                             self.timeline.remove(&id);
                         }

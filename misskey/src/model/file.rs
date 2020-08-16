@@ -4,10 +4,12 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct FileId(pub String);
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct FolderId(pub String);
 

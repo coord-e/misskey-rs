@@ -5,11 +5,12 @@ use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct UserGroupId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase", tag = "type")]
+#[serde(rename_all = "camelCase")]
 pub struct UserGroup {
     pub id: UserGroupId,
     pub created_at: DateTime<Utc>,
@@ -19,11 +20,12 @@ pub struct UserGroup {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct UserGroupInvitationId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase", tag = "type")]
+#[serde(rename_all = "camelCase")]
 pub struct UserGroupInvitation {
     pub id: UserGroupInvitationId,
     pub group: UserGroup,

@@ -28,12 +28,9 @@ pub enum ChannelMessage {
 }
 
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase", tag = "type", content = "body")]
-pub enum NotePostedMessage {
-    Note {
-        #[serde(flatten)]
-        note: Note,
-    },
+#[serde(rename_all = "camelCase", rename = "note", tag = "type")]
+pub struct NotePostedMessage {
+    pub body: Note,
 }
 
 #[derive(Deserialize, Debug)]

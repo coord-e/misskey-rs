@@ -7,6 +7,7 @@ use serde_json::value::Value;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct UserId(pub String);
 
@@ -71,6 +72,7 @@ fn default_zero() -> u64 {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct FollowRequestId(pub String);
 
