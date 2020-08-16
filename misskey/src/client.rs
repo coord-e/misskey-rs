@@ -5,9 +5,6 @@ use crate::model::note::{Note, NoteId, ReactionType, Visibility};
 
 use url::Url;
 
-pub mod http;
-pub use http::HttpClient;
-
 #[async_trait::async_trait]
 pub trait ClientBuilder {
     type Client: Client;
