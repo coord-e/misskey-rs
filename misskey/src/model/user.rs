@@ -69,3 +69,15 @@ fn default_false() -> bool {
 fn default_zero() -> u64 {
     0
 }
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[derivative(Debug = "transparent")]
+pub struct FollowRequestId(pub String);
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct FollowRequest {
+    pub id: FollowRequestId,
+    pub followee: User,
+    pub follower: User,
+}
