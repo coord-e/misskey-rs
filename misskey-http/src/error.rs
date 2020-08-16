@@ -1,10 +1,10 @@
-use err_derive::Error;
+use derive_more::{Display, Error, From};
 
-#[derive(Debug, Error)]
+#[derive(Debug, Display, From, Error)]
 pub enum Error {
-    #[error(display = "network error: {}", _0)]
+    #[display(fmt = "network error: {}", _0)]
     Network(#[error(source)] reqwest::Error),
-    #[error(display = "JSON error: {}", _0)]
+    #[display(fmt = "JSON error: {}", _0)]
     Json(#[error(source)] serde_json::Error),
 }
 
