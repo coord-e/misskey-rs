@@ -15,6 +15,16 @@ pub mod local_timeline;
 pub mod mentions;
 pub mod polls;
 pub mod reactions;
+pub mod renotes;
+pub mod replies;
+pub mod search;
+pub mod search_by_tag;
+pub mod show;
+pub mod state;
+pub mod timeline;
+pub mod unrenote;
+pub mod user_list_timeline;
+pub mod watching;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
