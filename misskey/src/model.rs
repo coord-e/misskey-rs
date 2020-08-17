@@ -1,5 +1,6 @@
 pub mod antenna;
 pub mod chart;
+pub mod emoji;
 pub mod file;
 pub mod messaging;
 pub mod note;

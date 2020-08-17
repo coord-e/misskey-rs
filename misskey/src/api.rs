@@ -1,6 +1,7 @@
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
+pub mod admin;
 pub mod charts;
 pub mod following;
 pub mod messaging;
