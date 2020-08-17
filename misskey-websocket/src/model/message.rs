@@ -14,6 +14,8 @@ pub enum MessageType {
     Api(ChannelId),
     Channel,
     NoteUpdated,
+    // from broadcastStream
+    EmojiAdded,
 }
 
 impl<'de> Deserialize<'de> for MessageType {
@@ -38,6 +40,7 @@ impl<'de> Deserialize<'de> for MessageType {
                 match value {
                     "channel" => return Ok(MessageType::Channel),
                     "noteUpdated" => return Ok(MessageType::NoteUpdated),
+                    "emojiAdded" => return Ok(MessageType::EmojiAdded),
                     _ => (),
                 }
 
@@ -49,7 +52,7 @@ impl<'de> Deserialize<'de> for MessageType {
                 } else {
                     Err(de::Error::unknown_variant(
                         value,
-                        &["api:<id>", "channel", "noteUpdated"],
+                        &["api:<id>", "channel", "noteUpdated", "emojiAdded"],
                     ))
                 }
             }

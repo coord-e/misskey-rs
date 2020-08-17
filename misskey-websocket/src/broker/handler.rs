@@ -96,6 +96,8 @@ impl Handler {
                     }
                 }
             }
+            // TODO: handle
+            MessageType::EmojiAdded => {}
         }
 
         Ok(())
