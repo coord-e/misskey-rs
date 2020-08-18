@@ -26,7 +26,7 @@ pub mod unrenote;
 pub mod user_list_timeline;
 pub mod watching;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub local: bool,

@@ -3,7 +3,7 @@ use crate::model::note::{Note, NoteId};
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     note_id: NoteId,

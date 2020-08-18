@@ -4,7 +4,7 @@ use crate::model::note::{Note, NoteId};
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub with_files: bool,

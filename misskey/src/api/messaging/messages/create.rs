@@ -5,7 +5,7 @@ use crate::model::{
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]

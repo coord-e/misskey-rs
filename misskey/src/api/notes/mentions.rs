@@ -3,7 +3,7 @@ use crate::model::note::{Note, NoteId, Visibility};
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub following: bool,

@@ -11,7 +11,7 @@ pub mod create;
 pub mod delete;
 pub mod read;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]

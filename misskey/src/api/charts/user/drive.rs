@@ -6,7 +6,7 @@ use crate::model::{
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub span: ChartSpan,
