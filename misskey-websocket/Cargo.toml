@@ -13,9 +13,7 @@ url = "2.1"
 async-trait = "0.1.35"
 futures = "0.3"
 uuid = { version = "0.8", features = ["serde", "v4"] }
-tokio-tungstenite = { version = "0.11", features = ["tls"] }
-tokio = "0.2"
-tokio-native-tls = "0.1"
+async-tungstenite = { version = "0.8", features = ["async-std-runtime", "async-tls"] }
 log = "0.4"
 derive_more = "0.99.5"
 derivative = "2.1"

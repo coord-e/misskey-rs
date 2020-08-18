@@ -3,20 +3,16 @@ use std::sync::Arc;
 use crate::error::{Error, Result};
 
 use async_std::sync::Mutex;
+use async_tungstenite::async_std::{connect_async, ConnectStream};
+use async_tungstenite::tungstenite::{error::Error as WsError, Message as WsMessage};
+use async_tungstenite::WebSocketStream;
 use futures::sink::SinkExt;
 use futures::stream::{SplitSink, SplitStream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
-use tokio::net::TcpStream;
-use tokio_native_tls::TlsStream;
-use tokio_tungstenite::stream::Stream as AutoStream;
-use tokio_tungstenite::tungstenite::{error::Error as WsError, Message as WsMessage};
-use tokio_tungstenite::WebSocketStream;
 use url::Url;
 
 /// Receiver channel that communicates with Misskey
-pub struct WebSocketReceriver(
-    SplitStream<WebSocketStream<AutoStream<TcpStream, TlsStream<TcpStream>>>>,
-);
+pub struct WebSocketReceriver(SplitStream<WebSocketStream<ConnectStream>>);
 
 impl WebSocketReceriver {
     pub async fn recv(&mut self) -> Result<WsMessage> {
@@ -42,9 +38,7 @@ impl WebSocketReceriver {
 }
 
 /// Sender channel that communicates with Misskey
-pub struct WebSocketSender(
-    SplitSink<WebSocketStream<AutoStream<TcpStream, TlsStream<TcpStream>>>, WsMessage>,
-);
+pub struct WebSocketSender(SplitSink<WebSocketStream<ConnectStream>, WsMessage>);
 
 impl WebSocketSender {
     pub async fn send(&mut self, msg: WsMessage) -> Result<()> {
@@ -59,7 +53,7 @@ impl WebSocketSender {
 pub type SharedWebSocketSender = Arc<Mutex<WebSocketSender>>;
 
 pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceriver)> {
-    let (ws, _) = tokio_tungstenite::connect_async(url).await?;
+    let (ws, _) = connect_async(url).await?;
     let (sink, stream) = ws.split();
     Ok((WebSocketSender(sink), WebSocketReceriver(stream)))
 }

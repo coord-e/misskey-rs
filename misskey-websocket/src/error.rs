@@ -2,16 +2,16 @@ use std::error::Error as StdError;
 use std::result::Result as StdResult;
 use std::sync::Arc;
 
+use async_tungstenite::tungstenite;
 use derivative::Derivative;
 use derive_more::{Deref, Display, Error, From};
-use tokio_tungstenite::tungstenite;
 
 #[derive(Debug, Display, Error, Clone)]
 pub enum Error {
     #[display(fmt = "websocket error: {}", _0)]
     WebSocket(#[error(source)] ArcError<tungstenite::Error>),
     #[display(fmt = "websocket unexpected message: {}", _0)]
-    UnexpectedMessage(#[error(not(source))] tokio_tungstenite::tungstenite::Message),
+    UnexpectedMessage(#[error(not(source))] tungstenite::Message),
     #[display(fmt = "JSON error: {}", _0)]
     Json(#[error(source)] ArcError<serde_json::Error>),
 }
