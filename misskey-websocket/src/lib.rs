@@ -7,5 +7,5 @@ mod model;
 pub use client::{builder::WebSocketClientBuilder, stream, WebSocketClient};
 pub use model::{
     message::{channel::MainStreamEvent, note_updated::NoteUpdateEvent},
-    request::Timeline,
+    request::{ParseTimelineError, Timeline},
 };

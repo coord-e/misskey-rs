@@ -9,7 +9,7 @@ pub mod api;
 pub mod channel;
 pub mod note_updated;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy)]
 pub enum MessageType {
     Api(ChannelId),
     Channel,
@@ -62,7 +62,7 @@ impl<'de> Deserialize<'de> for MessageType {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Message {
     #[serde(rename = "type")]
     pub type_: MessageType,

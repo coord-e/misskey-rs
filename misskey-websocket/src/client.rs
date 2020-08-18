@@ -83,10 +83,7 @@ impl Client for WebSocketClient {
 
         let (tx, rx) = response_channel(Arc::clone(&self.state));
         self.broker_tx
-            .send(BrokerControl::HandleApiResponse {
-                id: id.clone(),
-                sender: tx,
-            })
+            .send(BrokerControl::HandleApiResponse { id, sender: tx })
             .await?;
 
         let req = Request::Api {

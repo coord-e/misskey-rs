@@ -38,13 +38,13 @@ impl TimelineStream {
         let (response_tx, response_rx) = response_stream_channel(state);
         broker_tx
             .send(BrokerControl::SubscribeTimeline {
-                id: id.clone(),
+                id,
                 sender: response_tx,
             })
             .await?;
 
         let req = Request::Connect {
-            id: id.clone(),
+            id,
             channel: ConnectChannel::Timeline(timeline),
         };
         websocket_tx.lock().await.send_json(&req).await?;
@@ -62,13 +62,11 @@ impl TimelineStream {
         self.websocket_tx
             .lock()
             .await
-            .send_json(&Request::Disconnect {
-                id: self.id.clone(),
-            })
+            .send_json(&Request::Disconnect { id: self.id })
             .await?;
 
         self.broker_tx
-            .send(BrokerControl::UnsubscribeChannel(self.id.clone()))
+            .send(BrokerControl::UnsubscribeChannel(self.id))
             .await?;
 
         self.is_terminated = true;

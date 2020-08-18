@@ -12,7 +12,7 @@ use misskey::model::{
 use serde::Deserialize;
 use serde_json::Value;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum ChannelMessage {
     MainStream {
@@ -27,13 +27,13 @@ pub enum ChannelMessage {
     },
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", rename = "note", tag = "type")]
 pub struct NotePostedMessage {
     pub body: Note,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MainStreamEvent {
     ClientSettingUpdated {

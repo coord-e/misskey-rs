@@ -5,14 +5,14 @@ use misskey::model::{
 };
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct NoteUpdatedMessage {
     pub id: NoteId,
     #[serde(flatten)]
     pub event: NoteUpdateEvent,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum NoteUpdateEvent {
     #[serde(rename_all = "camelCase")]

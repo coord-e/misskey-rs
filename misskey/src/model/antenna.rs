@@ -2,9 +2,10 @@ use crate::model::{user::UserId, user_group::UserGroupId, user_list::UserListId}
 
 use chrono::{DateTime, Utc};
 use derivative::Derivative;
+use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
 #[serde(transparent)]
 #[derivative(Debug = "transparent")]
 pub struct AntennaId(pub String);
@@ -29,7 +30,7 @@ pub struct Antenna {
     pub with_replies: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum AntennaSource {
     All,
@@ -37,4 +38,23 @@ pub enum AntennaSource {
     Users,
     List,
     Group,
+}
+
+#[derive(Debug, Display, Error, Clone)]
+#[display(fmt = "invalid antenna source")]
+pub struct ParseAntennaSourceError;
+
+impl std::str::FromStr for AntennaSource {
+    type Err = ParseAntennaSourceError;
+
+    fn from_str(s: &str) -> Result<AntennaSource, Self::Err> {
+        match s {
+            "all" | "All" => Ok(AntennaSource::All),
+            "home" | "Home" => Ok(AntennaSource::Home),
+            "users" | "Users" => Ok(AntennaSource::Users),
+            "list" | "List" => Ok(AntennaSource::List),
+            "group" | "Group" => Ok(AntennaSource::Group),
+            _ => Err(ParseAntennaSourceError),
+        }
+    }
 }

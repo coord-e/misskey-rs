@@ -1,5 +1,6 @@
 use crate::model::ChannelId;
 
+use derive_more::{Display, Error};
 use misskey::model::note::NoteId;
 use serde::ser::Serializer;
 use serde::Serialize;
@@ -28,7 +29,7 @@ pub enum Request {
     },
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConnectChannel {
     Main,
     Timeline(Timeline),
@@ -46,7 +47,7 @@ impl Serialize for ConnectChannel {
     }
 }
 
-#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Timeline {
     #[serde(rename = "homeTimeline")]
     Home,
@@ -56,4 +57,22 @@ pub enum Timeline {
     Social,
     #[serde(rename = "globalTimeline")]
     Global,
+}
+
+#[derive(Debug, Display, Error, Clone)]
+#[display(fmt = "invalid timeline type")]
+pub struct ParseTimelineError;
+
+impl std::str::FromStr for Timeline {
+    type Err = ParseTimelineError;
+
+    fn from_str(s: &str) -> Result<Timeline, Self::Err> {
+        match s {
+            "home" | "Home" => Ok(Timeline::Home),
+            "local" | "Local" => Ok(Timeline::Local),
+            "social" | "Social" => Ok(Timeline::Social),
+            "global" | "Global" => Ok(Timeline::Global),
+            _ => Err(ParseTimelineError),
+        }
+    }
 }
