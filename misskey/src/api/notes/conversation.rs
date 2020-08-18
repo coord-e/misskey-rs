@@ -8,7 +8,7 @@ use serde::Serialize;
 pub struct Request {
     pub note_id: NoteId,
     pub offset: i64,
-    /// 1 .. 100, default: 10
+    /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
 }

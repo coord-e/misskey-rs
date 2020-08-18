@@ -7,7 +7,7 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     note_id: NoteId,
-    /// 1 .. 100, default: 10
+    /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]

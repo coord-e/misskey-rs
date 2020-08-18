@@ -34,7 +34,7 @@ pub struct Request {
     pub renote: bool,
     pub with_files: bool,
     pub poll: bool,
-    /// 1 .. 100, default: 10
+    /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]

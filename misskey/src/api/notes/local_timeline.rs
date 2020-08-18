@@ -11,7 +11,7 @@ pub struct Request {
     pub exclude_nsfw: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_type: Option<Vec<String>>,
-    /// 1 .. 100, default: 10
+    /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
