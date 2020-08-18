@@ -1,3 +1,4 @@
+pub mod announcement;
 pub mod antenna;
 pub mod blocking;
 pub mod chart;
@@ -6,6 +7,7 @@ pub mod file;
 pub mod messaging;
 pub mod muting;
 pub mod note;
+pub mod note_favorite;
 pub mod notification;
 pub mod signin;
 pub mod user;

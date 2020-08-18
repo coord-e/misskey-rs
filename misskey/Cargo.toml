@@ -11,3 +11,4 @@ chrono = { version = "0.4", features = ["serde"] }
 url = { version = "2.1", features = ["serde"] }
 async-trait = "0.1.35"
 derive_more = "0.99.5"
+strum_macros = "0.19"
