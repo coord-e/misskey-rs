@@ -4,6 +4,7 @@ pub mod chart;
 pub mod emoji;
 pub mod file;
 pub mod messaging;
+pub mod muting;
 pub mod note;
 pub mod notification;
 pub mod signin;

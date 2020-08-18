@@ -7,6 +7,7 @@ pub mod blocking;
 pub mod charts;
 pub mod following;
 pub mod messaging;
+pub mod mute;
 pub mod notes;
 pub mod users;
 
