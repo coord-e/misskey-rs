@@ -23,7 +23,7 @@ pub struct Tag(pub String);
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Derivative)]
 #[serde(transparent)]
 #[derivative(Debug = "transparent")]
-pub struct ReactionType(pub String);
+pub struct Reaction(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
@@ -93,7 +93,7 @@ pub struct Note {
     #[serde(default)]
     pub poll: Option<Poll>,
     #[serde(default)]
-    pub reactions: HashMap<ReactionType, u64>,
+    pub reactions: HashMap<Reaction, u64>,
     #[serde(default)]
     pub emojis: Vec<Emoji>,
     pub renote_count: u64,

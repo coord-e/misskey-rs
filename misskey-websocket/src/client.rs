@@ -8,7 +8,7 @@ use crate::broker::{
 use crate::channel::{connect_websocket, SharedWebSocketSender};
 use crate::error::{Error, Result};
 use crate::model::{
-    request::{Request, TimelineType},
+    request::{Request, Timeline},
     ChannelId,
 };
 
@@ -22,7 +22,7 @@ use url::Url;
 pub mod builder;
 pub mod stream;
 
-use stream::{MainStream, NoteUpdate, Timeline};
+use stream::{MainStream, NoteUpdateStream, TimelineStream};
 
 pub struct WebSocketClient {
     websocket_tx: SharedWebSocketSender,
@@ -44,8 +44,8 @@ impl WebSocketClient {
         })
     }
 
-    pub async fn timeline(&mut self, timeline: TimelineType) -> Result<Timeline> {
-        Timeline::subscribe(
+    pub async fn timeline(&mut self, timeline: Timeline) -> Result<TimelineStream> {
+        TimelineStream::subscribe(
             timeline,
             self.broker_tx.clone(),
             Arc::clone(&self.state),
@@ -63,8 +63,8 @@ impl WebSocketClient {
         .await
     }
 
-    pub async fn capture_note(&mut self, note_id: NoteId) -> Result<NoteUpdate> {
-        NoteUpdate::subscribe(
+    pub async fn capture_note(&mut self, note_id: NoteId) -> Result<NoteUpdateStream> {
+        NoteUpdateStream::subscribe(
             note_id,
             self.broker_tx.clone(),
             Arc::clone(&self.state),

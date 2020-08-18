@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use misskey::model::{
-    note::{NoteId, ReactionType},
+    note::{NoteId, Reaction},
     user::UserId,
 };
 use serde::Deserialize;
@@ -16,15 +16,9 @@ pub struct NoteUpdatedMessage {
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum NoteUpdateEvent {
     #[serde(rename_all = "camelCase")]
-    Reacted {
-        reaction: ReactionType,
-        user_id: UserId,
-    },
+    Reacted { reaction: Reaction, user_id: UserId },
     #[serde(rename_all = "camelCase")]
-    Unreacted {
-        reaction: ReactionType,
-        user_id: UserId,
-    },
+    Unreacted { reaction: Reaction, user_id: UserId },
     #[serde(rename_all = "camelCase")]
     Deleted { deleted_at: DateTime<Utc> },
     #[serde(rename_all = "camelCase")]

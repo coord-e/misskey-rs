@@ -31,7 +31,7 @@ pub enum Request {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ConnectChannel {
     Main,
-    Timeline(TimelineType),
+    Timeline(Timeline),
 }
 
 impl Serialize for ConnectChannel {
@@ -47,7 +47,7 @@ impl Serialize for ConnectChannel {
 }
 
 #[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum TimelineType {
+pub enum Timeline {
     #[serde(rename = "homeTimeline")]
     Home,
     #[serde(rename = "localTimeline")]

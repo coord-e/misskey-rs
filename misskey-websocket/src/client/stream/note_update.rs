@@ -15,7 +15,7 @@ use futures::{
 };
 use misskey::model::note::NoteId;
 
-pub struct NoteUpdate {
+pub struct NoteUpdateStream {
     id: NoteId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<NoteUpdateEvent>,
@@ -23,13 +23,13 @@ pub struct NoteUpdate {
     is_terminated: bool,
 }
 
-impl NoteUpdate {
+impl NoteUpdateStream {
     pub(crate) async fn subscribe(
         note_id: NoteId,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
         websocket_tx: SharedWebSocketSender,
-    ) -> Result<NoteUpdate> {
+    ) -> Result<NoteUpdateStream> {
         let (response_tx, response_rx) = response_stream_channel(state);
 
         broker_tx
@@ -44,7 +44,7 @@ impl NoteUpdate {
         };
         websocket_tx.lock().await.send_json(&req).await?;
 
-        Ok(NoteUpdate {
+        Ok(NoteUpdateStream {
             id: note_id,
             broker_tx,
             response_rx,
@@ -72,7 +72,7 @@ impl NoteUpdate {
     }
 }
 
-impl Stream for NoteUpdate {
+impl Stream for NoteUpdateStream {
     type Item = Result<NoteUpdateEvent>;
     fn poll_next(
         mut self: Pin<&mut Self>,
@@ -86,13 +86,13 @@ impl Stream for NoteUpdate {
     }
 }
 
-impl FusedStream for NoteUpdate {
+impl FusedStream for NoteUpdateStream {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl Drop for NoteUpdate {
+impl Drop for NoteUpdateStream {
     fn drop(&mut self) {
         executor::block_on(async {
             // If the broker or websocket connection is dead, we don't need to unsubscribe anyway

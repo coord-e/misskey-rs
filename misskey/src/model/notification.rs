@@ -1,5 +1,5 @@
 use crate::model::{
-    note::{Note, ReactionType},
+    note::{Note, Reaction},
     user::{User, UserId},
     user_group::UserGroupInvitation,
 };
@@ -45,7 +45,7 @@ pub enum NotificationBody {
     },
     Reaction {
         note: Note,
-        reaction: ReactionType,
+        reaction: Reaction,
     },
     PollVote {
         note: Note,
