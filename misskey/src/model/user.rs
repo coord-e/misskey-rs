@@ -12,6 +12,13 @@ pub struct UserId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct UserField {
+    pub name: String,
+    pub value: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: UserId,
     pub username: String,
@@ -60,6 +67,8 @@ pub struct User {
     pub has_unread_specified_notes: bool,
     #[serde(default = "default_false")]
     pub has_unread_mentions: bool,
+    #[serde(default)]
+    pub fields: Vec<UserField>,
 }
 
 fn default_false() -> bool {

@@ -9,6 +9,7 @@ pub mod muting;
 pub mod note;
 pub mod note_favorite;
 pub mod notification;
+pub mod page;
 pub mod signin;
 pub mod user;
 pub mod user_group;
