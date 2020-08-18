@@ -3,4 +3,5 @@ members = [
   "misskey",
   "misskey-http",
   "misskey-websocket",
+  "example/timeline",
 ]
