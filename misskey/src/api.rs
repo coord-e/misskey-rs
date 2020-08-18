@@ -7,6 +7,7 @@ pub mod charts;
 pub mod following;
 pub mod messaging;
 pub mod notes;
+pub mod users;
 
 pub trait ApiRequest: Serialize {
     type Response: DeserializeOwned;
