@@ -6,24 +6,20 @@ use crate::model::{
 };
 
 use chrono::{DateTime, Utc};
-use derivative::Derivative;
 use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]
-#[derivative(Debug = "transparent")]
 pub struct NoteId(pub String);
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]
-#[derivative(Debug = "transparent")]
 pub struct Tag(pub String);
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]
-#[derivative(Debug = "transparent")]
 pub struct Reaction(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]

@@ -1,15 +1,13 @@
 use crate::model::note::{Note, NoteId};
 
 use chrono::{DateTime, Utc};
-use derivative::Derivative;
 use derive_more::FromStr;
 use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 use url::Url;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]
-#[derivative(Debug = "transparent")]
 pub struct UserId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -72,9 +70,8 @@ fn default_zero() -> u64 {
     0
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]
-#[derivative(Debug = "transparent")]
 pub struct FollowRequestId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

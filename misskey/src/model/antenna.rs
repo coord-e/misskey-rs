@@ -1,13 +1,11 @@
 use crate::model::{user::UserId, user_group::UserGroupId, user_list::UserListId};
 
 use chrono::{DateTime, Utc};
-use derivative::Derivative;
 use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Derivative)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]
-#[derivative(Debug = "transparent")]
 pub struct AntennaId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
