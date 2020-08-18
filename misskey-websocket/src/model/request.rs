@@ -1,6 +1,7 @@
 use crate::model::ChannelId;
 
 use misskey::model::note::NoteId;
+use serde::ser::Serializer;
 use serde::Serialize;
 use serde_json::value::Value;
 
@@ -27,17 +28,22 @@ pub enum Request {
     },
 }
 
-#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[serde(untagged)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ConnectChannel {
-    Main(MainType),
+    Main,
     Timeline(TimelineType),
 }
 
-#[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MainType {
-    #[serde(rename = "main")]
-    Main,
+impl Serialize for ConnectChannel {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            ConnectChannel::Main => serializer.serialize_unit_variant("ConnectChannel", 0, "main"),
+            ConnectChannel::Timeline(tl) => tl.serialize(serializer),
+        }
+    }
 }
 
 #[derive(Serialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]

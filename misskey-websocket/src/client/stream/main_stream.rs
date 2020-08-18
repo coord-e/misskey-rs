@@ -9,7 +9,7 @@ use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
 use crate::model::{
     message::channel::MainStreamEvent,
-    request::{ConnectChannel, MainType, Request},
+    request::{ConnectChannel, Request},
     ChannelId,
 };
 
@@ -44,7 +44,7 @@ impl MainStream {
 
         let req = Request::Connect {
             id: id.clone(),
-            channel: ConnectChannel::Main(MainType::Main),
+            channel: ConnectChannel::Main,
         };
         websocket_tx.lock().await.send_json(&req).await?;
 
