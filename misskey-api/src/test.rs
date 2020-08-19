@@ -7,6 +7,7 @@ use misskey_core::model::ApiResult;
 use misskey_core::{ApiRequest, Client};
 use misskey_http::HttpClient;
 use url::Url;
+use uuid::Uuid;
 
 pub struct TestClient {
     pub admin: HttpClient,
@@ -42,6 +43,7 @@ impl Client for TestClient {
 pub trait ClientExt {
     async fn test<R: ApiRequest + Send>(&mut self, req: R) -> R::Response;
     async fn me(&mut self) -> User;
+    async fn create_test_account(&mut self) -> User;
     async fn create_note(
         &mut self,
         text: Option<&'static str>,
@@ -58,6 +60,16 @@ impl<T: Client + Send> ClientExt for T {
 
     async fn me(&mut self) -> User {
         self.test(crate::api::i::Request {}).await
+    }
+
+    async fn create_test_account(&mut self) -> User {
+        let uuid = Uuid::new_v4().to_simple().to_string();
+        self.test(crate::api::admin::accounts::create::Request {
+            username: uuid[..20].to_owned(),
+            password: "test".to_string(),
+        })
+        .await
+        .user
     }
 
     async fn create_note(
