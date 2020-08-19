@@ -47,3 +47,80 @@ impl ApiRequest for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::TestClient;
+
+    #[tokio::test]
+    async fn test_list() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                local: false,
+                reply: false,
+                renote: false,
+                with_files: false,
+                poll: false,
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn test_list_with_limit() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                local: false,
+                reply: false,
+                renote: false,
+                with_files: false,
+                poll: false,
+                limit: Some(100),
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn test_list_paginate() {
+        let mut client = TestClient::new();
+
+        let note = client
+            .test(crate::api::notes::create::Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("test".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await
+            .created_note;
+
+        client
+            .test(Request {
+                local: false,
+                reply: false,
+                renote: false,
+                with_files: false,
+                poll: false,
+                limit: None,
+                since_id: Some(note.id.clone()),
+                until_id: Some(note.id.clone()),
+            })
+            .await;
+    }
+}

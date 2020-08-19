@@ -51,3 +51,208 @@ impl ApiRequest for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "notes/create";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::TestClient;
+
+    #[tokio::test]
+    async fn test_text() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("some text".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn test_cw() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("!".to_string()),
+                cw: Some("nsfw".to_string()),
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn test_visibilty() {
+        use crate::model::note::Visibility;
+
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                visibility: Some(Visibility::Home),
+                visible_user_ids: Vec::new(),
+                text: Some("hello home".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+        client
+            .test(Request {
+                visibility: Some(Visibility::Public),
+                visible_user_ids: Vec::new(),
+                text: Some("hello public".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+        client
+            .test(Request {
+                visibility: Some(Visibility::Followers),
+                visible_user_ids: Vec::new(),
+                text: Some("hello followers".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+        client
+            .test(Request {
+                visibility: Some(Visibility::Specified),
+                visible_user_ids: Vec::new(), // TODO: specify some users
+                text: Some("hello specific person".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn test_renote() {
+        let mut client = TestClient::new();
+        let note = client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("renote".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await
+            .created_note;
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: None,
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: Some(note.id),
+                poll: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn test_reply() {
+        let mut client = TestClient::new();
+        let note = client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("reply".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await
+            .created_note;
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("hey".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: Some(note.id),
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+    }
+}

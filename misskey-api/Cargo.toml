@@ -12,3 +12,7 @@ url = { version = "2.1", features = ["serde"] }
 async-trait = "0.1.35"
 derive_more = "0.99.5"
 strum_macros = "0.19"
+
+[dev-dependencies]
+misskey-http = { path = "../misskey-http" }
+tokio = { version = "0.2.22", features = ["macros"] }
