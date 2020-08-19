@@ -13,3 +13,16 @@ impl ApiRequest for Request {
     type Response = ();
     const ENDPOINT: &'static str = "notes/watching/create";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        let note = client.admin.create_note(Some("test"), None, None).await;
+        client.user.test(Request { note_id: note.id }).await;
+    }
+}

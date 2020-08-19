@@ -1,4 +1,7 @@
-use crate::model::note::{Note, NoteId};
+use crate::model::{
+    note::{Note, NoteId},
+    user::User,
+};
 
 use misskey_core::model::ApiResult;
 use misskey_core::{ApiRequest, Client};
@@ -38,6 +41,7 @@ impl Client for TestClient {
 #[async_trait::async_trait]
 pub trait ClientExt {
     async fn test<R: ApiRequest + Send>(&mut self, req: R) -> R::Response;
+    async fn me(&mut self) -> User;
     async fn create_note(
         &mut self,
         text: Option<&'static str>,
@@ -50,6 +54,10 @@ pub trait ClientExt {
 impl<T: Client + Send> ClientExt for T {
     async fn test<R: ApiRequest + Send>(&mut self, req: R) -> R::Response {
         self.request(req).await.unwrap().unwrap()
+    }
+
+    async fn me(&mut self) -> User {
+        self.test(crate::api::i::Request {}).await
     }
 
     async fn create_note(

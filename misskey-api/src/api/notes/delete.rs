@@ -20,26 +20,9 @@ mod tests {
     use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
-    async fn test_delete() {
+    async fn request() {
         let mut client = TestClient::new();
-        let note = client
-            .test(crate::api::notes::create::Request {
-                visibility: None,
-                visible_user_ids: Vec::new(),
-                text: Some("some text".to_string()),
-                cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
-                reply_id: None,
-                renote_id: None,
-                poll: None,
-            })
-            .await
-            .created_note;
+        let note = client.create_note(Some("test"), None, None).await;
         client.test(Request { note_id: note.id }).await;
     }
 }

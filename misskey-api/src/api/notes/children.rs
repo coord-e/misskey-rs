@@ -6,7 +6,7 @@ use serde::Serialize;
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    note_id: NoteId,
+    pub note_id: NoteId,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
@@ -19,4 +19,56 @@ pub struct Request {
 impl ApiRequest for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes/children";
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        let note = client.create_note(Some("test"), None, None).await;
+        client
+            .test(Request {
+                note_id: note.id,
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_limit() {
+        let mut client = TestClient::new();
+        let note = client.create_note(Some("test"), None, None).await;
+        client
+            .test(Request {
+                note_id: note.id,
+                limit: Some(100),
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_paginate() {
+        let mut client = TestClient::new();
+        let note1 = client.create_note(Some("test1"), None, None).await;
+        let note2 = client
+            .create_note(Some("test2"), None, Some(note1.id.clone()))
+            .await;
+
+        client
+            .test(Request {
+                note_id: note1.id,
+                limit: None,
+                since_id: Some(note2.id.clone()),
+                until_id: Some(note2.id.clone()),
+            })
+            .await;
+    }
 }
