@@ -10,8 +10,11 @@ jobs:
       matrix:
         version:
           - '12.47.0'
-          - '12.45.0'
-          - '12.43.0'
+          - '12.40.0'
+          - '12.30.0'
+          - '12.20.0'
+          - '12.10.0'
+          - '12.0.0'
     steps:
       - uses: actions/checkout@master
       - uses: actions-rs/toolchain@v1
