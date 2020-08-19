@@ -40,6 +40,7 @@ pub struct ApiError {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
+#[must_use = "this `ApiResult` may be an `Err` variant, which should be handled"]
 pub enum ApiResult<T> {
     Err { error: ApiError },
     Ok(T),
