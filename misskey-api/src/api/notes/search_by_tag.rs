@@ -15,7 +15,7 @@ pub struct Request {
     pub poll: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub with_files: Option<bool>,
-    /// 1 .. 100
+    /// 1 .. 100 (1 .. 30 in ~12.19.0)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -110,7 +110,7 @@ mod tests {
                 renote: None,
                 poll: None,
                 with_files: None,
-                limit: Some(100),
+                limit: Some(30),
                 since_id: None,
                 until_id: None,
             })
