@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  get-token:
+    build: get-token
+    depends_on:
+      - web
+
+  web:
+    build:
+      context: web
+      args:
+        MISSKEY_VERSION: ${MISSKEY_VERSION:?}
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "3000:3000"
+
+  redis:
+    restart: always
+    image: redis:4.0-alpine
+
+  db:
+    restart: always
+    image: postgres:11.2-alpine
+    environment:
+      - POSTGRES_PASSWORD=misskey-test
+      - POSTGRES_USER=misskey-test
+      - POSTGRES_DB=misskey

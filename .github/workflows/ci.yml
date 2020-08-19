@@ -1,0 +1,67 @@
+on: [push, pull_request]
+
+name: CI
+
+jobs:
+  test_api:
+    name: Test misskey-api
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        version:
+          - '12.47.0'
+          - '12.45.0'
+          - '12.43.0'
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ubuntu-18.04-stable-cargo-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --package misskey-api
+      - id: setup_env
+        run: |
+          cd ci/testenv
+          docker-compose build
+          docker-compose run --rm web yarn run init
+          docker-compose up -d web
+          echo "::set-output name=token::$(docker-compose run --rm get-token)"
+        env:
+          MISSKEY_VERSION: ${{ matrix.version }}
+      - uses: actions-rs/cargo@v1
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_API_TOKEN: ${{ steps.setup_env.outputs.token }}
+        with:
+          command: test
+          args: --package misskey-api
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - run: rustup component add rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - run: rustup component add clippy
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
