@@ -16,7 +16,7 @@ pub(crate) struct ControlSender {
 
 impl ControlSender {
     pub async fn send(&mut self, ctrl: BrokerControl) -> Result<()> {
-        if let Err(_) = self.inner.unbounded_send(ctrl) {
+        if self.inner.unbounded_send(ctrl).is_err() {
             let state = self.state.read().await;
             let err = state
                 .dead()

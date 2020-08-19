@@ -18,12 +18,12 @@ impl HttpClientBuilder {
         }
     }
 
-    pub fn header<'a, K: IntoHeaderName>(&'a mut self, key: K, value: HeaderValue) -> &'a mut Self {
+    pub fn header<K: IntoHeaderName>(&mut self, key: K, value: HeaderValue) -> &mut Self {
         self.additional_headers.insert(key, value);
         self
     }
 
-    pub fn token<'a, S: Into<String>>(&'a mut self, token: S) -> &'a mut Self {
+    pub fn token<S: Into<String>>(&mut self, token: S) -> &mut Self {
         self.token = Some(token.into());
         self
     }

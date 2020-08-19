@@ -9,7 +9,7 @@ pub struct WebSocketClientBuilder {
 }
 
 impl WebSocketClientBuilder {
-    pub fn query<'a, S1, S2>(&'a mut self, key: S1, value: S2) -> &'a mut Self
+    pub fn query<S1, S2>(&mut self, key: S1, value: S2) -> &mut Self
     where
         S1: AsRef<str>,
         S2: AsRef<str>,
@@ -24,7 +24,7 @@ impl WebSocketClientBuilder {
         WebSocketClientBuilder { url, token: None }
     }
 
-    pub fn token<'a, S: Into<String>>(&'a mut self, token: S) -> &'a mut Self {
+    pub fn token<S: Into<String>>(&mut self, token: S) -> &mut Self {
         self.token = Some(token.into());
         self
     }
