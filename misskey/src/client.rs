@@ -1,4 +1,4 @@
-use crate::api::ApiRequest;
+use crate::api::{ApiRequest, ApiResult};
 
 use url::Url;
 
@@ -18,5 +18,5 @@ pub trait Client {
     async fn request<R: ApiRequest + Send>(
         &mut self,
         request: R,
-    ) -> Result<R::Response, Self::Error>;
+    ) -> Result<ApiResult<R::Response>, Self::Error>;
 }

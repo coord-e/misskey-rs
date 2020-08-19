@@ -1,7 +1,8 @@
+use derive_more::Into;
 use serde::Deserialize;
 use serde_json::value::Value;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone, Into)]
 pub struct ApiMessage {
     #[serde(default = "default_null")]
     pub res: Value,

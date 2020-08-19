@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
 
-use misskey::api::ApiRequest;
+use misskey::api::{ApiRequest, ApiResult};
 use misskey::Client;
 use reqwest::header::HeaderMap;
 use serde_json::value::{self, Value};
@@ -19,7 +19,10 @@ pub struct HttpClient {
 impl Client for HttpClient {
     type Error = Error;
 
-    async fn request<R: ApiRequest + Send>(&mut self, request: R) -> Result<R::Response> {
+    async fn request<R: ApiRequest + Send>(
+        &mut self,
+        request: R,
+    ) -> Result<ApiResult<R::Response>> {
         let url = self
             .url
             .join(R::ENDPOINT)

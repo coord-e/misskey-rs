@@ -13,7 +13,7 @@ use crate::model::{
 };
 
 use async_std::sync::Mutex;
-use misskey::api::ApiRequest;
+use misskey::api::{ApiRequest, ApiResult};
 use misskey::model::note::NoteId;
 use misskey::Client;
 use serde_json::value;
@@ -78,7 +78,10 @@ impl WebSocketClient {
 impl Client for WebSocketClient {
     type Error = Error;
 
-    async fn request<R: ApiRequest + Send>(&mut self, request: R) -> Result<R::Response> {
+    async fn request<R: ApiRequest + Send>(
+        &mut self,
+        request: R,
+    ) -> Result<ApiResult<R::Response>> {
         let id = ChannelId::new();
 
         let (tx, rx) = response_channel(Arc::clone(&self.state));
@@ -93,7 +96,9 @@ impl Client for WebSocketClient {
         };
         self.websocket_tx.lock().await.send_json(&req).await?;
 
-        let x = rx.recv().await?;
-        Ok(value::from_value(x)?)
+        Ok(match rx.recv().await? {
+            ApiResult::Ok(x) => ApiResult::Ok(value::from_value(x)?),
+            ApiResult::Err { error } => ApiResult::Err { error },
+        })
     }
 }

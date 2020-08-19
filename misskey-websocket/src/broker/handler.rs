@@ -16,11 +16,12 @@ use crate::model::{
 };
 
 use log::{debug, warn};
+use misskey::api::ApiResult;
 use misskey::model::note::{Note, NoteId};
 use serde_json::value::{self, Value};
 
 pub struct Handler {
-    api: HashMap<ChannelId, ResponseSender<Value>>,
+    api: HashMap<ChannelId, ResponseSender<ApiResult<Value>>>,
     main_stream: HashMap<ChannelId, ResponseStreamSender<MainStreamEvent>>,
     timeline: HashMap<ChannelId, ResponseStreamSender<Note>>,
     note: HashMap<NoteId, ResponseStreamSender<NoteUpdateEvent>>,
@@ -65,8 +66,8 @@ impl Handler {
         match msg.type_ {
             MessageType::Api(id) => {
                 if let Some(sender) = self.api.remove(&id) {
-                    let msg: ApiMessage = value::from_value(msg.body)?;
-                    sender.send(msg.res);
+                    let msg: ApiResult<ApiMessage> = value::from_value(msg.body)?;
+                    sender.send(msg.map(Into::into));
                 }
             }
             MessageType::Channel => match value::from_value(msg.body)? {

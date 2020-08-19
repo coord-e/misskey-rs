@@ -23,6 +23,8 @@ struct Opt {
 enum Error {
     #[display(fmt = "IO error: {}", _0)]
     Io(#[error(source)] async_std::io::Error),
+    #[display(fmt = "API error: {} ({})", "_0.message", "_0.code")]
+    Api(#[error(not(source))] misskey::api::ApiError),
     #[display(fmt = "JSON error: {}", _0)]
     Client(#[error(source)] misskey_websocket::error::Error),
 }
@@ -59,7 +61,8 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
                 renote_id: None,
                 poll: None,
             })
-            .await?;
+            .await?
+            .into_result()?;
     }
 }
 

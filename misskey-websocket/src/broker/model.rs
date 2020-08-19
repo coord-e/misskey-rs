@@ -8,6 +8,7 @@ use crate::model::{
 };
 
 use async_std::sync::RwLock;
+use misskey::api::ApiResult;
 use misskey::model::note::{Note, NoteId};
 use serde_json::Value;
 
@@ -15,7 +16,7 @@ use serde_json::Value;
 pub enum BrokerControl {
     HandleApiResponse {
         id: ChannelId,
-        sender: ResponseSender<Value>,
+        sender: ResponseSender<ApiResult<Value>>,
     },
     SubscribeMainStream {
         id: ChannelId,
