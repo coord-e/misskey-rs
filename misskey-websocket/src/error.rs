@@ -1,43 +1,38 @@
-use std::error::Error as StdError;
-use std::result::Result as StdResult;
 use std::sync::Arc;
 
 use async_tungstenite::tungstenite;
-use derivative::Derivative;
-use derive_more::{Deref, Display, Error, From};
+use derive_more::Display;
 
-#[derive(Debug, Display, Error, Clone)]
+#[derive(Debug, Display, Clone)]
 pub enum Error {
     #[display(fmt = "websocket error: {}", _0)]
-    WebSocket(#[error(source)] ArcError<tungstenite::Error>),
+    WebSocket(Arc<tungstenite::Error>),
     #[display(fmt = "websocket unexpected message: {}", _0)]
-    UnexpectedMessage(#[error(not(source))] tungstenite::Message),
+    UnexpectedMessage(tungstenite::Message),
     #[display(fmt = "JSON error: {}", _0)]
-    Json(#[error(source)] ArcError<serde_json::Error>),
+    Json(Arc<serde_json::Error>),
 }
 
-#[derive(Derivative, Display, From, Deref)]
-#[derivative(Debug = "transparent", Clone(bound = ""))]
-#[deref(forward)]
-#[from(forward)]
-pub struct ArcError<E>(pub Arc<E>);
-
-impl<E: StdError> StdError for ArcError<E> {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        self.0.source()
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::WebSocket(e) => Some(e.as_ref()),
+            Error::UnexpectedMessage(_) => None,
+            Error::Json(e) => Some(e.as_ref()),
+        }
     }
 }
 
 impl From<tungstenite::Error> for Error {
     fn from(err: tungstenite::Error) -> Error {
-        Error::WebSocket(err.into())
+        Error::WebSocket(Arc::new(err))
     }
 }
 
 impl From<serde_json::Error> for Error {
     fn from(err: serde_json::Error) -> Error {
-        Error::Json(err.into())
+        Error::Json(Arc::new(err))
     }
 }
 
-pub type Result<T> = StdResult<T, Error>;
+pub type Result<T> = std::result::Result<T, Error>;
