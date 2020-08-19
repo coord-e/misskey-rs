@@ -15,6 +15,17 @@ pub struct HttpClient {
     additional_headers: HeaderMap,
 }
 
+impl HttpClient {
+    pub fn new(url: Url, token: Option<String>) -> Self {
+        HttpClient {
+            url,
+            token,
+            client: reqwest::Client::new(),
+            additional_headers: HeaderMap::new(),
+        }
+    }
+}
+
 #[async_trait::async_trait]
 impl Client for HttpClient {
     type Error = Error;

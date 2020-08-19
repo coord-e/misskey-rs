@@ -4,7 +4,7 @@ use derive_more::{Display, Error, From};
 use futures::lock::Mutex;
 use futures::never::Never;
 use futures::stream::StreamExt;
-use misskey::{Client, ClientBuilder};
+use misskey::Client;
 use misskey_websocket::{Timeline, WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
 use url::Url;
@@ -85,7 +85,7 @@ async fn run(opt: Opt) -> Result<(), Error> {
     // create the client with API token
     let client = WebSocketClientBuilder::new(opt.url)
         .token(opt.i)
-        .build()
+        .connect()
         .await?;
 
     // wrap the client to share it between tasks

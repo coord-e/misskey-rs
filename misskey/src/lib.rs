@@ -2,4 +2,4 @@ pub mod api;
 mod client;
 pub mod model;
 
-pub use client::{Client, ClientBuilder};
+pub use client::Client;

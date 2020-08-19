@@ -1,7 +1,5 @@
 use crate::client::HttpClient;
-use crate::error::Result;
 
-use misskey::ClientBuilder;
 use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use url::Url;
 
@@ -11,11 +9,8 @@ pub struct HttpClientBuilder {
     additional_headers: HeaderMap,
 }
 
-#[async_trait::async_trait]
-impl ClientBuilder for HttpClientBuilder {
-    type Client = HttpClient;
-
-    fn new(url: Url) -> Self {
+impl HttpClientBuilder {
+    pub fn new(url: Url) -> Self {
         HttpClientBuilder {
             url,
             token: None,
@@ -23,24 +18,22 @@ impl ClientBuilder for HttpClientBuilder {
         }
     }
 
-    fn token<'a, S: Into<String>>(&'a mut self, token: S) -> &'a mut Self {
+    pub fn header<'a, K: IntoHeaderName>(&'a mut self, key: K, value: HeaderValue) -> &'a mut Self {
+        self.additional_headers.insert(key, value);
+        self
+    }
+
+    pub fn token<'a, S: Into<String>>(&'a mut self, token: S) -> &'a mut Self {
         self.token = Some(token.into());
         self
     }
 
-    async fn build(&self) -> Result<HttpClient> {
-        Ok(HttpClient {
+    pub fn build(&self) -> HttpClient {
+        HttpClient {
             url: self.url.clone(),
             token: self.token.clone(),
             additional_headers: self.additional_headers.clone(),
             client: reqwest::Client::new(),
-        })
-    }
-}
-
-impl HttpClientBuilder {
-    pub fn header<'a, K: IntoHeaderName>(&'a mut self, key: K, value: HeaderValue) -> &'a mut Self {
-        self.additional_headers.insert(key, value);
-        self
+        }
     }
 }
