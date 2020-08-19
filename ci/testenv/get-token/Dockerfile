@@ -1,7 +1,6 @@
-FROM debian:buster-slim
+FROM alpine:3.12
 
-RUN apt-get update -y
-RUN apt-get install -y --no-install-recommends wait-for-it jq curl
+RUN apk add --no-cache jq curl
 COPY get-token.sh /get-token.sh
 
-CMD ["wait-for-it", "web:3000", "--quiet", "--timeout=60", "--", "/get-token.sh"]
+CMD ["/get-token.sh"]

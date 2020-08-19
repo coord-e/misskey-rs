@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
-set -eo pipefail
+until nc -z web 3000; do
+  sleep 1
+done
 
 curl -fsSL -XPOST -H 'Content-Type: application/json'    \
 	--data '{"username":"testuser","password":"testuser"}' \
