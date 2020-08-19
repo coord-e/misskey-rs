@@ -47,3 +47,62 @@ impl ApiRequest for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                local: false,
+                reply: false,
+                renote: false,
+                with_files: false,
+                poll: false,
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_limit() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                local: false,
+                reply: false,
+                renote: false,
+                with_files: false,
+                poll: false,
+                limit: Some(100),
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_paginate() {
+        let mut client = TestClient::new();
+        let note = client.create_note(Some("test"), None, None).await;
+
+        client
+            .test(Request {
+                local: false,
+                reply: false,
+                renote: false,
+                with_files: false,
+                poll: false,
+                limit: None,
+                since_id: Some(note.id.clone()),
+                until_id: Some(note.id.clone()),
+            })
+            .await;
+    }
+}
