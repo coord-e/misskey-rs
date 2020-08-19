@@ -51,7 +51,7 @@ impl ApiRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::Request;
-    use crate::test::TestClient;
+    use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
     async fn test_list() {

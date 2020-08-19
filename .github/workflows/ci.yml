@@ -38,13 +38,14 @@ jobs:
           docker-compose build
           docker-compose run --rm web yarn run init
           docker-compose up -d web
-          echo "::set-output name=token::$(docker-compose run --rm get-token)"
+          docker-compose run --rm get-token
         env:
           MISSKEY_VERSION: ${{ matrix.version }}
       - uses: actions-rs/cargo@v1
         env:
           TEST_API_URL: http://localhost:3000/api/
-          TEST_API_TOKEN: ${{ steps.setup_env.outputs.token }}
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
         with:
           command: test
           args: --package misskey-api
