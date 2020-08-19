@@ -23,7 +23,7 @@ struct Opt {
 enum Error {
     #[display(fmt = "IO error: {}", _0)]
     Io(#[error(source)] async_std::io::Error),
-    #[display(fmt = "API error: {} ({})", "_0.message", "_0.code")]
+    #[display(fmt = "API error: {} ({})", "_0.message", "_0.id")]
     Api(#[error(not(source))] misskey::api::ApiError),
     #[display(fmt = "JSON error: {}", _0)]
     Client(#[error(source)] misskey_websocket::error::Error),
@@ -38,7 +38,7 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
         // wait for user input
         stdin.read_line(&mut text).await?;
 
-        if text.is_empty() {
+        if text.trim().is_empty() {
             continue;
         }
 
@@ -94,11 +94,14 @@ async fn run(opt: Opt) -> Result<(), Error> {
     // run two tasks simultaneously
     futures::try_join!(post(Arc::clone(&client)), timeline(client, opt.timeline))?;
 
-    // we can reason that we won't reach here using `Never` type, but omitted it here for brevity
+    // we can reason that we won't reach here from `Never` type, but omitted it for brevity
     Ok(())
 }
 
-fn main() -> Result<(), Error> {
+fn main() {
     let opt = Opt::from_args();
-    async_std::task::block_on(run(opt))
+    if let Err(e) = async_std::task::block_on(run(opt)) {
+        eprintln!("error: {}", e);
+        std::process::exit(1);
+    }
 }
