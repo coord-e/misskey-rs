@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use misskey::model::{
+use misskey_api::model::{
     note::{NoteId, Reaction},
     user::UserId,
 };

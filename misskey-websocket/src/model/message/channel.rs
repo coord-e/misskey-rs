@@ -1,6 +1,6 @@
 use crate::model::ChannelId;
 
-use misskey::model::{
+use misskey_api::model::{
     antenna::Antenna,
     file::DriveFile,
     messaging::MessagingMessage,

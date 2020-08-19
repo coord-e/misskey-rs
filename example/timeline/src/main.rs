@@ -4,7 +4,7 @@ use derive_more::{Display, Error, From};
 use futures::lock::Mutex;
 use futures::never::Never;
 use futures::stream::StreamExt;
-use misskey::Client;
+use misskey_core::Client;
 use misskey_websocket::{Timeline, WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
 use url::Url;
@@ -24,7 +24,7 @@ enum Error {
     #[display(fmt = "IO error: {}", _0)]
     Io(#[error(source)] async_std::io::Error),
     #[display(fmt = "API error: {} ({})", "_0.message", "_0.id")]
-    Api(#[error(not(source))] misskey::api::ApiError),
+    Api(#[error(not(source))] misskey_core::model::ApiError),
     #[display(fmt = "JSON error: {}", _0)]
     Client(#[error(source)] misskey_websocket::error::Error),
 }
@@ -46,7 +46,7 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
         client
             .lock()
             .await
-            .request(misskey::api::notes::create::Request {
+            .request(misskey_api::api::notes::create::Request {
                 visibility: None,
                 visible_user_ids: Vec::new(),
                 text: Some(text),

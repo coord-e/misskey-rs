@@ -16,8 +16,8 @@ use crate::model::{
 };
 
 use log::{debug, warn};
-use misskey::api::ApiResult;
-use misskey::model::note::{Note, NoteId};
+use misskey_api::model::note::{Note, NoteId};
+use misskey_core::model::ApiResult;
 use serde_json::value::{self, Value};
 
 pub struct Handler {

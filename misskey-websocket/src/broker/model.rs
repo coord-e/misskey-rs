@@ -8,8 +8,8 @@ use crate::model::{
 };
 
 use async_std::sync::RwLock;
-use misskey::api::ApiResult;
-use misskey::model::note::{Note, NoteId};
+use misskey_api::model::note::{Note, NoteId};
+use misskey_core::model::ApiResult;
 use serde_json::Value;
 
 #[derive(Debug)]

@@ -6,7 +6,8 @@ edition = "2018"
 
 [dependencies]
 misskey-websocket = { path = "../../misskey-websocket" }
-misskey = { path = "../../misskey" }
+misskey-api = { path = "../../misskey-api" }
+misskey-core = { path = "../../misskey-core" }
 structopt = "0.3.16"
 async-std = { version = "1.6.3", default_features = false }
 url = "2.1.1"

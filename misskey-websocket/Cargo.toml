@@ -5,7 +5,8 @@ authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
 
 [dependencies]
-misskey = { path = "../misskey" }
+misskey-core = { path = "../misskey-core" }
+misskey-api = { path = "../misskey-api" }
 serde = { version = "1.0.83", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4.12", features = ["serde"] }

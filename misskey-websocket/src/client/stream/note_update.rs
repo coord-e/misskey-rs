@@ -13,7 +13,7 @@ use futures::{
     executor,
     stream::{FusedStream, Stream},
 };
-use misskey::model::note::NoteId;
+use misskey_api::model::note::NoteId;
 
 pub struct NoteUpdateStream {
     id: NoteId,

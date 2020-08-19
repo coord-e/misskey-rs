@@ -16,7 +16,7 @@ use futures::{
     executor,
     stream::{FusedStream, Stream},
 };
-use misskey::model::note::Note;
+use misskey_api::model::note::Note;
 
 pub struct TimelineStream {
     id: ChannelId,

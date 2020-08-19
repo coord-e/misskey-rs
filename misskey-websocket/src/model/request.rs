@@ -1,7 +1,7 @@
 use crate::model::ChannelId;
 
 use derive_more::{Display, Error};
-use misskey::model::note::NoteId;
+use misskey_api::model::note::NoteId;
 use serde::ser::Serializer;
 use serde::Serialize;
 use serde_json::value::Value;

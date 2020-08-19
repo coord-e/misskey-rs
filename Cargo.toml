@@ -1,6 +1,7 @@
 [workspace]
 members = [
-  "misskey",
+  "misskey-api",
+  "misskey-core",
   "misskey-http",
   "misskey-websocket",
   "example/timeline",

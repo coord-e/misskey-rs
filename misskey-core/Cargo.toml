@@ -1,0 +1,10 @@
+[package]
+name = "misskey-core"
+version = "0.1.0"
+authors = ["coord.e <me@coord-e.com>"]
+edition = "2018"
+
+[dependencies]
+serde = { version = "1.0.103", features = ["derive"] }
+async-trait = "0.1.35"
+derive_more = "0.99.5"

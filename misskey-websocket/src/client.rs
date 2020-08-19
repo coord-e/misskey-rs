@@ -13,9 +13,9 @@ use crate::model::{
 };
 
 use async_std::sync::Mutex;
-use misskey::api::{ApiRequest, ApiResult};
-use misskey::model::note::NoteId;
-use misskey::Client;
+use misskey_api::model::note::NoteId;
+use misskey_core::model::ApiResult;
+use misskey_core::{ApiRequest, Client};
 use serde_json::value;
 use url::Url;
 
