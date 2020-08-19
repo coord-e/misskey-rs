@@ -3,7 +3,6 @@ use crate::model::note::{Note, NoteId};
 use chrono::{DateTime, Utc};
 use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
-use serde_json::value::Value;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
@@ -17,6 +16,16 @@ pub struct UserField {
     pub value: String,
 }
 
+// packed `Emoji` for `User`
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UserEmoji {
+    pub name: String,
+    pub url: Url,
+    pub host: Option<String>,
+    pub aliases: Vec<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -26,12 +35,12 @@ pub struct User {
     #[serde(default)]
     pub url: Option<Url>,
     pub avatar_url: Option<Url>,
-    pub avatar_blurhash: Option<Value>,
+    pub avatar_blurhash: Option<String>,
     #[serde(default)]
     pub banner_url: Option<Url>,
     #[serde(default)]
-    pub banner_blurhash: Option<Value>,
-    pub emojis: Option<Value>,
+    pub banner_blurhash: Option<String>,
+    pub emojis: Option<Vec<UserEmoji>>,
     pub host: Option<String>,
     #[serde(default)]
     pub description: Option<String>,

@@ -66,8 +66,9 @@ pub struct Poll {
     // pub expired_after: Option<DateTime<Utc>>,
 }
 
+// packed `Emoji` for `Note`
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Emoji {
+pub struct NoteEmoji {
     pub name: String,
     pub url: Url,
 }
@@ -110,7 +111,7 @@ pub struct Note {
     #[serde(default)]
     pub reactions: HashMap<Reaction, u64>,
     #[serde(default)]
-    pub emojis: Vec<Emoji>,
+    pub emojis: Vec<NoteEmoji>,
     pub renote_count: u64,
     pub replies_count: u64,
 }
