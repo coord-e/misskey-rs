@@ -14,7 +14,7 @@ use serde_json::Value;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
-pub enum ChannelMessage {
+pub(crate) enum ChannelMessage {
     MainStream {
         id: ChannelId,
         #[serde(flatten)]
@@ -29,7 +29,7 @@ pub enum ChannelMessage {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", rename = "note", tag = "type")]
-pub struct NotePostedMessage {
+pub(crate) struct NotePostedMessage {
     pub body: Note,
 }
 

@@ -8,7 +8,7 @@ use serde_json::value::Value;
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
-pub enum Request {
+pub(crate) enum Request {
     Api {
         id: ChannelId,
         endpoint: String,
@@ -30,7 +30,7 @@ pub enum Request {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ConnectChannel {
+pub(crate) enum ConnectChannel {
     Main,
     Timeline(Timeline),
 }

@@ -10,7 +10,7 @@ pub mod channel;
 pub mod note_updated;
 
 #[derive(Debug, Clone, PartialEq, Eq, Copy)]
-pub enum MessageType {
+pub(crate) enum MessageType {
     Api(ChannelId),
     Channel,
     NoteUpdated,
@@ -63,7 +63,7 @@ impl<'de> Deserialize<'de> for MessageType {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct Message {
+pub(crate) struct Message {
     #[serde(rename = "type")]
     pub type_: MessageType,
     /// This value would be deserialized into one of `ApiMessage`, `ChannelMessage`, `NotePostedMessage`,

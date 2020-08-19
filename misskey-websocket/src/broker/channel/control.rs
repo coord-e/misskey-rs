@@ -9,7 +9,7 @@ use futures::stream::Stream;
 
 /// Sender channel that the client uses to communicate with broker
 #[derive(Debug, Clone)]
-pub struct ControlSender {
+pub(crate) struct ControlSender {
     inner: UnboundedSender<BrokerControl>,
     state: SharedBrokerState,
 }
@@ -30,7 +30,7 @@ impl ControlSender {
 
 /// Receiver channel that broker uses to communicate with the client
 #[derive(Debug)]
-pub struct ControlReceiver(UnboundedReceiver<BrokerControl>);
+pub(crate) struct ControlReceiver(UnboundedReceiver<BrokerControl>);
 
 impl ControlReceiver {
     pub fn try_recv(&mut self) -> Option<BrokerControl> {
@@ -49,7 +49,7 @@ impl Stream for ControlReceiver {
     }
 }
 
-pub fn control_channel(state: SharedBrokerState) -> (ControlSender, ControlReceiver) {
+pub(crate) fn control_channel(state: SharedBrokerState) -> (ControlSender, ControlReceiver) {
     let (sender, receiver) = mpsc::unbounded();
     (
         ControlSender {

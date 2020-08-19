@@ -4,7 +4,7 @@ use crate::error::Result;
 use futures::channel::oneshot::{self, Receiver, Sender};
 
 #[derive(Debug)]
-pub struct ResponseSender<T>(Sender<T>);
+pub(crate) struct ResponseSender<T>(Sender<T>);
 
 impl<T> ResponseSender<T> {
     pub fn send(self, t: T) {
@@ -15,7 +15,7 @@ impl<T> ResponseSender<T> {
 }
 
 #[derive(Debug)]
-pub struct ResponseReceiver<T> {
+pub(crate) struct ResponseReceiver<T> {
     inner: Receiver<T>,
     state: SharedBrokerState,
 }
@@ -35,7 +35,9 @@ impl<T> ResponseReceiver<T> {
     }
 }
 
-pub fn response_channel<T>(state: SharedBrokerState) -> (ResponseSender<T>, ResponseReceiver<T>) {
+pub(crate) fn response_channel<T>(
+    state: SharedBrokerState,
+) -> (ResponseSender<T>, ResponseReceiver<T>) {
     let (sender, receiver) = oneshot::channel();
     (
         ResponseSender(sender),

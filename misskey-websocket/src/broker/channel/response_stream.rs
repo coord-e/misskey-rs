@@ -9,7 +9,7 @@ use futures::stream::{FusedStream, Stream};
 
 /// Sender channel that broker uses to respond to the client
 #[derive(Debug, Clone)]
-pub struct ResponseStreamSender<T>(UnboundedSender<T>);
+pub(crate) struct ResponseStreamSender<T>(UnboundedSender<T>);
 
 impl<T> ResponseStreamSender<T> {
     /// `Ok(())` when successfully sent, `Err(t)` when the channel is closed
@@ -20,7 +20,7 @@ impl<T> ResponseStreamSender<T> {
 
 /// Receiver channel that the client uses to receive the response from broker
 #[derive(Debug)]
-pub struct ResponseStreamReceiver<T> {
+pub(crate) struct ResponseStreamReceiver<T> {
     inner: UnboundedReceiver<T>,
     state: SharedBrokerState,
     is_terminated: bool,
@@ -53,7 +53,7 @@ impl<T> FusedStream for ResponseStreamReceiver<T> {
     }
 }
 
-pub fn response_stream_channel<T>(
+pub(crate) fn response_stream_channel<T>(
     state: SharedBrokerState,
 ) -> (ResponseStreamSender<T>, ResponseStreamReceiver<T>) {
     let (sender, receiver) = mpsc::unbounded();

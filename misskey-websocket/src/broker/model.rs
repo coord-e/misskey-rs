@@ -13,7 +13,7 @@ use misskey_core::model::ApiResult;
 use serde_json::Value;
 
 #[derive(Debug)]
-pub enum BrokerControl {
+pub(crate) enum BrokerControl {
     HandleApiResponse {
         id: ChannelId,
         sender: ResponseSender<ApiResult<Value>>,
@@ -35,7 +35,7 @@ pub enum BrokerControl {
 }
 
 #[derive(Debug, Clone)]
-pub enum BrokerState {
+pub(crate) enum BrokerState {
     Working,
     Dead(Error),
 }
@@ -49,4 +49,4 @@ impl BrokerState {
     }
 }
 
-pub type SharedBrokerState = Arc<RwLock<BrokerState>>;
+pub(crate) type SharedBrokerState = Arc<RwLock<BrokerState>>;

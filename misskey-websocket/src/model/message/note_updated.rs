@@ -6,7 +6,7 @@ use misskey_api::model::{
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct NoteUpdatedMessage {
+pub(crate) struct NoteUpdatedMessage {
     pub id: NoteId,
     #[serde(flatten)]
     pub event: NoteUpdateEvent,

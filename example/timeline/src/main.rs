@@ -5,7 +5,8 @@ use futures::lock::Mutex;
 use futures::never::Never;
 use futures::stream::StreamExt;
 use misskey_core::Client;
-use misskey_websocket::{Timeline, WebSocketClient, WebSocketClientBuilder};
+use misskey_websocket::model::Timeline;
+use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
 use url::Url;
 
