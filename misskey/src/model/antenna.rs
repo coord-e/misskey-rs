@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct AntennaId(pub String);
 

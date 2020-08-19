@@ -4,10 +4,10 @@ use crate::model::{
 };
 
 use chrono::{DateTime, Utc};
-use derive_more::FromStr;
+use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct UserGroupId(pub String);
 
@@ -22,7 +22,7 @@ pub struct UserGroup {
     pub user_ids: Vec<UserId>,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct MessagingMessageId(pub String);
 

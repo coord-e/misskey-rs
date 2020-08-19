@@ -10,7 +10,7 @@ use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct NoteId(pub String);
 

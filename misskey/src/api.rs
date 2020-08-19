@@ -1,4 +1,4 @@
-use derive_more::FromStr;
+use derive_more::{Display, FromStr};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
@@ -18,7 +18,7 @@ pub trait ApiRequest: Serialize {
     const ENDPOINT: &'static str;
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct ApiErrorId(pub String);
 
