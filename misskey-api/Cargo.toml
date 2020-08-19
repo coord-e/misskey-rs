@@ -16,3 +16,4 @@ strum_macros = "0.19"
 [dev-dependencies]
 misskey-http = { path = "../misskey-http" }
 tokio = { version = "0.2.22", features = ["macros"] }
+uuid = { version = "0.8.1", features = ["v4"] }
