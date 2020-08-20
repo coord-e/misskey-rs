@@ -19,3 +19,67 @@ impl ApiRequest for Request {
     type Response = Vec<Blocking>;
     const ENDPOINT: &'static str = "blocking/list";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+
+        client
+            .user
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_limit() {
+        let mut client = TestClient::new();
+
+        client
+            .test(Request {
+                limit: Some(100),
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_paginate() {
+        let mut client = TestClient::new();
+        let user = client.admin.create_test_account().await;
+
+        client
+            .user
+            .test(crate::api::blocking::create::Request {
+                user_id: user.id.clone(),
+            })
+            .await;
+
+        let blockings = client
+            .user
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+
+        client
+            .user
+            .test(Request {
+                limit: None,
+                since_id: Some(blockings[0].id.clone()),
+                until_id: Some(blockings[0].id.clone()),
+            })
+            .await;
+    }
+}
