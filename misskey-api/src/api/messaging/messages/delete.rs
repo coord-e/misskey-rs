@@ -13,3 +13,30 @@ impl ApiRequest for Request {
     type Response = ();
     const ENDPOINT: &'static str = "messaging/messages/delete";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        let admin = client.admin.me().await;
+        let message = client
+            .user
+            .test(crate::api::messaging::messages::create::Request {
+                text: Some("hi".to_string()),
+                user_id: Some(admin.id),
+                group_id: None,
+                file_id: None,
+            })
+            .await;
+        client
+            .user
+            .test(Request {
+                message_id: message.id,
+            })
+            .await;
+    }
+}

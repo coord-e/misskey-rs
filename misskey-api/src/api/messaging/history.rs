@@ -6,7 +6,8 @@ use serde::Serialize;
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub group: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group: Option<bool>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<u8>,
@@ -15,4 +16,43 @@ pub struct Request {
 impl ApiRequest for Request {
     type Response = Vec<MessagingMessage>;
     const ENDPOINT: &'static str = "messaging/history";
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                group: None,
+                limit: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_option() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                group: Some(true),
+                limit: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_limit() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                group: None,
+                limit: Some(100),
+            })
+            .await;
+    }
 }
