@@ -25,3 +25,18 @@ pub struct DriveFile {
     pub folder_id: Option<DriveFolderId>,
     pub is_sensitive: bool,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DriveFolder {
+    pub id: DriveFolderId,
+    pub created_at: DateTime<Utc>,
+    pub name: String,
+    #[serde(default)]
+    pub folders_count: Option<u64>,
+    #[serde(default)]
+    pub files_count: Option<u64>,
+    pub parent_id: Option<DriveFolderId>,
+    #[serde(default)]
+    pub parent: Option<Box<DriveFolder>>,
+}
