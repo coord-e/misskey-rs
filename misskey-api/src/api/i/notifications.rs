@@ -19,13 +19,75 @@ pub struct Request {
     pub following: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mark_as_read: Option<bool>,
-    #[serde(skip_serializing_if = "HashSet::is_empty")]
-    pub include_types: HashSet<NotificationType>,
-    #[serde(skip_serializing_if = "HashSet::is_empty")]
-    pub exclude_types: HashSet<NotificationType>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include_types: Option<HashSet<NotificationType>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub exclude_types: Option<HashSet<NotificationType>>,
 }
 
 impl ApiRequest for Request {
     type Response = Vec<Notification>;
     const ENDPOINT: &'static str = "i/notifications";
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+                following: None,
+                mark_as_read: None,
+                include_types: None,
+                exclude_types: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_limit() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                limit: Some(100),
+                since_id: None,
+                until_id: None,
+                following: None,
+                mark_as_read: None,
+                include_types: None,
+                exclude_types: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_options() {
+        use crate::model::notification::NotificationType;
+
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+                following: Some(true),
+                mark_as_read: Some(false),
+                include_types: Some(
+                    vec![NotificationType::Follow, NotificationType::Reply]
+                        .into_iter()
+                        .collect(),
+                ),
+                exclude_types: Some(vec![NotificationType::Mention].into_iter().collect()),
+            })
+            .await;
+    }
+
+    // TODO: request_paginate
 }

@@ -19,3 +19,35 @@ impl ApiRequest for Request {
     type Response = Vec<UserGroupInvitation>;
     const ENDPOINT: &'static str = "i/user-group-invites";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_limit() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                limit: Some(100),
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    // TODO: request_paginate
+}

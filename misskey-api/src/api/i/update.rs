@@ -52,3 +52,98 @@ impl ApiRequest for Request {
     type Response = User;
     const ENDPOINT: &'static str = "i/update";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                name: None,
+                description: None,
+                lang: None,
+                location: None,
+                birthday: None,
+                avatar_id: None,
+                banner_id: None,
+                fields: None,
+                is_locked: None,
+                careful_bot: None,
+                auto_accept_followed: None,
+                is_bot: None,
+                is_cat: None,
+                auto_watch: None,
+                inject_featured_note: None,
+                always_mark_nsfw: None,
+                pinned_page_id: None,
+                muted_words: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_options() {
+        use crate::model::user::UserField;
+
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                name: Some(Some("test".to_string())),
+                description: Some(Some("test description".to_string())),
+                lang: Some(Some("ja-JP".to_string())),
+                location: Some(Some("somewhere".to_string())),
+                birthday: None,
+                avatar_id: None,
+                banner_id: None,
+                fields: Some(vec![UserField {
+                    name: "key".to_string(),
+                    value: "value".to_string(),
+                }]),
+                is_locked: Some(true),
+                careful_bot: Some(true),
+                auto_accept_followed: Some(true),
+                is_bot: Some(true),
+                is_cat: Some(true),
+                auto_watch: Some(true),
+                inject_featured_note: Some(true),
+                always_mark_nsfw: Some(true),
+                pinned_page_id: None,
+                muted_words: Some(vec![
+                    vec!["mute1".to_string(), "mute2".to_string()],
+                    vec!["mute3".to_string()],
+                ]),
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_null_options() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                name: Some(None),
+                description: Some(None),
+                lang: Some(None),
+                location: Some(None),
+                birthday: Some(None),
+                avatar_id: Some(None),
+                banner_id: Some(None),
+                fields: None,
+                is_locked: None,
+                careful_bot: None,
+                auto_accept_followed: None,
+                is_bot: None,
+                is_cat: None,
+                auto_watch: None,
+                inject_featured_note: None,
+                always_mark_nsfw: None,
+                pinned_page_id: Some(None),
+                muted_words: None,
+            })
+            .await;
+    }
+}

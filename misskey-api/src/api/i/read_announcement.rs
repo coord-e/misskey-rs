@@ -13,3 +13,5 @@ impl ApiRequest for Request {
     type Response = ();
     const ENDPOINT: &'static str = "i/read-announcement";
 }
+
+// TODO: tests
