@@ -9,6 +9,13 @@ use misskey_http::HttpClient;
 use url::Url;
 use uuid::Uuid;
 
+lazy_static::lazy_static! {
+    static ref TEST_API_URL: Url = {
+        let url = std::env::var("TEST_API_URL").unwrap();
+        Url::parse(&url).unwrap()
+    };
+}
+
 pub struct TestClient {
     pub admin: HttpClient,
     pub user: HttpClient,
@@ -16,14 +23,12 @@ pub struct TestClient {
 
 impl TestClient {
     pub fn new() -> Self {
-        let url = std::env::var("TEST_API_URL").unwrap();
-        let url = Url::parse(&url).unwrap();
         let admin_token = std::env::var("TEST_ADMIN_TOKEN").unwrap();
         let user_token = std::env::var("TEST_USER_TOKEN").unwrap();
 
         TestClient {
-            admin: HttpClient::new(url.clone(), Some(admin_token)),
-            user: HttpClient::new(url.clone(), Some(user_token)),
+            admin: HttpClient::new(TEST_API_URL.clone(), Some(admin_token)),
+            user: HttpClient::new(TEST_API_URL.clone(), Some(user_token)),
         }
     }
 }
@@ -42,8 +47,8 @@ impl Client for TestClient {
 #[async_trait::async_trait]
 pub trait ClientExt {
     async fn test<R: ApiRequest + Send>(&mut self, req: R) -> R::Response;
+    async fn create_user(&mut self) -> (User, HttpClient);
     async fn me(&mut self) -> User;
-    async fn create_test_account(&mut self) -> User;
     async fn create_note(
         &mut self,
         text: Option<&'static str>,
@@ -62,14 +67,19 @@ impl<T: Client + Send> ClientExt for T {
         self.test(crate::api::i::Request {}).await
     }
 
-    async fn create_test_account(&mut self) -> User {
+    async fn create_user(&mut self) -> (User, HttpClient) {
         let uuid = Uuid::new_v4().to_simple().to_string();
-        self.test(crate::api::admin::accounts::create::Request {
-            username: uuid[..20].to_owned(),
-            password: "test".to_string(),
-        })
-        .await
-        .user
+        let res = self
+            .test(crate::api::admin::accounts::create::Request {
+                username: uuid[..20].to_owned(),
+                password: "test".to_string(),
+            })
+            .await;
+
+        (
+            res.user,
+            HttpClient::new(TEST_API_URL.clone(), Some(res.token)),
+        )
     }
 
     async fn create_note(

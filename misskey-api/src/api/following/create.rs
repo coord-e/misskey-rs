@@ -13,3 +13,17 @@ impl ApiRequest for Request {
     type Response = User;
     const ENDPOINT: &'static str = "following/create";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        let (user, _) = client.admin.create_user().await;
+
+        client.user.test(Request { user_id: user.id }).await;
+    }
+}

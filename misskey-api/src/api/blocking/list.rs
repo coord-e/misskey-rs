@@ -55,7 +55,7 @@ mod tests {
     #[tokio::test]
     async fn request_paginate() {
         let mut client = TestClient::new();
-        let user = client.admin.create_test_account().await;
+        let (user, _) = client.admin.create_user().await;
 
         client
             .user
