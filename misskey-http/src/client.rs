@@ -46,24 +46,30 @@ impl Client for HttpClient {
         };
 
         use reqwest::header::CONTENT_TYPE;
-        let response_bytes = self
+        let response = self
             .client
             .post(url)
             .body(body)
             .header(CONTENT_TYPE, "application/json")
             .headers(self.additional_headers.clone())
             .send()
-            .await?
-            .bytes()
             .await?;
 
+        let response_status = response.status();
+        let response_bytes = response.bytes().await?;
         let json_bytes = if response_bytes.is_empty() {
             b"null"
         } else {
             response_bytes.as_ref()
         };
-        let response = serde_json::from_slice(json_bytes)?;
-        Ok(response)
+
+        if response_status.is_success() {
+            // Limit response to `ApiResult::Ok` branch to get informative error message
+            // when our model does not match the response.
+            Ok(ApiResult::Ok(serde_json::from_slice(json_bytes)?))
+        } else {
+            Ok(serde_json::from_slice(json_bytes)?)
+        }
     }
 }
 
