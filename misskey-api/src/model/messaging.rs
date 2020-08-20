@@ -1,5 +1,5 @@
 use crate::model::{
-    file::{DriveFile, FileId},
+    drive::{DriveFile, DriveFileId},
     user::{User, UserId},
 };
 
@@ -35,7 +35,7 @@ pub struct MessagingMessage {
     pub user: User,
     pub text: Option<String>,
     #[serde(default)]
-    pub file_id: Option<FileId>,
+    pub file_id: Option<DriveFileId>,
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<DriveFile>,

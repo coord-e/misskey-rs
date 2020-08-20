@@ -1,5 +1,5 @@
 use crate::model::{
-    file::FileId, messaging::MessagingMessage, user::UserId, user_group::UserGroupId,
+    drive::DriveFileId, messaging::MessagingMessage, user::UserId, user_group::UserGroupId,
 };
 
 use misskey_core::ApiRequest;
@@ -15,7 +15,7 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub group_id: Option<UserGroupId>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub file_id: Option<FileId>,
+    pub file_id: Option<DriveFileId>,
 }
 
 impl ApiRequest for Request {

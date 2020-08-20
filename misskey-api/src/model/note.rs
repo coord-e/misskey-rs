@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::model::{
-    file::{DriveFile, FileId},
+    drive::{DriveFile, DriveFileId},
     user::{User, UserId},
 };
 
@@ -101,7 +101,7 @@ pub struct Note {
     #[serde(default)]
     pub visible_user_ids: Vec<UserId>,
     #[serde(default)]
-    pub file_ids: Vec<FileId>,
+    pub file_ids: Vec<DriveFileId>,
     #[serde(default)]
     pub files: Vec<DriveFile>,
     #[serde(default)]

@@ -2,7 +2,7 @@ use crate::model::ChannelId;
 
 use misskey_api::model::{
     antenna::Antenna,
-    file::DriveFile,
+    drive::DriveFile,
     messaging::MessagingMessage,
     note::{Note, NoteId},
     notification::Notification,

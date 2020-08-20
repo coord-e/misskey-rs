@@ -1,5 +1,5 @@
 use crate::model::{
-    file::FileId,
+    drive::DriveFileId,
     note::{Note, NoteId, Visibility},
     user::UserId,
 };
@@ -37,7 +37,7 @@ pub struct Request {
     pub no_extract_hashtags: bool,
     pub no_extract_emojis: bool,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub file_ids: Vec<FileId>,
+    pub file_ids: Vec<DriveFileId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reply_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]

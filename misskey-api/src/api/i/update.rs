@@ -1,5 +1,5 @@
 use crate::model::{
-    file::FileId,
+    drive::DriveFileId,
     page::PageId,
     user::{User, UserField},
 };
@@ -21,9 +21,9 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub birthday: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub avatar_id: Option<Option<FileId>>,
+    pub avatar_id: Option<Option<DriveFileId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub banner_id: Option<Option<FileId>>,
+    pub banner_id: Option<Option<DriveFileId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fields: Option<Vec<UserField>>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -5,16 +5,16 @@ use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
-pub struct FileId(pub String);
+pub struct DriveFileId(pub String);
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
-pub struct FolderId(pub String);
+pub struct DriveFolderId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DriveFile {
-    pub id: FileId,
+    pub id: DriveFileId,
     pub created_at: DateTime<Utc>,
     pub name: String,
     #[serde(rename = "type")]
@@ -22,6 +22,6 @@ pub struct DriveFile {
     pub md5: String,
     pub size: u64,
     pub url: Option<Url>,
-    pub folder_id: Option<FolderId>,
+    pub folder_id: Option<DriveFolderId>,
     pub is_sensitive: bool,
 }

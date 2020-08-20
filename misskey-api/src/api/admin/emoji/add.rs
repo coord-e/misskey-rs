@@ -1,4 +1,4 @@
-use crate::model::{emoji::EmojiId, file::FileId};
+use crate::model::{drive::DriveFileId, emoji::EmojiId};
 
 use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub file_id: FileId,
+    pub file_id: DriveFileId,
 }
 
 #[derive(Deserialize, Debug, Clone)]
