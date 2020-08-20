@@ -35,7 +35,7 @@ pub struct DriveChart {
     pub inc_count: Vec<u64>,
     #[serde(alias = "incUsage")]
     pub inc_size: Vec<u64>,
-    #[serde(alias = "decCount")]
+    #[serde(alias = "decFiles")]
     pub dec_count: Vec<u64>,
     #[serde(alias = "decUsage")]
     pub dec_size: Vec<u64>,
