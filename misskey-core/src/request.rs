@@ -5,3 +5,5 @@ pub trait ApiRequest: Serialize {
     type Response: DeserializeOwned;
     const ENDPOINT: &'static str;
 }
+
+pub trait ApiRequestWithFile: ApiRequest {}

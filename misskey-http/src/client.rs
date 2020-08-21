@@ -1,7 +1,8 @@
 use crate::error::{Error, Result};
 
+use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{ApiRequest, Client};
+use misskey_core::{ApiRequest, ApiRequestWithFile, Client};
 use reqwest::header::HeaderMap;
 use serde_json::value::{self, Value};
 use url::Url;
@@ -23,6 +24,53 @@ impl HttpClient {
             client: reqwest::Client::new(),
             additional_headers: HeaderMap::new(),
         }
+    }
+
+    pub async fn request_with_file<R: ApiRequestWithFile + Send>(
+        &mut self,
+        request: R,
+        type_: Mime,
+        file_name: String,
+        data: Vec<u8>,
+    ) -> Result<ApiResult<R::Response>> {
+        let url = self
+            .url
+            .join(R::ENDPOINT)
+            .expect("ApiRequest::ENDPOINT must be a fragment of valid URL");
+
+        let mut form = reqwest::multipart::Form::new().part(
+            "file",
+            reqwest::multipart::Part::bytes(data)
+                .file_name(file_name)
+                .mime_str(type_.as_ref())
+                .unwrap(),
+        );
+
+        let value = if let Some(token) = &self.token {
+            to_json_with_api_key(request, token)?
+        } else {
+            value::to_value(request)?
+        };
+
+        let obj = value.as_object().expect("ApiRequest must be an object");
+        for (k, v) in obj {
+            let v = v
+                .as_str()
+                .expect("ApiRequestWithFile must be an object that all values are string");
+            form = form.text(k.to_owned(), v.to_owned());
+        }
+
+        use reqwest::header::CONTENT_TYPE;
+        let response = self
+            .client
+            .post(url)
+            .multipart(form)
+            .header(CONTENT_TYPE, "multipart/form-data")
+            .headers(self.additional_headers.clone())
+            .send()
+            .await?;
+
+        response_to_result::<R>(response).await
     }
 }
 
@@ -55,25 +103,31 @@ impl Client for HttpClient {
             .send()
             .await?;
 
-        let response_status = response.status();
-        let response_bytes = response.bytes().await?;
-        let json_bytes = if response_bytes.is_empty() {
-            b"null"
-        } else {
-            response_bytes.as_ref()
-        };
-
-        if response_status.is_success() {
-            // Limit response to `ApiResult::Ok` branch to get informative error message
-            // when our model does not match the response.
-            Ok(ApiResult::Ok(serde_json::from_slice(json_bytes)?))
-        } else {
-            Ok(serde_json::from_slice(json_bytes)?)
-        }
+        response_to_result::<R>(response).await
     }
 }
 
-pub fn to_json_with_api_key<T: ApiRequest>(data: T, api_key: &str) -> Result<Value> {
+async fn response_to_result<R: ApiRequest>(
+    response: reqwest::Response,
+) -> Result<ApiResult<R::Response>> {
+    let status = response.status();
+    let bytes = response.bytes().await?;
+    let json_bytes = if bytes.is_empty() {
+        b"null"
+    } else {
+        bytes.as_ref()
+    };
+
+    if status.is_success() {
+        // Limit response to `ApiResult::Ok` branch to get informative error message
+        // when our model does not match the response.
+        Ok(ApiResult::Ok(serde_json::from_slice(json_bytes)?))
+    } else {
+        Ok(serde_json::from_slice(json_bytes)?)
+    }
+}
+
+fn to_json_with_api_key<T: ApiRequest>(data: T, api_key: &str) -> Result<Value> {
     let mut value = value::to_value(data)?;
 
     let obj = value.as_object_mut().expect("ApiRequest must be an object");
