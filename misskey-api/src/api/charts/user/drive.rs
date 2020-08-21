@@ -3,7 +3,6 @@ use crate::model::{
     user::UserId,
 };
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -17,7 +16,7 @@ pub struct Request {
     pub offset: Option<u64>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = DriveChart;
     const ENDPOINT: &'static str = "charts/user/drive";
 }

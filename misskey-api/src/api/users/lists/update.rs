@@ -1,6 +1,5 @@
 use crate::model::user_list::{UserList, UserListId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -11,7 +10,7 @@ pub struct Request {
     pub name: String,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = UserList;
     const ENDPOINT: &'static str = "users/lists/update";
 }

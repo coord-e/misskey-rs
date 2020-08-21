@@ -1,6 +1,5 @@
 use crate::model::drive::{DriveFile, DriveFileId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 use url::Url;
 
@@ -13,7 +12,7 @@ pub struct Request {
     pub url: Option<Url>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = DriveFile;
     const ENDPOINT: &'static str = "drive/files/show";
 }

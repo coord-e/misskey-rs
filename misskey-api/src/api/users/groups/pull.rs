@@ -1,6 +1,5 @@
 use crate::model::{user::UserId, user_group::UserGroupId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -10,7 +9,7 @@ pub struct Request {
     pub user_id: UserId,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = ();
     const ENDPOINT: &'static str = "users/groups/pull";
 }

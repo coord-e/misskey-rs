@@ -3,7 +3,6 @@ use crate::model::{
     user_group::{UserGroup, UserGroupId},
 };
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -13,7 +12,7 @@ pub struct Request {
     pub user_id: UserId,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = UserGroup;
     const ENDPOINT: &'static str = "users/groups/transfer";
 }

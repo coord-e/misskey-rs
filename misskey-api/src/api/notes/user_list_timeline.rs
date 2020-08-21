@@ -4,7 +4,6 @@ use crate::model::{
 };
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -38,7 +37,7 @@ pub struct Request {
     pub until_date: Option<DateTime<Utc>>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes/user-list-timeline";
 }

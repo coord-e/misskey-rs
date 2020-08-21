@@ -1,4 +1,3 @@
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 pub mod files;
@@ -16,7 +15,7 @@ pub struct Response {
     pub usage: u64,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "drive";
 }

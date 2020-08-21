@@ -6,7 +6,7 @@ use crate::model::{
 
 use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{ApiRequest, ApiRequestWithFile, Client};
+use misskey_core::{Client, Request, RequestWithFile};
 use misskey_http::HttpClient;
 use url::Url;
 use uuid::Uuid;
@@ -38,7 +38,7 @@ impl TestClient {
 #[async_trait::async_trait]
 impl Client for TestClient {
     type Error = <HttpClient as Client>::Error;
-    async fn request<R: ApiRequest + Send>(
+    async fn request<R: Request + Send>(
         &mut self,
         request: R,
     ) -> Result<ApiResult<R::Response>, Self::Error> {
@@ -48,7 +48,7 @@ impl Client for TestClient {
 
 #[async_trait::async_trait]
 pub trait ClientExt {
-    async fn test<R: ApiRequest + Send>(&mut self, req: R) -> R::Response;
+    async fn test<R: Request + Send>(&mut self, req: R) -> R::Response;
     async fn create_user(&mut self) -> (User, HttpClient);
     async fn me(&mut self) -> User;
     async fn create_note(
@@ -61,7 +61,7 @@ pub trait ClientExt {
 
 #[async_trait::async_trait]
 impl<T: Client + Send> ClientExt for T {
-    async fn test<R: ApiRequest + Send>(&mut self, req: R) -> R::Response {
+    async fn test<R: Request + Send>(&mut self, req: R) -> R::Response {
         self.request(req).await.unwrap().unwrap()
     }
 
@@ -120,7 +120,7 @@ pub trait HttpClientExt {
         content: B,
     ) -> R::Response
     where
-        R: ApiRequestWithFile + Send,
+        R: RequestWithFile + Send,
         B: AsRef<[u8]> + Send + Sync;
     async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile;
 }
@@ -135,7 +135,7 @@ impl HttpClientExt for HttpClient {
         content: B,
     ) -> R::Response
     where
-        R: ApiRequestWithFile + Send,
+        R: RequestWithFile + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
         self.request_with_file(req, mime, file_name.to_string(), content.as_ref().to_vec())
@@ -170,7 +170,7 @@ impl HttpClientExt for TestClient {
         content: B,
     ) -> R::Response
     where
-        R: ApiRequestWithFile + Send,
+        R: RequestWithFile + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
         self.user

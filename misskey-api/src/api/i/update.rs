@@ -4,7 +4,6 @@ use crate::model::{
     user::{User, UserField},
 };
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -48,7 +47,7 @@ pub struct Request {
     pub muted_words: Option<Vec<Vec<String>>>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = User;
     const ENDPOINT: &'static str = "i/update";
 }

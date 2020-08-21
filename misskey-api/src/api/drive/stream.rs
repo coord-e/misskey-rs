@@ -1,6 +1,5 @@
 use crate::model::drive::{DriveFile, DriveFileId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -17,7 +16,7 @@ pub struct Request {
     pub until_id: Option<DriveFileId>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<DriveFile>;
     const ENDPOINT: &'static str = "drive/stream";
 }

@@ -1,6 +1,5 @@
 use crate::model::drive::{DriveFile, DriveFolderId};
 
-use misskey_core::{ApiRequest, ApiRequestWithFile};
 use serde::ser::Serializer;
 use serde::Serialize;
 
@@ -34,12 +33,12 @@ pub struct Request {
     pub force: Option<bool>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = DriveFile;
     const ENDPOINT: &'static str = "drive/files/create";
 }
 
-impl ApiRequestWithFile for Request {}
+impl misskey_core::RequestWithFile for Request {}
 
 #[cfg(test)]
 mod tests {

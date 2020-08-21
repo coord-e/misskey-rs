@@ -1,6 +1,5 @@
 use crate::model::user_group::{UserGroupInvitation, UserGroupInvitationId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -15,7 +14,7 @@ pub struct Request {
     pub until_id: Option<UserGroupInvitationId>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<UserGroupInvitation>;
     const ENDPOINT: &'static str = "i/user-group-invites";
 }

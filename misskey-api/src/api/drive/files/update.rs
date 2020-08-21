@@ -1,6 +1,5 @@
 use crate::model::drive::{DriveFile, DriveFileId, DriveFolderId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -15,7 +14,7 @@ pub struct Request {
     pub is_sensitive: Option<bool>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = DriveFile;
     const ENDPOINT: &'static str = "drive/files/update";
 }

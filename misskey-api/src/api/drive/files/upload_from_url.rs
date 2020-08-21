@@ -1,6 +1,5 @@
 use crate::model::drive::{DriveFile, DriveFolderId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 use url::Url;
 
@@ -16,7 +15,7 @@ pub struct Request {
     pub force: Option<bool>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = DriveFile;
     const ENDPOINT: &'static str = "drive/files/upload-from-url";
 }

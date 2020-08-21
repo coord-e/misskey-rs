@@ -1,6 +1,5 @@
 use crate::model::user::User;
 
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -18,7 +17,7 @@ pub struct Response {
     pub token: String,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "admin/accounts/create";
 }

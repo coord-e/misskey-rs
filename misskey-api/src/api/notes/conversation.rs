@@ -1,6 +1,5 @@
 use crate::model::note::{Note, NoteId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -14,7 +13,7 @@ pub struct Request {
     pub limit: Option<u8>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes/conversation";
 }

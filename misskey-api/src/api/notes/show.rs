@@ -1,6 +1,5 @@
 use crate::model::note::{Note, NoteId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -9,7 +8,7 @@ pub struct Request {
     pub note_id: NoteId,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Note;
     const ENDPOINT: &'static str = "notes/show";
 }

@@ -1,6 +1,5 @@
 use crate::model::user::User;
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 pub mod favorites;
@@ -17,7 +16,7 @@ pub mod user_group_invites;
 #[serde(rename_all = "camelCase")]
 pub struct Request {}
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = User;
     const ENDPOINT: &'static str = "i";
 }

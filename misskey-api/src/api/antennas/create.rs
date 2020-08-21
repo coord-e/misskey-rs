@@ -4,7 +4,6 @@ use crate::model::{
     user_list::UserListId,
 };
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -24,7 +23,7 @@ pub struct Request {
     pub notify: bool,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Antenna;
     const ENDPOINT: &'static str = "antennas/create";
 }

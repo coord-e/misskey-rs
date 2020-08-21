@@ -1,6 +1,5 @@
 use crate::model::chart::{ChartSpan, FederationChart};
 
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -19,7 +18,7 @@ pub struct Response {
     pub instance: FederationChart,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "charts/federation";
 }

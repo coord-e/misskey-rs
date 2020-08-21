@@ -2,7 +2,6 @@ use crate::model::{
     drive::DriveFileId, messaging::MessagingMessage, user::UserId, user_group::UserGroupId,
 };
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -18,7 +17,7 @@ pub struct Request {
     pub file_id: Option<DriveFileId>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = MessagingMessage;
     const ENDPOINT: &'static str = "messaging/messages/create";
 }

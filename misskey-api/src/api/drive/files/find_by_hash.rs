@@ -1,6 +1,5 @@
 use crate::model::drive::DriveFile;
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -9,7 +8,7 @@ pub struct Request {
     pub md5: String,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<DriveFile>;
     const ENDPOINT: &'static str = "drive/files/find-by-hash";
 }

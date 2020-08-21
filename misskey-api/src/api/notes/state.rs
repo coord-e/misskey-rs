@@ -1,6 +1,5 @@
 use crate::model::note::NoteId;
 
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -16,7 +15,7 @@ pub struct Response {
     pub is_watching: bool,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "notes/state";
 }

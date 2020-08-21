@@ -1,6 +1,5 @@
 use crate::model::chart::{ChartSpan, UsersChart};
 
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -20,7 +19,7 @@ pub struct Response {
     pub remote: UsersChart,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "charts/users";
 }

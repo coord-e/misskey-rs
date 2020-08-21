@@ -2,7 +2,6 @@ use std::collections::HashSet;
 
 use crate::model::notification::{Notification, NotificationId, NotificationType};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -25,7 +24,7 @@ pub struct Request {
     pub exclude_types: Option<HashSet<NotificationType>>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<Notification>;
     const ENDPOINT: &'static str = "i/notifications";
 }

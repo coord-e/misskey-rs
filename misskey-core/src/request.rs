@@ -1,9 +1,9 @@
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-pub trait ApiRequest: Serialize {
+pub trait Request: Serialize {
     type Response: DeserializeOwned;
     const ENDPOINT: &'static str;
 }
 
-pub trait ApiRequestWithFile: ApiRequest {}
+pub trait RequestWithFile: Request {}

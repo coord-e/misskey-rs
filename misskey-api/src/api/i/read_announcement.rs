@@ -1,6 +1,5 @@
 use crate::model::announcement::AnnouncementId;
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -9,7 +8,7 @@ pub struct Request {
     pub announcement_id: AnnouncementId,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = ();
     const ENDPOINT: &'static str = "i/read-announcement";
 }

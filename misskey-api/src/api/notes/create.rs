@@ -5,7 +5,6 @@ use crate::model::{
 };
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -52,7 +51,7 @@ pub struct Response {
     pub created_note: Note,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "notes/create";
 }

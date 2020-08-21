@@ -1,6 +1,5 @@
 use crate::model::drive::{DriveFolder, DriveFolderId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 pub mod create;
@@ -22,7 +21,7 @@ pub struct Request {
     pub until_id: Option<DriveFolderId>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<DriveFolder>;
     const ENDPOINT: &'static str = "drive/folders";
 }

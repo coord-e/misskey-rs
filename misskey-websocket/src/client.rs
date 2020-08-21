@@ -15,7 +15,7 @@ use crate::model::{
 use async_std::sync::Mutex;
 use misskey_api::model::note::NoteId;
 use misskey_core::model::ApiResult;
-use misskey_core::{ApiRequest, Client};
+use misskey_core::Client;
 use serde_json::value;
 use url::Url;
 
@@ -78,7 +78,7 @@ impl WebSocketClient {
 impl Client for WebSocketClient {
     type Error = Error;
 
-    async fn request<R: ApiRequest + Send>(
+    async fn request<R: misskey_core::Request + Send>(
         &mut self,
         request: R,
     ) -> Result<ApiResult<R::Response>> {

@@ -3,4 +3,4 @@ pub mod model;
 mod request;
 
 pub use client::Client;
-pub use request::{ApiRequest, ApiRequestWithFile};
+pub use request::{Request, RequestWithFile};

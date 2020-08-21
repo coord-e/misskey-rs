@@ -1,6 +1,5 @@
 use crate::model::note_favorite::{NoteFavorite, NoteFavoriteId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -15,7 +14,7 @@ pub struct Request {
     pub until_id: Option<NoteFavoriteId>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<NoteFavorite>;
     const ENDPOINT: &'static str = "i/favorites";
 }

@@ -3,7 +3,6 @@ use crate::model::{
     user::UserId,
 };
 
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -24,7 +23,7 @@ pub struct Response {
     pub remote: ReactionsChart,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "charts/user/reactions";
 }

@@ -1,6 +1,5 @@
 use crate::model::muting::{Muting, MutingId};
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -15,7 +14,7 @@ pub struct Request {
     pub until_id: Option<MutingId>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Vec<Muting>;
     const ENDPOINT: &'static str = "mute/list";
 }

@@ -1,6 +1,5 @@
 use crate::model::emoji::EmojiId;
 
-use misskey_core::ApiRequest;
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
@@ -12,7 +11,7 @@ pub struct Request {
     pub aliases: Vec<String>,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = ();
     const ENDPOINT: &'static str = "admin/emoji/update";
 }

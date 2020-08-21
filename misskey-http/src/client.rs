@@ -2,7 +2,7 @@ use crate::error::{Error, Result};
 
 use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{ApiRequest, ApiRequestWithFile, Client};
+use misskey_core::{Client, Request, RequestWithFile};
 use reqwest::header::HeaderMap;
 use serde_json::value::{self, Value};
 use url::Url;
@@ -26,7 +26,7 @@ impl HttpClient {
         }
     }
 
-    pub async fn request_with_file<R: ApiRequestWithFile + Send>(
+    pub async fn request_with_file<R: RequestWithFile + Send>(
         &mut self,
         request: R,
         type_: Mime,
@@ -36,7 +36,7 @@ impl HttpClient {
         let url = self
             .url
             .join(R::ENDPOINT)
-            .expect("ApiRequest::ENDPOINT must be a fragment of valid URL");
+            .expect("Request::ENDPOINT must be a fragment of valid URL");
 
         let mut form = reqwest::multipart::Form::new().part(
             "file",
@@ -52,11 +52,11 @@ impl HttpClient {
             value::to_value(request)?
         };
 
-        let obj = value.as_object().expect("ApiRequest must be an object");
+        let obj = value.as_object().expect("Request must be an object");
         for (k, v) in obj {
             let v = v
                 .as_str()
-                .expect("ApiRequestWithFile must be an object that all values are string");
+                .expect("RequestWithFile must be an object that all values are string");
             form = form.text(k.to_owned(), v.to_owned());
         }
 
@@ -78,14 +78,11 @@ impl HttpClient {
 impl Client for HttpClient {
     type Error = Error;
 
-    async fn request<R: ApiRequest + Send>(
-        &mut self,
-        request: R,
-    ) -> Result<ApiResult<R::Response>> {
+    async fn request<R: Request + Send>(&mut self, request: R) -> Result<ApiResult<R::Response>> {
         let url = self
             .url
             .join(R::ENDPOINT)
-            .expect("ApiRequest::ENDPOINT must be a fragment of valid URL");
+            .expect("Request::ENDPOINT must be a fragment of valid URL");
 
         let body = if let Some(token) = &self.token {
             serde_json::to_vec(&to_json_with_api_key(request, token)?)?
@@ -107,7 +104,7 @@ impl Client for HttpClient {
     }
 }
 
-async fn response_to_result<R: ApiRequest>(
+async fn response_to_result<R: Request>(
     response: reqwest::Response,
 ) -> Result<ApiResult<R::Response>> {
     let status = response.status();
@@ -127,15 +124,15 @@ async fn response_to_result<R: ApiRequest>(
     }
 }
 
-fn to_json_with_api_key<T: ApiRequest>(data: T, api_key: &str) -> Result<Value> {
+fn to_json_with_api_key<T: Request>(data: T, api_key: &str) -> Result<Value> {
     let mut value = value::to_value(data)?;
 
-    let obj = value.as_object_mut().expect("ApiRequest must be an object");
+    let obj = value.as_object_mut().expect("Request must be an object");
     if obj
         .insert("i".to_string(), Value::String(api_key.to_string()))
         .is_some()
     {
-        panic!("ApiRequest must not have 'i' key");
+        panic!("Request must not have 'i' key");
     }
 
     Ok(value)

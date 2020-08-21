@@ -2,7 +2,6 @@ use crate::model::chart::{
     ChartSpan, DriveChart, FollowersChart, FollowingChart, NotesChart, RequestsChart, UsersChart,
 };
 
-use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
@@ -27,7 +26,7 @@ pub struct Response {
     pub drive: DriveChart,
 }
 
-impl ApiRequest for Request {
+impl misskey_core::Request for Request {
     type Response = Response;
     const ENDPOINT: &'static str = "charts/instance";
 }
