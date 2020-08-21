@@ -15,13 +15,18 @@ pub struct Antenna {
     pub created_at: DateTime<Utc>,
     pub name: String,
     pub case_sensitive: bool,
-    pub exclude_keywords: Vec<Vec<String>>,
+    /// not available in <12.19.0
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub exclude_keywords: Option<Vec<Vec<String>>>,
     pub keywords: Vec<Vec<String>>,
     pub expression: Option<String>,
     pub src: AntennaSource,
+    /// not available in <12.10.0
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub user_group_id: Option<UserGroupId>,
     pub user_list_id: Option<UserListId>,
-    pub user_id: UserId,
     pub users: Vec<UserId>,
     pub notify: bool,
     pub with_file: bool,
@@ -35,6 +40,7 @@ pub enum AntennaSource {
     Home,
     Users,
     List,
+    /// not available in <12.10.0
     Group,
 }
 
