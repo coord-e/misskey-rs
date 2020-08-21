@@ -26,7 +26,7 @@ impl ApiRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::Request;
-    use crate::test::{ClientExt, TestClient};
+    use crate::test::{ClientExt, HttpClientExt, TestClient};
 
     #[tokio::test]
     async fn request_with_text() {
@@ -61,5 +61,20 @@ mod tests {
             .await;
     }
 
-    // TODO: request_with_file
+    #[tokio::test]
+    async fn request_with_file() {
+        let mut client = TestClient::new();
+        let admin = client.admin.me().await;
+        let file = client.create_text_file("test.txt", "hello").await;
+
+        client
+            .user
+            .test(Request {
+                text: Some("hi".to_string()),
+                user_id: Some(admin.id),
+                group_id: None,
+                file_id: Some(file.id),
+            })
+            .await;
+    }
 }

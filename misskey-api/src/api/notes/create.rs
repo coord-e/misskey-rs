@@ -60,7 +60,7 @@ impl ApiRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{PollRequest, Request};
-    use crate::test::{ClientExt, TestClient};
+    use crate::test::{ClientExt, HttpClientExt, TestClient};
 
     #[tokio::test]
     async fn request_with_text() {
@@ -285,6 +285,31 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: Some(poll),
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_files() {
+        let mut client = TestClient::new();
+        let file1 = client.create_text_file("test1.txt", "hi").await;
+        let file2 = client.create_text_file("test2.txt", "hi").await;
+
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("some text".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: vec![file1.id, file2.id],
+                reply_id: None,
+                renote_id: None,
+                poll: None,
             })
             .await;
     }
