@@ -1,6 +1,7 @@
 use misskey_core::ApiRequest;
 use serde::{Deserialize, Serialize};
 
+pub mod files;
 pub mod folders;
 
 #[derive(Serialize, Debug, Clone)]
