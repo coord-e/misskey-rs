@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod files;
 pub mod folders;
+pub mod stream;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
