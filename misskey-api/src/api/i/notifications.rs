@@ -88,5 +88,42 @@ mod tests {
             .await;
     }
 
-    // TODO: request_paginate
+    #[tokio::test]
+    #[cfg(feature = "12-27-0")]
+    async fn request_paginate() {
+        let mut client = TestClient::new();
+        client
+            .test(crate::api::notifications::create::Request {
+                body: "hi".to_string(),
+                header: None,
+                icon: None,
+            })
+            .await;
+
+        let notification = client
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+                following: None,
+                mark_as_read: None,
+                include_types: None,
+                exclude_types: None,
+            })
+            .await
+            .pop()
+            .unwrap();
+
+        client
+            .test(Request {
+                limit: None,
+                since_id: Some(notification.id.clone()),
+                until_id: Some(notification.id.clone()),
+                following: None,
+                mark_as_read: None,
+                include_types: None,
+                exclude_types: None,
+            })
+            .await;
+    }
 }
