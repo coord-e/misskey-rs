@@ -57,6 +57,7 @@ pub trait ClientExt {
         renote_id: Option<NoteId>,
         reply_id: Option<NoteId>,
     ) -> Note;
+    async fn avatar_url(&mut self) -> Url;
 }
 
 #[async_trait::async_trait]
@@ -107,6 +108,16 @@ impl<T: Client + Send> ClientExt for T {
         })
         .await
         .created_note
+    }
+
+    async fn avatar_url(&mut self) -> Url {
+        let me = self.me().await;
+        if let Some(url) = me.avatar_url {
+            url
+        } else {
+            let path = format!("/avatar/{}", me.id);
+            TEST_API_URL.join(&path).unwrap()
+        }
     }
 }
 
