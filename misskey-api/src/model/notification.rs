@@ -18,7 +18,13 @@ pub struct NotificationId(pub String);
 pub struct Notification {
     pub id: NotificationId,
     pub created_at: DateTime<Utc>,
+    #[cfg(feature = "12-27-0")]
+    pub user_id: Option<UserId>,
+    #[cfg(feature = "12-27-0")]
+    pub user: Option<User>,
+    #[cfg(not(feature = "12-27-0"))]
     pub user_id: UserId,
+    #[cfg(not(feature = "12-27-0"))]
     pub user: User,
     #[cfg(feature = "12-40-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-40-0")))]
