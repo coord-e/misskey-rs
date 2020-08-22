@@ -8,16 +8,16 @@ use serde::Serialize;
 
 pub mod followers;
 pub mod following;
-// pub mod get_frequently_replied_users;
+pub mod get_frequently_replied_users;
 pub mod groups;
 pub mod lists;
 // pub mod notes;
-// pub mod recommendation;
+pub mod recommendation;
 // pub mod relation;
 // pub mod report_abuse;
-// pub mod search;
-// pub mod search_by_username_and_host;
-// pub mod show;
+pub mod search;
+pub mod search_by_username_and_host;
+pub mod show;
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Display)]
 pub enum Sort {
