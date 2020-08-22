@@ -141,3 +141,16 @@ impl std::str::FromStr for UserOrigin {
         }
     }
 }
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UserRelation {
+    pub id: UserId,
+    pub is_following: bool,
+    pub has_pending_follow_request_from_you: bool,
+    pub has_pending_follow_request_to_you: bool,
+    pub is_followed: bool,
+    pub is_blocking: bool,
+    pub is_blocked: bool,
+    pub is_muted: bool,
+}
