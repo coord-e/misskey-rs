@@ -20,10 +20,8 @@ pub struct Notification {
     pub created_at: DateTime<Utc>,
     pub user_id: UserId,
     pub user: User,
-    /// not available in <12.40.0
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_read: Option<bool>,
+    #[cfg(feature = "12-40-0")]
+    pub is_read: bool,
     #[serde(flatten)]
     pub body: NotificationBody,
 }

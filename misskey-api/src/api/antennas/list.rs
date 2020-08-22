@@ -26,9 +26,11 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::All,
                 user_list_id: None,
+                #[cfg(feature = "12-10-0")]
                 user_group_id: None,
                 keywords: Vec::new(),
-                exclude_keywords: None,
+                #[cfg(feature = "12-19-0")]
+                exclude_keywords: Vec::new(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,

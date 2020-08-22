@@ -1,6 +1,7 @@
+#[cfg(feature = "12-10-0")]
+use crate::model::user_group::UserGroupId;
 use crate::model::{
     antenna::{Antenna, AntennaId, AntennaSource},
-    user_group::UserGroupId,
     user_list::UserListId,
 };
 
@@ -14,13 +15,11 @@ pub struct Request {
     pub name: String,
     pub src: AntennaSource,
     pub user_list_id: Option<UserListId>,
-    /// not available in <12.10.0
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[cfg(feature = "12-10-0")]
     pub user_group_id: Option<UserGroupId>,
     pub keywords: Vec<Vec<String>>,
-    /// not available in <12.19.0
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub exclude_keywords: Option<Vec<Vec<String>>>,
+    #[cfg(feature = "12-19-0")]
+    pub exclude_keywords: Vec<Vec<String>>,
     pub users: Vec<String>,
     pub case_sensitive: bool,
     pub with_replies: bool,
@@ -49,9 +48,11 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::All,
                 user_list_id: None,
+                #[cfg(feature = "12-10-0")]
                 user_group_id: None,
                 keywords: vec![vec!["hello".to_string(), "awesome".to_string()]],
-                exclude_keywords: None,
+                #[cfg(feature = "12-19-0")]
+                exclude_keywords: Vec::new(),
                 users: Vec::new(),
                 case_sensitive: true,
                 with_replies: false,
@@ -72,9 +73,11 @@ mod tests {
                 name: "test2".to_string(),
                 src: AntennaSource::List,
                 user_list_id: Some(list.id),
+                #[cfg(feature = "12-10-0")]
                 user_group_id: None,
                 keywords: vec![vec!["cool".to_string()], vec!["nice".to_string()]],
-                exclude_keywords: None,
+                #[cfg(feature = "12-19-0")]
+                exclude_keywords: Vec::new(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: true,
