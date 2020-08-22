@@ -12,6 +12,7 @@ pub mod note_favorite;
 pub mod notification;
 pub mod page;
 pub mod signin;
+pub mod sort;
 pub mod user;
 pub mod user_group;
 pub mod user_list;

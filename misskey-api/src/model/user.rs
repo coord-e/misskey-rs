@@ -1,7 +1,7 @@
 use crate::model::note::{Note, NoteId};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, FromStr};
+use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -88,14 +88,56 @@ fn default_zero() -> u64 {
     0
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct FollowRequestId(pub String);
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
-pub struct FollowRequest {
-    pub id: FollowRequestId,
-    pub followee: User,
-    pub follower: User,
+pub enum UserState {
+    All,
+    Alive,
+    Admin,
+    Moderator,
+    AdminOrModerator,
+}
+
+#[derive(Debug, Display, Error, Clone)]
+#[display(fmt = "invalid user state")]
+pub struct ParseUserStateError;
+
+impl std::str::FromStr for UserState {
+    type Err = ParseUserStateError;
+
+    fn from_str(s: &str) -> Result<UserState, Self::Err> {
+        match s {
+            "all" | "All" => Ok(UserState::All),
+            "alive" | "Alive" => Ok(UserState::Alive),
+            "admin" | "Admin" => Ok(UserState::Admin),
+            "moderator" | "Moderator" => Ok(UserState::Moderator),
+            "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
+            _ => Err(ParseUserStateError),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
+#[serde(rename_all = "camelCase")]
+pub enum UserOrigin {
+    Local,
+    Remote,
+    Combined,
+}
+
+#[derive(Debug, Display, Error, Clone)]
+#[display(fmt = "invalid user origin")]
+pub struct ParseUserOriginError;
+
+impl std::str::FromStr for UserOrigin {
+    type Err = ParseUserOriginError;
+
+    fn from_str(s: &str) -> Result<UserOrigin, Self::Err> {
+        match s {
+            "local" | "Local" => Ok(UserOrigin::Local),
+            "remote" | "Remote" => Ok(UserOrigin::Remote),
+            "combined" | "Combined" => Ok(UserOrigin::Combined),
+            _ => Err(ParseUserOriginError),
+        }
+    }
 }
