@@ -60,6 +60,10 @@ impl MainStream {
     }
 
     pub async fn unsubscribe(&mut self) -> Result<()> {
+        if self.is_terminated() {
+            return Ok(());
+        }
+
         self.websocket_tx
             .lock()
             .await
