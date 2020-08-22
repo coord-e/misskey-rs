@@ -27,3 +27,7 @@ tokio = { version = "0.2.22", features = ["macros"] }
 uuid = { version = "0.8.1", features = ["v4"] }
 lazy_static = "1.4.0"
 mime = "0.3"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

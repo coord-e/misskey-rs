@@ -15,9 +15,11 @@ pub struct Request {
     pub src: AntennaSource,
     pub user_list_id: Option<UserListId>,
     #[cfg(feature = "12-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
     pub user_group_id: Option<UserGroupId>,
     pub keywords: Vec<Vec<String>>,
     #[cfg(feature = "12-19-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]
     pub exclude_keywords: Vec<Vec<String>>,
     pub users: Vec<String>,
     pub case_sensitive: bool,

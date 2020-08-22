@@ -18,11 +18,13 @@ pub struct Antenna {
     pub name: String,
     pub case_sensitive: bool,
     #[cfg(feature = "12-19-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]
     pub exclude_keywords: Vec<Vec<String>>,
     pub keywords: Vec<Vec<String>>,
     pub expression: Option<String>,
     pub src: AntennaSource,
     #[cfg(feature = "12-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
     pub user_group_id: Option<UserGroupId>,
     pub user_list_id: Option<UserListId>,
     pub users: Vec<UserId>,
@@ -39,6 +41,7 @@ pub enum AntennaSource {
     Users,
     List,
     #[cfg(feature = "12-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
     Group,
 }
 
