@@ -18,6 +18,7 @@ use futures::{
     stream::{FusedStream, Stream},
 };
 
+#[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
 pub struct MainStream {
     id: ChannelId,

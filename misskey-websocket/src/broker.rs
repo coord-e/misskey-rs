@@ -15,6 +15,7 @@ use channel::{control_channel, ControlReceiver, ControlSender};
 use handler::Handler;
 use model::{BrokerState, SharedBrokerState};
 
+#[derive(Debug)]
 pub(crate) struct Broker {
     websocket_rx: WebSocketReceriver,
     broker_rx: ControlReceiver,

@@ -20,6 +20,7 @@ use misskey_api::model::note::{Note, NoteId};
 use misskey_core::model::ApiResult;
 use serde_json::value::{self, Value};
 
+#[derive(Debug)]
 pub(crate) struct Handler {
     api: HashMap<ChannelId, ResponseSender<ApiResult<Value>>>,
     main_stream: HashMap<ChannelId, ResponseStreamSender<MainStreamEvent>>,

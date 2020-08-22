@@ -24,6 +24,7 @@ pub mod stream;
 
 use stream::{MainStream, NoteUpdateStream, TimelineStream};
 
+#[derive(Debug, Clone)]
 pub struct WebSocketClient {
     websocket_tx: SharedWebSocketSender,
     broker_tx: ControlSender,

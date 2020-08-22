@@ -3,6 +3,7 @@ use crate::error::Result;
 
 use url::Url;
 
+#[derive(Debug, Clone)]
 pub struct WebSocketClientBuilder {
     url: Url,
     token: Option<String>,

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 use crate::error::{Error, Result};
 
@@ -13,6 +13,12 @@ use url::Url;
 
 /// Receiver channel that communicates with Misskey
 pub struct WebSocketReceriver(SplitStream<WebSocketStream<ConnectStream>>);
+
+impl fmt::Debug for WebSocketReceriver {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("WebSocketReceriver").finish()
+    }
+}
 
 impl WebSocketReceriver {
     pub async fn recv(&mut self) -> Result<WsMessage> {
@@ -39,6 +45,12 @@ impl WebSocketReceriver {
 
 /// Sender channel that communicates with Misskey
 pub struct WebSocketSender(SplitSink<WebSocketStream<ConnectStream>, WsMessage>);
+
+impl fmt::Debug for WebSocketSender {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("WebSocketSender").finish()
+    }
+}
 
 impl WebSocketSender {
     pub async fn send(&mut self, msg: WsMessage) -> Result<()> {
