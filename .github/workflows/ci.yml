@@ -19,6 +19,8 @@ jobs:
             flags: --no-default-features --features 12-19-0
           - version: '12.10.0'
             flags: --no-default-features --features 12-10-0
+          - version: '12.9.0'
+            flags: --no-default-features --features 12-9-0
           - version: '12.8.0'
             flags: --no-default-features --features 12-8-0
           - version: '12.5.0'
