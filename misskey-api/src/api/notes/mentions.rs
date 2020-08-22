@@ -117,10 +117,12 @@ mod tests {
     #[tokio::test]
     async fn request_paginate() {
         let mut client = TestClient::new();
-        // TODO: mention test user in the text
-        let note = client.create_note(Some("test1"), None, None).await;
+        let me = client.user.me().await;
+        let text = format!("hey @{}", me.username);
+        let note = client.admin.create_note(Some(&text), None, None).await;
 
         client
+            .user
             .test(Request {
                 following: None,
                 visibility: None,

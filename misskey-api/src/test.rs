@@ -53,7 +53,7 @@ pub trait ClientExt {
     async fn me(&mut self) -> User;
     async fn create_note(
         &mut self,
-        text: Option<&'static str>,
+        text: Option<&str>,
         renote_id: Option<NoteId>,
         reply_id: Option<NoteId>,
     ) -> Note;
@@ -86,7 +86,7 @@ impl<T: Client + Send> ClientExt for T {
 
     async fn create_note(
         &mut self,
-        text: Option<&'static str>,
+        text: Option<&str>,
         renote_id: Option<NoteId>,
         reply_id: Option<NoteId>,
     ) -> Note {

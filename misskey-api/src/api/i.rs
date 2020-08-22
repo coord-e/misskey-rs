@@ -20,3 +20,15 @@ impl misskey_core::Request for Request {
     type Response = User;
     const ENDPOINT: &'static str = "i";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client.test(Request {}).await;
+    }
+}

@@ -161,10 +161,13 @@ mod tests {
                 poll: None,
             })
             .await;
+
+        let admin = client.admin.me().await;
         client
+            .user
             .test(Request {
                 visibility: Some(Visibility::Specified),
-                visible_user_ids: Vec::new(), // TODO: specify some users
+                visible_user_ids: vec![admin.id],
                 text: Some("hello specific person".to_string()),
                 cw: None,
                 via_mobile: false,
