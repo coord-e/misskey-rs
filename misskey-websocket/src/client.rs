@@ -103,3 +103,92 @@ impl Client for WebSocketClient {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::WebSocketClient;
+    use misskey_core::Client;
+
+    async fn test_client() -> WebSocketClient {
+        use crate::WebSocketClientBuilder;
+
+        let url = std::env::var("TEST_WEBSOCKET_URL").unwrap();
+        let url = url::Url::parse(&url).unwrap();
+        let user_token = std::env::var("TEST_USER_TOKEN").unwrap();
+
+        WebSocketClientBuilder::new(url)
+            .token(user_token)
+            .connect()
+            .await
+            .unwrap()
+    }
+
+    #[async_std::test]
+    async fn timeline() {
+        use crate::model::Timeline;
+
+        let mut client = test_client().await;
+
+        {
+            let mut stream = client.timeline(Timeline::Home).await.unwrap();
+            stream.unsubscribe().await.unwrap();
+        }
+        {
+            let mut stream = client.timeline(Timeline::Local).await.unwrap();
+            stream.unsubscribe().await.unwrap();
+        }
+        {
+            let mut stream = client.timeline(Timeline::Global).await.unwrap();
+            stream.unsubscribe().await.unwrap();
+        }
+        {
+            let mut stream = client.timeline(Timeline::Social).await.unwrap();
+            stream.unsubscribe().await.unwrap();
+        }
+    }
+
+    #[async_std::test]
+    async fn main_stream() {
+        let mut client = test_client().await;
+        let mut stream = client.main_stream().await.unwrap();
+        stream.unsubscribe().await.unwrap();
+    }
+
+    #[async_std::test]
+    async fn capture_note() {
+        let mut client = test_client().await;
+        let note = client
+            .request(misskey_api::api::notes::create::Request {
+                visibility: None,
+                visible_user_ids: Vec::new(),
+                text: Some("test".to_string()),
+                cw: None,
+                via_mobile: false,
+                local_only: false,
+                no_extract_mentions: false,
+                no_extract_hashtags: false,
+                no_extract_emojis: false,
+                file_ids: Vec::new(),
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await
+            .unwrap()
+            .unwrap()
+            .created_note;
+
+        let mut stream = client.capture_note(note.id).await.unwrap();
+        stream.unsubscribe().await.unwrap();
+    }
+
+    #[async_std::test]
+    async fn request() {
+        let mut client = test_client().await;
+        client
+            .request(misskey_api::api::i::Request {})
+            .await
+            .unwrap()
+            .unwrap();
+    }
+}
