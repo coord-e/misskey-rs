@@ -26,6 +26,7 @@ strum_macros = "0.19"
 misskey-http = { path = "../misskey-http" }
 tokio = { version = "0.2.22", features = ["macros"] }
 uuid = { version = "0.8.1", features = ["v4"] }
+reqwest = "0.10.7"
 lazy_static = "1.4.0"
 mime = "0.3"
 

@@ -39,6 +39,21 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn request_image() {
+        let mut client = TestClient::new();
+        let image_url = client.avatar_url().await;
+
+        client
+            .test(Request {
+                url: image_url,
+                folder_id: None,
+                is_sensitive: None,
+                force: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
     async fn request_with_options() {
         let mut client = TestClient::new();
         let folder = client
