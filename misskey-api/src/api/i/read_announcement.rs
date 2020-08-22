@@ -13,4 +13,27 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "i/read-announcement";
 }
 
-// TODO: tests
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        let announcement = client
+            .admin
+            .test(crate::api::admin::announcements::create::Request {
+                title: "attention".to_string(),
+                text: "hello".to_string(),
+                image_url: None,
+            })
+            .await;
+
+        client
+            .test(Request {
+                announcement_id: announcement.id,
+            })
+            .await;
+    }
+}
