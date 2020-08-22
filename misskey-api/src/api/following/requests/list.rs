@@ -1,4 +1,4 @@
-use crate::model::user::FollowRequest;
+use crate::model::following::FollowRequest;
 
 use serde::Serialize;
 
