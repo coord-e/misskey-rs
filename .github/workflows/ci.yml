@@ -8,13 +8,21 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        version:
-          - '12.46.0'
-          - '12.40.0'
-          - '12.30.0'
-          - '12.20.0'
-          - '12.10.0'
-          - '12.0.0'
+        include:
+          - version: '12.46.0'
+            flags: ''
+          - version: '12.40.0'
+            flags: --no-default-features --features 12-40-0
+          - version: '12.30.0'
+            flags: --no-default-features --features 12-19-0
+          - version: '12.20.0'
+            flags: --no-default-features --features 12-19-0
+          - version: '12.10.0'
+            flags: --no-default-features --features 12-10-0
+          - version: '12.8.0'
+            flags: --no-default-features --features 12-8-0
+          - version: '12.0.0'
+            flags: --no-default-features
     steps:
       - uses: actions/checkout@master
       - uses: actions-rs/toolchain@v1
@@ -31,7 +39,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --tests --package misskey-api
+          args: --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
       - id: setup_env
         run: |
           cd ci/testenv
@@ -48,7 +56,7 @@ jobs:
           TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
         with:
           command: test
-          args: --package misskey-api
+          args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
   fmt:
     name: Rustfmt
     runs-on: ubuntu-18.04
