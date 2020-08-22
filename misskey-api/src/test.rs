@@ -1,5 +1,6 @@
 use crate::model::{
     drive::DriveFile,
+    emoji::EmojiId,
     note::{Note, NoteId},
     user::User,
 };
@@ -58,6 +59,7 @@ pub trait ClientExt {
         reply_id: Option<NoteId>,
     ) -> Note;
     async fn avatar_url(&mut self) -> Url;
+    async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId;
 }
 
 #[async_trait::async_trait]
@@ -118,6 +120,35 @@ impl<T: Client + Send> ClientExt for T {
             let path = format!("/avatar/{}", me.id);
             TEST_API_URL.join(&path).unwrap()
         }
+    }
+
+    #[cfg(feature = "12-9-0")]
+    async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId {
+        let file = self
+            .test(crate::api::drive::files::upload_from_url::Request {
+                url,
+                folder_id: None,
+                is_sensitive: None,
+                force: None,
+            })
+            .await;
+
+        self.test(crate::api::admin::emoji::add::Request { file_id: file.id })
+            .await
+            .id
+    }
+
+    #[cfg(not(feature = "12-9-0"))]
+    async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId {
+        let uuid = Uuid::new_v4().to_simple().to_string();
+        self.test(crate::api::admin::emoji::add::Request {
+            name: uuid,
+            url,
+            category: None,
+            aliases: None,
+        })
+        .await
+        .id
     }
 }
 
