@@ -1,4 +1,5 @@
 pub mod admin;
+pub mod announcements;
 pub mod antennas;
 pub mod blocking;
 pub mod charts;
