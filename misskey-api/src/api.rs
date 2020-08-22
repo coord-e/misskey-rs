@@ -10,4 +10,6 @@ pub mod messaging;
 pub mod mute;
 pub mod notes;
 pub mod notifications;
+pub mod pinned_users;
+pub mod username;
 pub mod users;
