@@ -48,5 +48,37 @@ mod tests {
             .await;
     }
 
-    // TODO: request_paginate
+    #[tokio::test]
+    async fn request_paginate() {
+        let mut client = TestClient::new();
+        let (new_user, mut new_user_client) = client.admin.create_user().await;
+        let group = client
+            .test(crate::api::users::groups::create::Request {
+                name: "test".to_string(),
+            })
+            .await;
+        client
+            .test(crate::api::users::groups::invite::Request {
+                group_id: group.id,
+                user_id: new_user.id,
+            })
+            .await;
+        let invitation = new_user_client
+            .test(Request {
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await
+            .pop()
+            .unwrap();
+
+        new_user_client
+            .test(Request {
+                limit: None,
+                since_id: Some(invitation.id.clone()),
+                until_id: Some(invitation.id.clone()),
+            })
+            .await;
+    }
 }
