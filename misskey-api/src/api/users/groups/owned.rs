@@ -10,3 +10,21 @@ impl misskey_core::Request for Request {
     type Response = Vec<UserGroup>;
     const ENDPOINT: &'static str = "users/groups/owned";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client
+            .test(crate::api::users::groups::create::Request {
+                name: "test".to_string(),
+            })
+            .await;
+
+        client.test(Request {}).await;
+    }
+}

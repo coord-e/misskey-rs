@@ -13,3 +13,18 @@ impl misskey_core::Request for Request {
     type Response = UserGroup;
     const ENDPOINT: &'static str = "users/groups/create";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Request;
+    use crate::test::{ClientExt, TestClient};
+
+    #[tokio::test]
+    async fn request() {
+        let mut client = TestClient::new();
+        client.test(Request {
+            // random 100 chars
+            name: "QANQyX49AyhYTUbe8onotbllnx5VNMczPY4GBeJEuxn15aaLeoCg7RPBMrPOELdXv19vFzniwtwPsLV8QAzQ8SQJ472i9xitUyhw".to_string()
+        }).await;
+    }
+}
