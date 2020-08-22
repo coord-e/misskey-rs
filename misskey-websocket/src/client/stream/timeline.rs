@@ -18,6 +18,7 @@ use futures::{
 };
 use misskey_api::model::note::Note;
 
+#[must_use = "streams do nothing unless polled"]
 pub struct TimelineStream {
     id: ChannelId,
     broker_tx: ControlSender,

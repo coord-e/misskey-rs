@@ -18,6 +18,7 @@ use futures::{
     stream::{FusedStream, Stream},
 };
 
+#[must_use = "streams do nothing unless polled"]
 pub struct MainStream {
     id: ChannelId,
     broker_tx: ControlSender,

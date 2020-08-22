@@ -15,6 +15,7 @@ use futures::{
 };
 use misskey_api::model::note::NoteId;
 
+#[must_use = "streams do nothing unless polled"]
 pub struct NoteUpdateStream {
     id: NoteId,
     broker_tx: ControlSender,
