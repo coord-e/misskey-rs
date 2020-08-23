@@ -65,14 +65,13 @@ impl TimelineStream {
             return Ok(());
         }
 
+        self.broker_tx
+            .send(BrokerControl::UnsubscribeChannel(self.id))
+            .await?;
         self.websocket_tx
             .lock()
             .await
             .send_json(&Request::Disconnect { id: self.id })
-            .await?;
-
-        self.broker_tx
-            .send(BrokerControl::UnsubscribeChannel(self.id))
             .await?;
 
         self.is_terminated = true;

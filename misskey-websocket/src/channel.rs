@@ -9,6 +9,7 @@ use async_tungstenite::WebSocketStream;
 use futures::future::{self, Future, FutureExt, Ready};
 use futures::sink::SinkExt;
 use futures::stream::{self, SplitSink, SplitStream, Stream, StreamExt};
+use log::debug;
 use serde::{de::DeserializeOwned, Serialize};
 use url::Url;
 
@@ -81,6 +82,7 @@ impl fmt::Debug for WebSocketSender {
 
 impl WebSocketSender {
     pub async fn send(&mut self, msg: WsMessage) -> Result<()> {
+        debug!("send message: {:?}", msg);
         Ok(self.0.send(msg).await?)
     }
 

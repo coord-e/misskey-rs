@@ -37,6 +37,7 @@ pub(crate) enum BrokerControl {
 #[derive(Debug, Clone)]
 pub(crate) enum BrokerState {
     Working,
+    Exited,
     Dead(Error),
 }
 
@@ -44,6 +45,8 @@ impl BrokerState {
     pub fn dead(&self) -> Option<&Error> {
         match self {
             BrokerState::Working => None,
+            // TODO: clearify the guarantee that no one asks for `BrokerState` after broker is dead
+            BrokerState::Exited => panic!("asked if broker is dead while it is already exited"),
             BrokerState::Dead(e) => Some(e),
         }
     }

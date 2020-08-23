@@ -15,7 +15,7 @@ use crate::model::{
     ChannelId,
 };
 
-use log::{debug, warn};
+use log::warn;
 use misskey_api::model::note::{Note, NoteId};
 use misskey_core::model::ApiResult;
 use serde_json::value::{self, Value};
@@ -62,8 +62,19 @@ impl Handler {
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        // prevent from mistake when new field is added
+        let Handler {
+            api,
+            main_stream,
+            timeline,
+            note,
+        } = self;
+
+        api.is_empty() && main_stream.is_empty() && timeline.is_empty() && note.is_empty()
+    }
+
     pub async fn handle(&mut self, msg: Message) -> Result<()> {
-        debug!("received {:?} (broker)", msg);
         match msg.type_ {
             MessageType::Api(id) => {
                 if let Some(sender) = self.api.remove(&id) {

@@ -4,8 +4,8 @@ use crate::channel::WebSocketReceriver;
 use crate::error::Result;
 
 use async_std::sync::RwLock;
-use futures::never::Never;
-use log::debug;
+use futures::stream::StreamExt;
+use log::{debug, info};
 
 pub mod channel;
 pub mod handler;
@@ -37,34 +37,73 @@ impl Broker {
 
         async_std::task::spawn(async move {
             match broker.task().await {
-                Ok(x) => match x {},
-                Err(e) => {
-                    {
-                        let mut state = state.write().await;
-                        *state = BrokerState::Dead(e);
-                    }
+                Ok(()) => {
+                    info!("broker: exited normally");
 
-                    // This ensures that broker (and communication channels on broker side)
-                    // is dropped after `state` is surely set to `Dead`, thus asserts that the
-                    // state must be set to `Dead` when these channels are found out to be closed.
-                    std::mem::drop(broker);
+                    let mut state = state.write().await;
+                    *state = BrokerState::Exited;
+                }
+                Err(e) => {
+                    let mut state = state.write().await;
+                    *state = BrokerState::Dead(e);
                 }
             }
+
+            // This ensures that broker (and communication channels on broker side)
+            // is dropped after `state` is surely set to `Dead` or `Exited`, thus asserts that the
+            // state must be set to `Dead` or `Exited` when these channels are found out to be closed.
+            std::mem::drop(broker);
         });
 
         (broker_tx, shared_state)
     }
 
-    async fn task(&mut self) -> Result<Never> {
-        loop {
-            let msg = self.websocket_rx.recv_json().await?;
+    async fn clean_handler(&mut self) -> Result<()> {
+        if self.handler.is_empty() {
+            return Ok(());
+        }
 
-            while let Some(ctrl) = self.broker_rx.try_recv() {
-                debug!("received control {:?} (broker)", ctrl);
-                self.handler.update(ctrl);
-            }
+        debug!("broker: handler is not empty, enter receiving loop");
+        while !self.handler.is_empty() {
+            let msg = self.websocket_rx.recv_json().await?;
+            debug!("broker: received {:?} (cleaning)", msg);
 
             self.handler.handle(msg).await?;
+        }
+
+        Ok(())
+    }
+
+    async fn task(&mut self) -> Result<()> {
+        use futures::future::{self, Either};
+
+        loop {
+            let t1 = self.websocket_rx.recv_json();
+            let t2 = self.broker_rx.next();
+
+            futures::pin_mut!(t1, t2);
+
+            match future::select(t1, t2).await {
+                Either::Left((msg, _)) => {
+                    let msg = msg?;
+                    debug!("broker: received {:?}", msg);
+
+                    while let Some(ctrl) = self.broker_rx.try_recv() {
+                        debug!("broker: received control {:?}", ctrl);
+                        self.handler.update(ctrl);
+                    }
+
+                    self.handler.handle(msg).await?;
+                }
+                Either::Right((Some(ctrl), _)) => {
+                    debug!("broker: received control {:?}", ctrl);
+                    self.handler.update(ctrl);
+                }
+                Either::Right((None, _)) => {
+                    info!("broker: all controls terminated, exiting gracefully");
+                    return self.clean_handler().await;
+                }
+            }
         }
     }
 }
