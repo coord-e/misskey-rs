@@ -33,7 +33,12 @@ impl ControlSender {
 pub(crate) struct ControlReceiver(UnboundedReceiver<BrokerControl>);
 
 impl ControlReceiver {
+    // returns `None` when either no message is available or all senders are closed
     pub fn try_recv(&mut self) -> Option<BrokerControl> {
+        if self.0.is_terminated() {
+            return None;
+        }
+
         match self.0.try_next() {
             Ok(Some(x)) => Some(x),
             // all control senders are dropped
@@ -46,7 +51,12 @@ impl ControlReceiver {
 impl Stream for ControlReceiver {
     type Item = BrokerControl;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<BrokerControl>> {
-        Pin::new(&mut self.0).poll_next(cx)
+        // always return `None` when terminated
+        if self.0.is_terminated() {
+            Poll::Ready(None)
+        } else {
+            Pin::new(&mut self.0).poll_next(cx)
+        }
     }
 }
 
