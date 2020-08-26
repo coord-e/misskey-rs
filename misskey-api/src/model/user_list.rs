@@ -15,6 +15,6 @@ pub struct UserList {
     pub created_at: DateTime<Utc>,
     pub name: String,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub user_ids: Vec<UserId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_ids: Option<Vec<UserId>>,
 }
