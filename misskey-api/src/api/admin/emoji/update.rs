@@ -1,14 +1,18 @@
 use crate::model::emoji::EmojiId;
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 #[cfg(not(feature = "12-9-0"))]
 use url::Url;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub id: EmojiId,
+    #[builder(setter(into))]
     pub name: String,
+    #[builder(default, setter(strip_option, into))]
     pub category: Option<String>,
     pub aliases: Vec<String>,
     #[cfg(not(feature = "12-9-0"))]

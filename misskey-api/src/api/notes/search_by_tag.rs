@@ -1,25 +1,36 @@
 use crate::model::note::{Note, NoteId, Tag};
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub tag: Option<Tag>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub query: Option<Vec<Vec<Tag>>>,
+    #[builder(default, setter(strip_option))]
     pub reply: Option<bool>,
+    #[builder(default, setter(strip_option))]
     pub renote: Option<bool>,
+    #[builder(default, setter(strip_option))]
     pub poll: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
     /// 1 .. 100 (1 .. 30 in ~12.19.0)
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub since_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub until_id: Option<NoteId>,
 }
 

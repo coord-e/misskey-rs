@@ -1,15 +1,19 @@
 use crate::model::note::{Note, NoteId};
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub note_id: NoteId,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
 }
 

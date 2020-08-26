@@ -1,19 +1,26 @@
 use crate::model::user::User;
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
+    #[builder(setter(into))]
     pub query: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub local_only: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub detail: Option<bool>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
 }
 

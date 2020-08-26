@@ -2,7 +2,7 @@ use crate::model::following::FollowRequest;
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {}
 
@@ -50,6 +50,6 @@ mod tests {
             })
             .await;
 
-        new_client.test(Request {}).await;
+        new_client.test(Request::default()).await;
     }
 }

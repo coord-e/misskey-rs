@@ -2,32 +2,42 @@ use crate::model::note::{Note, NoteId};
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub exclude_nsfw: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub file_type: Option<Vec<String>>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub since_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub until_id: Option<NoteId>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"
     )]
+    #[builder(default, setter(strip_option, into))]
     pub since_date: Option<DateTime<Utc>>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"
     )]
+    #[builder(default, setter(strip_option, into))]
     pub until_date: Option<DateTime<Utc>>,
 }
 
@@ -44,18 +54,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let mut client = TestClient::new();
-        client
-            .test(Request {
-                with_files: None,
-                exclude_nsfw: None,
-                file_type: None,
-                limit: None,
-                since_id: None,
-                until_id: None,
-                since_date: None,
-                until_date: None,
-            })
-            .await;
+        client.test(Request::default()).await;
     }
 
     #[tokio::test]

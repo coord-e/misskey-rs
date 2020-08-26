@@ -1,17 +1,22 @@
 use crate::model::drive::{DriveFile, DriveFolderId};
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 use url::Url;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub url: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub folder_id: Option<DriveFolderId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub is_sensitive: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub force: Option<bool>,
 }
 

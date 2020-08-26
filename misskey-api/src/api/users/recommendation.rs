@@ -2,7 +2,7 @@ use crate::model::user::User;
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     /// 1 .. 100
@@ -25,12 +25,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let mut client = TestClient::new();
-        client
-            .test(Request {
-                limit: None,
-                offset: None,
-            })
-            .await;
+        client.test(Request::default()).await;
     }
 
     #[tokio::test]

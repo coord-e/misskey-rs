@@ -6,29 +6,37 @@ use crate::model::{
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct PollRequest {
     pub choices: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub multiple: Option<bool>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"
     )]
+    #[builder(default, setter(strip_option, into))]
     pub expires_at: Option<DateTime<Utc>>,
     // pub expired_after: Option<DateTime<Utc>>,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub visibility: Option<Visibility>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub visible_user_ids: Vec<UserId>,
+    #[builder(default, setter(strip_option, into))]
     pub text: Option<String>,
+    #[builder(default, setter(strip_option, into))]
     pub cw: Option<String>,
     pub via_mobile: bool,
     pub local_only: bool,
@@ -38,10 +46,13 @@ pub struct Request {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub file_ids: Vec<DriveFileId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub reply_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub renote_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub poll: Option<PollRequest>,
 }
 

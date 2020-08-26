@@ -5,35 +5,46 @@ use crate::model::{
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub list_id: UserListId,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub include_my_renotes: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub include_renoted_my_notes: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub include_local_renotes: Option<bool>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub since_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub until_id: Option<NoteId>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"
     )]
+    #[builder(default, setter(strip_option, into))]
     pub since_date: Option<DateTime<Utc>>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"
     )]
+    #[builder(default, setter(strip_option, into))]
     pub until_date: Option<DateTime<Utc>>,
 }
 

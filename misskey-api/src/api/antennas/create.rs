@@ -6,16 +6,21 @@ use crate::model::{
 };
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     /// [ 1 .. 100 ] characters
+    #[builder(setter(into))]
     pub name: String,
     pub src: AntennaSource,
+    #[builder(default, setter(strip_option))]
     pub user_list_id: Option<UserListId>,
     #[cfg(feature = "12-10-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[builder(default, setter(strip_option))]
     pub user_group_id: Option<UserGroupId>,
     pub keywords: Vec<Vec<String>>,
     #[cfg(feature = "12-19-0")]

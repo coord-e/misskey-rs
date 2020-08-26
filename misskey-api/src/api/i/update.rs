@@ -5,45 +5,65 @@ use crate::model::{
 };
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub name: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub description: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub lang: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub location: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub birthday: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub avatar_id: Option<Option<DriveFileId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub banner_id: Option<Option<DriveFileId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub fields: Option<Vec<UserField>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub is_locked: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub careful_bot: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub auto_accept_followed: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub is_bot: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub is_cat: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub auto_watch: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub inject_featured_note: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub always_mark_nsfw: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub pinned_page_id: Option<Option<PageId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub muted_words: Option<Vec<Vec<String>>>,
 }
 
@@ -60,28 +80,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let mut client = TestClient::new();
-        client
-            .test(Request {
-                name: None,
-                description: None,
-                lang: None,
-                location: None,
-                birthday: None,
-                avatar_id: None,
-                banner_id: None,
-                fields: None,
-                is_locked: None,
-                careful_bot: None,
-                auto_accept_followed: None,
-                is_bot: None,
-                is_cat: None,
-                auto_watch: None,
-                inject_featured_note: None,
-                always_mark_nsfw: None,
-                pinned_page_id: None,
-                muted_words: None,
-            })
-            .await;
+        client.test(Request::default()).await;
     }
 
     #[tokio::test]

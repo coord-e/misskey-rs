@@ -4,6 +4,8 @@ use crate::model::emoji::EmojiId;
 
 use serde::{Deserialize, Serialize};
 #[cfg(not(feature = "12-9-0"))]
+use typed_builder::TypedBuilder;
+#[cfg(not(feature = "12-9-0"))]
 use url::Url;
 
 #[cfg(feature = "12-9-0")]
@@ -16,14 +18,18 @@ pub struct Request {
 
 #[cfg(not(feature = "12-9-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
+    #[builder(setter(into))]
     pub name: String,
     pub url: Url,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
     pub category: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub aliases: Option<Vec<String>>,
 }
 

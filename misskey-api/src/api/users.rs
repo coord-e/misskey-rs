@@ -5,6 +5,7 @@ use crate::model::{
 
 use derive_more::{Display, Error};
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 pub mod followers;
 pub mod following;
@@ -46,19 +47,25 @@ impl std::str::FromStr for Sort {
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub sort: Option<SortOrder<Sort>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub state: Option<UserState>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub origin: Option<UserOrigin>,
 }
 
@@ -75,15 +82,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let mut client = TestClient::new();
-        client
-            .test(Request {
-                limit: None,
-                offset: None,
-                sort: None,
-                state: None,
-                origin: None,
-            })
-            .await;
+        client.test(Request::default()).await;
     }
 
     #[tokio::test]

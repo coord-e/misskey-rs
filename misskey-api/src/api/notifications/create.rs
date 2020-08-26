@@ -1,11 +1,16 @@
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 use url::Url;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
+    #[builder(setter(into))]
     pub body: String,
+    #[builder(default, setter(strip_option, into))]
     pub header: Option<String>,
+    #[builder(default, setter(strip_option))]
     pub icon: Option<Url>,
 }
 

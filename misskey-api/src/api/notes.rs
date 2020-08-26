@@ -1,6 +1,7 @@
 use crate::model::note::{Note, NoteId};
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 pub mod children;
 pub mod conversation;
@@ -25,8 +26,9 @@ pub mod unrenote;
 pub mod user_list_timeline;
 pub mod watching;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub local: bool,
     pub reply: bool,
@@ -35,10 +37,13 @@ pub struct Request {
     pub poll: bool,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub since_id: Option<NoteId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub until_id: Option<NoteId>,
 }
 

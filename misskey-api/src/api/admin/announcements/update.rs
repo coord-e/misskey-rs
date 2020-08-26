@@ -1,14 +1,19 @@
 use crate::model::announcement::AnnouncementId;
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 use url::Url;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub id: AnnouncementId,
+    #[builder(setter(into))]
     pub title: String,
+    #[builder(setter(into))]
     pub text: String,
+    #[builder(default, setter(strip_option))]
     pub image_url: Option<Url>,
 }
 

@@ -12,7 +12,7 @@ use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde::Deserialize;
 use serde_json::Value;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Request {}
 
 impl Serialize for Request {
@@ -86,7 +86,7 @@ mod tests {
     #[async_std::test]
     async fn subscribe_unsubscribe() {
         let mut client = TestClient::new().await;
-        let mut stream = client.subscribe(Request {}).await.unwrap();
+        let mut stream = client.subscribe(Request::default()).await.unwrap();
         stream.unsubscribe().await.unwrap();
     }
 

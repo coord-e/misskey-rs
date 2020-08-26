@@ -3,15 +3,20 @@ use crate::model::chart::{
 };
 
 use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     pub span: ChartSpan,
+    #[builder(setter(into))]
     pub host: String,
     /// 1 .. 500
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u64>,
+    #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
 }
 

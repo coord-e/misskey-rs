@@ -2,6 +2,7 @@ use crate::model::drive::{DriveFile, DriveFolderId};
 
 use serde::ser::Serializer;
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 fn bool_string_option<S: Serializer>(
     input: &Option<bool>,
@@ -14,22 +15,27 @@ fn bool_string_option<S: Serializer>(
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub folder_id: Option<DriveFolderId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
     pub name: Option<String>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         serialize_with = "bool_string_option"
     )]
+    #[builder(default, setter(strip_option))]
     pub is_sensitive: Option<bool>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         serialize_with = "bool_string_option"
     )]
+    #[builder(default, setter(strip_option))]
     pub force: Option<bool>,
 }
 
@@ -49,17 +55,7 @@ mod tests {
     async fn request() {
         let mut client = TestClient::new();
         client
-            .test_with_file(
-                Request {
-                    folder_id: None,
-                    name: None,
-                    is_sensitive: None,
-                    force: None,
-                },
-                mime::TEXT_PLAIN,
-                "test.txt",
-                "hello",
-            )
+            .test_with_file(Request::default(), mime::TEXT_PLAIN, "test.txt", "hello")
             .await;
     }
 

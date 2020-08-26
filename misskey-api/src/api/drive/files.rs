@@ -1,6 +1,7 @@
 use crate::model::drive::{DriveFile, DriveFileId, DriveFolderId};
 
 use serde::Serialize;
+use typed_builder::TypedBuilder;
 
 pub mod attached_notes;
 pub mod check_existence;
@@ -12,18 +13,24 @@ pub mod show;
 pub mod update;
 pub mod upload_from_url;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
+#[builder(doc)]
 pub struct Request {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
     pub type_: Option<String>,
+    #[builder(default, setter(strip_option))]
     pub folder_id: Option<DriveFolderId>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub since_id: Option<DriveFileId>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
     pub until_id: Option<DriveFileId>,
 }
 
@@ -42,15 +49,7 @@ mod tests {
         let mut client = TestClient::new();
         client.create_text_file("test.txt", "test").await;
 
-        client
-            .test(Request {
-                type_: None,
-                folder_id: None,
-                limit: None,
-                since_id: None,
-                until_id: None,
-            })
-            .await;
+        client.test(Request::default()).await;
     }
 
     #[tokio::test]
