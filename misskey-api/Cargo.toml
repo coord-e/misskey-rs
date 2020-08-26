@@ -28,8 +28,8 @@ strum_macros = "0.19"
 typed-builder = "0.7"
 
 [dev-dependencies]
-misskey-http = { path = "../misskey-http" }
-misskey-websocket = { path = "../misskey-websocket" }
+misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
+misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"] }
 tokio = { version = "0.2.22", features = ["macros"] }
 async-std = { version = "1.6.3", default_features = false, features = ["std", "attributes"] }
 futures = "0.3"

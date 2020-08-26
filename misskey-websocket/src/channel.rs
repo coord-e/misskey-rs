@@ -9,6 +9,7 @@ use async_tungstenite::WebSocketStream;
 use futures::future::{self, Future, FutureExt, Ready};
 use futures::sink::SinkExt;
 use futures::stream::{self, SplitSink, SplitStream, Stream, StreamExt};
+#[cfg(feature = "inspect-contents")]
 use log::debug;
 use serde::{de::DeserializeOwned, Serialize};
 use url::Url;
@@ -60,7 +61,12 @@ impl WebSocketReceiver {
     pub fn recv_json<T: DeserializeOwned>(&mut self) -> RecvJson<'_, T> {
         fn map<T: DeserializeOwned>(opt: Option<Result<String>>) -> Result<T> {
             match opt {
-                Some(Ok(t)) => serde_json::from_str(&t).map_err(Into::into),
+                Some(Ok(t)) => {
+                    #[cfg(feature = "inspect-contents")]
+                    debug!("received message: {}", t);
+
+                    serde_json::from_str(&t).map_err(Into::into)
+                }
                 Some(Err(e)) => Err(e),
                 None => Err(WsError::ConnectionClosed.into()),
             }
@@ -82,7 +88,9 @@ impl fmt::Debug for WebSocketSender {
 
 impl WebSocketSender {
     pub async fn send(&mut self, msg: WsMessage) -> Result<()> {
+        #[cfg(feature = "inspect-contents")]
         debug!("send message: {:?}", msg);
+
         Ok(self.0.send(msg).await?)
     }
 

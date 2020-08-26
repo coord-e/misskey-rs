@@ -74,15 +74,24 @@ impl Handler {
                 if let Some(sender) = self.api.remove(&id) {
                     let msg: ApiResult<ApiMessage> = value::from_value(msg.body)?;
                     sender.send(msg.map(Into::into));
+                } else {
+                    warn!("unknown API response message with id {}, skipping", id);
+                    return Ok(());
                 }
             }
             MessageType::Other(type_) => match value::from_value(msg.body)? {
                 OtherMessage::WithId { id, content } => {
-                    if let Some(sender) = self.subscription.get_mut(&id) {
-                        if sender.try_send(content).is_err() {
-                            warn!("stale subscription handler {:?}, deleted", id);
-                            self.subscription.remove(&id);
+                    let sender = match self.subscription.get_mut(&id) {
+                        Some(x) => x,
+                        None => {
+                            warn!("unhandled message {} with id {}, skipping", type_, id);
+                            return Ok(());
                         }
+                    };
+
+                    if sender.try_send(content).is_err() {
+                        warn!("stale subscription handler {:?}, deleted", id);
+                        self.subscription.remove(&id);
                     }
                 }
                 OtherMessage::WithoutId(content) => {

@@ -1,5 +1,7 @@
 use crate::error::{Error, Result};
 
+#[cfg(feature = "inspect-contents")]
+use log::debug;
 use mime::Mime;
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request, RequestWithFile};
@@ -38,6 +40,18 @@ impl HttpClient {
             .join(R::ENDPOINT)
             .expect("Request::ENDPOINT must be a fragment of valid URL");
 
+        let value = if let Some(token) = &self.token {
+            to_json_with_api_key(request, token)?
+        } else {
+            value::to_value(request)?
+        };
+
+        #[cfg(feature = "inspect-contents")]
+        debug!(
+            "sending request to {} with {} file named '{}': {}",
+            url, type_, file_name, value
+        );
+
         let mut form = reqwest::multipart::Form::new().part(
             "file",
             reqwest::multipart::Part::bytes(data)
@@ -45,12 +59,6 @@ impl HttpClient {
                 .mime_str(type_.as_ref())
                 .unwrap(),
         );
-
-        let value = if let Some(token) = &self.token {
-            to_json_with_api_key(request, token)?
-        } else {
-            value::to_value(request)?
-        };
 
         let obj = value.as_object().expect("Request must be an object");
         for (k, v) in obj {
@@ -90,6 +98,13 @@ impl Client for HttpClient {
             serde_json::to_vec(&request)?
         };
 
+        #[cfg(feature = "inspect-contents")]
+        debug!(
+            "sending request to {}: {}",
+            url,
+            String::from_utf8_lossy(&body)
+        );
+
         use reqwest::header::CONTENT_TYPE;
         let response = self
             .client
@@ -108,7 +123,18 @@ async fn response_to_result<R: Request>(
     response: reqwest::Response,
 ) -> Result<ApiResult<R::Response>> {
     let status = response.status();
+    #[cfg(feature = "inspect-contents")]
+    let url = response.url().clone();
     let bytes = response.bytes().await?;
+
+    #[cfg(feature = "inspect-contents")]
+    debug!(
+        "got response ({}) from {}: {}",
+        status,
+        url,
+        String::from_utf8_lossy(&bytes)
+    );
+
     let json_bytes = if bytes.is_empty() {
         b"null"
     } else {

@@ -13,6 +13,7 @@ use futures::{
     executor,
     stream::{self, FusedStream, Stream, StreamExt},
 };
+use log::{info, warn};
 use misskey_core::streaming::{SubscriptionItem, SubscriptionRequest};
 use serde_json::Value;
 
@@ -83,6 +84,7 @@ where
 
     pub async fn unsubscribe(&mut self) -> Result<()> {
         if self.is_terminated() {
+            info!("unsubscribing already terminated Subscription, skipping");
             return Ok(());
         }
 
@@ -135,10 +137,19 @@ where
     R: SubscriptionRequest,
 {
     fn drop(&mut self) {
+        if self.is_terminated() {
+            return;
+        }
+
         executor::block_on(async {
             // If the broker or websocket connection is dead, we don't need to unsubscribe anyway
             // because the client can't be used anymore.
-            let _ = self.unsubscribe().await;
+            if let Err(e) = self.unsubscribe().await {
+                warn!(
+                    "Subscription::unsubscribe failed in Drop::drop (ignored): {:?}",
+                    e
+                );
+            }
         });
     }
 }

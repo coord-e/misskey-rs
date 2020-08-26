@@ -11,6 +11,7 @@ use futures::{
     executor,
     stream::{self, FusedStream, Stream, StreamExt},
 };
+use log::{info, warn};
 use misskey_core::streaming::BroadcastItem;
 use serde_json::Value;
 
@@ -58,6 +59,7 @@ where
 
     pub async fn stop(&mut self) -> Result<()> {
         if self.is_terminated() {
+            info!("stopping already terminated Broadcast, skipping");
             return Ok(());
         }
 
@@ -99,10 +101,16 @@ where
     I: BroadcastItem,
 {
     fn drop(&mut self) {
+        if self.is_terminated() {
+            return;
+        }
+
         executor::block_on(async {
             // If the broker connection is dead, we don't need to stop this anyway
             // because the client can't be used anymore.
-            let _ = self.stop().await;
+            if let Err(e) = self.stop().await {
+                warn!("Broadcast::stop failed in Drop::drop (ignored): {:?}", e);
+            }
         });
     }
 }

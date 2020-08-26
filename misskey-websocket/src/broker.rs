@@ -5,7 +5,7 @@ use crate::error::Result;
 
 use async_std::sync::RwLock;
 use futures::stream::StreamExt;
-use log::{debug, info};
+use log::{debug, info, warn};
 
 pub mod channel;
 pub mod handler;
@@ -44,6 +44,8 @@ impl Broker {
                     *state = BrokerState::Exited;
                 }
                 Err(e) => {
+                    warn!("broker: exited with error: {:?}", e);
+
                     let mut state = state.write().await;
                     *state = BrokerState::Dead(e);
                 }
@@ -63,11 +65,9 @@ impl Broker {
             return Ok(());
         }
 
-        debug!("broker: handler is not empty, enter receiving loop");
+        info!("broker: handler is not empty, enter receiving loop");
         while !self.handler.is_empty() {
             let msg = self.websocket_rx.recv_json().await?;
-            debug!("broker: received {:?} (cleaning)", msg);
-
             self.handler.handle(msg).await?;
         }
 
@@ -77,6 +77,8 @@ impl Broker {
     async fn task(&mut self) -> Result<()> {
         use futures::future::{self, Either};
 
+        info!("broker: started");
+
         loop {
             let t1 = self.websocket_rx.recv_json();
             let t2 = self.broker_rx.next();
@@ -85,15 +87,12 @@ impl Broker {
 
             match future::select(t1, t2).await {
                 Either::Left((msg, _)) => {
-                    let msg = msg?;
-                    debug!("broker: received {:?}", msg);
-
                     while let Some(ctrl) = self.broker_rx.try_recv() {
                         debug!("broker: received control {:?}", ctrl);
                         self.handler.update(ctrl);
                     }
 
-                    self.handler.handle(msg).await?;
+                    self.handler.handle(msg?).await?;
                 }
                 Either::Right((Some(ctrl), _)) => {
                     debug!("broker: received control {:?}", ctrl);
