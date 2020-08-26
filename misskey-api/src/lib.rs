@@ -1,6 +1,6 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-pub mod api;
+pub mod endpoint;
 pub mod model;
 pub mod streaming;
 

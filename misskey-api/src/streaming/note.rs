@@ -69,7 +69,7 @@ mod tests {
         future::join(
             client
                 .admin
-                .test(crate::api::notes::reactions::create::Request {
+                .test(crate::endpoint::notes::reactions::create::Request {
                     note_id: note.id,
                     reaction: Reaction("👍".to_string()),
                 }),
@@ -96,7 +96,7 @@ mod tests {
             .await;
         client
             .admin
-            .test(crate::api::notes::reactions::create::Request {
+            .test(crate::endpoint::notes::reactions::create::Request {
                 note_id: note.id.clone(),
                 reaction: Reaction("👍".to_string()),
             })
@@ -113,7 +113,7 @@ mod tests {
         future::join(
             client
                 .admin
-                .test(crate::api::notes::reactions::delete::Request { note_id: note.id }),
+                .test(crate::endpoint::notes::reactions::delete::Request { note_id: note.id }),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
@@ -142,7 +142,7 @@ mod tests {
         future::join(
             client
                 .user
-                .test(crate::api::notes::delete::Request { note_id: note.id }),
+                .test(crate::endpoint::notes::delete::Request { note_id: note.id }),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
@@ -158,14 +158,14 @@ mod tests {
     #[async_std::test]
     async fn poll_voted() {
         let mut client = TestClient::new().await;
-        let poll = crate::api::notes::create::PollRequest {
+        let poll = crate::endpoint::notes::create::PollRequest {
             choices: vec!["a".to_string(), "b".to_string()],
             multiple: Some(true),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
         };
         let note = client
             .user
-            .test(crate::api::notes::create::Request {
+            .test(crate::endpoint::notes::create::Request {
                 visibility: None,
                 visible_user_ids: None,
                 text: Some("?".to_string()),
@@ -192,10 +192,12 @@ mod tests {
             .unwrap();
 
         futures::future::join(
-            client.user.test(crate::api::notes::polls::vote::Request {
-                note_id: note.id,
-                choice: 0,
-            }),
+            client
+                .user
+                .test(crate::endpoint::notes::polls::vote::Request {
+                    note_id: note.id,
+                    choice: 0,
+                }),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {

@@ -48,7 +48,7 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
             .lock()
             .await
             .request(
-                misskey_api::api::notes::create::Request::builder()
+                misskey_api::endpoint::notes::create::Request::builder()
                     .text(text)
                     .build(),
             )

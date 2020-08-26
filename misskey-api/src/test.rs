@@ -37,13 +37,13 @@ impl<T: Client + Send> ClientExt for T {
     }
 
     async fn me(&mut self) -> User {
-        self.test(crate::api::i::Request {}).await
+        self.test(crate::endpoint::i::Request {}).await
     }
 
     async fn create_user(&mut self) -> (User, HttpClient) {
         let uuid = Uuid::new_v4().to_simple().to_string();
         let res = self
-            .test(crate::api::admin::accounts::create::Request {
+            .test(crate::endpoint::admin::accounts::create::Request {
                 username: uuid[..20].to_owned(),
                 password: "test".to_string(),
             })
@@ -61,7 +61,7 @@ impl<T: Client + Send> ClientExt for T {
         renote_id: Option<NoteId>,
         reply_id: Option<NoteId>,
     ) -> Note {
-        self.test(crate::api::notes::create::Request {
+        self.test(crate::endpoint::notes::create::Request {
             visibility: None,
             visible_user_ids: None,
             text: text.map(|x| x.to_string()),
@@ -93,7 +93,7 @@ impl<T: Client + Send> ClientExt for T {
     #[cfg(feature = "12-9-0")]
     async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId {
         let file = self
-            .test(crate::api::drive::files::upload_from_url::Request {
+            .test(crate::endpoint::drive::files::upload_from_url::Request {
                 url,
                 folder_id: None,
                 is_sensitive: None,
@@ -101,7 +101,7 @@ impl<T: Client + Send> ClientExt for T {
             })
             .await;
 
-        self.test(crate::api::admin::emoji::add::Request { file_id: file.id })
+        self.test(crate::endpoint::admin::emoji::add::Request { file_id: file.id })
             .await
             .id
     }
@@ -109,7 +109,7 @@ impl<T: Client + Send> ClientExt for T {
     #[cfg(not(feature = "12-9-0"))]
     async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId {
         let uuid = Uuid::new_v4().to_simple().to_string();
-        self.test(crate::api::admin::emoji::add::Request {
+        self.test(crate::endpoint::admin::emoji::add::Request {
             name: uuid,
             url,
             category: None,

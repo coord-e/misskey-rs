@@ -73,7 +73,7 @@ impl HttpClientExt for HttpClient {
 
     async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile {
         self.test_with_file(
-            crate::api::drive::files::create::Request {
+            crate::endpoint::drive::files::create::Request {
                 folder_id: None,
                 name: Some(file_name.to_string()),
                 is_sensitive: None,
