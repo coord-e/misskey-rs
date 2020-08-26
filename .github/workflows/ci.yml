@@ -58,6 +58,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         env:
           TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
           TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
           TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
         with:
