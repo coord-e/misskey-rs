@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::channel::WebSocketReceriver;
+use crate::channel::WebSocketReceiver;
 use crate::error::Result;
 
 use async_std::sync::RwLock;
@@ -17,13 +17,13 @@ use model::{BrokerState, SharedBrokerState};
 
 #[derive(Debug)]
 pub(crate) struct Broker {
-    websocket_rx: WebSocketReceriver,
+    websocket_rx: WebSocketReceiver,
     broker_rx: ControlReceiver,
     handler: Handler,
 }
 
 impl Broker {
-    pub fn spawn(websocket_rx: WebSocketReceriver) -> (ControlSender, SharedBrokerState) {
+    pub fn spawn(websocket_rx: WebSocketReceiver) -> (ControlSender, SharedBrokerState) {
         let state = Arc::new(RwLock::new(BrokerState::Working));
         let shared_state = Arc::clone(&state);
 

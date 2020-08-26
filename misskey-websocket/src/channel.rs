@@ -18,11 +18,11 @@ type FilterFn = fn(<RawStream as Stream>::Item) -> Ready<Option<Result<String>>>
 type InnerStream = stream::FilterMap<RawStream, Ready<Option<Result<String>>>, FilterFn>;
 
 /// Receiver channel that communicates with Misskey
-pub struct WebSocketReceriver(InnerStream);
+pub struct WebSocketReceiver(InnerStream);
 
-impl fmt::Debug for WebSocketReceriver {
+impl fmt::Debug for WebSocketReceiver {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("WebSocketReceriver").finish()
+        f.debug_struct("WebSocketReceiver").finish()
     }
 }
 
@@ -39,7 +39,7 @@ impl<T> Future for RecvJson<'_, T> {
     }
 }
 
-impl WebSocketReceriver {
+impl WebSocketReceiver {
     fn new(stream: RawStream) -> Self {
         fn filter(res: <RawStream as Stream>::Item) -> Ready<Option<Result<String>>> {
             future::ready(match res {
@@ -53,7 +53,7 @@ impl WebSocketReceriver {
         }
 
         let filter: FilterFn = filter;
-        WebSocketReceriver(stream.filter_map(filter))
+        WebSocketReceiver(stream.filter_map(filter))
     }
 
     // using concrete type here because impl trait failed to infer appropriate lifetime...
@@ -93,8 +93,8 @@ impl WebSocketSender {
 
 pub type SharedWebSocketSender = Arc<Mutex<WebSocketSender>>;
 
-pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceriver)> {
+pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceiver)> {
     let (ws, _) = connect_async(url).await?;
     let (sink, stream) = ws.split();
-    Ok((WebSocketSender(sink), WebSocketReceriver::new(stream)))
+    Ok((WebSocketSender(sink), WebSocketReceiver::new(stream)))
 }
