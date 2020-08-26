@@ -74,3 +74,70 @@ impl misskey_core::streaming::SubscriptionItem for MainStreamEvent {
     const TYPE: &'static str = "channel";
     const UNSUBSCRIBE_REQUEST_TYPE: &'static str = "disconnect";
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{MainStreamEvent, Request};
+    use crate::test::{websocket::TestClient, ClientExt};
+
+    use futures::{future, StreamExt};
+    use misskey_core::streaming::SubscriptionClient;
+
+    #[async_std::test]
+    async fn subscribe_unsubscribe() {
+        let mut client = TestClient::new().await;
+        let mut stream = client.subscribe(Request {}).await.unwrap();
+        stream.unsubscribe().await.unwrap();
+    }
+
+    #[async_std::test]
+    async fn reply() {
+        let mut client = TestClient::new().await;
+
+        let mut stream = client.user.subscribe(Request {}).await.unwrap();
+
+        future::join(
+            async {
+                let note = client.user.create_note(Some("awesome"), None, None).await;
+                client
+                    .admin
+                    .create_note(Some("nice"), None, Some(note.id))
+                    .await;
+            },
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        MainStreamEvent::Reply(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[async_std::test]
+    async fn mention() {
+        let mut client = TestClient::new().await;
+        let me = client.user.me().await;
+
+        let mut stream = client.user.subscribe(Request {}).await.unwrap();
+
+        futures::future::join(
+            client
+                .admin
+                .create_note(Some(&format!("@{} hello", me.username)), None, None),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        MainStreamEvent::Mention(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    // TODO: Test the other events
+}

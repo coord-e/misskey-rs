@@ -1,51 +1,19 @@
 use crate::model::{
-    drive::DriveFile,
     emoji::EmojiId,
     note::{Note, NoteId},
     user::User,
 };
 
-use mime::Mime;
-use misskey_core::model::ApiResult;
-use misskey_core::{Client, Request, RequestWithFile};
+use misskey_core::{Client, Request};
 use misskey_http::HttpClient;
 use url::Url;
 use uuid::Uuid;
 
-lazy_static::lazy_static! {
-    static ref TEST_API_URL: Url = {
-        let url = std::env::var("TEST_API_URL").unwrap();
-        Url::parse(&url).unwrap()
-    };
-}
+mod env;
+pub mod http;
+pub mod websocket;
 
-pub struct TestClient {
-    pub admin: HttpClient,
-    pub user: HttpClient,
-}
-
-impl TestClient {
-    pub fn new() -> Self {
-        let admin_token = std::env::var("TEST_ADMIN_TOKEN").unwrap();
-        let user_token = std::env::var("TEST_USER_TOKEN").unwrap();
-
-        TestClient {
-            admin: HttpClient::new(TEST_API_URL.clone(), Some(admin_token)),
-            user: HttpClient::new(TEST_API_URL.clone(), Some(user_token)),
-        }
-    }
-}
-
-#[async_trait::async_trait]
-impl Client for TestClient {
-    type Error = <HttpClient as Client>::Error;
-    async fn request<R: Request + Send>(
-        &mut self,
-        request: R,
-    ) -> Result<ApiResult<R::Response>, Self::Error> {
-        self.user.request(request).await
-    }
-}
+pub use http::{HttpClientExt, TestClient};
 
 #[async_trait::async_trait]
 pub trait ClientExt {
@@ -83,7 +51,7 @@ impl<T: Client + Send> ClientExt for T {
 
         (
             res.user,
-            HttpClient::new(TEST_API_URL.clone(), Some(res.token)),
+            HttpClient::new(env::TEST_API_URL.clone(), Some(res.token)),
         )
     }
 
@@ -118,7 +86,7 @@ impl<T: Client + Send> ClientExt for T {
             url
         } else {
             let path = format!("/avatar/{}", me.id);
-            TEST_API_URL.join(&path).unwrap()
+            env::TEST_API_URL.join(&path).unwrap()
         }
     }
 
@@ -149,78 +117,5 @@ impl<T: Client + Send> ClientExt for T {
         })
         .await
         .id
-    }
-}
-
-#[async_trait::async_trait]
-pub trait HttpClientExt {
-    async fn test_with_file<R, B>(
-        &mut self,
-        req: R,
-        mime: Mime,
-        file_name: &str,
-        content: B,
-    ) -> R::Response
-    where
-        R: RequestWithFile + Send,
-        B: AsRef<[u8]> + Send + Sync;
-    async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile;
-}
-
-#[async_trait::async_trait]
-impl HttpClientExt for HttpClient {
-    async fn test_with_file<R, B>(
-        &mut self,
-        req: R,
-        mime: Mime,
-        file_name: &str,
-        content: B,
-    ) -> R::Response
-    where
-        R: RequestWithFile + Send,
-        B: AsRef<[u8]> + Send + Sync,
-    {
-        self.request_with_file(req, mime, file_name.to_string(), content.as_ref().to_vec())
-            .await
-            .unwrap()
-            .unwrap()
-    }
-
-    async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile {
-        self.test_with_file(
-            crate::api::drive::files::create::Request {
-                folder_id: None,
-                name: Some(file_name.to_string()),
-                is_sensitive: None,
-                force: Some(true),
-            },
-            mime::TEXT_PLAIN,
-            file_name,
-            content,
-        )
-        .await
-    }
-}
-
-#[async_trait::async_trait]
-impl HttpClientExt for TestClient {
-    async fn test_with_file<R, B>(
-        &mut self,
-        req: R,
-        mime: Mime,
-        file_name: &str,
-        content: B,
-    ) -> R::Response
-    where
-        R: RequestWithFile + Send,
-        B: AsRef<[u8]> + Send + Sync,
-    {
-        self.user
-            .test_with_file(req, mime, file_name, content)
-            .await
-    }
-
-    async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile {
-        self.user.create_text_file(file_name, content).await
     }
 }
