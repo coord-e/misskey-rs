@@ -47,21 +47,11 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
         client
             .lock()
             .await
-            .request(misskey_api::api::notes::create::Request {
-                visibility: None,
-                visible_user_ids: Vec::new(),
-                text: Some(text),
-                cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
-                reply_id: None,
-                renote_id: None,
-                poll: None,
-            })
+            .request(
+                misskey_api::api::notes::create::Request::builder()
+                    .text(text)
+                    .build(),
+            )
             .await?
             .into_result()?;
     }

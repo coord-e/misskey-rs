@@ -32,19 +32,31 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub visibility: Option<Visibility>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub visible_user_ids: Vec<UserId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub visible_user_ids: Option<Vec<UserId>>,
     #[builder(default, setter(strip_option, into))]
     pub text: Option<String>,
     #[builder(default, setter(strip_option, into))]
     pub cw: Option<String>,
-    pub via_mobile: bool,
-    pub local_only: bool,
-    pub no_extract_mentions: bool,
-    pub no_extract_hashtags: bool,
-    pub no_extract_emojis: bool,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub file_ids: Vec<DriveFileId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub via_mobile: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub local_only: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub no_extract_mentions: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub no_extract_hashtags: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub no_extract_emojis: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub file_ids: Option<Vec<DriveFileId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub reply_id: Option<NoteId>,
@@ -78,15 +90,37 @@ mod tests {
         client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("some text".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_options() {
+        let mut client = TestClient::new();
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: None,
+                text: Some("aww yeah".to_string()),
+                cw: None,
+                via_mobile: Some(true),
+                local_only: Some(true),
+                no_extract_mentions: Some(true),
+                no_extract_hashtags: Some(true),
+                no_extract_emojis: Some(true),
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -100,15 +134,15 @@ mod tests {
         client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("!".to_string()),
                 cw: Some("nsfw".to_string()),
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -124,15 +158,15 @@ mod tests {
         client
             .test(Request {
                 visibility: Some(Visibility::Home),
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("hello home".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -141,15 +175,15 @@ mod tests {
         client
             .test(Request {
                 visibility: Some(Visibility::Public),
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("hello public".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -158,15 +192,15 @@ mod tests {
         client
             .test(Request {
                 visibility: Some(Visibility::Followers),
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("hello followers".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -178,15 +212,15 @@ mod tests {
             .user
             .test(Request {
                 visibility: Some(Visibility::Specified),
-                visible_user_ids: vec![admin.id],
+                visible_user_ids: Some(vec![admin.id]),
                 text: Some("hello specific person".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -200,15 +234,15 @@ mod tests {
         let note = client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("renote".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -218,15 +252,15 @@ mod tests {
         client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: None,
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: Some(note.id),
                 poll: None,
@@ -240,15 +274,15 @@ mod tests {
         let note = client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("reply".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: None,
@@ -258,15 +292,15 @@ mod tests {
         client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("hey".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: Some(note.id),
                 renote_id: None,
                 poll: None,
@@ -286,15 +320,15 @@ mod tests {
         client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("poll".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: Vec::new(),
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
                 reply_id: None,
                 renote_id: None,
                 poll: Some(poll),
@@ -311,15 +345,15 @@ mod tests {
         client
             .test(Request {
                 visibility: None,
-                visible_user_ids: Vec::new(),
+                visible_user_ids: None,
                 text: Some("some text".to_string()),
                 cw: None,
-                via_mobile: false,
-                local_only: false,
-                no_extract_mentions: false,
-                no_extract_hashtags: false,
-                no_extract_emojis: false,
-                file_ids: vec![file1.id, file2.id],
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: Some(vec![file1.id, file2.id]),
                 reply_id: None,
                 renote_id: None,
                 poll: None,
