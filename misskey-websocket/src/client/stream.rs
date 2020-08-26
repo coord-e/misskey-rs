@@ -1,7 +1,5 @@
-mod main_stream;
-mod note_update;
-mod timeline;
+mod broadcast;
+mod subscription;
 
-pub use main_stream::MainStream;
-pub use note_update::NoteUpdateStream;
-pub use timeline::TimelineStream;
+pub use broadcast::Broadcast;
+pub use subscription::Subscription;

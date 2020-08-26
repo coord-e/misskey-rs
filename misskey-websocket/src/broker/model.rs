@@ -2,36 +2,45 @@ use std::sync::Arc;
 
 use crate::broker::channel::{ResponseSender, ResponseStreamSender};
 use crate::error::Error;
-use crate::model::{
-    message::{channel::MainStreamEvent, note_updated::NoteUpdateEvent},
-    ChannelId,
-};
+use crate::model::RequestId;
 
 use async_std::sync::RwLock;
-use misskey_api::model::note::{Note, NoteId};
+use derive_more::{Display, FromStr};
 use misskey_core::model::ApiResult;
 use serde_json::Value;
+use uuid::Uuid;
+
+#[derive(Clone, PartialEq, Eq, Hash, FromStr, Debug, Display, Copy)]
+pub(crate) struct BroadcastId(pub Uuid);
+
+impl BroadcastId {
+    pub fn new() -> Self {
+        BroadcastId(Uuid::new_v4())
+    }
+}
 
 #[derive(Debug)]
 pub(crate) enum BrokerControl {
     HandleApiResponse {
-        id: ChannelId,
+        id: RequestId,
         sender: ResponseSender<ApiResult<Value>>,
     },
-    SubscribeMainStream {
-        id: ChannelId,
-        sender: ResponseStreamSender<MainStreamEvent>,
+    Subscribe {
+        id: RequestId,
+        type_: &'static str,
+        sender: ResponseStreamSender<Value>,
     },
-    SubscribeTimeline {
-        id: ChannelId,
-        sender: ResponseStreamSender<Note>,
+    Unsubscribe {
+        id: RequestId,
     },
-    SubscribeNote {
-        id: NoteId,
-        sender: ResponseStreamSender<NoteUpdateEvent>,
+    StartBroadcast {
+        id: BroadcastId,
+        type_: &'static str,
+        sender: ResponseStreamSender<Value>,
     },
-    UnsubscribeChannel(ChannelId),
-    UnsubscribeNote(NoteId),
+    StopBroadcast {
+        id: BroadcastId,
+    },
 }
 
 #[derive(Debug, Clone)]

@@ -2,6 +2,7 @@
 
 pub mod api;
 pub mod model;
+pub mod streaming;
 
 #[cfg(test)]
 mod test;

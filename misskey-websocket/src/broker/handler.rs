@@ -2,39 +2,31 @@ use std::collections::HashMap;
 
 use crate::broker::{
     channel::{ResponseSender, ResponseStreamSender},
-    model::BrokerControl,
+    model::{BroadcastId, BrokerControl},
 };
 use crate::error::Result;
 use crate::model::{
-    message::{
-        api::ApiMessage,
-        channel::{ChannelMessage, MainStreamEvent},
-        note_updated::{NoteUpdateEvent, NoteUpdatedMessage},
-        Message, MessageType,
-    },
-    ChannelId,
+    message::{ApiMessage, Message, MessageType, OtherMessage},
+    RequestId,
 };
 
-use log::warn;
-use misskey_api::model::note::{Note, NoteId};
+use log::{info, warn};
 use misskey_core::model::ApiResult;
 use serde_json::value::{self, Value};
 
 #[derive(Debug)]
 pub(crate) struct Handler {
-    api: HashMap<ChannelId, ResponseSender<ApiResult<Value>>>,
-    main_stream: HashMap<ChannelId, ResponseStreamSender<MainStreamEvent>>,
-    timeline: HashMap<ChannelId, ResponseStreamSender<Note>>,
-    note: HashMap<NoteId, ResponseStreamSender<NoteUpdateEvent>>,
+    api: HashMap<RequestId, ResponseSender<ApiResult<Value>>>,
+    subscription: HashMap<RequestId, ResponseStreamSender<Value>>,
+    broadcast: HashMap<&'static str, HashMap<BroadcastId, ResponseStreamSender<Value>>>,
 }
 
 impl Handler {
     pub fn new() -> Handler {
         Handler {
             api: HashMap::new(),
-            main_stream: HashMap::new(),
-            timeline: HashMap::new(),
-            note: HashMap::new(),
+            subscription: HashMap::new(),
+            broadcast: HashMap::new(),
         }
     }
 
@@ -43,35 +35,37 @@ impl Handler {
             BrokerControl::HandleApiResponse { id, sender } => {
                 self.api.insert(id, sender);
             }
-            BrokerControl::SubscribeMainStream { id, sender } => {
-                self.main_stream.insert(id, sender);
+            // not using `type_` because we can determine corresponding sender by ID
+            BrokerControl::Subscribe {
+                id,
+                sender,
+                type_: _,
+            } => {
+                self.subscription.insert(id, sender);
             }
-            BrokerControl::SubscribeTimeline { id, sender } => {
-                self.timeline.insert(id, sender);
+            BrokerControl::StartBroadcast { id, type_, sender } => {
+                self.broadcast
+                    .entry(type_)
+                    .or_insert_with(HashMap::new)
+                    .insert(id, sender);
             }
-            BrokerControl::SubscribeNote { id, sender } => {
-                self.note.insert(id, sender);
+            BrokerControl::Unsubscribe { id } => {
+                self.subscription.remove(&id);
             }
-            BrokerControl::UnsubscribeChannel(id) => {
-                self.main_stream.remove(&id);
-                self.timeline.remove(&id);
-            }
-            BrokerControl::UnsubscribeNote(id) => {
-                self.note.remove(&id);
+            BrokerControl::StopBroadcast { id } => {
+                for senders in &mut self.broadcast.values_mut() {
+                    if senders.remove(&id).is_some() {
+                        break;
+                    }
+                }
             }
         }
     }
 
     pub fn is_empty(&self) -> bool {
-        // prevent from mistake when new field is added
-        let Handler {
-            api,
-            main_stream,
-            timeline,
-            note,
-        } = self;
-
-        api.is_empty() && main_stream.is_empty() && timeline.is_empty() && note.is_empty()
+        self.api.is_empty()
+            && self.subscription.is_empty()
+            && self.broadcast.values().all(|m| m.is_empty())
     }
 
     pub async fn handle(&mut self, msg: Message) -> Result<()> {
@@ -82,35 +76,34 @@ impl Handler {
                     sender.send(msg.map(Into::into));
                 }
             }
-            MessageType::Channel => match value::from_value(msg.body)? {
-                ChannelMessage::MainStream { id, event } => {
-                    if let Some(sender) = self.main_stream.get_mut(&id) {
-                        if sender.try_send(event).is_err() {
-                            warn!("stale main_stream handler {:?}, deleted", id);
-                            self.main_stream.remove(&id);
+            MessageType::Other(type_) => match value::from_value(msg.body)? {
+                OtherMessage::WithId { id, content } => {
+                    if let Some(sender) = self.subscription.get_mut(&id) {
+                        if sender.try_send(content).is_err() {
+                            warn!("stale subscription handler {:?}, deleted", id);
+                            self.subscription.remove(&id);
                         }
                     }
                 }
-                ChannelMessage::Timeline { id, note_posted } => {
-                    if let Some(sender) = self.timeline.get_mut(&id) {
-                        if sender.try_send(note_posted.body).is_err() {
-                            warn!("stale timeline handler {:?}, deleted", id);
-                            self.timeline.remove(&id);
+                OtherMessage::WithoutId(content) => {
+                    let senders = match self.broadcast.get_mut(type_.as_str()) {
+                        Some(x) => x,
+                        None => {
+                            info!("unhandled broadcast message {}, skipping", type_);
+                            return Ok(());
                         }
-                    }
+                    };
+
+                    senders.retain(|id, sender| {
+                        if sender.try_send(content.clone()).is_err() {
+                            warn!("stale broadcast handler {}:{}, deleted", type_, id);
+                            false
+                        } else {
+                            true
+                        }
+                    });
                 }
             },
-            MessageType::NoteUpdated => {
-                let msg: NoteUpdatedMessage = value::from_value(msg.body)?;
-                if let Some(sender) = self.note.get_mut(&msg.id) {
-                    if sender.try_send(msg.event).is_err() {
-                        warn!("stale note handler {:?}, deleted", msg.id);
-                        self.note.remove(&msg.id);
-                    }
-                }
-            }
-            // TODO: handle
-            MessageType::EmojiAdded => {}
         }
 
         Ok(())

@@ -1,21 +1,14 @@
-use crate::model::ChannelId;
+use crate::model::RequestId;
 
+use derive_more::Into;
 use serde::de::{self, Deserializer};
 use serde::Deserialize;
-use serde_json::value::Value;
-use uuid::Uuid;
+use serde_json::Value;
 
-pub mod api;
-pub mod channel;
-pub mod note_updated;
-
-#[derive(Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum MessageType {
-    Api(ChannelId),
-    Channel,
-    NoteUpdated,
-    // from broadcastStream
-    EmojiAdded,
+    Api(RequestId),
+    Other(String),
 }
 
 impl<'de> Deserialize<'de> for MessageType {
@@ -37,23 +30,10 @@ impl<'de> Deserialize<'de> for MessageType {
             where
                 E: de::Error,
             {
-                match value {
-                    "channel" => return Ok(MessageType::Channel),
-                    "noteUpdated" => return Ok(MessageType::NoteUpdated),
-                    "emojiAdded" => return Ok(MessageType::EmojiAdded),
-                    _ => (),
-                }
-
                 if let Some(id) = value.strip_prefix("api:") {
-                    let uuid = Uuid::parse_str(id)
-                        .map_err(|e| e.to_string())
-                        .map_err(de::Error::custom)?;
-                    Ok(MessageType::Api(ChannelId(uuid)))
+                    Ok(MessageType::Api(RequestId(id.to_string())))
                 } else {
-                    Err(de::Error::unknown_variant(
-                        value,
-                        &["api:<id>", "channel", "noteUpdated", "emojiAdded"],
-                    ))
+                    Ok(MessageType::Other(value.to_string()))
                 }
             }
         }
@@ -62,12 +42,28 @@ impl<'de> Deserialize<'de> for MessageType {
     }
 }
 
+#[derive(Deserialize, Debug, Clone, Into)]
+pub(crate) struct ApiMessage {
+    #[serde(default)]
+    pub res: Value,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(untagged)]
+pub(crate) enum OtherMessage {
+    WithId {
+        id: RequestId,
+        #[serde(flatten)]
+        content: Value,
+    },
+    WithoutId(Value),
+}
+
 #[derive(Deserialize, Debug, Clone)]
 pub(crate) struct Message {
     #[serde(rename = "type")]
     pub type_: MessageType,
-    /// This value would be deserialized into one of `ApiMessage`, `ChannelMessage`, `NotePostedMessage`,
-    /// or `NoteUpdatedMessage`. But this choice depends on `type_` and since we cannot express
-    /// that constraint in the type, we keep this value as `Value` here.
+    /// The deserialization of this value depends on `type_` and since we cannot express
+    /// that constraint in the type, we keep this value as an untyped object here.
     pub body: Value,
 }

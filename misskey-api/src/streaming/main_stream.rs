@@ -1,6 +1,4 @@
-use crate::model::ChannelId;
-
-use misskey_api::model::{
+use crate::model::{
     antenna::Antenna,
     drive::DriveFile,
     messaging::MessagingMessage,
@@ -9,28 +7,23 @@ use misskey_api::model::{
     signin::Signin,
     user::User,
 };
+
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde::Deserialize;
 use serde_json::Value;
 
-#[derive(Deserialize, Debug, Clone)]
-#[serde(untagged)]
-pub(crate) enum ChannelMessage {
-    MainStream {
-        id: ChannelId,
-        #[serde(flatten)]
-        event: MainStreamEvent,
-    },
-    Timeline {
-        id: ChannelId,
-        #[serde(flatten)]
-        note_posted: NotePostedMessage,
-    },
-}
+#[derive(Debug, Clone)]
+pub struct Request {}
 
-#[derive(Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase", rename = "note", tag = "type")]
-pub(crate) struct NotePostedMessage {
-    pub body: Note,
+impl Serialize for Request {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Request", 1)?;
+        state.serialize_field("channel", "main")?;
+        state.end()
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -70,4 +63,14 @@ pub enum MainStreamEvent {
     UnreadNotification(Notification),
     UnreadAntenna(Antenna),
     DriveFileCreated(DriveFile),
+}
+
+impl misskey_core::streaming::SubscriptionRequest for Request {
+    type Item = MainStreamEvent;
+    const TYPE: &'static str = "connect";
+}
+
+impl misskey_core::streaming::SubscriptionItem for MainStreamEvent {
+    const TYPE: &'static str = "channel";
+    const UNSUBSCRIBE_REQUEST_TYPE: &'static str = "disconnect";
 }
