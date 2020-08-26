@@ -12,7 +12,9 @@ jobs:
           - version: '12.46.0'
             flags: ''
           - version: '12.40.0'
-            flags: --no-default-features --features 12-40-0
+            flags: --no-default-features --features 12-39-0
+          - version: '12.39.0'
+            flags: --no-default-features --features 12-39-0
           - version: '12.30.0'
             flags: --no-default-features --features 12-29-0
           - version: '12.28.0'

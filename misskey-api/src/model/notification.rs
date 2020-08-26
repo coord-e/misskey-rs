@@ -26,8 +26,8 @@ pub struct Notification {
     pub user_id: UserId,
     #[cfg(not(feature = "12-27-0"))]
     pub user: User,
-    #[cfg(feature = "12-40-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-40-0")))]
+    #[cfg(feature = "12-39-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-39-0")))]
     pub is_read: bool,
     #[serde(flatten)]
     pub body: NotificationBody,
