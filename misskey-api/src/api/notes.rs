@@ -26,15 +26,25 @@ pub mod unrenote;
 pub mod user_list_timeline;
 pub mod watching;
 
-#[derive(Serialize, Debug, Clone, TypedBuilder)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub local: bool,
-    pub reply: bool,
-    pub renote: bool,
-    pub with_files: bool,
-    pub poll: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub local: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub reply: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub renote: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub with_files: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub poll: Option<bool>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -60,18 +70,7 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let mut client = TestClient::new();
-        client
-            .test(Request {
-                local: false,
-                reply: false,
-                renote: false,
-                with_files: false,
-                poll: false,
-                limit: None,
-                since_id: None,
-                until_id: None,
-            })
-            .await;
+        client.test(Request::default()).await;
     }
 
     #[tokio::test]
@@ -79,11 +78,11 @@ mod tests {
         let mut client = TestClient::new();
         client
             .test(Request {
-                local: false,
-                reply: false,
-                renote: false,
-                with_files: false,
-                poll: false,
+                local: None,
+                reply: None,
+                renote: None,
+                with_files: None,
+                poll: None,
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -98,11 +97,11 @@ mod tests {
 
         client
             .test(Request {
-                local: false,
-                reply: false,
-                renote: false,
-                with_files: false,
-                poll: false,
+                local: None,
+                reply: None,
+                renote: None,
+                with_files: None,
+                poll: None,
                 limit: None,
                 since_id: Some(note.id.clone()),
                 until_id: Some(note.id.clone()),
