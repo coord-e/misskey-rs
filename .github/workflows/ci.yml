@@ -45,7 +45,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('**/Cargo.toml') }}
+          key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}
+          restore-keys: |
+            ubuntu-18.04-stable-cargo-misskey-api-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -78,7 +80,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-misskey-http-${{ hashFiles('**/Cargo.toml') }}
+          key: ubuntu-18.04-stable-cargo-misskey-http-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-websocket/Cargo.toml') }}
+          restore-keys: |
+            ubuntu-18.04-stable-cargo-misskey-http-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -114,7 +118,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-misskey-websocket-${{ hashFiles('**/Cargo.toml') }}
+          key: ubuntu-18.04-stable-cargo-misskey-websocket-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-http/Cargo.toml') }}
+          restore-keys: |
+            ubuntu-18.04-stable-cargo-misskey-websocket-
       - uses: actions-rs/cargo@v1
         with:
           command: build
