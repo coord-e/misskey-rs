@@ -3,7 +3,9 @@ use derive_more::{Display, Error, From};
 #[derive(Debug, Display, From, Error)]
 pub enum Error {
     #[display(fmt = "network error: {}", _0)]
-    Network(#[error(source)] reqwest::Error),
+    Network(#[error(source)] isahc::Error),
+    #[display(fmt = "IO error: {}", _0)]
+    Io(#[error(source)] std::io::Error),
     #[display(fmt = "JSON error: {}", _0)]
     Json(#[error(source)] serde_json::Error),
 }

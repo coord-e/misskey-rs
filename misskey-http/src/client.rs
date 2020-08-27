@@ -1,11 +1,16 @@
+use std::path::Path;
+
 use crate::error::{Error, Result};
 
+use common_multipart_rfc7578::client::{multipart, Error as MultipartError};
+use futures::compat::Compat01As03;
+use futures::io::AsyncReadExt;
+use isahc::http;
 #[cfg(feature = "inspect-contents")]
 use log::debug;
 use mime::Mime;
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request, RequestWithFile};
-use reqwest::header::HeaderMap;
 use serde_json::value::{self, Value};
 use url::Url;
 
@@ -14,18 +19,16 @@ pub mod builder;
 pub struct HttpClient {
     url: Url,
     token: Option<String>,
-    client: reqwest::Client,
-    additional_headers: HeaderMap,
+    client: isahc::HttpClient,
 }
 
 impl HttpClient {
-    pub fn new(url: Url, token: Option<String>) -> Self {
-        HttpClient {
+    pub fn new(url: Url, token: Option<String>) -> Result<Self> {
+        Ok(HttpClient {
             url,
             token,
-            client: reqwest::Client::new(),
-            additional_headers: HeaderMap::new(),
-        }
+            client: isahc::HttpClient::new()?,
+        })
     }
 
     pub async fn request_with_file<R: RequestWithFile + Send>(
@@ -33,7 +36,7 @@ impl HttpClient {
         request: R,
         type_: Mime,
         file_name: String,
-        data: Vec<u8>,
+        path: impl AsRef<Path>,
     ) -> Result<ApiResult<R::Response>> {
         let url = self
             .url
@@ -48,34 +51,47 @@ impl HttpClient {
 
         #[cfg(feature = "inspect-contents")]
         debug!(
-            "sending request to {} with {} file named '{}': {}",
-            url, type_, file_name, value
+            "sending request to {} with {} ({}) file: {}",
+            url,
+            path.as_ref().display(),
+            type_,
+            value
         );
 
-        let mut form = reqwest::multipart::Form::new().part(
-            "file",
-            reqwest::multipart::Part::bytes(data)
-                .file_name(file_name)
-                .mime_str(type_.as_ref())
-                .unwrap(),
-        );
+        let mut form = multipart::Form::default();
+
+        // TODO: Can't we just take `AsyncRead` or `Read` and use it directly?
+        let read = std::fs::File::open(path)?;
+        form.add_reader_file_with_mime("file", read, file_name, type_);
 
         let obj = value.as_object().expect("Request must be an object");
         for (k, v) in obj {
             let v = v
                 .as_str()
                 .expect("RequestWithFile must be an object that all values are string");
-            form = form.text(k.to_owned(), v.to_owned());
+            form.add_text(k.to_owned(), v.to_owned());
         }
 
-        use reqwest::header::CONTENT_TYPE;
+        let content_type = form.content_type();
+
+        use futures::stream::TryStreamExt;
+        let stream = Compat01As03::new(multipart::Body::from(form)).map_err(|e| match e {
+            MultipartError::HeaderWrite(e) => e,
+            MultipartError::BoundaryWrite(e) => e,
+            MultipartError::ContentRead(e) => e,
+        });
+        let body = isahc::Body::from_reader(async_dup::Mutex::new(stream.into_async_read()));
+
+        use isahc::http::header::CONTENT_TYPE;
         let response = self
             .client
-            .post(url)
-            .multipart(form)
-            .header(CONTENT_TYPE, "multipart/form-data")
-            .headers(self.additional_headers.clone())
-            .send()
+            .send_async(
+                // TODO: uncomfortable conversion from `Url` to `Uri`
+                http::Request::post(url.into_string())
+                    .header(CONTENT_TYPE, content_type)
+                    .body(body)
+                    .unwrap(),
+            )
             .await?;
 
         response_to_result::<R>(response).await
@@ -105,14 +121,16 @@ impl Client for HttpClient {
             String::from_utf8_lossy(&body)
         );
 
-        use reqwest::header::CONTENT_TYPE;
+        use isahc::http::header::CONTENT_TYPE;
         let response = self
             .client
-            .post(url)
-            .body(body)
-            .header(CONTENT_TYPE, "application/json")
-            .headers(self.additional_headers.clone())
-            .send()
+            .send_async(
+                // TODO: uncomfortable conversion from `Url` to `Uri`
+                http::Request::post(url.to_string())
+                    .header(CONTENT_TYPE, "application/json")
+                    .body(body)
+                    .unwrap(),
+            )
             .await?;
 
         response_to_result::<R>(response).await
@@ -120,23 +138,22 @@ impl Client for HttpClient {
 }
 
 async fn response_to_result<R: Request>(
-    response: reqwest::Response,
+    response: http::Response<isahc::Body>,
 ) -> Result<ApiResult<R::Response>> {
     let status = response.status();
-    #[cfg(feature = "inspect-contents")]
-    let url = response.url().clone();
-    let bytes = response.bytes().await?;
+    let mut bytes = Vec::new();
+    response.into_body().read_to_end(&mut bytes).await?;
 
     #[cfg(feature = "inspect-contents")]
     debug!(
         "got response ({}) from {}: {}",
         status,
-        url,
+        R::ENDPOINT,
         String::from_utf8_lossy(&bytes)
     );
 
     let json_bytes = if bytes.is_empty() {
-        b"null"
+        b"null".as_ref()
     } else {
         bytes.as_ref()
     };

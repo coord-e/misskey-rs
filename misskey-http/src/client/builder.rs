@@ -1,6 +1,7 @@
 use crate::client::HttpClient;
+use crate::error::Result;
 
-use reqwest::header::{HeaderMap, HeaderValue, IntoHeaderName};
+use isahc::http::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use url::Url;
 
 pub struct HttpClientBuilder {
@@ -28,12 +29,13 @@ impl HttpClientBuilder {
         self
     }
 
-    pub fn build(&self) -> HttpClient {
-        HttpClient {
+    pub fn build(&self) -> Result<HttpClient> {
+        Ok(HttpClient {
             url: self.url.clone(),
             token: self.token.clone(),
-            additional_headers: self.additional_headers.clone(),
-            client: reqwest::Client::new(),
-        }
+            client: isahc::HttpClientBuilder::new()
+                .default_headers(&self.additional_headers)
+                .build()?,
+        })
     }
 }

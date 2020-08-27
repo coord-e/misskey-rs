@@ -51,7 +51,7 @@ impl<T: Client + Send> ClientExt for T {
 
         (
             res.user,
-            HttpClient::new(env::TEST_API_URL.clone(), Some(res.token)),
+            HttpClient::new(env::TEST_API_URL.clone(), Some(res.token)).unwrap(),
         )
     }
 

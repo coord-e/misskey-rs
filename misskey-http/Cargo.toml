@@ -12,7 +12,10 @@ misskey-core = { path = "../misskey-core" }
 serde_json = "1.0"
 derive_more = "0.99.5"
 url = "2.1"
-reqwest = "0.10"
+isahc = "0.9"
 mime = "0.3"
+common-multipart-rfc7578 = "0.1"
+async-dup = "1.2"
+futures = { version = "0.3", default-features = false, features = ["compat"] }
 async-trait = "0.1.35"
 log = { version = "0.4", optional = true }

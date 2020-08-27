@@ -5,6 +5,7 @@ use mime::Mime;
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request, RequestWithFile};
 use misskey_http::HttpClient;
+use uuid::Uuid;
 
 pub struct TestClient {
     pub admin: HttpClient,
@@ -17,11 +18,13 @@ impl TestClient {
             admin: HttpClient::new(
                 env::TEST_API_URL.clone(),
                 Some(env::TEST_ADMIN_TOKEN.clone()),
-            ),
+            )
+            .unwrap(),
             user: HttpClient::new(
                 env::TEST_API_URL.clone(),
                 Some(env::TEST_USER_TOKEN.clone()),
-            ),
+            )
+            .unwrap(),
         }
     }
 }
@@ -65,7 +68,16 @@ impl HttpClientExt for HttpClient {
         R: RequestWithFile + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
-        self.request_with_file(req, mime, file_name.to_string(), content.as_ref().to_vec())
+        let tmp_name = Uuid::new_v4().to_simple().to_string();
+        let path = std::env::temp_dir().join(tmp_name);
+        {
+            use tokio::{fs::File, io::AsyncWriteExt};
+            let mut file = File::create(&path).await.unwrap();
+            file.write_all(content.as_ref()).await.unwrap();
+            file.sync_all().await.unwrap();
+        }
+
+        self.request_with_file(req, mime, file_name.to_string(), &path)
             .await
             .unwrap()
             .unwrap()
