@@ -8,8 +8,8 @@ edition = "2018"
 misskey-websocket = { path = "../../misskey-websocket" }
 misskey-api = { path = "../../misskey-api" }
 misskey-core = { path = "../../misskey-core" }
+tokio = { version = "0.2", features = ["full"] }
 structopt = "0.3.16"
-async-std = { version = "1.6.3", default_features = false }
 url = "2.1.1"
 futures = "0.3.5"
 derive_more = "0.99.5"

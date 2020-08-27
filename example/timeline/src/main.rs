@@ -23,7 +23,7 @@ struct Opt {
 #[derive(Debug, Display, From, Error)]
 enum Error {
     #[display(fmt = "IO error: {}", _0)]
-    Io(#[error(source)] async_std::io::Error),
+    Io(#[error(source)] tokio::io::Error),
     #[display(fmt = "API error: {} ({})", "_0.message", "_0.id")]
     Api(#[error(not(source))] misskey_core::model::ApiError),
     #[display(fmt = "JSON error: {}", _0)]
@@ -31,7 +31,8 @@ enum Error {
 }
 
 async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
-    let stdin = async_std::io::stdin();
+    use tokio::io::{self, AsyncBufReadExt, BufReader};
+    let mut stdin = BufReader::new(io::stdin());
 
     loop {
         let mut text = String::new();
@@ -93,9 +94,10 @@ async fn run(opt: Opt) -> Result<(), Error> {
     Ok(())
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let opt = Opt::from_args();
-    if let Err(e) = async_std::task::block_on(run(opt)) {
+    if let Err(e) = run(opt).await {
         eprintln!("error: {}", e);
         std::process::exit(1);
     }
