@@ -26,3 +26,8 @@ derive_more = "0.99.5"
 
 async-std = { version = "1.6.3", default-features = false, features = ["std"], optional = true }
 tokio = { version = "0.2", default-features = false, features = ["sync"], optional = true }
+
+[dev-dependencies]
+misskey-api = { path = "../misskey-api" }
+async-std = { version = "1.6.3", features = ["attributes"] }
+tokio = { version = "0.2", features = ["macros", "rt-core"] }

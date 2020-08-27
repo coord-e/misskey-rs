@@ -124,3 +124,69 @@ where
         .await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{builder::WebSocketClientBuilder, WebSocketClient};
+
+    use futures::stream::StreamExt;
+    use misskey_core::{streaming::SubscriptionClient, Client};
+    use url::Url;
+
+    async fn test_client() -> WebSocketClient {
+        let url = std::env::var("TEST_WEBSOCKET_URL").unwrap();
+        let token = std::env::var("TEST_USER_TOKEN").unwrap();
+        WebSocketClientBuilder::new(Url::parse(&url).unwrap())
+            .token(token)
+            .connect()
+            .await
+            .unwrap()
+    }
+
+    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
+    async fn request() {
+        let mut client = test_client().await;
+
+        client
+            .request(
+                misskey_api::endpoint::notes::create::Request::builder()
+                    .text("hi")
+                    .build(),
+            )
+            .await
+            .unwrap()
+            .unwrap();
+    }
+
+    #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[cfg_attr(feature = "async-std-runtime", async_std::test)]
+    async fn subscribe_timeline() {
+        let mut client = test_client().await;
+
+        let mut stream = client
+            .subscribe(misskey_api::streaming::timeline::Request {
+                channel: misskey_api::model::timeline::Timeline::Local,
+            })
+            .await
+            .unwrap();
+
+        futures::future::join(
+            async {
+                client
+                    .request(
+                        misskey_api::endpoint::notes::create::Request::builder()
+                            .text("stream me")
+                            .build(),
+                    )
+                    .await
+                    .unwrap()
+                    .unwrap()
+            },
+            async { stream.next().await.unwrap().unwrap() },
+        )
+        .await;
+    }
+
+    // TODO: test of `Broadcast`
+}

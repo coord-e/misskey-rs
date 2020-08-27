@@ -180,3 +180,92 @@ fn to_json_with_api_key<T: Request>(data: T, api_key: &str) -> Result<Value> {
 
     Ok(value)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::HttpClient;
+
+    use misskey_core::Client;
+    use url::Url;
+    use uuid::Uuid;
+
+    fn test_client() -> HttpClient {
+        let url = std::env::var("TEST_API_URL").unwrap();
+        let token = std::env::var("TEST_USER_TOKEN").unwrap();
+        HttpClient::new(Url::parse(&url).unwrap(), Some(token)).unwrap()
+    }
+
+    #[tokio::test]
+    async fn tokio_request() {
+        let mut client = test_client();
+        client
+            .request(
+                misskey_api::endpoint::notes::create::Request::builder()
+                    .text("hi")
+                    .build(),
+            )
+            .await
+            .unwrap()
+            .unwrap();
+    }
+
+    #[async_std::test]
+    async fn async_std_request() {
+        let mut client = test_client();
+        client
+            .request(
+                misskey_api::endpoint::notes::create::Request::builder()
+                    .text("hi")
+                    .build(),
+            )
+            .await
+            .unwrap()
+            .unwrap();
+    }
+
+    fn write_to_temp_file(data: impl AsRef<[u8]>) -> std::path::PathBuf {
+        let tmp_name = Uuid::new_v4().to_simple().to_string();
+        let path = std::env::temp_dir().join(tmp_name);
+        {
+            use std::{fs::File, io::Write};
+            let mut file = File::create(&path).unwrap();
+            file.write_all(data.as_ref()).unwrap();
+            file.sync_all().unwrap();
+        }
+        path
+    }
+
+    #[tokio::test]
+    async fn tokio_request_with_file() {
+        let mut client = test_client();
+        let path = write_to_temp_file("test");
+
+        client
+            .request_with_file(
+                misskey_api::endpoint::drive::files::create::Request::default(),
+                mime::TEXT_PLAIN,
+                "test.txt".to_string(),
+                path,
+            )
+            .await
+            .unwrap()
+            .unwrap();
+    }
+
+    #[async_std::test]
+    async fn async_std_request_with_file() {
+        let mut client = test_client();
+        let path = write_to_temp_file("test");
+
+        client
+            .request_with_file(
+                misskey_api::endpoint::drive::files::create::Request::default(),
+                mime::TEXT_PLAIN,
+                "test.txt".to_string(),
+                path,
+            )
+            .await
+            .unwrap()
+            .unwrap();
+    }
+}
