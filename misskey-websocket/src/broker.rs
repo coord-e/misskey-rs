@@ -3,9 +3,16 @@ use std::sync::Arc;
 use crate::channel::WebSocketReceiver;
 use crate::error::Result;
 
+#[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::sync::RwLock;
+#[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
+use async_std::task;
 use futures::stream::StreamExt;
 use log::{debug, info, warn};
+#[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
+use tokio::sync::RwLock;
+#[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
+use tokio::task;
 
 pub mod channel;
 pub mod handler;
@@ -35,7 +42,7 @@ impl Broker {
             handler: Handler::new(),
         };
 
-        async_std::task::spawn(async move {
+        task::spawn(async move {
             match broker.task().await {
                 Ok(()) => {
                     info!("broker: exited normally");

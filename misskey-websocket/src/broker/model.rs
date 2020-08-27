@@ -4,10 +4,13 @@ use crate::broker::channel::{ResponseSender, ResponseStreamSender};
 use crate::error::Error;
 use crate::model::RequestId;
 
+#[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::sync::RwLock;
 use derive_more::{Display, FromStr};
 use misskey_core::model::ApiResult;
 use serde_json::Value;
+#[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
+use tokio::sync::RwLock;
 use uuid::Uuid;
 
 #[derive(Clone, PartialEq, Eq, Hash, FromStr, Debug, Display, Copy)]

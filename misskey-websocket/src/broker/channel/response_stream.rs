@@ -1,3 +1,4 @@
+use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -33,9 +34,13 @@ impl<T> Stream for ResponseStreamReceiver<T> {
             return Poll::Ready(None);
         }
 
-        let state = match self.state.try_read() {
-            None => return Poll::Pending,
-            Some(lock) => lock.dead().cloned(),
+        let state = {
+            let read_fut = self.state.read();
+            futures::pin_mut!(read_fut);
+            match Pin::new(&mut read_fut).poll(cx) {
+                Poll::Pending => return Poll::Pending,
+                Poll::Ready(lock) => lock.dead().cloned(),
+            }
         };
 
         if let Some(err) = state {

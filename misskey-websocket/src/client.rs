@@ -12,7 +12,7 @@ use crate::model::{
     RequestId,
 };
 
-use async_std::sync::Mutex;
+use futures::lock::Mutex;
 use misskey_core::model::ApiResult;
 use misskey_core::{
     streaming::{BroadcastClient, SubscriptionClient},

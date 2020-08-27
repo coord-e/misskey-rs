@@ -2,11 +2,14 @@ use std::{fmt, sync::Arc};
 
 use crate::error::{Error, Result};
 
-use async_std::sync::Mutex;
+#[cfg(all(feature = "async-std-runtime", not(feature = "tokio-runtime")))]
 use async_tungstenite::async_std::{connect_async, ConnectStream};
+#[cfg(all(not(feature = "async-std-runtime"), feature = "tokio-runtime"))]
+use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::{error::Error as WsError, Message as WsMessage};
 use async_tungstenite::WebSocketStream;
 use futures::future::{self, Future, FutureExt, Ready};
+use futures::lock::Mutex;
 use futures::sink::SinkExt;
 use futures::stream::{self, SplitSink, SplitStream, Stream, StreamExt};
 #[cfg(feature = "inspect-contents")]
