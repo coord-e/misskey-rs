@@ -45,18 +45,13 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-${{ hashFiles('**/Cargo.toml') }}
+          key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('**/Cargo.toml') }}
       - uses: actions-rs/cargo@v1
         with:
           command: build
           args: --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
       - id: setup_env
-        run: |
-          cd ci/testenv
-          docker-compose build
-          docker-compose run --rm web yarn run init
-          docker-compose up -d web
-          docker-compose run --rm get-token
+        run: ./ci/testenv/setup.sh
         env:
           MISSKEY_VERSION: ${{ matrix.version }}
       - uses: actions-rs/cargo@v1
@@ -68,6 +63,73 @@ jobs:
         with:
           command: test
           args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
+  test_http:
+    name: Test misskey-http
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ubuntu-18.04-stable-cargo-misskey-http-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-http/Cargo.toml
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_VERSION: 12.0.0
+      - uses: actions-rs/cargo@v1
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-http/Cargo.toml
+  test_websocket:
+    name: Test misskey-websocket
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        features:
+          - tokio-runtime
+          - async-std-runtime
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ubuntu-18.04-stable-cargo-misskey-websocket-${{ hashFiles('**/Cargo.toml') }}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_VERSION: 12.0.0
+      - uses: actions-rs/cargo@v1
+        env:
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
   fmt:
     name: Rustfmt
     runs-on: ubuntu-18.04
