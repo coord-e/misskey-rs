@@ -83,14 +83,14 @@ mod tests {
     use futures::{future, StreamExt};
     use misskey_core::streaming::SubscriptionClient;
 
-    #[async_std::test]
+    #[tokio::test]
     async fn subscribe_unsubscribe() {
         let mut client = TestClient::new().await;
         let mut stream = client.subscribe(Request::default()).await.unwrap();
         stream.unsubscribe().await.unwrap();
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn reply() {
         let mut client = TestClient::new().await;
 
@@ -116,7 +116,7 @@ mod tests {
         .await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn mention() {
         let mut client = TestClient::new().await;
         let me = client.user.me().await;

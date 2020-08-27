@@ -41,22 +41,22 @@ mod tests {
         stream.unsubscribe().await.unwrap();
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn subscribe_unsubscribe_home() {
         subscribe_unsubscribe_timeline(Timeline::Home).await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn subscribe_unsubscribe_local() {
         subscribe_unsubscribe_timeline(Timeline::Local).await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn subscribe_unsubscribe_global() {
         subscribe_unsubscribe_timeline(Timeline::Global).await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn subscribe_unsubscribe_socical() {
         subscribe_unsubscribe_timeline(Timeline::Social).await;
     }
@@ -76,22 +76,22 @@ mod tests {
         .await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn stream_home() {
         stream_timeline(Timeline::Home).await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn stream_local() {
         stream_timeline(Timeline::Local).await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn stream_global() {
         stream_timeline(Timeline::Global).await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn stream_social() {
         stream_timeline(Timeline::Social).await;
     }

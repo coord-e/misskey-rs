@@ -36,7 +36,6 @@ typed-builder = "0.7"
 misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
 misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"] }
 tokio = { version = "0.2.22", features = ["macros"] }
-async-std = { version = "1.6.3", default_features = false, features = ["std", "attributes"] }
 futures = "0.3"
 uuid = { version = "0.8.1", features = ["v4"] }
 reqwest = "0.10.7"

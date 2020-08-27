@@ -21,7 +21,7 @@ mod tests {
     use misskey_core::streaming::BroadcastClient;
     use misskey_websocket::stream::Broadcast;
 
-    #[async_std::test]
+    #[tokio::test]
     async fn broadcast() {
         let mut client = TestClient::new().await;
         let url = client.avatar_url().await;

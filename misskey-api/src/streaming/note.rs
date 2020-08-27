@@ -39,7 +39,7 @@ mod tests {
     use futures::{future, StreamExt};
     use misskey_core::streaming::SubscriptionClient;
 
-    #[async_std::test]
+    #[tokio::test]
     async fn subscribe_unsubscribe() {
         let mut client = TestClient::new().await;
         let note = client.create_note(Some("test"), None, None).await;
@@ -48,7 +48,7 @@ mod tests {
         stream.unsubscribe().await.unwrap();
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn reacted() {
         use crate::model::note::Reaction;
 
@@ -85,7 +85,7 @@ mod tests {
         .await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn unreacted() {
         use crate::model::note::Reaction;
 
@@ -126,7 +126,7 @@ mod tests {
         .await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn deleted() {
         let mut client = TestClient::new().await;
         let note = client.user.create_note(Some("hmm..."), None, None).await;
@@ -155,7 +155,7 @@ mod tests {
         .await;
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn poll_voted() {
         let mut client = TestClient::new().await;
         let poll = crate::endpoint::notes::create::PollRequest {
