@@ -88,31 +88,29 @@ fn default_zero() -> u64 {
     0
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
-#[serde(rename_all = "camelCase")]
-pub enum UserState {
-    All,
-    Alive,
-    Admin,
-    Moderator,
-    AdminOrModerator,
+#[derive(PartialEq, Eq, Clone, Debug, Copy, Display)]
+pub enum UserSort {
+    #[display(fmt = "follower")]
+    Follower,
+    #[display(fmt = "createdAt")]
+    CreatedAt,
+    #[display(fmt = "updatedAt")]
+    UpdatedAt,
 }
 
 #[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid user state")]
-pub struct ParseUserStateError;
+#[display(fmt = "invalid sort key")]
+pub struct ParseUserSortError;
 
-impl std::str::FromStr for UserState {
-    type Err = ParseUserStateError;
+impl std::str::FromStr for UserSort {
+    type Err = ParseUserSortError;
 
-    fn from_str(s: &str) -> Result<UserState, Self::Err> {
+    fn from_str(s: &str) -> Result<UserSort, Self::Err> {
         match s {
-            "all" | "All" => Ok(UserState::All),
-            "alive" | "Alive" => Ok(UserState::Alive),
-            "admin" | "Admin" => Ok(UserState::Admin),
-            "moderator" | "Moderator" => Ok(UserState::Moderator),
-            "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
-            _ => Err(ParseUserStateError),
+            "follower" | "Follower" => Ok(UserSort::Follower),
+            "createdAt" | "CreatedAt" => Ok(UserSort::CreatedAt),
+            "updatedAt" | "UpdatedAt" => Ok(UserSort::UpdatedAt),
+            _ => Err(ParseUserSortError),
         }
     }
 }

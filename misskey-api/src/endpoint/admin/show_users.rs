@@ -7,27 +7,17 @@ use derive_more::{Display, Error};
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-pub mod followers;
-pub mod following;
-pub mod get_frequently_replied_users;
-pub mod groups;
-pub mod lists;
-pub mod notes;
-pub mod recommendation;
-pub mod relation;
-pub mod report_abuse;
-pub mod search;
-pub mod search_by_username_and_host;
-pub mod show;
-
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum UserState {
     All,
-    Alive,
+    Available,
+    // Alive,
     Admin,
     Moderator,
     AdminOrModerator,
+    Silenced,
+    Suspended,
 }
 
 #[derive(Debug, Display, Error, Clone)]
@@ -40,10 +30,13 @@ impl std::str::FromStr for UserState {
     fn from_str(s: &str) -> Result<UserState, Self::Err> {
         match s {
             "all" | "All" => Ok(UserState::All),
-            "alive" | "Alive" => Ok(UserState::Alive),
+            // "alive" | "Alive" => Ok(UserState::Alive),
+            "available" | "Available" => Ok(UserState::Available),
             "admin" | "Admin" => Ok(UserState::Admin),
             "moderator" | "Moderator" => Ok(UserState::Moderator),
             "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
+            "silenced" | "Silenced" => Ok(UserState::Silenced),
+            "suspended" | "Suspended" => Ok(UserState::Suspended),
             _ => Err(ParseUserStateError),
         }
     }
@@ -69,11 +62,17 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub origin: Option<UserOrigin>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
+    pub username: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
+    pub hostname: Option<String>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<User>;
-    const ENDPOINT: &'static str = "users";
+    const ENDPOINT: &'static str = "admin/show-users";
 }
 
 #[cfg(test)]
@@ -84,19 +83,22 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let mut client = TestClient::new();
-        client.test(Request::default()).await;
+        client.admin.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_limit() {
         let mut client = TestClient::new();
         client
+            .admin
             .test(Request {
                 limit: Some(100),
                 offset: None,
                 sort: None,
                 state: None,
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
     }
@@ -105,12 +107,15 @@ mod tests {
     async fn request_with_offset() {
         let mut client = TestClient::new();
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: Some(5),
                 sort: None,
                 state: None,
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
     }
@@ -122,30 +127,39 @@ mod tests {
         let mut client = TestClient::new();
 
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: Some(SortOrder::Ascending(UserSort::Follower)),
                 state: None,
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: Some(SortOrder::Ascending(UserSort::CreatedAt)),
                 state: None,
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: Some(SortOrder::Descending(UserSort::UpdatedAt)),
                 state: None,
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
     }
@@ -155,43 +169,68 @@ mod tests {
         let mut client = TestClient::new();
 
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
                 state: Some(UserState::All),
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
                 state: Some(UserState::Admin),
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
-                state: Some(UserState::Alive),
+                state: Some(UserState::Available),
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
+        // client
+        //     .admin
+        //     .test(Request {
+        //         limit: None,
+        //         offset: None,
+        //         sort: None,
+        //         state: Some(UserState::Alive),
+        //         origin: None,
+        //         username: None,
+        //         hostname: None,
+        //     })
+        //     .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
                 state: Some(UserState::Moderator),
                 origin: None,
+                username: None,
+                hostname: None,
             })
             .await;
         // TODO: Uncomment with cfg when `adminOrModerator` value is fixed in Misskey
         // client
+        //     .admin
         //     .test(Request {
         //         limit: None,
         //         offset: None,
@@ -200,6 +239,30 @@ mod tests {
         //         origin: None,
         //     })
         //     .await;
+        client
+            .admin
+            .test(Request {
+                limit: None,
+                offset: None,
+                sort: None,
+                state: Some(UserState::Silenced),
+                origin: None,
+                username: None,
+                hostname: None,
+            })
+            .await;
+        client
+            .admin
+            .test(Request {
+                limit: None,
+                offset: None,
+                sort: None,
+                state: Some(UserState::Suspended),
+                origin: None,
+                username: None,
+                hostname: None,
+            })
+            .await;
     }
 
     #[tokio::test]
@@ -209,30 +272,57 @@ mod tests {
         let mut client = TestClient::new();
 
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Local),
+                username: None,
+                hostname: None,
             })
             .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Remote),
+                username: None,
+                hostname: None,
             })
             .await;
         client
+            .admin
             .test(Request {
                 limit: None,
                 offset: None,
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Combined),
+                username: None,
+                hostname: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_username_hostname() {
+        let mut client = TestClient::new();
+
+        client
+            .admin
+            .test(Request {
+                limit: None,
+                offset: None,
+                sort: None,
+                state: None,
+                origin: None,
+                username: Some("admin".to_string()),
+                hostname: Some("host".to_string()),
             })
             .await;
     }
