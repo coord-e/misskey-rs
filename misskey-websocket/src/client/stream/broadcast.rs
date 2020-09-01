@@ -12,7 +12,7 @@ use futures::{
     stream::{self, FusedStream, Stream, StreamExt},
 };
 use log::{info, warn};
-use misskey_core::streaming::BroadcastItem;
+use misskey_core::streaming::BroadcastMessage;
 use serde_json::Value;
 
 type DeserializedResponseStream<T> =
@@ -20,28 +20,28 @@ type DeserializedResponseStream<T> =
 
 #[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
-pub struct Broadcast<I: BroadcastItem> {
+pub struct Broadcast<M: BroadcastMessage> {
     id: BroadcastId,
     broker_tx: ControlSender,
-    response_rx: DeserializedResponseStream<I>,
+    response_rx: DeserializedResponseStream<M>,
     is_terminated: bool,
 }
 
-impl<I> Broadcast<I>
+impl<M> Broadcast<M>
 where
-    I: BroadcastItem,
+    M: BroadcastMessage,
 {
     pub(crate) async fn start(
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-    ) -> Result<Broadcast<I>> {
+    ) -> Result<Broadcast<M>> {
         let id = BroadcastId::new();
 
         let (response_tx, response_rx_raw) = response_stream_channel(state);
         broker_tx
             .send(BrokerControl::StartBroadcast {
                 id,
-                type_: I::TYPE,
+                type_: M::TYPE,
                 sender: response_tx,
             })
             .await?;
@@ -73,13 +73,13 @@ where
     }
 }
 
-impl<I> Stream for Broadcast<I>
+impl<M> Stream for Broadcast<M>
 where
-    I: BroadcastItem,
+    M: BroadcastMessage,
 {
-    type Item = Result<I>;
+    type Item = Result<M>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<I>>> {
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<M>>> {
         if self.is_terminated {
             return Poll::Ready(None);
         }
@@ -87,18 +87,18 @@ where
     }
 }
 
-impl<I> FusedStream for Broadcast<I>
+impl<M> FusedStream for Broadcast<M>
 where
-    I: BroadcastItem,
+    M: BroadcastMessage,
 {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl<I> Drop for Broadcast<I>
+impl<M> Drop for Broadcast<M>
 where
-    I: BroadcastItem,
+    M: BroadcastMessage,
 {
     fn drop(&mut self) {
         if self.is_terminated() {

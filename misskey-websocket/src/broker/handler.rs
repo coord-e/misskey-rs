@@ -6,8 +6,8 @@ use crate::broker::{
 };
 use crate::error::Result;
 use crate::model::{
-    message::{ApiMessage, Message, MessageType, OtherMessage},
-    RequestId,
+    message::{ApiMessage, Message, MessageType, OtherMessage, SubscriptionId},
+    request::ApiRequestId,
 };
 
 use log::{info, warn};
@@ -16,8 +16,8 @@ use serde_json::value::{self, Value};
 
 #[derive(Debug)]
 pub(crate) struct Handler {
-    api: HashMap<RequestId, ResponseSender<ApiResult<Value>>>,
-    subscription: HashMap<RequestId, ResponseStreamSender<Value>>,
+    api: HashMap<ApiRequestId, ResponseSender<ApiResult<Value>>>,
+    subscription: HashMap<SubscriptionId, ResponseStreamSender<Value>>,
     broadcast: HashMap<&'static str, HashMap<BroadcastId, ResponseStreamSender<Value>>>,
 }
 
@@ -80,7 +80,7 @@ impl Handler {
                 }
             }
             MessageType::Other(type_) => match value::from_value(msg.body)? {
-                OtherMessage::WithId { id, content } => {
+                OtherMessage::Subscription { id, content } => {
                     let sender = match self.subscription.get_mut(&id) {
                         Some(x) => x,
                         None => {
@@ -94,7 +94,7 @@ impl Handler {
                         self.subscription.remove(&id);
                     }
                 }
-                OtherMessage::WithoutId(content) => {
+                OtherMessage::Broadcast(content) => {
                     let senders = match self.broadcast.get_mut(type_.as_str()) {
                         Some(x) => x,
                         None => {

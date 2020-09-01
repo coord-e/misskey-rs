@@ -7,14 +7,14 @@ use crate::broker::{
 };
 use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
-use crate::model::{request::Request, RequestId};
+use crate::model::message::SubscriptionId;
 
 use futures::{
     executor,
     stream::{self, FusedStream, Stream, StreamExt},
 };
 use log::{info, warn};
-use misskey_core::streaming::{SubscriptionItem, SubscriptionRequest};
+use misskey_core::streaming::{SubscribeRequest, UnsubscribeRequest};
 use serde_json::Value;
 
 type DeserializedResponseStream<T> =
@@ -22,17 +22,18 @@ type DeserializedResponseStream<T> =
 
 #[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
-pub struct Subscription<R: SubscriptionRequest> {
-    id: RequestId,
+pub struct Subscription<R: SubscribeRequest> {
+    id: SubscriptionId,
+    unsubscribe: R::Unsubscribe,
     broker_tx: ControlSender,
-    response_rx: DeserializedResponseStream<R::Item>,
+    response_rx: DeserializedResponseStream<R::Message>,
     websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
 }
 
 impl<R> Subscription<R>
 where
-    R: SubscriptionRequest,
+    R: SubscribeRequest,
 {
     pub(crate) async fn subscribe(
         req: R,
@@ -40,17 +41,13 @@ where
         state: SharedBrokerState,
         websocket_tx: SharedWebSocketSender,
     ) -> Result<Subscription<R>> {
-        let mut body = serde_json::to_value(&req)?;
-        let body_obj = body
-            .as_object_mut()
-            .expect("SubscriptionRequest must be an object");
-        let id = if let Some(id) = body_obj.get("id") {
-            RequestId(id.as_str().expect("id must be string").to_string())
-        } else {
-            let id = RequestId::uuid();
-            body_obj.insert("id".to_string(), id.to_string().into());
-            id
-        };
+        let id = SubscriptionId(
+            serde_json::to_value(req.id())?
+                .as_str()
+                .expect("SubscribeRequest::Id must be serialized as string")
+                .to_string(),
+        );
+        let unsubscribe = <R::Unsubscribe as UnsubscribeRequest>::from_id(req.id().clone());
 
         let (response_tx, response_rx_raw) = response_stream_channel(state);
         broker_tx
@@ -61,17 +58,11 @@ where
             })
             .await?;
 
-        websocket_tx
-            .lock()
-            .await
-            .send_json(&Request {
-                type_: R::TYPE,
-                body,
-            })
-            .await?;
+        websocket_tx.lock().await.send_request(req).await?;
 
         Ok(Subscription {
             id,
+            unsubscribe,
             broker_tx,
             response_rx: response_rx_raw.map(|r| match r {
                 Ok(v) => serde_json::from_value(v).map_err(Into::into),
@@ -83,7 +74,7 @@ where
     }
 
     pub async fn unsubscribe(&mut self) -> Result<()> {
-        if self.is_terminated() {
+        if self.is_terminated {
             info!("unsubscribing already terminated Subscription, skipping");
             return Ok(());
         }
@@ -94,13 +85,11 @@ where
             })
             .await?;
 
-        let req = Request {
-            type_: R::Item::UNSUBSCRIBE_REQUEST_TYPE,
-            body: serde_json::json!({
-                "id": self.id
-            }),
-        };
-        self.websocket_tx.lock().await.send_json(&req).await?;
+        self.websocket_tx
+            .lock()
+            .await
+            .send_request(&self.unsubscribe)
+            .await?;
 
         self.is_terminated = true;
 
@@ -110,11 +99,15 @@ where
 
 impl<R> Stream for Subscription<R>
 where
-    R: SubscriptionRequest,
+    R: SubscribeRequest,
+    R::Unsubscribe: Unpin,
 {
-    type Item = Result<R::Item>;
+    type Item = Result<R::Message>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<R::Item>>> {
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+    ) -> Poll<Option<Result<R::Message>>> {
         if self.is_terminated {
             return Poll::Ready(None);
         }
@@ -125,7 +118,8 @@ where
 
 impl<R> FusedStream for Subscription<R>
 where
-    R: SubscriptionRequest,
+    R: SubscribeRequest,
+    R::Unsubscribe: Unpin,
 {
     fn is_terminated(&self) -> bool {
         self.is_terminated
@@ -134,10 +128,10 @@ where
 
 impl<R> Drop for Subscription<R>
 where
-    R: SubscriptionRequest,
+    R: SubscribeRequest,
 {
     fn drop(&mut self) {
-        if self.is_terminated() {
+        if self.is_terminated {
             return;
         }
 

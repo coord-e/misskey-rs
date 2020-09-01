@@ -7,15 +7,12 @@ use crate::broker::{
 };
 use crate::channel::{connect_websocket, SharedWebSocketSender};
 use crate::error::{Error, Result};
-use crate::model::{
-    request::{ApiRequest, Request},
-    RequestId,
-};
+use crate::model::request::{ApiRequest, ApiRequestId};
 
 use futures::lock::Mutex;
 use misskey_core::model::ApiResult;
 use misskey_core::{
-    streaming::{BroadcastClient, SubscriptionClient},
+    streaming::{BroadcastClient, OneshotClient, SubscriptionClient},
     Client,
 };
 use serde_json::value;
@@ -56,7 +53,7 @@ impl Client for WebSocketClient {
         &mut self,
         request: R,
     ) -> Result<ApiResult<R::Response>> {
-        let id = RequestId::uuid();
+        let id = ApiRequestId::uuid();
 
         let (tx, rx) = response_channel(Arc::clone(&self.state));
         self.broker_tx
@@ -71,14 +68,7 @@ impl Client for WebSocketClient {
             endpoint: R::ENDPOINT.to_string(),
             data: value::to_value(request)?,
         };
-        self.websocket_tx
-            .lock()
-            .await
-            .send_json(&Request {
-                type_: "api",
-                body: serde_json::to_value(req)?,
-            })
-            .await?;
+        self.websocket_tx.lock().await.send_request(req).await?;
 
         Ok(match rx.recv().await? {
             ApiResult::Ok(x) => ApiResult::Ok(value::from_value(x)?),
@@ -88,16 +78,28 @@ impl Client for WebSocketClient {
 }
 
 #[async_trait::async_trait]
-impl<I> BroadcastClient<I> for WebSocketClient
+impl OneshotClient for WebSocketClient {
+    type Error = Error;
+
+    async fn send<R>(&mut self, request: R) -> Result<()>
+    where
+        R: misskey_core::streaming::OneshotRequest + Send,
+    {
+        self.websocket_tx.lock().await.send_request(request).await
+    }
+}
+
+#[async_trait::async_trait]
+impl<M> BroadcastClient<M> for WebSocketClient
 where
-    I: misskey_core::streaming::BroadcastItem,
+    M: misskey_core::streaming::BroadcastMessage,
 {
     type Error = Error;
-    type Stream = Broadcast<I>;
+    type Stream = Broadcast<M>;
 
     async fn broadcast<'a>(&mut self) -> Result<Self::Stream>
     where
-        I: 'a,
+        M: 'a,
     {
         Broadcast::start(self.broker_tx.clone(), Arc::clone(&self.state)).await
     }
@@ -106,7 +108,8 @@ where
 #[async_trait::async_trait]
 impl<R> SubscriptionClient<R> for WebSocketClient
 where
-    R: misskey_core::streaming::SubscriptionRequest + Send,
+    R: misskey_core::streaming::SubscribeRequest + Send,
+    R::Unsubscribe: Send + Unpin,
 {
     type Error = Error;
     type Stream = Subscription<R>;
@@ -161,12 +164,22 @@ mod tests {
 
     #[cfg_attr(feature = "tokio-runtime", tokio::test)]
     #[cfg_attr(feature = "async-std-runtime", async_std::test)]
-    async fn subscribe_timeline() {
+    async fn subscribe_note() {
         let mut client = test_client().await;
+        let note = client
+            .request(
+                misskey_api::endpoint::notes::create::Request::builder()
+                    .text("hi")
+                    .build(),
+            )
+            .await
+            .unwrap()
+            .unwrap()
+            .created_note;
 
         let mut stream = client
-            .subscribe(misskey_api::streaming::timeline::Request {
-                channel: misskey_api::model::timeline::Timeline::Local,
+            .subscribe(misskey_api::streaming::note::SubNoteRequest {
+                id: note.id.clone(),
             })
             .await
             .unwrap();
@@ -174,11 +187,7 @@ mod tests {
         futures::future::join(
             async {
                 client
-                    .request(
-                        misskey_api::endpoint::notes::create::Request::builder()
-                            .text("stream me")
-                            .build(),
-                    )
+                    .request(misskey_api::endpoint::notes::delete::Request { note_id: note.id })
                     .await
                     .unwrap()
                     .unwrap()

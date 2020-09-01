@@ -100,6 +100,17 @@ impl WebSocketSender {
     pub async fn send_json<T: Serialize>(&mut self, x: &T) -> Result<()> {
         self.send(WsMessage::Text(serde_json::to_string(x)?)).await
     }
+
+    pub async fn send_request<R: misskey_core::streaming::Request>(
+        &mut self,
+        request: R,
+    ) -> Result<()> {
+        let json = serde_json::json!({
+            "type": R::TYPE,
+            "body": request,
+        });
+        self.send_json(&json).await
+    }
 }
 
 pub type SharedWebSocketSender = Arc<Mutex<WebSocketSender>>;

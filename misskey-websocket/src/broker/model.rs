@@ -1,8 +1,9 @@
+use std::hash::Hash;
 use std::sync::Arc;
 
 use crate::broker::channel::{ResponseSender, ResponseStreamSender};
 use crate::error::Error;
-use crate::model::RequestId;
+use crate::model::{message::SubscriptionId, request::ApiRequestId};
 
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::sync::RwLock;
@@ -25,16 +26,16 @@ impl BroadcastId {
 #[derive(Debug)]
 pub(crate) enum BrokerControl {
     HandleApiResponse {
-        id: RequestId,
+        id: ApiRequestId,
         sender: ResponseSender<ApiResult<Value>>,
     },
     Subscribe {
-        id: RequestId,
+        id: SubscriptionId,
         type_: &'static str,
         sender: ResponseStreamSender<Value>,
     },
     Unsubscribe {
-        id: RequestId,
+        id: SubscriptionId,
     },
     StartBroadcast {
         id: BroadcastId,

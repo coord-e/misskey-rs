@@ -1,13 +1,17 @@
-use crate::model::RequestId;
+use crate::model::request::ApiRequestId;
 
-use derive_more::Into;
+use derive_more::{Display, FromStr, Into};
 use serde::de::{self, Deserializer};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use uuid::Uuid;
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
+pub(crate) struct SubscriptionId(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum MessageType {
-    Api(RequestId),
+    Api(ApiRequestId),
     Other(String),
 }
 
@@ -31,7 +35,10 @@ impl<'de> Deserialize<'de> for MessageType {
                 E: de::Error,
             {
                 if let Some(id) = value.strip_prefix("api:") {
-                    Ok(MessageType::Api(RequestId(id.to_string())))
+                    let uuid = Uuid::parse_str(id)
+                        .map_err(|e| e.to_string())
+                        .map_err(de::Error::custom)?;
+                    Ok(MessageType::Api(ApiRequestId(uuid)))
                 } else {
                     Ok(MessageType::Other(value.to_string()))
                 }
@@ -51,12 +58,12 @@ pub(crate) struct ApiMessage {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub(crate) enum OtherMessage {
-    WithId {
-        id: RequestId,
+    Subscription {
+        id: SubscriptionId,
         #[serde(flatten)]
         content: Value,
     },
-    WithoutId(Value),
+    Broadcast(Value),
 }
 
 #[derive(Deserialize, Debug, Clone)]

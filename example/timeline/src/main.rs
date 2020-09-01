@@ -4,7 +4,6 @@ use derive_more::{Display, Error, From};
 use futures::lock::Mutex;
 use futures::never::Never;
 use futures::stream::StreamExt;
-use misskey_api::model::timeline::Timeline;
 use misskey_core::{streaming::SubscriptionClient, Client};
 use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
@@ -14,8 +13,6 @@ use url::Url;
 struct Opt {
     #[structopt(short, long, parse(try_from_str = Url::parse))]
     url: Url,
-    #[structopt(short, long, default_value = "local", possible_values = &["global", "home", "social", "local"])]
-    timeline: Timeline,
     #[structopt(env = "API_TOKEN")]
     i: String,
 }
@@ -58,17 +55,21 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
     }
 }
 
-async fn timeline(client: Arc<Mutex<WebSocketClient>>, timeline: Timeline) -> Result<Never, Error> {
+async fn timeline(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
+    use misskey_api::streaming::channel;
+
     // subscribe to the timeline
     let mut stream = client
         .lock()
         .await
-        .subscribe(misskey_api::streaming::timeline::Request { channel: timeline })
+        .subscribe(channel::ConnectRequest::<
+            channel::local_timeline::LocalTimeline,
+        >::new())
         .await?;
 
     loop {
         // wait for the next note
-        let note = stream.next().await.unwrap()?.body;
+        let note = stream.next().await.unwrap()?.into_inner().note;
         println!(
             "<@{}> {}",
             note.user.username,
@@ -88,7 +89,7 @@ async fn run(opt: Opt) -> Result<(), Error> {
     let client = Arc::new(Mutex::new(client));
 
     // run two tasks simultaneously
-    futures::try_join!(post(Arc::clone(&client)), timeline(client, opt.timeline))?;
+    futures::try_join!(post(Arc::clone(&client)), timeline(client))?;
 
     // we can reason that we won't reach here from `Never` type, but omitted it for brevity
     Ok(())
