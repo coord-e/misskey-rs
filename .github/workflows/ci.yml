@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - version: '12.46.0'
-            flags: ''
+          - version: '12.47.1'
+            flags: --no-default-features --features 12-47-0
           - version: '12.40.0'
             flags: --no-default-features --features 12-39-0
           - version: '12.39.0'
