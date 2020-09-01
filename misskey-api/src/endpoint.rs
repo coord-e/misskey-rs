@@ -18,3 +18,7 @@ pub mod pinned_users;
 pub mod stats;
 pub mod username;
 pub mod users;
+
+#[cfg(feature = "12-47-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+pub mod channels;

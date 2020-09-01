@@ -2,6 +2,7 @@ pub mod abuse_user_report;
 pub mod announcement;
 pub mod antenna;
 pub mod blocking;
+pub mod channel;
 pub mod chart;
 pub mod drive;
 pub mod emoji;
