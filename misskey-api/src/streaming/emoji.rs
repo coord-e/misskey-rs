@@ -4,17 +4,19 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct EmojiAddedEvent {
+pub struct EmojiAddedMessage {
     pub emoji: Emoji,
 }
 
-impl misskey_core::streaming::BroadcastItem for EmojiAddedEvent {
+impl misskey_core::streaming::Message for EmojiAddedMessage {
     const TYPE: &'static str = "emojiAdded";
 }
 
+impl misskey_core::streaming::BroadcastMessage for EmojiAddedMessage {}
+
 #[cfg(test)]
 mod tests {
-    use super::EmojiAddedEvent;
+    use super::EmojiAddedMessage;
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
@@ -26,7 +28,7 @@ mod tests {
         let mut client = TestClient::new().await;
         let url = client.avatar_url().await;
 
-        let mut stream: Broadcast<EmojiAddedEvent> = client.broadcast().await.unwrap();
+        let mut stream: Broadcast<EmojiAddedMessage> = client.broadcast().await.unwrap();
 
         future::join(client.admin.add_emoji_from_url(url), async {
             stream.next().await.unwrap().unwrap()

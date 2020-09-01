@@ -1,6 +1,5 @@
-pub mod main_stream;
+pub mod channel;
 pub mod note;
-pub mod timeline;
 
 #[cfg(feature = "12-29-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-29-0")))]

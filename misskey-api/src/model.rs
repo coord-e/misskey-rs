@@ -17,7 +17,6 @@ pub mod notification;
 pub mod page;
 pub mod signin;
 pub mod sort;
-pub mod timeline;
 pub mod user;
 pub mod user_group;
 pub mod user_list;

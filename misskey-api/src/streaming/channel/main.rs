@@ -8,23 +8,8 @@ use crate::model::{
     user::User,
 };
 
-use serde::ser::{Serialize, SerializeStruct, Serializer};
 use serde::Deserialize;
 use serde_json::Value;
-
-#[derive(Debug, Default, Clone)]
-pub struct Request {}
-
-impl Serialize for Request {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state = serializer.serialize_struct("Request", 1)?;
-        state.serialize_field("channel", "main")?;
-        state.end()
-    }
-}
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
@@ -65,19 +50,20 @@ pub enum MainStreamEvent {
     DriveFileCreated(DriveFile),
 }
 
-impl misskey_core::streaming::SubscriptionRequest for Request {
-    type Item = MainStreamEvent;
-    const TYPE: &'static str = "connect";
+#[derive(Deserialize, Debug, Clone)]
+pub struct Main {
+    #[serde(flatten)]
+    pub event: MainStreamEvent,
 }
 
-impl misskey_core::streaming::SubscriptionItem for MainStreamEvent {
-    const TYPE: &'static str = "channel";
-    const UNSUBSCRIBE_REQUEST_TYPE: &'static str = "disconnect";
+impl crate::streaming::channel::Channel for Main {
+    const NAME: &'static str = "main";
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{MainStreamEvent, Request};
+    use super::{Main, MainStreamEvent};
+    use crate::streaming::channel::ConnectRequest;
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
@@ -86,7 +72,10 @@ mod tests {
     #[tokio::test]
     async fn subscribe_unsubscribe() {
         let mut client = TestClient::new().await;
-        let mut stream = client.subscribe(Request::default()).await.unwrap();
+        let mut stream = client
+            .subscribe(ConnectRequest::<Main>::new())
+            .await
+            .unwrap();
         stream.unsubscribe().await.unwrap();
     }
 
@@ -94,7 +83,11 @@ mod tests {
     async fn reply() {
         let mut client = TestClient::new().await;
 
-        let mut stream = client.user.subscribe(Request {}).await.unwrap();
+        let mut stream = client
+            .user
+            .subscribe(ConnectRequest::<Main>::new())
+            .await
+            .unwrap();
 
         future::join(
             async {
@@ -106,7 +99,7 @@ mod tests {
             },
             async {
                 loop {
-                    match stream.next().await.unwrap().unwrap() {
+                    match stream.next().await.unwrap().unwrap().into_inner().event {
                         MainStreamEvent::Reply(_) => break,
                         _ => continue,
                     }
@@ -121,7 +114,11 @@ mod tests {
         let mut client = TestClient::new().await;
         let me = client.user.me().await;
 
-        let mut stream = client.user.subscribe(Request {}).await.unwrap();
+        let mut stream = client
+            .user
+            .subscribe(ConnectRequest::<Main>::new())
+            .await
+            .unwrap();
 
         futures::future::join(
             client
@@ -129,7 +126,7 @@ mod tests {
                 .create_note(Some(&format!("@{} hello", me.username)), None, None),
             async {
                 loop {
-                    match stream.next().await.unwrap().unwrap() {
+                    match stream.next().await.unwrap().unwrap().into_inner().event {
                         MainStreamEvent::Mention(_) => break,
                         _ => continue,
                     }

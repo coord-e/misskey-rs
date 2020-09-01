@@ -4,13 +4,18 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Debug, Clone)]
-pub struct Request {
+pub struct SubNoteRequest {
+    pub id: NoteId,
+}
+
+#[derive(Serialize, Debug, Clone)]
+pub struct UnsubNoteRequest {
     pub id: NoteId,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
-pub enum NoteUpdateEvent {
+pub enum NoteUpdateMessage {
     #[serde(rename_all = "camelCase")]
     Reacted { reaction: Reaction, user_id: UserId },
     #[serde(rename_all = "camelCase")]
@@ -21,19 +26,40 @@ pub enum NoteUpdateEvent {
     PollVoted { choice: u64, user_id: UserId },
 }
 
-impl misskey_core::streaming::SubscriptionRequest for Request {
-    type Item = NoteUpdateEvent;
+impl misskey_core::streaming::Request for SubNoteRequest {
     const TYPE: &'static str = "subNote";
 }
 
-impl misskey_core::streaming::SubscriptionItem for NoteUpdateEvent {
-    const TYPE: &'static str = "noteUpdated";
-    const UNSUBSCRIBE_REQUEST_TYPE: &'static str = "unsubNote";
+impl misskey_core::streaming::SubscribeRequest for SubNoteRequest {
+    type Message = NoteUpdateMessage;
+    type Unsubscribe = UnsubNoteRequest;
+
+    type Id = NoteId;
+    fn id(&self) -> &Self::Id {
+        &self.id
+    }
 }
+
+impl misskey_core::streaming::Request for UnsubNoteRequest {
+    const TYPE: &'static str = "unsubNote";
+}
+
+impl misskey_core::streaming::UnsubscribeRequest for UnsubNoteRequest {
+    type Id = NoteId;
+    fn from_id(id: Self::Id) -> Self {
+        UnsubNoteRequest { id }
+    }
+}
+
+impl misskey_core::streaming::Message for NoteUpdateMessage {
+    const TYPE: &'static str = "noteUpdated";
+}
+
+impl misskey_core::streaming::SubscriptionMessage for NoteUpdateMessage {}
 
 #[cfg(test)]
 mod tests {
-    use super::{NoteUpdateEvent, Request};
+    use super::{NoteUpdateMessage, SubNoteRequest};
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
@@ -44,7 +70,10 @@ mod tests {
         let mut client = TestClient::new().await;
         let note = client.create_note(Some("test"), None, None).await;
 
-        let mut stream = client.subscribe(Request { id: note.id }).await.unwrap();
+        let mut stream = client
+            .subscribe(SubNoteRequest { id: note.id })
+            .await
+            .unwrap();
         stream.unsubscribe().await.unwrap();
     }
 
@@ -60,7 +89,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .subscribe(Request {
+            .subscribe(SubNoteRequest {
                 id: note.id.clone(),
             })
             .await
@@ -76,7 +105,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateEvent::Reacted { .. } => break,
+                        NoteUpdateMessage::Reacted { .. } => break,
                         _ => continue,
                     }
                 }
@@ -104,7 +133,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .subscribe(Request {
+            .subscribe(SubNoteRequest {
                 id: note.id.clone(),
             })
             .await
@@ -117,7 +146,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateEvent::Unreacted { .. } => break,
+                        NoteUpdateMessage::Unreacted { .. } => break,
                         _ => continue,
                     }
                 }
@@ -133,7 +162,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .subscribe(Request {
+            .subscribe(SubNoteRequest {
                 id: note.id.clone(),
             })
             .await
@@ -146,7 +175,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateEvent::Deleted { .. } => break,
+                        NoteUpdateMessage::Deleted { .. } => break,
                         _ => continue,
                     }
                 }
@@ -187,7 +216,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .subscribe(Request {
+            .subscribe(SubNoteRequest {
                 id: note.id.clone(),
             })
             .await
@@ -203,7 +232,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateEvent::PollVoted { .. } => break,
+                        NoteUpdateMessage::PollVoted { .. } => break,
                         _ => continue,
                     }
                 }

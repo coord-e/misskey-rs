@@ -2,7 +2,7 @@ use crate::test::env;
 
 use misskey_core::model::ApiResult;
 use misskey_core::streaming::{
-    BroadcastClient, BroadcastItem, SubscriptionClient, SubscriptionRequest,
+    BroadcastClient, BroadcastMessage, SubscribeRequest, SubscriptionClient,
 };
 use misskey_core::{Client, Request};
 use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
@@ -41,16 +41,16 @@ impl Client for TestClient {
 }
 
 #[async_trait::async_trait]
-impl<I> BroadcastClient<I> for TestClient
+impl<M> BroadcastClient<M> for TestClient
 where
-    I: BroadcastItem,
+    M: BroadcastMessage,
 {
-    type Error = <WebSocketClient as BroadcastClient<I>>::Error;
-    type Stream = <WebSocketClient as BroadcastClient<I>>::Stream;
+    type Error = <WebSocketClient as BroadcastClient<M>>::Error;
+    type Stream = <WebSocketClient as BroadcastClient<M>>::Stream;
 
     async fn broadcast<'a>(&mut self) -> Result<Self::Stream, Self::Error>
     where
-        I: 'a,
+        M: 'a,
     {
         self.user.broadcast().await
     }
@@ -59,7 +59,8 @@ where
 #[async_trait::async_trait]
 impl<R> SubscriptionClient<R> for TestClient
 where
-    R: SubscriptionRequest + Send,
+    R: SubscribeRequest + Send,
+    R::Unsubscribe: Send + Unpin,
 {
     type Error = <WebSocketClient as SubscriptionClient<R>>::Error;
     type Stream = <WebSocketClient as SubscriptionClient<R>>::Stream;

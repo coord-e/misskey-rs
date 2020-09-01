@@ -1,13 +1,15 @@
 use std::marker::PhantomData;
 
-use crate::streaming::api::{
-    Message, Request, SubscribeRequest, SubscriptionMessage, UnsubscribeRequest,
-};
-
 use derive_more::{Display, FromStr};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+pub mod global_timeline;
+pub mod home_timeline;
+pub mod hybrid_timeline;
+pub mod local_timeline;
+pub mod main;
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
@@ -55,14 +57,14 @@ impl<C> ConnectRequest<C> {
     }
 }
 
-impl<C> Request for ConnectRequest<C>
+impl<C> misskey_core::streaming::Request for ConnectRequest<C>
 where
     C: Channel,
 {
     const TYPE: &'static str = "connect";
 }
 
-impl<C> SubscribeRequest for ConnectRequest<C>
+impl<C> misskey_core::streaming::SubscribeRequest for ConnectRequest<C>
 where
     C: Channel,
 {
@@ -80,11 +82,11 @@ pub struct DisconnectRequest {
     id: ChannelId,
 }
 
-impl Request for DisconnectRequest {
+impl misskey_core::streaming::Request for DisconnectRequest {
     const TYPE: &'static str = "disconnect";
 }
 
-impl UnsubscribeRequest for DisconnectRequest {
+impl misskey_core::streaming::UnsubscribeRequest for DisconnectRequest {
     type Id = ChannelId;
     fn from_id(id: Self::Id) -> Self {
         DisconnectRequest { id }
@@ -99,11 +101,11 @@ pub struct ChannelMessage<C> {
     message: C,
 }
 
-impl<C> Message for ChannelMessage<C>
+impl<C> misskey_core::streaming::Message for ChannelMessage<C>
 where
     C: Channel,
 {
     const TYPE: &'static str = "channel";
 }
 
-impl<C> SubscriptionMessage for ChannelMessage<C> where C: Channel {}
+impl<C> misskey_core::streaming::SubscriptionMessage for ChannelMessage<C> where C: Channel {}
