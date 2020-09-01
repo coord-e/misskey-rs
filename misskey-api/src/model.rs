@@ -4,6 +4,7 @@ pub mod antenna;
 pub mod blocking;
 pub mod channel;
 pub mod chart;
+pub mod clip;
 pub mod drive;
 pub mod emoji;
 pub mod following;

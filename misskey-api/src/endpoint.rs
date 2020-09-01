@@ -3,6 +3,7 @@ pub mod announcements;
 pub mod antennas;
 pub mod blocking;
 pub mod charts;
+pub mod clips;
 pub mod drive;
 #[allow(clippy::module_inception)]
 pub mod endpoint;
