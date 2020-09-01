@@ -76,6 +76,8 @@ pub struct User {
     pub has_unread_specified_notes: bool,
     #[serde(default = "default_false")]
     pub has_unread_mentions: bool,
+    #[serde(default = "default_false")]
+    pub has_unread_channel: bool,
     #[serde(default)]
     pub fields: Vec<UserField>,
 }

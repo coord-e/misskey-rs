@@ -1,3 +1,5 @@
+#[cfg(feature = "12-47-0")]
+use crate::model::channel::ChannelId;
 use crate::model::{
     drive::DriveFileId,
     note::{Note, NoteId, Visibility},
@@ -66,6 +68,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub poll: Option<PollRequest>,
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub channel_id: Option<ChannelId>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -102,6 +109,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -124,6 +133,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -146,6 +157,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -170,6 +183,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
         client
@@ -187,6 +202,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
         client
@@ -204,6 +221,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
 
@@ -224,6 +243,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -246,6 +267,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await
             .created_note;
@@ -264,6 +287,8 @@ mod tests {
                 reply_id: None,
                 renote_id: Some(note.id),
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -286,6 +311,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await
             .created_note;
@@ -304,6 +331,8 @@ mod tests {
                 reply_id: Some(note.id),
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -332,6 +361,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: Some(poll),
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
     }
@@ -357,6 +388,40 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
+            })
+            .await;
+    }
+
+    #[cfg(feature = "12-47-0")]
+    #[tokio::test]
+    async fn request_with_channel_id() {
+        let mut client = TestClient::new();
+        let channel = client
+            .test(crate::endpoint::channels::create::Request {
+                name: "test".to_string(),
+                description: None,
+                banner_id: None,
+            })
+            .await;
+
+        client
+            .test(Request {
+                visibility: None,
+                visible_user_ids: None,
+                text: Some("hi channel".to_string()),
+                cw: None,
+                via_mobile: None,
+                local_only: None,
+                no_extract_mentions: None,
+                no_extract_hashtags: None,
+                no_extract_emojis: None,
+                file_ids: None,
+                reply_id: None,
+                renote_id: None,
+                poll: None,
+                channel_id: Some(channel.id),
             })
             .await;
     }

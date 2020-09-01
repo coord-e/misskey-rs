@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::model::{
+    channel::ChannelId,
     drive::{DriveFile, DriveFileId},
     user::{User, UserId},
 };
@@ -73,6 +74,13 @@ pub struct NoteEmoji {
     pub url: Url,
 }
 
+// packed `Channel` for `Note`
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NoteChannel {
+    pub id: ChannelId,
+    pub name: String,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Note {
@@ -114,6 +122,12 @@ pub struct Note {
     pub emojis: Vec<NoteEmoji>,
     pub renote_count: u64,
     pub replies_count: u64,
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    pub channel_id: Option<ChannelId>,
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    pub channel: Option<NoteChannel>,
 }
 
 fn default_false() -> bool {

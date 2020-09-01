@@ -75,6 +75,8 @@ impl<T: Client + Send> ClientExt for T {
             reply_id,
             renote_id,
             poll: None,
+            #[cfg(feature = "12-47-0")]
+            channel_id: None,
         })
         .await
         .created_note

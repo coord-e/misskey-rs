@@ -43,6 +43,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: Some(poll),
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await
             .created_note;

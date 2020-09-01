@@ -37,6 +37,8 @@ mod tests {
                 reply_id: None,
                 renote_id: None,
                 poll: None,
+                #[cfg(feature = "12-47-0")]
+                channel_id: None,
             })
             .await;
 
