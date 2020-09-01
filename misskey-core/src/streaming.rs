@@ -1,5 +1,6 @@
 mod api;
+pub mod channel;
 mod client;
 
-pub use api::{BroadcastItem, SubscriptionItem, SubscriptionRequest};
-pub use client::{BroadcastClient, SubscriptionClient};
+pub use api::*;
+pub use client::*;
