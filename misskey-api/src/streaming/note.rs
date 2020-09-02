@@ -15,7 +15,7 @@ pub struct UnsubNoteRequest {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
-pub enum NoteUpdateMessage {
+pub enum NoteUpdateEvent {
     #[serde(rename_all = "camelCase")]
     Reacted { reaction: Reaction, user_id: UserId },
     #[serde(rename_all = "camelCase")]
@@ -31,7 +31,7 @@ impl misskey_core::streaming::Request for SubNoteRequest {
 }
 
 impl misskey_core::streaming::SubscribeRequest for SubNoteRequest {
-    type Message = NoteUpdateMessage;
+    type Content = NoteUpdateEvent;
     type Unsubscribe = UnsubNoteRequest;
 
     type Id = NoteId;
@@ -51,15 +51,13 @@ impl misskey_core::streaming::UnsubscribeRequest for UnsubNoteRequest {
     }
 }
 
-impl misskey_core::streaming::Message for NoteUpdateMessage {
-    const TYPE: &'static str = "noteUpdated";
+impl misskey_core::streaming::SubscriptionContent for NoteUpdateEvent {
+    const MESSAGE_TYPE: &'static str = "noteUpdated";
 }
-
-impl misskey_core::streaming::SubscriptionMessage for NoteUpdateMessage {}
 
 #[cfg(test)]
 mod tests {
-    use super::{NoteUpdateMessage, SubNoteRequest};
+    use super::{NoteUpdateEvent, SubNoteRequest};
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
@@ -105,7 +103,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateMessage::Reacted { .. } => break,
+                        NoteUpdateEvent::Reacted { .. } => break,
                         _ => continue,
                     }
                 }
@@ -146,7 +144,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateMessage::Unreacted { .. } => break,
+                        NoteUpdateEvent::Unreacted { .. } => break,
                         _ => continue,
                     }
                 }
@@ -175,7 +173,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateMessage::Deleted { .. } => break,
+                        NoteUpdateEvent::Deleted { .. } => break,
                         _ => continue,
                     }
                 }
@@ -232,7 +230,7 @@ mod tests {
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
-                        NoteUpdateMessage::PollVoted { .. } => break,
+                        NoteUpdateEvent::PollVoted { .. } => break,
                         _ => continue,
                     }
                 }

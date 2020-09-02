@@ -8,12 +8,20 @@ use crate::model::{
 
 use chrono::{DateTime, Utc};
 use derive_more::{Display, Error, FromStr};
+use misskey_core::streaming::SubscriptionId;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct NoteId(pub String);
+
+/// in order to use as ID in [`streaming::note`](crate::streaming::note)
+impl From<NoteId> for SubscriptionId {
+    fn from(id: NoteId) -> SubscriptionId {
+        SubscriptionId(id.0)
+    }
+}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
 #[serde(transparent)]

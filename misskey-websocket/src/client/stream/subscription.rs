@@ -7,14 +7,13 @@ use crate::broker::{
 };
 use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
-use crate::model::message::SubscriptionId;
 
 use futures::{
     executor,
     stream::{self, FusedStream, Stream, StreamExt},
 };
 use log::{info, warn};
-use misskey_core::streaming::{SubscribeRequest, UnsubscribeRequest};
+use misskey_core::streaming::{SubscribeRequest, SubscriptionId, UnsubscribeRequest};
 use serde_json::Value;
 
 type DeserializedResponseStream<T> =
@@ -26,7 +25,7 @@ pub struct Subscription<R: SubscribeRequest> {
     id: SubscriptionId,
     unsubscribe: R::Unsubscribe,
     broker_tx: ControlSender,
-    response_rx: DeserializedResponseStream<R::Message>,
+    response_rx: DeserializedResponseStream<R::Content>,
     websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
 }
@@ -41,12 +40,7 @@ where
         state: SharedBrokerState,
         websocket_tx: SharedWebSocketSender,
     ) -> Result<Subscription<R>> {
-        let id = SubscriptionId(
-            serde_json::to_value(req.id())?
-                .as_str()
-                .expect("SubscribeRequest::Id must be serialized as string")
-                .to_string(),
-        );
+        let id = req.id().clone().into();
         let unsubscribe = <R::Unsubscribe as UnsubscribeRequest>::from_id(req.id().clone());
 
         let (response_tx, response_rx_raw) = response_stream_channel(state);
@@ -102,12 +96,12 @@ where
     R: SubscribeRequest,
     R::Unsubscribe: Unpin,
 {
-    type Item = Result<R::Message>;
+    type Item = Result<R::Content>;
 
     fn poll_next(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-    ) -> Poll<Option<Result<R::Message>>> {
+    ) -> Poll<Option<Result<R::Content>>> {
         if self.is_terminated {
             return Poll::Ready(None);
         }

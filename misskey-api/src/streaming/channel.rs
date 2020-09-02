@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use derive_more::{Display, FromStr};
+use misskey_core::streaming::SubscriptionId;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -18,6 +19,12 @@ pub struct ChannelId(Uuid);
 impl ChannelId {
     fn new() -> Self {
         ChannelId(Uuid::new_v4())
+    }
+}
+
+impl From<ChannelId> for SubscriptionId {
+    fn from(id: ChannelId) -> SubscriptionId {
+        SubscriptionId(id.0.to_string())
     }
 }
 
@@ -48,6 +55,7 @@ where
     }
 }
 
+#[allow(clippy::new_without_default)]
 impl<C> ConnectRequest<C> {
     pub fn new() -> Self {
         ConnectRequest {
@@ -68,7 +76,7 @@ impl<C> misskey_core::streaming::SubscribeRequest for ConnectRequest<C>
 where
     C: Channel,
 {
-    type Message = ChannelMessage<C>;
+    type Content = ChannelContent<C>;
     type Unsubscribe = DisconnectRequest;
 
     type Id = ChannelId;
@@ -94,18 +102,18 @@ impl misskey_core::streaming::UnsubscribeRequest for DisconnectRequest {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-#[serde(bound = "C: Channel")]
-pub struct ChannelMessage<C> {
-    id: ChannelId,
-    #[serde(flatten)]
-    message: C,
+#[serde(transparent, bound = "C: Channel")]
+pub struct ChannelContent<C>(C);
+
+impl<C> ChannelContent<C> {
+    pub fn into_inner(self) -> C {
+        self.0
+    }
 }
 
-impl<C> misskey_core::streaming::Message for ChannelMessage<C>
+impl<C> misskey_core::streaming::SubscriptionContent for ChannelContent<C>
 where
     C: Channel,
 {
-    const TYPE: &'static str = "channel";
+    const MESSAGE_TYPE: &'static str = "channel";
 }
-
-impl<C> misskey_core::streaming::SubscriptionMessage for ChannelMessage<C> where C: Channel {}

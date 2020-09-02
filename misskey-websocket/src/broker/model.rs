@@ -3,12 +3,13 @@ use std::sync::Arc;
 
 use crate::broker::channel::{ResponseSender, ResponseStreamSender};
 use crate::error::Error;
-use crate::model::{message::SubscriptionId, request::ApiRequestId};
+use crate::model::request::ApiRequestId;
 
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::sync::RwLock;
 use derive_more::{Display, FromStr};
 use misskey_core::model::ApiResult;
+use misskey_core::streaming::SubscriptionId;
 use serde_json::Value;
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
 use tokio::sync::RwLock;

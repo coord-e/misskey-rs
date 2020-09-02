@@ -12,7 +12,7 @@ pub trait OneshotClient {
 #[async_trait::async_trait]
 pub trait SubscriptionClient<R: SubscribeRequest> {
     type Error: std::error::Error;
-    type Stream: futures_core::stream::Stream<Item = Result<R::Message, Self::Error>>;
+    type Stream: futures_core::stream::Stream<Item = Result<R::Content, Self::Error>>;
 
     async fn subscribe<'a>(&mut self, request: R) -> Result<Self::Stream, Self::Error>
     where

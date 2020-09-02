@@ -8,11 +8,9 @@ pub struct EmojiAddedMessage {
     pub emoji: Emoji,
 }
 
-impl misskey_core::streaming::Message for EmojiAddedMessage {
+impl misskey_core::streaming::BroadcastMessage for EmojiAddedMessage {
     const TYPE: &'static str = "emojiAdded";
 }
-
-impl misskey_core::streaming::BroadcastMessage for EmojiAddedMessage {}
 
 #[cfg(test)]
 mod tests {

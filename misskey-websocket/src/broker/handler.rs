@@ -6,12 +6,13 @@ use crate::broker::{
 };
 use crate::error::Result;
 use crate::model::{
-    message::{ApiMessage, Message, MessageType, OtherMessage, SubscriptionId},
+    message::{ApiMessage, Message, MessageType, OtherMessage},
     request::ApiRequestId,
 };
 
 use log::{info, warn};
 use misskey_core::model::ApiResult;
+use misskey_core::streaming::SubscriptionId;
 use serde_json::value::{self, Value};
 
 #[derive(Debug)]
@@ -94,7 +95,7 @@ impl Handler {
                         self.subscription.remove(&id);
                     }
                 }
-                OtherMessage::Broadcast(content) => {
+                OtherMessage::Broadcast(message) => {
                     let senders = match self.broadcast.get_mut(type_.as_str()) {
                         Some(x) => x,
                         None => {
@@ -104,7 +105,7 @@ impl Handler {
                     };
 
                     senders.retain(|id, sender| {
-                        if sender.try_send(content.clone()).is_err() {
+                        if sender.try_send(message.clone()).is_err() {
                             warn!("stale broadcast handler {}:{}, deleted", type_, id);
                             false
                         } else {

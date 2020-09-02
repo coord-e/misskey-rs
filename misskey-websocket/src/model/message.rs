@@ -1,13 +1,11 @@
 use crate::model::request::ApiRequestId;
 
-use derive_more::{Display, FromStr, Into};
+use derive_more::Into;
+use misskey_core::streaming::SubscriptionId;
 use serde::de::{self, Deserializer};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-pub(crate) struct SubscriptionId(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum MessageType {
