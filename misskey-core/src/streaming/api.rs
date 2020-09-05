@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 pub struct SubNoteId(pub String);
 
 pub trait ConnectChannelRequest: Serialize {
-    type Incoming: DeserializeOwned;
+    type Incoming: DeserializeOwned + 'static;
     type Outgoing: Serialize;
 
     const NAME: &'static str;
 }
 
-pub trait SubNoteEvent: DeserializeOwned {}
+pub trait SubNoteEvent: DeserializeOwned + 'static {}
 
-pub trait BroadcastEvent: DeserializeOwned {
+pub trait BroadcastEvent: DeserializeOwned + 'static {
     const TYPE: &'static str;
 }

@@ -1,5 +1,6 @@
 use crate::test::env;
 
+use futures::future::BoxFuture;
 use misskey_core::model::ApiResult;
 use misskey_core::streaming::{
     BroadcastClient, BroadcastEvent, ChannelClient, ConnectChannelRequest, SubNoteClient,
@@ -43,7 +44,6 @@ impl Client for TestClient {
     }
 }
 
-#[async_trait::async_trait]
 impl<E> BroadcastClient<E> for TestClient
 where
     E: BroadcastEvent,
@@ -51,32 +51,26 @@ where
     type Error = <WebSocketClient as BroadcastClient<E>>::Error;
     type Stream = <WebSocketClient as BroadcastClient<E>>::Stream;
 
-    async fn broadcast<'a>(&mut self) -> Result<Self::Stream, Self::Error>
-    where
-        E: 'a,
-    {
-        self.user.broadcast().await
+    fn broadcast(&mut self) -> BoxFuture<'static, Result<Self::Stream, Self::Error>> {
+        self.user.broadcast()
     }
 }
 
-#[async_trait::async_trait]
 impl<R> ChannelClient<R> for TestClient
 where
-    R: ConnectChannelRequest + Send,
-    R::Outgoing: Unpin,
+    R: ConnectChannelRequest,
 {
     type Error = <WebSocketClient as ChannelClient<R>>::Error;
     type Stream = <WebSocketClient as ChannelClient<R>>::Stream;
 
-    async fn connect<'a>(&mut self, request: R) -> Result<Self::Stream, Self::Error>
+    fn connect<'a>(&mut self, request: R) -> BoxFuture<'a, Result<Self::Stream, Self::Error>>
     where
         R: 'a,
     {
-        self.user.connect(request).await
+        self.user.connect(request)
     }
 }
 
-#[async_trait::async_trait]
 impl<E> SubNoteClient<E> for TestClient
 where
     E: SubNoteEvent,
@@ -84,11 +78,10 @@ where
     type Error = <WebSocketClient as SubNoteClient<E>>::Error;
     type Stream = <WebSocketClient as SubNoteClient<E>>::Stream;
 
-    async fn subscribe_note<'a, I>(&mut self, id: I) -> Result<Self::Stream, Self::Error>
+    fn subscribe_note<I>(&mut self, id: I) -> BoxFuture<'static, Result<Self::Stream, Self::Error>>
     where
-        I: Into<SubNoteId> + Send,
-        E: 'a,
+        I: Into<SubNoteId>,
     {
-        self.user.subscribe_note(id).await
+        self.user.subscribe_note(id)
     }
 }

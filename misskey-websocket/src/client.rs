@@ -9,7 +9,7 @@ use crate::channel::{connect_websocket, SharedWebSocketSender};
 use crate::error::{Error, Result};
 use crate::model::{ApiRequestId, OutgoingMessage};
 
-use futures::{lock::Mutex, sink::SinkExt};
+use futures::{future::BoxFuture, lock::Mutex, sink::SinkExt};
 use misskey_core::model::ApiResult;
 use misskey_core::{
     streaming::{BroadcastClient, ChannelClient, SubNoteClient},
@@ -80,7 +80,6 @@ impl Client for WebSocketClient {
     }
 }
 
-#[async_trait::async_trait]
 impl<E> SubNoteClient<E> for WebSocketClient
 where
     E: misskey_core::streaming::SubNoteEvent,
@@ -88,45 +87,39 @@ where
     type Error = Error;
     type Stream = SubNote<E>;
 
-    async fn subscribe_note<'a, I>(&mut self, id: I) -> Result<SubNote<E>>
+    fn subscribe_note<I>(&mut self, id: I) -> BoxFuture<'static, Result<SubNote<E>>>
     where
-        I: Into<misskey_core::streaming::SubNoteId> + Send,
-        E: 'a,
+        I: Into<misskey_core::streaming::SubNoteId>,
     {
-        SubNote::subscribe(
+        Box::pin(SubNote::subscribe(
             id.into(),
             self.broker_tx.clone(),
             Arc::clone(&self.state),
             Arc::clone(&self.websocket_tx),
-        )
-        .await
+        ))
     }
 }
 
-#[async_trait::async_trait]
 impl<R> ChannelClient<R> for WebSocketClient
 where
-    R: misskey_core::streaming::ConnectChannelRequest + Send,
-    R::Outgoing: Unpin,
+    R: misskey_core::streaming::ConnectChannelRequest,
 {
     type Error = Error;
-    type Stream = Channel<R>;
+    type Stream = Channel<R::Incoming, R::Outgoing>;
 
-    async fn connect<'a>(&mut self, request: R) -> Result<Self::Stream>
+    fn connect<'a>(&mut self, request: R) -> BoxFuture<'a, Result<Self::Stream>>
     where
         R: 'a,
     {
-        Channel::connect(
+        Box::pin(Channel::connect(
             request,
             self.broker_tx.clone(),
             Arc::clone(&self.state),
             Arc::clone(&self.websocket_tx),
-        )
-        .await
+        ))
     }
 }
 
-#[async_trait::async_trait]
 impl<E> BroadcastClient<E> for WebSocketClient
 where
     E: misskey_core::streaming::BroadcastEvent,
@@ -134,11 +127,11 @@ where
     type Error = Error;
     type Stream = Broadcast<E>;
 
-    async fn broadcast<'a>(&mut self) -> Result<Self::Stream>
-    where
-        E: 'a,
-    {
-        Broadcast::start(self.broker_tx.clone(), Arc::clone(&self.state)).await
+    fn broadcast(&mut self) -> BoxFuture<'static, Result<Self::Stream>> {
+        Box::pin(Broadcast::start(
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+        ))
     }
 }
 

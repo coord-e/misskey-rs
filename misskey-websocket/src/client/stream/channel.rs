@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -22,71 +23,82 @@ use futures::{
 };
 use log::{info, warn};
 use misskey_core::streaming::ConnectChannelRequest;
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
 #[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
-pub struct Channel<R> {
+pub struct Channel<I, O> {
     id: ChannelId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<Value>,
     websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
     sink_buffer: VecDeque<OutgoingMessage>,
-    _marker: PhantomData<fn() -> R>,
+    _marker: PhantomData<fn() -> (I, O)>,
 }
 
-impl<R> Channel<R>
+impl<I, O> Channel<I, O>
 where
-    R: ConnectChannelRequest,
+    I: DeserializeOwned + 'static,
+    O: Serialize,
 {
-    pub(crate) async fn connect(
+    pub(crate) fn connect<R>(
         req: R,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
         websocket_tx: SharedWebSocketSender,
-    ) -> Result<Channel<R>> {
+    ) -> impl Future<Output = Result<Channel<I, O>>>
+    where
+        R: ConnectChannelRequest<Incoming = I, Outgoing = O>,
+    {
         let id = ChannelId::uuid();
 
         let (response_tx, response_rx) = response_stream_channel(Arc::clone(&state));
         let (pong_tx, pong_rx) = channel_pong_channel(state);
 
-        broker_tx
-            .send(BrokerControl::Connect {
+        // limit the use of `R` to the outside of `async`
+        // in order not to require `Send` on `R`
+        let serialized_req = serde_json::to_value(req);
+
+        async move {
+            broker_tx
+                .send(BrokerControl::Connect {
+                    id,
+                    name: R::NAME,
+                    sender: response_tx,
+                    pong: pong_tx,
+                })
+                .await?;
+
+            websocket_tx
+                .lock()
+                .await
+                .send(OutgoingMessage::Connect {
+                    channel: R::NAME,
+                    id,
+                    params: serialized_req?,
+                    pong: true,
+                })
+                .await?;
+
+            // wait for `connected` pong message from server
+            pong_rx.recv().await?;
+
+            Ok(Channel {
                 id,
-                name: R::NAME,
-                sender: response_tx,
-                pong: pong_tx,
+                broker_tx,
+                response_rx,
+                websocket_tx,
+                is_terminated: false,
+                sink_buffer: VecDeque::new(),
+                _marker: PhantomData,
             })
-            .await?;
-
-        websocket_tx
-            .lock()
-            .await
-            .send(OutgoingMessage::Connect {
-                channel: R::NAME,
-                id,
-                params: serde_json::to_value(req)?,
-                pong: true,
-            })
-            .await?;
-
-        // wait for `connected` pong message from server
-        pong_rx.recv().await?;
-
-        Ok(Channel {
-            id,
-            broker_tx,
-            response_rx,
-            websocket_tx,
-            is_terminated: false,
-            sink_buffer: VecDeque::new(),
-            _marker: PhantomData,
-        })
+        }
     }
 }
 
-impl<R> Channel<R> {
+impl<I, O> Channel<I, O> {
     pub async fn disconnect(&mut self) -> Result<()> {
         if self.is_terminated {
             info!("disconnecting from already terminated Channel, skipping");
@@ -109,16 +121,13 @@ impl<R> Channel<R> {
     }
 }
 
-impl<R> Stream for Channel<R>
+impl<I, O> Stream for Channel<I, O>
 where
-    R: ConnectChannelRequest,
+    I: DeserializeOwned,
 {
-    type Item = Result<R::Incoming>;
+    type Item = Result<I>;
 
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut Context<'_>,
-    ) -> Poll<Option<Result<R::Incoming>>> {
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<I>>> {
         if self.is_terminated {
             return Poll::Ready(None);
         }
@@ -131,10 +140,9 @@ where
     }
 }
 
-impl<R> Sink<R::Outgoing> for Channel<R>
+impl<I, O> Sink<O> for Channel<I, O>
 where
-    R: ConnectChannelRequest,
-    R::Outgoing: Unpin,
+    O: Serialize,
 {
     type Error = Error;
 
@@ -145,7 +153,7 @@ where
         }
     }
 
-    fn start_send(self: Pin<&mut Self>, item: R::Outgoing) -> Result<()> {
+    fn start_send(self: Pin<&mut Self>, item: O) -> Result<()> {
         let message = OutgoingMessage::Channel {
             id: self.id,
             message: serde_json::to_value(item)?,
@@ -195,16 +203,16 @@ where
     }
 }
 
-impl<R> FusedStream for Channel<R>
+impl<I, O> FusedStream for Channel<I, O>
 where
-    R: ConnectChannelRequest,
+    I: DeserializeOwned,
 {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl<R> Drop for Channel<R> {
+impl<I, O> Drop for Channel<I, O> {
     fn drop(&mut self) {
         if self.is_terminated {
             return;
