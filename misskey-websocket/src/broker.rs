@@ -74,7 +74,7 @@ impl Broker {
 
         info!("broker: handler is not empty, enter receiving loop");
         while !self.handler.is_empty() {
-            let msg = self.websocket_rx.recv_json().await?;
+            let msg = self.websocket_rx.recv().await?;
             self.handler.handle(msg).await?;
         }
 
@@ -87,7 +87,7 @@ impl Broker {
         info!("broker: started");
 
         loop {
-            let t1 = self.websocket_rx.recv_json();
+            let t1 = self.websocket_rx.recv();
             let t2 = self.broker_rx.next();
 
             futures::pin_mut!(t1, t2);

@@ -7,12 +7,12 @@ use crate::broker::{
 };
 use crate::channel::{connect_websocket, SharedWebSocketSender};
 use crate::error::{Error, Result};
-use crate::model::request::{ApiRequest, ApiRequestId};
+use crate::model::{ApiRequestId, OutgoingMessage};
 
-use futures::lock::Mutex;
+use futures::{lock::Mutex, sink::SinkExt};
 use misskey_core::model::ApiResult;
 use misskey_core::{
-    streaming::{BroadcastClient, OneshotClient, SubscriptionClient},
+    streaming::{BroadcastClient, ChannelClient, SubNoteClient},
     Client,
 };
 use serde_json::value;
@@ -21,7 +21,7 @@ use url::Url;
 pub mod builder;
 pub mod stream;
 
-use stream::{Broadcast, Subscription};
+use stream::{Broadcast, Channel, SubNote};
 
 #[derive(Debug, Clone)]
 pub struct WebSocketClient {
@@ -63,12 +63,15 @@ impl Client for WebSocketClient {
             })
             .await?;
 
-        let req = ApiRequest {
-            id,
-            endpoint: R::ENDPOINT.to_string(),
-            data: value::to_value(request)?,
-        };
-        self.websocket_tx.lock().await.send_request(req).await?;
+        self.websocket_tx
+            .lock()
+            .await
+            .send(OutgoingMessage::Api {
+                id,
+                endpoint: R::ENDPOINT,
+                data: serde_json::to_value(request)?,
+            })
+            .await?;
 
         Ok(match rx.recv().await? {
             ApiResult::Ok(x) => ApiResult::Ok(value::from_value(x)?),
@@ -78,47 +81,42 @@ impl Client for WebSocketClient {
 }
 
 #[async_trait::async_trait]
-impl OneshotClient for WebSocketClient {
+impl<E> SubNoteClient<E> for WebSocketClient
+where
+    E: misskey_core::streaming::SubNoteEvent,
+{
     type Error = Error;
+    type Stream = SubNote<E>;
 
-    async fn send<R>(&mut self, request: R) -> Result<()>
+    async fn subscribe_note<'a, I>(&mut self, id: I) -> Result<SubNote<E>>
     where
-        R: misskey_core::streaming::OneshotRequest + Send,
+        I: Into<misskey_core::streaming::SubNoteId> + Send,
+        E: 'a,
     {
-        self.websocket_tx.lock().await.send_request(request).await
+        SubNote::subscribe(
+            id.into(),
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+            Arc::clone(&self.websocket_tx),
+        )
+        .await
     }
 }
 
 #[async_trait::async_trait]
-impl<M> BroadcastClient<M> for WebSocketClient
+impl<R> ChannelClient<R> for WebSocketClient
 where
-    M: misskey_core::streaming::BroadcastMessage,
+    R: misskey_core::streaming::ConnectChannelRequest + Send,
+    R::Outgoing: Unpin,
 {
     type Error = Error;
-    type Stream = Broadcast<M>;
+    type Stream = Channel<R>;
 
-    async fn broadcast<'a>(&mut self) -> Result<Self::Stream>
-    where
-        M: 'a,
-    {
-        Broadcast::start(self.broker_tx.clone(), Arc::clone(&self.state)).await
-    }
-}
-
-#[async_trait::async_trait]
-impl<R> SubscriptionClient<R> for WebSocketClient
-where
-    R: misskey_core::streaming::SubscribeRequest + Send,
-    R::Unsubscribe: Send + Unpin,
-{
-    type Error = Error;
-    type Stream = Subscription<R>;
-
-    async fn subscribe<'a>(&mut self, request: R) -> Result<Self::Stream>
+    async fn connect<'a>(&mut self, request: R) -> Result<Self::Stream>
     where
         R: 'a,
     {
-        Subscription::subscribe(
+        Channel::connect(
             request,
             self.broker_tx.clone(),
             Arc::clone(&self.state),
@@ -128,12 +126,28 @@ where
     }
 }
 
+#[async_trait::async_trait]
+impl<E> BroadcastClient<E> for WebSocketClient
+where
+    E: misskey_core::streaming::BroadcastEvent,
+{
+    type Error = Error;
+    type Stream = Broadcast<E>;
+
+    async fn broadcast<'a>(&mut self) -> Result<Self::Stream>
+    where
+        E: 'a,
+    {
+        Broadcast::start(self.broker_tx.clone(), Arc::clone(&self.state)).await
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{builder::WebSocketClientBuilder, WebSocketClient};
 
     use futures::stream::StreamExt;
-    use misskey_core::{streaming::SubscriptionClient, Client};
+    use misskey_core::{streaming::SubNoteClient, Client};
     use url::Url;
 
     async fn test_client() -> WebSocketClient {
@@ -177,12 +191,8 @@ mod tests {
             .unwrap()
             .created_note;
 
-        let mut stream = client
-            .subscribe(misskey_api::streaming::note::SubNoteRequest {
-                id: note.id.clone(),
-            })
-            .await
-            .unwrap();
+        let mut stream: crate::stream::SubNote<misskey_api::streaming::note::NoteUpdateEvent> =
+            client.subscribe_note(note.id.clone()).await.unwrap();
 
         futures::future::join(
             async {

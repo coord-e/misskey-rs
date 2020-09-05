@@ -1,5 +1,7 @@
 mod broadcast;
-mod subscription;
+mod channel;
+mod sub_note;
 
 pub use broadcast::Broadcast;
-pub use subscription::Subscription;
+pub use channel::Channel;
+pub use sub_note::SubNote;

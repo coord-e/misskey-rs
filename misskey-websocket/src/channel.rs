@@ -1,6 +1,10 @@
+use std::future::Future;
+use std::pin::Pin;
+use std::task::{Context, Poll};
 use std::{fmt, sync::Arc};
 
 use crate::error::{Error, Result};
+use crate::model::{IncomingMessage, OutgoingMessage};
 
 #[cfg(all(feature = "async-std-runtime", not(feature = "tokio-runtime")))]
 use async_tungstenite::async_std::{connect_async, ConnectStream};
@@ -8,21 +12,17 @@ use async_tungstenite::async_std::{connect_async, ConnectStream};
 use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::{error::Error as WsError, Message as WsMessage};
 use async_tungstenite::WebSocketStream;
-use futures::future::{self, Future, FutureExt, Ready};
-use futures::lock::Mutex;
-use futures::sink::SinkExt;
-use futures::stream::{self, SplitSink, SplitStream, Stream, StreamExt};
+use futures::{
+    lock::Mutex,
+    sink::{Sink, SinkExt},
+    stream::{SplitSink, SplitStream, Stream, StreamExt},
+};
 #[cfg(feature = "inspect-contents")]
 use log::debug;
-use serde::{de::DeserializeOwned, Serialize};
 use url::Url;
 
-type RawStream = SplitStream<WebSocketStream<ConnectStream>>;
-type FilterFn = fn(<RawStream as Stream>::Item) -> Ready<Option<Result<String>>>;
-type InnerStream = stream::FilterMap<RawStream, Ready<Option<Result<String>>>, FilterFn>;
-
 /// Receiver channel that communicates with Misskey
-pub struct WebSocketReceiver(InnerStream);
+pub struct WebSocketReceiver(SplitStream<WebSocketStream<ConnectStream>>);
 
 impl fmt::Debug for WebSocketReceiver {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -30,53 +30,48 @@ impl fmt::Debug for WebSocketReceiver {
     }
 }
 
-type MapFn<T> = fn(Option<<InnerStream as Stream>::Item>) -> Result<T>;
-pub struct RecvJson<'a, T>(future::Map<stream::Next<'a, InnerStream>, MapFn<T>>);
+impl Stream for WebSocketReceiver {
+    type Item = Result<IncomingMessage>;
 
-impl<T> Future for RecvJson<'_, T> {
-    type Output = Result<T>;
-    fn poll(
-        mut self: std::pin::Pin<&mut Self>,
-        cx: &mut std::task::Context,
-    ) -> std::task::Poll<Self::Output> {
-        std::pin::Pin::new(&mut self.0).poll(cx)
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        let opt = match self.0.poll_next_unpin(cx)? {
+            Poll::Pending => return Poll::Pending,
+            Poll::Ready(opt) => opt,
+        };
+
+        let text = match opt {
+            Some(WsMessage::Text(t)) => t,
+            Some(WsMessage::Ping(_)) | Some(WsMessage::Pong(_)) => return Poll::Pending,
+            None | Some(WsMessage::Close(_)) => return Poll::Ready(None),
+            Some(m) => return Poll::Ready(Some(Err(Error::UnexpectedMessage(m)))),
+        };
+
+        #[cfg(feature = "inspect-contents")]
+        debug!("received message: {}", text);
+
+        Poll::Ready(Some(Ok(serde_json::from_str(&text)?)))
+    }
+}
+
+pub struct Recv<'a> {
+    stream: &'a mut WebSocketReceiver,
+}
+
+impl Future for Recv<'_> {
+    type Output = Result<IncomingMessage>;
+
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        self.stream
+            .poll_next_unpin(cx)
+            .map(|opt| opt.unwrap_or_else(|| Err(WsError::ConnectionClosed.into())))
     }
 }
 
 impl WebSocketReceiver {
-    fn new(stream: RawStream) -> Self {
-        fn filter(res: <RawStream as Stream>::Item) -> Ready<Option<Result<String>>> {
-            future::ready(match res {
-                Ok(WsMessage::Text(t)) => Some(Ok(t)),
-                Ok(WsMessage::Ping(_)) => None,
-                Ok(WsMessage::Pong(_)) => None,
-                Ok(WsMessage::Close(_)) => None,
-                Ok(m) => Some(Err(Error::UnexpectedMessage(m))),
-                Err(e) => Some(Err(e.into())),
-            })
-        }
-
-        let filter: FilterFn = filter;
-        WebSocketReceiver(stream.filter_map(filter))
-    }
-
-    // using concrete type here because impl trait failed to infer appropriate lifetime...
-    pub fn recv_json<T: DeserializeOwned>(&mut self) -> RecvJson<'_, T> {
-        fn map<T: DeserializeOwned>(opt: Option<Result<String>>) -> Result<T> {
-            match opt {
-                Some(Ok(t)) => {
-                    #[cfg(feature = "inspect-contents")]
-                    debug!("received message: {}", t);
-
-                    serde_json::from_str(&t).map_err(Into::into)
-                }
-                Some(Err(e)) => Err(e),
-                None => Err(WsError::ConnectionClosed.into()),
-            }
-        }
-
-        let map: MapFn<T> = map;
-        RecvJson(self.0.next().map(map))
+    /// Receive one message from the stream using `StreamExt::next`,
+    /// while folding `None` to an error that represents closed connection.
+    pub fn recv(&mut self) -> Recv<'_> {
+        Recv { stream: self }
     }
 }
 
@@ -89,27 +84,28 @@ impl fmt::Debug for WebSocketSender {
     }
 }
 
-impl WebSocketSender {
-    pub async fn send(&mut self, msg: WsMessage) -> Result<()> {
+impl Sink<OutgoingMessage> for WebSocketSender {
+    type Error = Error;
+
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.0.poll_ready_unpin(cx).map_err(Into::into)
+    }
+
+    fn start_send(mut self: Pin<&mut Self>, item: OutgoingMessage) -> Result<()> {
+        let msg = WsMessage::Text(serde_json::to_string(&item)?);
+
         #[cfg(feature = "inspect-contents")]
         debug!("send message: {:?}", msg);
 
-        Ok(self.0.send(msg).await?)
+        self.0.start_send_unpin(msg).map_err(Into::into)
     }
 
-    pub async fn send_json<T: Serialize>(&mut self, x: &T) -> Result<()> {
-        self.send(WsMessage::Text(serde_json::to_string(x)?)).await
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.0.poll_flush_unpin(cx).map_err(Into::into)
     }
 
-    pub async fn send_request<R: misskey_core::streaming::Request>(
-        &mut self,
-        request: R,
-    ) -> Result<()> {
-        let json = serde_json::json!({
-            "type": R::TYPE,
-            "body": request,
-        });
-        self.send_json(&json).await
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.0.poll_close_unpin(cx).map_err(Into::into)
     }
 }
 
@@ -118,5 +114,5 @@ pub type SharedWebSocketSender = Arc<Mutex<WebSocketSender>>;
 pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceiver)> {
     let (ws, _) = connect_async(url).await?;
     let (sink, stream) = ws.split();
-    Ok((WebSocketSender(sink), WebSocketReceiver::new(stream)))
+    Ok((WebSocketSender(sink), WebSocketReceiver(stream)))
 }

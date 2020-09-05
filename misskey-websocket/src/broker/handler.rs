@@ -6,19 +6,20 @@ use crate::broker::{
 };
 use crate::error::Result;
 use crate::model::{
-    message::{ApiMessage, Message, MessageType, OtherMessage},
-    request::ApiRequestId,
+    ApiMessage, ApiRequestId, ChannelId, ChannelMessage, IncomingMessage, IncomingMessageType,
+    NoteUpdatedMessage,
 };
 
 use log::{info, warn};
 use misskey_core::model::ApiResult;
-use misskey_core::streaming::SubscriptionId;
+use misskey_core::streaming::SubNoteId;
 use serde_json::value::{self, Value};
 
 #[derive(Debug)]
 pub(crate) struct Handler {
     api: HashMap<ApiRequestId, ResponseSender<ApiResult<Value>>>,
-    subscription: HashMap<SubscriptionId, ResponseStreamSender<Value>>,
+    sub_note: HashMap<SubNoteId, ResponseStreamSender<Value>>,
+    channel: HashMap<ChannelId, ResponseStreamSender<Value>>,
     broadcast: HashMap<&'static str, HashMap<BroadcastId, ResponseStreamSender<Value>>>,
 }
 
@@ -26,7 +27,8 @@ impl Handler {
     pub fn new() -> Handler {
         Handler {
             api: HashMap::new(),
-            subscription: HashMap::new(),
+            sub_note: HashMap::new(),
+            channel: HashMap::new(),
             broadcast: HashMap::new(),
         }
     }
@@ -36,22 +38,28 @@ impl Handler {
             BrokerControl::HandleApiResponse { id, sender } => {
                 self.api.insert(id, sender);
             }
-            // not using `type_` because we can determine corresponding sender by ID
-            BrokerControl::Subscribe {
+            // not using `name` because we can determine corresponding sender by ID
+            BrokerControl::Connect {
                 id,
                 sender,
-                type_: _,
+                name: _,
             } => {
-                self.subscription.insert(id, sender);
+                self.channel.insert(id, sender);
+            }
+            BrokerControl::Disconnect { id } => {
+                self.channel.remove(&id);
+            }
+            BrokerControl::SubNote { id, sender } => {
+                self.sub_note.insert(id, sender);
+            }
+            BrokerControl::UnsubNote { id } => {
+                self.sub_note.remove(&id);
             }
             BrokerControl::StartBroadcast { id, type_, sender } => {
                 self.broadcast
                     .entry(type_)
                     .or_insert_with(HashMap::new)
                     .insert(id, sender);
-            }
-            BrokerControl::Unsubscribe { id } => {
-                self.subscription.remove(&id);
             }
             BrokerControl::StopBroadcast { id } => {
                 for senders in &mut self.broadcast.values_mut() {
@@ -65,13 +73,14 @@ impl Handler {
 
     pub fn is_empty(&self) -> bool {
         self.api.is_empty()
-            && self.subscription.is_empty()
+            && self.sub_note.is_empty()
+            && self.channel.is_empty()
             && self.broadcast.values().all(|m| m.is_empty())
     }
 
-    pub async fn handle(&mut self, msg: Message) -> Result<()> {
+    pub async fn handle(&mut self, msg: IncomingMessage) -> Result<()> {
         match msg.type_ {
-            MessageType::Api(id) => {
+            IncomingMessageType::Api(id) => {
                 if let Some(sender) = self.api.remove(&id) {
                     let msg: ApiResult<ApiMessage> = value::from_value(msg.body)?;
                     sender.send(msg.map(Into::into));
@@ -80,40 +89,59 @@ impl Handler {
                     return Ok(());
                 }
             }
-            MessageType::Other(type_) => match value::from_value(msg.body)? {
-                OtherMessage::Subscription { id, content } => {
-                    let sender = match self.subscription.get_mut(&id) {
-                        Some(x) => x,
-                        None => {
-                            warn!("unhandled message {} with id {}, skipping", type_, id);
-                            return Ok(());
-                        }
-                    };
+            IncomingMessageType::Channel => {
+                let ChannelMessage { id, message } = value::from_value(msg.body)?;
 
-                    if sender.try_send(content).is_err() {
-                        warn!("stale subscription handler {:?}, deleted", id);
-                        self.subscription.remove(&id);
+                let sender = match self.channel.get_mut(&id) {
+                    Some(x) => x,
+                    None => {
+                        warn!("unhandled channel message with id {}, skipping", id);
+                        return Ok(());
                     }
-                }
-                OtherMessage::Broadcast(message) => {
-                    let senders = match self.broadcast.get_mut(type_.as_str()) {
-                        Some(x) => x,
-                        None => {
-                            info!("unhandled broadcast message {}, skipping", type_);
-                            return Ok(());
-                        }
-                    };
+                };
 
-                    senders.retain(|id, sender| {
-                        if sender.try_send(message.clone()).is_err() {
-                            warn!("stale broadcast handler {}:{}, deleted", type_, id);
-                            false
-                        } else {
-                            true
-                        }
-                    });
+                if sender.try_send(message).is_err() {
+                    warn!("stale channel handler for id {}, deleted", id);
+                    self.channel.remove(&id);
                 }
-            },
+            }
+            IncomingMessageType::NoteUpdated => {
+                let NoteUpdatedMessage { id, message } = value::from_value(msg.body)?;
+
+                let sender = match self.sub_note.get_mut(&id) {
+                    Some(x) => x,
+                    None => {
+                        warn!("unhandled subnote message with id {}, skipping", id);
+                        return Ok(());
+                    }
+                };
+
+                if sender.try_send(message).is_err() {
+                    warn!("stale subnote handler for id {}, deleted", id);
+                    self.sub_note.remove(&id);
+                }
+            }
+            IncomingMessageType::Other(type_) => {
+                // assuming other message types as broadcast
+
+                let senders = match self.broadcast.get_mut(type_.as_str()) {
+                    Some(x) => x,
+                    None => {
+                        info!("unhandled broadcast message {}, skipping", type_);
+                        return Ok(());
+                    }
+                };
+
+                let body = msg.body;
+                senders.retain(|id, sender| {
+                    if sender.try_send(body.clone()).is_err() {
+                        warn!("stale broadcast handler {}:{}, deleted", type_, id);
+                        false
+                    } else {
+                        true
+                    }
+                });
+            }
         }
 
         Ok(())

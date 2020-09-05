@@ -4,7 +4,7 @@ use derive_more::{Display, Error, From};
 use futures::lock::Mutex;
 use futures::never::Never;
 use futures::stream::StreamExt;
-use misskey_core::{streaming::SubscriptionClient, Client};
+use misskey_core::{streaming::ChannelClient, Client};
 use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
 use url::Url;
@@ -62,14 +62,13 @@ async fn timeline(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
     let mut stream = client
         .lock()
         .await
-        .subscribe(channel::ConnectRequest::<
-            channel::local_timeline::LocalTimeline,
-        >::new())
+        .connect(channel::local_timeline::Request::default())
         .await?;
 
     loop {
         // wait for the next note
-        let note = stream.next().await.unwrap()?.into_inner().note;
+        let channel::local_timeline::LocalTimelineEvent::Note(note) =
+            stream.next().await.unwrap()?;
         println!(
             "<@{}> {}",
             note.user.username,

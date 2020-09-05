@@ -3,13 +3,13 @@ use std::sync::Arc;
 
 use crate::broker::channel::{ResponseSender, ResponseStreamSender};
 use crate::error::Error;
-use crate::model::request::ApiRequestId;
+use crate::model::{ApiRequestId, ChannelId};
 
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::sync::RwLock;
 use derive_more::{Display, FromStr};
 use misskey_core::model::ApiResult;
-use misskey_core::streaming::SubscriptionId;
+use misskey_core::streaming::SubNoteId;
 use serde_json::Value;
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
 use tokio::sync::RwLock;
@@ -30,13 +30,20 @@ pub(crate) enum BrokerControl {
         id: ApiRequestId,
         sender: ResponseSender<ApiResult<Value>>,
     },
-    Subscribe {
-        id: SubscriptionId,
-        type_: &'static str,
+    Connect {
+        id: ChannelId,
+        name: &'static str,
         sender: ResponseStreamSender<Value>,
     },
-    Unsubscribe {
-        id: SubscriptionId,
+    Disconnect {
+        id: ChannelId,
+    },
+    SubNote {
+        id: SubNoteId,
+        sender: ResponseStreamSender<Value>,
+    },
+    UnsubNote {
+        id: SubNoteId,
     },
     StartBroadcast {
         id: BroadcastId,

@@ -2,7 +2,8 @@ use crate::test::env;
 
 use misskey_core::model::ApiResult;
 use misskey_core::streaming::{
-    BroadcastClient, BroadcastMessage, SubscribeRequest, SubscriptionClient,
+    BroadcastClient, BroadcastEvent, ChannelClient, ConnectChannelRequest, SubNoteClient,
+    SubNoteEvent, SubNoteId,
 };
 use misskey_core::{Client, Request};
 use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
@@ -41,34 +42,51 @@ impl Client for TestClient {
 }
 
 #[async_trait::async_trait]
-impl<M> BroadcastClient<M> for TestClient
+impl<E> BroadcastClient<E> for TestClient
 where
-    M: BroadcastMessage,
+    E: BroadcastEvent,
 {
-    type Error = <WebSocketClient as BroadcastClient<M>>::Error;
-    type Stream = <WebSocketClient as BroadcastClient<M>>::Stream;
+    type Error = <WebSocketClient as BroadcastClient<E>>::Error;
+    type Stream = <WebSocketClient as BroadcastClient<E>>::Stream;
 
     async fn broadcast<'a>(&mut self) -> Result<Self::Stream, Self::Error>
     where
-        M: 'a,
+        E: 'a,
     {
         self.user.broadcast().await
     }
 }
 
 #[async_trait::async_trait]
-impl<R> SubscriptionClient<R> for TestClient
+impl<R> ChannelClient<R> for TestClient
 where
-    R: SubscribeRequest + Send,
-    R::Unsubscribe: Send + Unpin,
+    R: ConnectChannelRequest + Send,
+    R::Outgoing: Unpin,
 {
-    type Error = <WebSocketClient as SubscriptionClient<R>>::Error;
-    type Stream = <WebSocketClient as SubscriptionClient<R>>::Stream;
+    type Error = <WebSocketClient as ChannelClient<R>>::Error;
+    type Stream = <WebSocketClient as ChannelClient<R>>::Stream;
 
-    async fn subscribe<'a>(&mut self, request: R) -> Result<Self::Stream, Self::Error>
+    async fn connect<'a>(&mut self, request: R) -> Result<Self::Stream, Self::Error>
     where
         R: 'a,
     {
-        self.user.subscribe(request).await
+        self.user.connect(request).await
+    }
+}
+
+#[async_trait::async_trait]
+impl<E> SubNoteClient<E> for TestClient
+where
+    E: SubNoteEvent,
+{
+    type Error = <WebSocketClient as SubNoteClient<E>>::Error;
+    type Stream = <WebSocketClient as SubNoteClient<E>>::Stream;
+
+    async fn subscribe_note<'a, I>(&mut self, id: I) -> Result<Self::Stream, Self::Error>
+    where
+        I: Into<SubNoteId> + Send,
+        E: 'a,
+    {
+        self.user.subscribe_note(id).await
     }
 }

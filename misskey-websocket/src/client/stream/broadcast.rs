@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -9,39 +10,37 @@ use crate::error::Result;
 
 use futures::{
     executor,
-    stream::{self, FusedStream, Stream, StreamExt},
+    stream::{FusedStream, Stream, StreamExt},
 };
 use log::{info, warn};
-use misskey_core::streaming::BroadcastMessage;
+use misskey_core::streaming::BroadcastEvent;
 use serde_json::Value;
-
-type DeserializedResponseStream<T> =
-    stream::Map<ResponseStreamReceiver<Value>, fn(Result<Value>) -> Result<T>>;
 
 #[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
-pub struct Broadcast<M: BroadcastMessage> {
+pub struct Broadcast<E: BroadcastEvent> {
     id: BroadcastId,
     broker_tx: ControlSender,
-    response_rx: DeserializedResponseStream<M>,
+    response_rx: ResponseStreamReceiver<Value>,
     is_terminated: bool,
+    _marker: PhantomData<fn() -> E>,
 }
 
-impl<M> Broadcast<M>
+impl<E> Broadcast<E>
 where
-    M: BroadcastMessage,
+    E: BroadcastEvent,
 {
     pub(crate) async fn start(
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-    ) -> Result<Broadcast<M>> {
+    ) -> Result<Broadcast<E>> {
         let id = BroadcastId::new();
 
-        let (response_tx, response_rx_raw) = response_stream_channel(state);
+        let (response_tx, response_rx) = response_stream_channel(state);
         broker_tx
             .send(BrokerControl::StartBroadcast {
                 id,
-                type_: M::TYPE,
+                type_: E::TYPE,
                 sender: response_tx,
             })
             .await?;
@@ -49,11 +48,9 @@ where
         Ok(Broadcast {
             id,
             broker_tx,
-            response_rx: response_rx_raw.map(|r| match r {
-                Ok(v) => serde_json::from_value(v).map_err(Into::into),
-                Err(e) => Err(e),
-            }),
+            response_rx,
             is_terminated: false,
+            _marker: PhantomData,
         })
     }
 
@@ -73,32 +70,37 @@ where
     }
 }
 
-impl<M> Stream for Broadcast<M>
+impl<E> Stream for Broadcast<E>
 where
-    M: BroadcastMessage,
+    E: BroadcastEvent,
 {
-    type Item = Result<M>;
+    type Item = Result<E>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<M>>> {
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<E>>> {
         if self.is_terminated {
             return Poll::Ready(None);
         }
-        Pin::new(&mut self.response_rx).poll_next(cx)
+
+        match self.response_rx.poll_next_unpin(cx)? {
+            Poll::Pending => Poll::Pending,
+            Poll::Ready(None) => Poll::Ready(None),
+            Poll::Ready(Some(v)) => Poll::Ready(Some(Ok(serde_json::from_value(v)?))),
+        }
     }
 }
 
-impl<M> FusedStream for Broadcast<M>
+impl<E> FusedStream for Broadcast<E>
 where
-    M: BroadcastMessage,
+    E: BroadcastEvent,
 {
     fn is_terminated(&self) -> bool {
         self.is_terminated
     }
 }
 
-impl<M> Drop for Broadcast<M>
+impl<E> Drop for Broadcast<E>
 where
-    M: BroadcastMessage,
+    E: BroadcastEvent,
 {
     fn drop(&mut self) {
         if self.is_terminated() {
