@@ -43,6 +43,7 @@ uuid = { version = "0.8.1", features = ["v4"] }
 reqwest = "0.10.7"
 lazy_static = "1.4.0"
 mime = "0.3"
+env_logger = "0.7"
 
 [package.metadata.docs.rs]
 all-features = true

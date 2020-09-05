@@ -25,3 +25,4 @@ misskey-api = { path = "../misskey-api" }
 uuid = { version = "0.8.1", features = ["v4"] }
 tokio = { version = "0.2", features = ["macros", "rt-core"] }
 async-std = { version = "1.6", features = ["attributes"] }
+env_logger = "0.7"

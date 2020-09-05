@@ -14,6 +14,8 @@ pub struct TestClient {
 
 impl TestClient {
     pub fn new() -> Self {
+        env::init_logger();
+
         TestClient {
             admin: HttpClient::new(
                 env::TEST_API_URL.clone(),

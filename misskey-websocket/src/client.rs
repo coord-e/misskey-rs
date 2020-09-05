@@ -144,13 +144,19 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Once;
+
     use super::{builder::WebSocketClientBuilder, WebSocketClient};
 
     use futures::stream::StreamExt;
     use misskey_core::{streaming::SubNoteClient, Client};
     use url::Url;
 
+    static INIT_LOGGER: Once = Once::new();
+
     async fn test_client() -> WebSocketClient {
+        INIT_LOGGER.call_once(env_logger::init);
+
         let url = std::env::var("TEST_WEBSOCKET_URL").unwrap();
         let token = std::env::var("TEST_USER_TOKEN").unwrap();
         WebSocketClientBuilder::new(Url::parse(&url).unwrap())

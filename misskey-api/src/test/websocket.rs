@@ -15,6 +15,8 @@ pub struct TestClient {
 
 impl TestClient {
     pub async fn new() -> Self {
+        env::init_logger();
+
         let admin = WebSocketClientBuilder::new(env::TEST_WEBSOCKET_URL.clone())
             .token(env::TEST_ADMIN_TOKEN.clone())
             .connect()

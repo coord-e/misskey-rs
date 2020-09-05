@@ -31,3 +31,4 @@ tokio = { version = "0.2", default-features = false, features = ["sync"], option
 misskey-api = { path = "../misskey-api" }
 async-std = { version = "1.6.3", features = ["attributes"] }
 tokio = { version = "0.2", features = ["macros", "rt-core"] }
+env_logger = "0.7"

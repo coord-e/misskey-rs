@@ -183,13 +183,19 @@ fn to_json_with_api_key<T: Request>(data: T, api_key: &str) -> Result<Value> {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Once;
+
     use super::HttpClient;
 
     use misskey_core::Client;
     use url::Url;
     use uuid::Uuid;
 
+    static INIT_LOGGER: Once = Once::new();
+
     fn test_client() -> HttpClient {
+        INIT_LOGGER.call_once(env_logger::init);
+
         let url = std::env::var("TEST_API_URL").unwrap();
         let token = std::env::var("TEST_USER_TOKEN").unwrap();
         HttpClient::new(Url::parse(&url).unwrap(), Some(token)).unwrap()
