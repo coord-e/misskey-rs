@@ -8,5 +8,4 @@ edition = "2018"
 serde = { version = "1.0.103", features = ["derive"] }
 futures-core = "0.3"
 futures-sink = "0.3"
-async-trait = "0.1.35"
 derive_more = "0.99.5"

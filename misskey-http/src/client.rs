@@ -4,6 +4,7 @@ use crate::error::{Error, Result};
 
 use common_multipart_rfc7578::client::{multipart, Error as MultipartError};
 use futures::compat::Compat01As03;
+use futures::future::BoxFuture;
 use futures::io::AsyncReadExt;
 use isahc::http;
 #[cfg(feature = "inspect-contents")]
@@ -11,6 +12,7 @@ use log::debug;
 use mime::Mime;
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request, RequestWithFile};
+use serde::Serialize;
 use serde_json::value::{self, Value};
 use url::Url;
 
@@ -31,7 +33,35 @@ impl HttpClient {
         })
     }
 
-    pub async fn request_with_file<R: RequestWithFile + Send>(
+    fn set_api_key<R: Request>(
+        &self,
+        request: R,
+    ) -> std::result::Result<impl Serialize, serde_json::Error> {
+        #[derive(Serialize)]
+        #[serde(untagged)]
+        enum ValueOrRequest<R> {
+            Value(Value),
+            Request(R),
+        }
+
+        if let Some(token) = &self.token {
+            let mut value = value::to_value(request)?;
+
+            let obj = value.as_object_mut().expect("Request must be an object");
+            if obj
+                .insert("i".to_string(), Value::String(token.to_owned()))
+                .is_some()
+            {
+                panic!("Request must not have 'i' key");
+            }
+
+            Ok(ValueOrRequest::Value(value))
+        } else {
+            Ok(ValueOrRequest::Request(request))
+        }
+    }
+
+    pub async fn request_with_file<R: RequestWithFile>(
         &mut self,
         request: R,
         type_: Mime,
@@ -43,97 +73,106 @@ impl HttpClient {
             .join(R::ENDPOINT)
             .expect("Request::ENDPOINT must be a fragment of valid URL");
 
-        let value = if let Some(token) = &self.token {
-            to_json_with_api_key(request, token)?
-        } else {
-            value::to_value(request)?
-        };
+        // limit the use of `R` value to the outside of `async`
+        // in order not to require `Send` on `R`
+        let value = self.set_api_key(request).and_then(value::to_value);
 
-        #[cfg(feature = "inspect-contents")]
-        debug!(
-            "sending request to {} with {} ({}) file: {}",
-            url,
-            path.as_ref().display(),
-            type_,
-            value
-        );
+        async move {
+            let value = value?;
 
-        let mut form = multipart::Form::default();
+            #[cfg(feature = "inspect-contents")]
+            debug!(
+                "sending request to {} with {} ({}) file: {}",
+                url,
+                path.as_ref().display(),
+                type_,
+                value
+            );
 
-        // TODO: Can't we just take `AsyncRead` or `Read` and use it directly?
-        let read = std::fs::File::open(path)?;
-        form.add_reader_file_with_mime("file", read, file_name, type_);
+            let mut form = multipart::Form::default();
 
-        let obj = value.as_object().expect("Request must be an object");
-        for (k, v) in obj {
-            let v = v
-                .as_str()
-                .expect("RequestWithFile must be an object that all values are string");
-            form.add_text(k.to_owned(), v.to_owned());
+            // TODO: Can't we just take `AsyncRead` or `Read` and use it directly?
+            let read = std::fs::File::open(path)?;
+            form.add_reader_file_with_mime("file", read, file_name, type_);
+
+            let obj = value.as_object().expect("Request must be an object");
+            for (k, v) in obj {
+                let v = v
+                    .as_str()
+                    .expect("RequestWithFile must be an object that all values are string");
+                form.add_text(k.to_owned(), v.to_owned());
+            }
+
+            let content_type = form.content_type();
+
+            use futures::stream::TryStreamExt;
+            let stream = Compat01As03::new(multipart::Body::from(form)).map_err(|e| match e {
+                MultipartError::HeaderWrite(e) => e,
+                MultipartError::BoundaryWrite(e) => e,
+                MultipartError::ContentRead(e) => e,
+            });
+            let body = isahc::Body::from_reader(async_dup::Mutex::new(stream.into_async_read()));
+
+            use isahc::http::header::CONTENT_TYPE;
+            let response = self
+                .client
+                .send_async(
+                    // TODO: uncomfortable conversion from `Url` to `Uri`
+                    http::Request::post(url.into_string())
+                        .header(CONTENT_TYPE, content_type)
+                        .body(body)
+                        .unwrap(),
+                )
+                .await?;
+
+            response_to_result::<R>(response).await
         }
-
-        let content_type = form.content_type();
-
-        use futures::stream::TryStreamExt;
-        let stream = Compat01As03::new(multipart::Body::from(form)).map_err(|e| match e {
-            MultipartError::HeaderWrite(e) => e,
-            MultipartError::BoundaryWrite(e) => e,
-            MultipartError::ContentRead(e) => e,
-        });
-        let body = isahc::Body::from_reader(async_dup::Mutex::new(stream.into_async_read()));
-
-        use isahc::http::header::CONTENT_TYPE;
-        let response = self
-            .client
-            .send_async(
-                // TODO: uncomfortable conversion from `Url` to `Uri`
-                http::Request::post(url.into_string())
-                    .header(CONTENT_TYPE, content_type)
-                    .body(body)
-                    .unwrap(),
-            )
-            .await?;
-
-        response_to_result::<R>(response).await
+        .await
     }
 }
 
-#[async_trait::async_trait]
 impl Client for HttpClient {
     type Error = Error;
 
-    async fn request<R: Request + Send>(&mut self, request: R) -> Result<ApiResult<R::Response>> {
+    fn request<'a, R>(&'a mut self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
+    where
+        R: Request + 'a,
+    {
         let url = self
             .url
             .join(R::ENDPOINT)
             .expect("Request::ENDPOINT must be a fragment of valid URL");
 
-        let body = if let Some(token) = &self.token {
-            serde_json::to_vec(&to_json_with_api_key(request, token)?)?
-        } else {
-            serde_json::to_vec(&request)?
-        };
+        // limit the use of `R` value to the outside of `async`
+        // in order not to require `Send` on `R`
+        let body = self
+            .set_api_key(request)
+            .and_then(|b| serde_json::to_vec(&b));
 
-        #[cfg(feature = "inspect-contents")]
-        debug!(
-            "sending request to {}: {}",
-            url,
-            String::from_utf8_lossy(&body)
-        );
+        Box::pin(async move {
+            let body = body?;
 
-        use isahc::http::header::CONTENT_TYPE;
-        let response = self
-            .client
-            .send_async(
-                // TODO: uncomfortable conversion from `Url` to `Uri`
-                http::Request::post(url.to_string())
-                    .header(CONTENT_TYPE, "application/json")
-                    .body(body)
-                    .unwrap(),
-            )
-            .await?;
+            #[cfg(feature = "inspect-contents")]
+            debug!(
+                "sending request to {}: {}",
+                url,
+                String::from_utf8_lossy(&body)
+            );
 
-        response_to_result::<R>(response).await
+            use isahc::http::header::CONTENT_TYPE;
+            let response = self
+                .client
+                .send_async(
+                    // TODO: uncomfortable conversion from `Url` to `Uri`
+                    http::Request::post(url.to_string())
+                        .header(CONTENT_TYPE, "application/json")
+                        .body(body)
+                        .unwrap(),
+                )
+                .await?;
+
+            response_to_result::<R>(response).await
+        })
     }
 }
 
@@ -165,20 +204,6 @@ async fn response_to_result<R: Request>(
     } else {
         Ok(serde_json::from_slice(json_bytes)?)
     }
-}
-
-fn to_json_with_api_key<T: Request>(data: T, api_key: &str) -> Result<Value> {
-    let mut value = value::to_value(data)?;
-
-    let obj = value.as_object_mut().expect("Request must be an object");
-    if obj
-        .insert("i".to_string(), Value::String(api_key.to_string()))
-        .is_some()
-    {
-        panic!("Request must not have 'i' key");
-    }
-
-    Ok(value)
 }
 
 #[cfg(test)]

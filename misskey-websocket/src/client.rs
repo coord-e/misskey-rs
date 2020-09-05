@@ -45,37 +45,42 @@ impl WebSocketClient {
     }
 }
 
-#[async_trait::async_trait]
 impl Client for WebSocketClient {
     type Error = Error;
 
-    async fn request<R: misskey_core::Request + Send>(
-        &mut self,
-        request: R,
-    ) -> Result<ApiResult<R::Response>> {
+    fn request<'a, R>(&'a mut self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
+    where
+        R: misskey_core::Request + 'a,
+    {
         let id = ApiRequestId::uuid();
 
-        let (tx, rx) = response_channel(Arc::clone(&self.state));
-        self.broker_tx
-            .send(BrokerControl::HandleApiResponse {
-                id: id.clone(),
-                sender: tx,
-            })
-            .await?;
+        // limit the use of `R` to the outside of `async`
+        // in order not to require `Send` on `R`
+        let serialized_request = serde_json::to_value(request);
 
-        self.websocket_tx
-            .lock()
-            .await
-            .send(OutgoingMessage::Api {
-                id,
-                endpoint: R::ENDPOINT,
-                data: serde_json::to_value(request)?,
-            })
-            .await?;
+        Box::pin(async move {
+            let (tx, rx) = response_channel(Arc::clone(&self.state));
+            self.broker_tx
+                .send(BrokerControl::HandleApiResponse {
+                    id: id.clone(),
+                    sender: tx,
+                })
+                .await?;
 
-        Ok(match rx.recv().await? {
-            ApiResult::Ok(x) => ApiResult::Ok(value::from_value(x)?),
-            ApiResult::Err { error } => ApiResult::Err { error },
+            self.websocket_tx
+                .lock()
+                .await
+                .send(OutgoingMessage::Api {
+                    id,
+                    endpoint: R::ENDPOINT,
+                    data: serialized_request?,
+                })
+                .await?;
+
+            Ok(match rx.recv().await? {
+                ApiResult::Ok(x) => ApiResult::Ok(value::from_value(x)?),
+                ApiResult::Err { error } => ApiResult::Err { error },
+            })
         })
     }
 }

@@ -1,12 +1,15 @@
 use crate::model::ApiResult;
 use crate::request::Request;
 
-#[async_trait::async_trait]
+use futures_core::future::BoxFuture;
+
 pub trait Client {
     type Error: std::error::Error;
 
-    async fn request<R: Request + Send>(
-        &mut self,
+    fn request<'a, R>(
+        &'a mut self,
         request: R,
-    ) -> Result<ApiResult<R::Response>, Self::Error>;
+    ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
+    where
+        R: Request + 'a;
 }

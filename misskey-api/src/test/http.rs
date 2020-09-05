@@ -1,6 +1,7 @@
 use crate::model::drive::DriveFile;
 use crate::test::env;
 
+use futures::future::BoxFuture;
 use mime::Mime;
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request, RequestWithFile};
@@ -31,14 +32,16 @@ impl TestClient {
     }
 }
 
-#[async_trait::async_trait]
 impl Client for TestClient {
     type Error = <HttpClient as Client>::Error;
-    async fn request<R: Request + Send>(
-        &mut self,
+    fn request<'a, R>(
+        &'a mut self,
         request: R,
-    ) -> Result<ApiResult<R::Response>, Self::Error> {
-        self.user.request(request).await
+    ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
+    where
+        R: Request + 'a,
+    {
+        self.user.request(request)
     }
 }
 

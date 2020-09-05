@@ -33,14 +33,16 @@ impl TestClient {
     }
 }
 
-#[async_trait::async_trait]
 impl Client for TestClient {
     type Error = <WebSocketClient as Client>::Error;
-    async fn request<R: Request + Send>(
-        &mut self,
+    fn request<'a, R>(
+        &'a mut self,
         request: R,
-    ) -> Result<ApiResult<R::Response>, Self::Error> {
-        self.user.request(request).await
+    ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
+    where
+        R: Request + 'a,
+    {
+        self.user.request(request)
     }
 }
 
