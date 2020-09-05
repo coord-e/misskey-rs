@@ -1,0 +1,195 @@
+use crate::model::drive::{DriveFile, DriveFileId, DriveFolder, DriveFolderId};
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase", tag = "type", content = "body")]
+pub enum DriveStreamEvent {
+    FolderCreated(DriveFolder),
+    FolderUpdated(DriveFolder),
+    FolderDeleted(DriveFolderId),
+    FileCreated(DriveFile),
+    FileUpdated(DriveFile),
+    FileDeleted(DriveFileId),
+}
+
+#[derive(Serialize, Default, Debug, Clone)]
+pub struct Request {}
+
+impl misskey_core::streaming::ConnectChannelRequest for Request {
+    type Incoming = DriveStreamEvent;
+    type Outgoing = ();
+
+    const NAME: &'static str = "drive";
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{DriveStreamEvent, Request};
+    use crate::test::{websocket::TestClient, ClientExt};
+
+    use futures::{future, StreamExt};
+    use misskey_core::streaming::ChannelClient;
+
+    #[tokio::test]
+    async fn subscribe_unsubscribe() {
+        let mut client = TestClient::new().await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+        stream.disconnect().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn stream_folder_created() {
+        let mut client = TestClient::new().await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::drive::folders::create::Request::default()),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        DriveStreamEvent::FolderCreated(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn stream_folder_updated() {
+        let mut client = TestClient::new().await;
+        let folder = client
+            .test(crate::endpoint::drive::folders::create::Request::default())
+            .await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::drive::folders::update::Request {
+                folder_id: folder.id,
+                name: Some("test".to_string()),
+                parent_id: None,
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        DriveStreamEvent::FolderUpdated(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn stream_folder_deleted() {
+        let mut client = TestClient::new().await;
+        let folder = client
+            .test(crate::endpoint::drive::folders::create::Request::default())
+            .await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::drive::folders::delete::Request {
+                folder_id: folder.id,
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        DriveStreamEvent::FolderDeleted(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn stream_file_created() {
+        let mut client = TestClient::new().await;
+        let url = client.avatar_url().await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::drive::files::upload_from_url::Request {
+                url,
+                folder_id: None,
+                is_sensitive: None,
+                force: Some(true),
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        DriveStreamEvent::FileCreated(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn stream_file_updated() {
+        let mut client = TestClient::new().await;
+        let url = client.avatar_url().await;
+        let file = client
+            .test(crate::endpoint::drive::files::upload_from_url::Request {
+                url,
+                folder_id: None,
+                is_sensitive: None,
+                force: Some(true),
+            })
+            .await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::drive::files::update::Request {
+                file_id: file.id,
+                folder_id: None,
+                is_sensitive: None,
+                name: Some("test".to_string()),
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        DriveStreamEvent::FileUpdated(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[tokio::test]
+    async fn stream_file_deleted() {
+        let mut client = TestClient::new().await;
+        let url = client.avatar_url().await;
+        let file = client
+            .test(crate::endpoint::drive::files::upload_from_url::Request {
+                url,
+                folder_id: None,
+                is_sensitive: None,
+                force: Some(true),
+            })
+            .await;
+        let mut stream = client.connect(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::drive::files::delete::Request { file_id: file.id }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        DriveStreamEvent::FileDeleted(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+}
