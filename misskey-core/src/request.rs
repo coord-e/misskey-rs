@@ -6,4 +6,4 @@ pub trait Request: Serialize {
     const ENDPOINT: &'static str;
 }
 
-pub trait RequestWithFile: Request {}
+pub trait UploadFileRequest: Request {}

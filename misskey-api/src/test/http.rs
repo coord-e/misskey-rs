@@ -4,7 +4,7 @@ use crate::test::env;
 use futures::future::BoxFuture;
 use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{Client, Request, RequestWithFile};
+use misskey_core::{Client, Request, UploadFileRequest};
 use misskey_http::HttpClient;
 use uuid::Uuid;
 
@@ -55,7 +55,7 @@ pub trait HttpClientExt {
         content: B,
     ) -> R::Response
     where
-        R: RequestWithFile + Send,
+        R: UploadFileRequest + Send,
         B: AsRef<[u8]> + Send + Sync;
     async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile;
 }
@@ -70,7 +70,7 @@ impl HttpClientExt for HttpClient {
         content: B,
     ) -> R::Response
     where
-        R: RequestWithFile + Send,
+        R: UploadFileRequest + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
         let tmp_name = Uuid::new_v4().to_simple().to_string();
@@ -114,7 +114,7 @@ impl HttpClientExt for TestClient {
         content: B,
     ) -> R::Response
     where
-        R: RequestWithFile + Send,
+        R: UploadFileRequest + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
         self.user

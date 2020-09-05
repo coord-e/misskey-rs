@@ -44,7 +44,7 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "drive/files/create";
 }
 
-impl misskey_core::RequestWithFile for Request {}
+impl misskey_core::UploadFileRequest for Request {}
 
 #[cfg(test)]
 mod tests {

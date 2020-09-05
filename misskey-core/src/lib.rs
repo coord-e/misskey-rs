@@ -4,4 +4,4 @@ mod request;
 pub mod streaming;
 
 pub use client::Client;
-pub use request::{Request, RequestWithFile};
+pub use request::{Request, UploadFileRequest};

@@ -11,7 +11,7 @@ use isahc::http;
 use log::debug;
 use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{Client, Request, RequestWithFile};
+use misskey_core::{Client, Request, UploadFileRequest};
 use serde::Serialize;
 use serde_json::value::{self, Value};
 use url::Url;
@@ -61,7 +61,7 @@ impl HttpClient {
         }
     }
 
-    pub async fn request_with_file<R: RequestWithFile>(
+    pub async fn request_with_file<R: UploadFileRequest>(
         &mut self,
         request: R,
         type_: Mime,
@@ -99,7 +99,7 @@ impl HttpClient {
             for (k, v) in obj {
                 let v = v
                     .as_str()
-                    .expect("RequestWithFile must be an object that all values are string");
+                    .expect("UploadFileRequest must be an object that all values are string");
                 form.add_text(k.to_owned(), v.to_owned());
             }
 
