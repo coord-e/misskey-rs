@@ -5,7 +5,7 @@ use crate::broker::model::{BrokerControl, SharedBrokerState};
 use crate::error::Result;
 
 use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use futures::stream::{FusedStream, Stream};
+use futures::stream::{FusedStream, Stream, StreamExt};
 
 /// Sender channel that the client uses to communicate with broker
 #[derive(Debug, Clone)]
@@ -55,7 +55,7 @@ impl Stream for ControlReceiver {
         if self.0.is_terminated() {
             Poll::Ready(None)
         } else {
-            Pin::new(&mut self.0).poll_next(cx)
+            self.0.poll_next_unpin(cx)
         }
     }
 }

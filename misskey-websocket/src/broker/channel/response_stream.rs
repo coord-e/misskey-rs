@@ -1,4 +1,3 @@
-use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -6,7 +5,8 @@ use crate::broker::model::SharedBrokerState;
 use crate::error::Result;
 
 use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use futures::stream::{FusedStream, Stream};
+use futures::future::FutureExt;
+use futures::stream::{FusedStream, Stream, StreamExt};
 
 /// Sender channel that broker uses to respond to the client
 #[derive(Debug, Clone)]
@@ -37,7 +37,7 @@ impl<T> Stream for ResponseStreamReceiver<T> {
         let state = {
             let read_fut = self.state.read();
             futures::pin_mut!(read_fut);
-            match Pin::new(&mut read_fut).poll(cx) {
+            match read_fut.poll_unpin(cx) {
                 Poll::Pending => return Poll::Pending,
                 Poll::Ready(lock) => lock.dead().cloned(),
             }
@@ -47,7 +47,7 @@ impl<T> Stream for ResponseStreamReceiver<T> {
             self.is_terminated = true;
             Poll::Ready(Some(Err(err)))
         } else {
-            Pin::new(&mut self.inner).poll_next(cx).map(|x| x.map(Ok))
+            self.inner.poll_next_unpin(cx).map(|x| x.map(Ok))
         }
     }
 }
