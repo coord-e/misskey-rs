@@ -1,7 +1,7 @@
 use std::hash::Hash;
 use std::sync::Arc;
 
-use crate::broker::channel::{ResponseSender, ResponseStreamSender};
+use crate::broker::channel::{ChannelPongSender, ResponseSender, ResponseStreamSender};
 use crate::error::Error;
 use crate::model::{ApiRequestId, ChannelId};
 
@@ -34,6 +34,7 @@ pub(crate) enum BrokerControl {
         id: ChannelId,
         name: &'static str,
         sender: ResponseStreamSender<Value>,
+        pong: ChannelPongSender,
     },
     Disconnect {
         id: ChannelId,

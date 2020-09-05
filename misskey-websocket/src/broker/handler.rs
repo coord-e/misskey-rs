@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
 use crate::broker::{
-    channel::{ResponseSender, ResponseStreamSender},
+    channel::{ChannelPongSender, ResponseSender, ResponseStreamSender},
     model::{BroadcastId, BrokerControl},
 };
 use crate::error::Result;
 use crate::model::{
-    ApiMessage, ApiRequestId, ChannelId, ChannelMessage, IncomingMessage, IncomingMessageType,
-    NoteUpdatedMessage,
+    ApiMessage, ApiRequestId, ChannelId, ChannelMessage, ConnectedMessage, IncomingMessage,
+    IncomingMessageType, NoteUpdatedMessage,
 };
 
 use log::{info, warn};
@@ -19,7 +19,7 @@ use serde_json::value::{self, Value};
 pub(crate) struct Handler {
     api: HashMap<ApiRequestId, ResponseSender<ApiResult<Value>>>,
     sub_note: HashMap<SubNoteId, ResponseStreamSender<Value>>,
-    channel: HashMap<ChannelId, ResponseStreamSender<Value>>,
+    channel: HashMap<ChannelId, (ResponseStreamSender<Value>, Option<ChannelPongSender>)>,
     broadcast: HashMap<&'static str, HashMap<BroadcastId, ResponseStreamSender<Value>>>,
 }
 
@@ -43,8 +43,9 @@ impl Handler {
                 id,
                 sender,
                 name: _,
+                pong,
             } => {
-                self.channel.insert(id, sender);
+                self.channel.insert(id, (sender, Some(pong)));
             }
             BrokerControl::Disconnect { id } => {
                 self.channel.remove(&id);
@@ -92,7 +93,7 @@ impl Handler {
             IncomingMessageType::Channel => {
                 let ChannelMessage { id, message } = value::from_value(msg.body)?;
 
-                let sender = match self.channel.get_mut(&id) {
+                let (sender, _) = match self.channel.get_mut(&id) {
                     Some(x) => x,
                     None => {
                         warn!("unhandled channel message with id {}, skipping", id);
@@ -103,6 +104,23 @@ impl Handler {
                 if sender.try_send(message).is_err() {
                     warn!("stale channel handler for id {}, deleted", id);
                     self.channel.remove(&id);
+                }
+            }
+            IncomingMessageType::Connected => {
+                let ConnectedMessage { id } = value::from_value(msg.body)?;
+
+                let (_, pong) = match self.channel.get_mut(&id) {
+                    Some(x) => x,
+                    None => {
+                        warn!("unhandled connected message with id {}, skipping", id);
+                        return Ok(());
+                    }
+                };
+
+                if let Some(pong) = pong.take() {
+                    pong.send();
+                } else {
+                    warn!("duplicated connected message with id {}, skipping", id);
                 }
             }
             IncomingMessageType::NoteUpdated => {

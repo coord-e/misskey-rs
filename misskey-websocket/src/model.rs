@@ -29,6 +29,7 @@ impl ApiRequestId {
 pub enum IncomingMessageType {
     Api(ApiRequestId),
     Channel,
+    Connected,
     NoteUpdated,
     Other(String),
 }
@@ -54,6 +55,7 @@ impl<'de> Deserialize<'de> for IncomingMessageType {
             {
                 match value {
                     "channel" => return Ok(IncomingMessageType::Channel),
+                    "connected" => return Ok(IncomingMessageType::Connected),
                     "noteUpdated" => return Ok(IncomingMessageType::NoteUpdated),
                     _ => (),
                 }
@@ -87,6 +89,11 @@ pub struct ChannelMessage {
 }
 
 #[derive(Deserialize, Debug, Clone, Into)]
+pub struct ConnectedMessage {
+    pub id: ChannelId,
+}
+
+#[derive(Deserialize, Debug, Clone, Into)]
 pub struct NoteUpdatedMessage {
     pub id: SubNoteId,
     #[serde(flatten)]
@@ -112,6 +119,7 @@ pub enum OutgoingMessage {
         id: ChannelId,
         channel: &'static str,
         params: Value,
+        pong: bool,
     },
     Channel {
         id: ChannelId,

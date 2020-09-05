@@ -1,10 +1,13 @@
 use std::collections::VecDeque;
 use std::marker::PhantomData;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::task::{Context, Poll};
 
 use crate::broker::{
-    channel::{response_stream_channel, ControlSender, ResponseStreamReceiver},
+    channel::{
+        channel_pong_channel, response_stream_channel, ControlSender, ResponseStreamReceiver,
+    },
     model::{BrokerControl, SharedBrokerState},
 };
 use crate::channel::SharedWebSocketSender;
@@ -45,12 +48,15 @@ where
     ) -> Result<Channel<R>> {
         let id = ChannelId::uuid();
 
-        let (response_tx, response_rx) = response_stream_channel(state);
+        let (response_tx, response_rx) = response_stream_channel(Arc::clone(&state));
+        let (pong_tx, pong_rx) = channel_pong_channel(state);
+
         broker_tx
             .send(BrokerControl::Connect {
                 id,
                 name: R::NAME,
                 sender: response_tx,
+                pong: pong_tx,
             })
             .await?;
 
@@ -61,8 +67,12 @@ where
                 channel: R::NAME,
                 id,
                 params: serde_json::to_value(req)?,
+                pong: true,
             })
             .await?;
+
+        // wait for `connected` pong message from server
+        pong_rx.recv().await?;
 
         Ok(Channel {
             id,
