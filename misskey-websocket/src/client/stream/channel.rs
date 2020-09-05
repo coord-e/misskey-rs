@@ -13,7 +13,7 @@ use crate::broker::{
 };
 use crate::channel::SharedWebSocketSender;
 use crate::error::{Error, Result};
-use crate::model::{ChannelId, OutgoingMessage};
+use crate::model::{outgoing::OutgoingMessage, ChannelId};
 
 use futures::{
     executor,

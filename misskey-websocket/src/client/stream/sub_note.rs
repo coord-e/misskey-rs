@@ -8,7 +8,7 @@ use crate::broker::{
 };
 use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
-use crate::model::OutgoingMessage;
+use crate::model::outgoing::OutgoingMessage;
 
 use futures::{
     executor,

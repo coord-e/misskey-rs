@@ -7,7 +7,7 @@ use crate::broker::{
 };
 use crate::channel::{connect_websocket, SharedWebSocketSender};
 use crate::error::{Error, Result};
-use crate::model::{ApiRequestId, OutgoingMessage};
+use crate::model::{outgoing::OutgoingMessage, ApiRequestId};
 
 use futures::{future::BoxFuture, lock::Mutex, sink::SinkExt};
 use misskey_core::model::ApiResult;

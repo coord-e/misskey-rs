@@ -6,8 +6,11 @@ use crate::broker::{
 };
 use crate::error::Result;
 use crate::model::{
-    ApiMessage, ApiRequestId, ChannelId, ChannelMessage, ConnectedMessage, IncomingMessage,
-    IncomingMessageType, NoteUpdatedMessage,
+    incoming::{
+        ApiMessage, ChannelMessage, ConnectedMessage, IncomingMessage, IncomingMessageType,
+        NoteUpdatedMessage,
+    },
+    ApiRequestId, ChannelId,
 };
 
 use log::{info, warn};

@@ -4,7 +4,7 @@ use std::task::{Context, Poll};
 use std::{fmt, sync::Arc};
 
 use crate::error::{Error, Result};
-use crate::model::{IncomingMessage, OutgoingMessage};
+use crate::model::{incoming::IncomingMessage, outgoing::OutgoingMessage};
 
 #[cfg(all(feature = "async-std-runtime", not(feature = "tokio-runtime")))]
 use async_tungstenite::async_std::{connect_async, ConnectStream};
