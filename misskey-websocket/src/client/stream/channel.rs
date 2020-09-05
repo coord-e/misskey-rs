@@ -26,7 +26,7 @@ use serde_json::Value;
 
 #[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
-pub struct Channel<R: ConnectChannelRequest> {
+pub struct Channel<R> {
     id: ChannelId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<Value>,
@@ -84,7 +84,9 @@ where
             _marker: PhantomData,
         })
     }
+}
 
+impl<R> Channel<R> {
     pub async fn disconnect(&mut self) -> Result<()> {
         if self.is_terminated {
             info!("disconnecting from already terminated Channel, skipping");
@@ -202,10 +204,7 @@ where
     }
 }
 
-impl<R> Drop for Channel<R>
-where
-    R: ConnectChannelRequest,
-{
+impl<R> Drop for Channel<R> {
     fn drop(&mut self) {
         if self.is_terminated {
             return;

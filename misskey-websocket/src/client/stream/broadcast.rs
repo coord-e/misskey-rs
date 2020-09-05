@@ -18,7 +18,7 @@ use serde_json::Value;
 
 #[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
-pub struct Broadcast<E: BroadcastEvent> {
+pub struct Broadcast<E> {
     id: BroadcastId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<Value>,
@@ -53,9 +53,11 @@ where
             _marker: PhantomData,
         })
     }
+}
 
+impl<E> Broadcast<E> {
     pub async fn stop(&mut self) -> Result<()> {
-        if self.is_terminated() {
+        if self.is_terminated {
             info!("stopping already terminated Broadcast, skipping");
             return Ok(());
         }
@@ -98,12 +100,9 @@ where
     }
 }
 
-impl<E> Drop for Broadcast<E>
-where
-    E: BroadcastEvent,
-{
+impl<E> Drop for Broadcast<E> {
     fn drop(&mut self) {
-        if self.is_terminated() {
+        if self.is_terminated {
             return;
         }
 
