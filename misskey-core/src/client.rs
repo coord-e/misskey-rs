@@ -1,5 +1,5 @@
+use crate::api::Request;
 use crate::model::ApiResult;
-use crate::request::Request;
 
 use futures_core::future::BoxFuture;
 
