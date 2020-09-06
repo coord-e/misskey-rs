@@ -226,6 +226,18 @@ mod tests {
         HttpClient::new(Url::parse(&url).unwrap(), Some(token)).unwrap()
     }
 
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<HttpClient>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_send<T: Sync>() {}
+        assert_send::<HttpClient>();
+    }
+
     #[tokio::test]
     async fn tokio_request() {
         let client = test_client();

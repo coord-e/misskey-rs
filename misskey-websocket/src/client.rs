@@ -165,6 +165,18 @@ mod tests {
             .unwrap()
     }
 
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<WebSocketClient>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_send<T: Sync>() {}
+        assert_send::<WebSocketClient>();
+    }
+
     #[cfg_attr(feature = "tokio-runtime", tokio::test)]
     #[cfg_attr(feature = "async-std-runtime", async_std::test)]
     async fn request() {
