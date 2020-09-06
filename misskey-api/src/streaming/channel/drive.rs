@@ -29,19 +29,18 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
-    use misskey_core::streaming::ChannelClient;
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
         let client = TestClient::new().await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
     #[tokio::test]
     async fn stream_folder_created() {
         let client = TestClient::new().await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             client.test(crate::endpoint::drive::folders::create::Request::default()),
@@ -63,7 +62,7 @@ mod tests {
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request::default())
             .await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             client.test(crate::endpoint::drive::folders::update::Request {
@@ -89,7 +88,7 @@ mod tests {
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request::default())
             .await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             client.test(crate::endpoint::drive::folders::delete::Request {
@@ -111,7 +110,7 @@ mod tests {
     async fn stream_file_created() {
         let client = TestClient::new().await;
         let url = client.avatar_url().await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             client.test(crate::endpoint::drive::files::upload_from_url::Request {
@@ -144,7 +143,7 @@ mod tests {
                 force: Some(true),
             })
             .await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             client.test(crate::endpoint::drive::files::update::Request {
@@ -177,7 +176,7 @@ mod tests {
                 force: Some(true),
             })
             .await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             client.test(crate::endpoint::drive::files::delete::Request { file_id: file.id }),

@@ -40,7 +40,6 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, SinkExt, StreamExt};
-    use misskey_core::streaming::ChannelClient;
 
     #[tokio::test]
     async fn subscribe_unsubscribe_otherparty() {
@@ -48,7 +47,7 @@ mod tests {
         let admin = client.admin.me().await;
         let mut stream = client
             .user
-            .connect(Request::Otherparty(admin.id))
+            .channel(Request::Otherparty(admin.id))
             .await
             .unwrap();
         stream.disconnect().await.unwrap();
@@ -62,7 +61,7 @@ mod tests {
                 name: "test".to_string(),
             })
             .await;
-        let mut stream = client.user.connect(Request::Group(group.id)).await.unwrap();
+        let mut stream = client.user.channel(Request::Group(group.id)).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
@@ -73,7 +72,7 @@ mod tests {
         let admin = client.admin.me().await;
         let mut stream = client
             .user
-            .connect(Request::Otherparty(admin.id))
+            .channel(Request::Otherparty(admin.id))
             .await
             .unwrap();
 
@@ -114,7 +113,7 @@ mod tests {
             .await;
         let mut stream = client
             .user
-            .connect(Request::Otherparty(admin.id))
+            .channel(Request::Otherparty(admin.id))
             .await
             .unwrap();
 
@@ -152,12 +151,12 @@ mod tests {
             .await;
         let mut user_stream = client
             .user
-            .connect(Request::Otherparty(admin.id))
+            .channel(Request::Otherparty(admin.id))
             .await
             .unwrap();
         let mut admin_stream = client
             .admin
-            .connect(Request::Otherparty(user.id))
+            .channel(Request::Otherparty(user.id))
             .await
             .unwrap();
 

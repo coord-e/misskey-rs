@@ -1,4 +1,5 @@
 use std::fmt::{self, Debug};
+use std::future::Future;
 use std::sync::Arc;
 
 use crate::broker::{
@@ -12,10 +13,7 @@ use crate::model::{outgoing::OutgoingMessage, ApiRequestId};
 
 use futures::{future::BoxFuture, lock::Mutex, sink::SinkExt};
 use misskey_core::model::ApiResult;
-use misskey_core::{
-    streaming::{BroadcastClient, ChannelClient, SubNoteClient},
-    Client,
-};
+use misskey_core::Client;
 use serde_json::value;
 use url::Url;
 
@@ -49,6 +47,44 @@ impl WebSocketClient {
             broker_tx,
             state,
         })
+    }
+
+    pub fn subscribe_note<E, Id>(
+        &self,
+        id: Id,
+    ) -> impl Future<Output = Result<SubNote<E>>> + 'static
+    where
+        E: misskey_core::streaming::SubNoteEvent,
+        Id: Into<misskey_core::streaming::SubNoteId>,
+    {
+        SubNote::subscribe(
+            id.into(),
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+            Arc::clone(&self.websocket_tx),
+        )
+    }
+
+    pub fn channel<'a, R>(
+        &self,
+        request: R,
+    ) -> impl Future<Output = Result<Channel<R::Incoming, R::Outgoing>>> + 'a
+    where
+        R: misskey_core::streaming::ConnectChannelRequest + 'a,
+    {
+        Channel::connect(
+            request,
+            self.broker_tx.clone(),
+            Arc::clone(&self.state),
+            Arc::clone(&self.websocket_tx),
+        )
+    }
+
+    pub fn broadcast<E>(&self) -> impl Future<Output = Result<Broadcast<E>>> + 'static
+    where
+        E: misskey_core::streaming::BroadcastEvent,
+    {
+        Broadcast::start(self.broker_tx.clone(), Arc::clone(&self.state))
     }
 }
 
@@ -93,61 +129,6 @@ impl Client for WebSocketClient {
     }
 }
 
-impl<E> SubNoteClient<E> for WebSocketClient
-where
-    E: misskey_core::streaming::SubNoteEvent,
-{
-    type Error = Error;
-    type Stream = SubNote<E>;
-
-    fn subscribe_note<I>(&self, id: I) -> BoxFuture<'static, Result<SubNote<E>>>
-    where
-        I: Into<misskey_core::streaming::SubNoteId>,
-    {
-        Box::pin(SubNote::subscribe(
-            id.into(),
-            self.broker_tx.clone(),
-            Arc::clone(&self.state),
-            Arc::clone(&self.websocket_tx),
-        ))
-    }
-}
-
-impl<R> ChannelClient<R> for WebSocketClient
-where
-    R: misskey_core::streaming::ConnectChannelRequest,
-{
-    type Error = Error;
-    type Stream = Channel<R::Incoming, R::Outgoing>;
-
-    fn connect<'a>(&self, request: R) -> BoxFuture<'a, Result<Self::Stream>>
-    where
-        R: 'a,
-    {
-        Box::pin(Channel::connect(
-            request,
-            self.broker_tx.clone(),
-            Arc::clone(&self.state),
-            Arc::clone(&self.websocket_tx),
-        ))
-    }
-}
-
-impl<E> BroadcastClient<E> for WebSocketClient
-where
-    E: misskey_core::streaming::BroadcastEvent,
-{
-    type Error = Error;
-    type Stream = Broadcast<E>;
-
-    fn broadcast(&self) -> BoxFuture<'static, Result<Self::Stream>> {
-        Box::pin(Broadcast::start(
-            self.broker_tx.clone(),
-            Arc::clone(&self.state),
-        ))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::sync::Once;
@@ -155,7 +136,7 @@ mod tests {
     use super::{builder::WebSocketClientBuilder, WebSocketClient};
 
     use futures::stream::StreamExt;
-    use misskey_core::{streaming::SubNoteClient, Client};
+    use misskey_core::Client;
     use url::Url;
 
     static INIT_LOGGER: Once = Once::new();

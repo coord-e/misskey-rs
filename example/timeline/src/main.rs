@@ -1,7 +1,7 @@
 use derive_more::{Display, Error, From};
 use futures::never::Never;
 use futures::stream::StreamExt;
-use misskey_core::{streaming::ChannelClient, Client};
+use misskey_core::Client;
 use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
 use url::Url;
@@ -55,7 +55,7 @@ async fn timeline(client: &WebSocketClient) -> Result<Never, Error> {
 
     // subscribe to the timeline
     let mut stream = client
-        .connect(channel::local_timeline::Request::default())
+        .channel(channel::local_timeline::Request::default())
         .await?;
 
     loop {

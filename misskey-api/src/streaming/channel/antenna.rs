@@ -27,7 +27,6 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
-    use misskey_core::streaming::ChannelClient;
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
@@ -53,7 +52,7 @@ mod tests {
             .await;
 
         let mut stream = client
-            .connect(Request {
+            .channel(Request {
                 antenna_id: antenna.id,
             })
             .await
@@ -85,7 +84,7 @@ mod tests {
             .await;
 
         let mut stream = client
-            .connect(Request {
+            .channel(Request {
                 antenna_id: antenna.id,
             })
             .await

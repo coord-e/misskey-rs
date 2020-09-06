@@ -45,12 +45,11 @@ mod tests {
     use crate::test::websocket::TestClient;
 
     use futures::{future, SinkExt, StreamExt};
-    use misskey_core::streaming::ChannelClient;
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
         let client = TestClient::new().await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
@@ -59,7 +58,7 @@ mod tests {
         use std::time::Duration;
 
         let client = TestClient::new().await;
-        let mut stream = client.connect(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         // margin of 100 ms
         tokio::time::timeout(Duration::from_millis(10100), async {
@@ -79,7 +78,7 @@ mod tests {
         use uuid::Uuid;
 
         let client = TestClient::new().await;
-        let (mut sink, mut stream) = client.connect(Request::default()).await.unwrap().split();
+        let (mut sink, mut stream) = client.channel(Request::default()).await.unwrap().split();
 
         future::join(
             async {

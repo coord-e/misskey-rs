@@ -25,12 +25,11 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
-    use misskey_core::streaming::ChannelClient;
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
         let client = TestClient::new().await;
-        let mut stream = client.user.connect(Request::default()).await.unwrap();
+        let mut stream = client.user.channel(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
@@ -38,7 +37,7 @@ mod tests {
     async fn stream_message() {
         let client = TestClient::new().await;
         let user = client.user.me().await;
-        let mut stream = client.user.connect(Request::default()).await.unwrap();
+        let mut stream = client.user.channel(Request::default()).await.unwrap();
 
         future::join(
             client
@@ -74,7 +73,7 @@ mod tests {
                 file_id: None,
             })
             .await;
-        let mut stream = client.user.connect(Request::default()).await.unwrap();
+        let mut stream = client.user.channel(Request::default()).await.unwrap();
 
         future::join(
             client

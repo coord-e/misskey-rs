@@ -32,7 +32,6 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
-    use misskey_core::streaming::ChannelClient;
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
@@ -43,7 +42,7 @@ mod tests {
             })
             .await;
 
-        let mut stream = client.connect(Request { list_id: list.id }).await.unwrap();
+        let mut stream = client.channel(Request { list_id: list.id }).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
@@ -67,7 +66,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .connect(Request { list_id: list.id })
+            .channel(Request { list_id: list.id })
             .await
             .unwrap();
 
@@ -100,7 +99,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .connect(Request {
+            .channel(Request {
                 list_id: list.id.clone(),
             })
             .await
@@ -145,7 +144,7 @@ mod tests {
 
         let mut stream = client
             .user
-            .connect(Request {
+            .channel(Request {
                 list_id: list.id.clone(),
             })
             .await

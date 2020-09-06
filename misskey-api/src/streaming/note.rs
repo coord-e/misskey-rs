@@ -24,15 +24,16 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
-    use misskey_core::streaming::SubNoteClient;
-    use misskey_websocket::stream::SubNote;
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
         let client = TestClient::new().await;
         let note = client.create_note(Some("test"), None, None).await;
 
-        let mut stream: SubNote<NoteUpdateEvent> = client.subscribe_note(note.id).await.unwrap();
+        let mut stream = client
+            .subscribe_note::<NoteUpdateEvent, _>(note.id)
+            .await
+            .unwrap();
         stream.unsubscribe().await.unwrap();
     }
 
@@ -46,8 +47,7 @@ mod tests {
             .create_note(Some("looks good"), None, None)
             .await;
 
-        let mut stream: SubNote<NoteUpdateEvent> =
-            client.user.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
 
         future::join(
             client
@@ -85,8 +85,7 @@ mod tests {
             })
             .await;
 
-        let mut stream: SubNote<NoteUpdateEvent> =
-            client.user.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
 
         future::join(
             client

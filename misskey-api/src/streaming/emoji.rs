@@ -18,15 +18,13 @@ mod tests {
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
-    use misskey_core::streaming::BroadcastClient;
-    use misskey_websocket::stream::Broadcast;
 
     #[tokio::test]
     async fn broadcast() {
         let client = TestClient::new().await;
         let url = client.avatar_url().await;
 
-        let mut stream: Broadcast<EmojiAddedEvent> = client.broadcast().await.unwrap();
+        let mut stream = client.broadcast::<EmojiAddedEvent>().await.unwrap();
 
         future::join(client.admin.add_emoji_from_url(url), async {
             stream.next().await.unwrap().unwrap()
