@@ -29,7 +29,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let announcement = client
             .admin
             .test(crate::endpoint::admin::announcements::create::Request {
@@ -52,7 +52,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_image() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let announcement = client
             .admin
             .test(crate::endpoint::admin::announcements::create::Request {

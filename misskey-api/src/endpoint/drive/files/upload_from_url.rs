@@ -32,7 +32,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 url: url::Url::parse("http://example.com/index.html").unwrap(),
@@ -45,7 +45,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_image() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
 
         client
@@ -60,7 +60,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,

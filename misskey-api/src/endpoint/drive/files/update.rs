@@ -31,7 +31,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         client
             .test(Request {
@@ -45,7 +45,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
@@ -66,7 +66,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_null_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         client
             .test(Request {

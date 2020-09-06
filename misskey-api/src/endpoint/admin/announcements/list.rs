@@ -31,13 +31,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.admin.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .admin
             .test(Request {
@@ -50,7 +50,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let announcement = client
             .admin
             .test(crate::endpoint::admin::announcements::create::Request {

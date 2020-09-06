@@ -28,7 +28,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
 
         let mut stream = client.connect(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
@@ -36,7 +36,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
 
         let mut stream = client.connect(Request::default()).await.unwrap();
 

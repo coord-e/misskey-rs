@@ -93,7 +93,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_text() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 visibility: None,
@@ -117,7 +117,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 visibility: None,
@@ -141,7 +141,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_cw() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 visibility: None,
@@ -167,7 +167,7 @@ mod tests {
     async fn request_with_visibilty() {
         use crate::model::note::Visibility;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 visibility: Some(Visibility::Home),
@@ -251,7 +251,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_renote() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client
             .test(Request {
                 visibility: None,
@@ -295,7 +295,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_reply() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client
             .test(Request {
                 visibility: None,
@@ -339,7 +339,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_poll() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         let poll = PollRequest {
             choices: vec!["a".to_string(), "b".to_string()],
@@ -369,7 +369,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_files() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file1 = client.create_text_file("test1.txt", "hi").await;
         let file2 = client.create_text_file("test2.txt", "hi").await;
 
@@ -397,7 +397,7 @@ mod tests {
     #[cfg(feature = "12-47-0")]
     #[tokio::test]
     async fn request_with_channel_id() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),

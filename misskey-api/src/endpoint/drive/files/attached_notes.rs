@@ -20,7 +20,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         client
             .test(crate::endpoint::notes::create::Request {

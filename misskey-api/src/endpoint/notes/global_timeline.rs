@@ -47,13 +47,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_option() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 with_files: Some(true),
@@ -68,7 +68,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 with_files: None,
@@ -83,7 +83,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("test"), None, None).await;
 
         client
@@ -100,7 +100,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_date() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let now = chrono::Utc::now();
 
         client

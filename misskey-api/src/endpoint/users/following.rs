@@ -43,7 +43,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_id() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.me().await;
 
         client
@@ -58,7 +58,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_username() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.me().await;
 
         client
@@ -76,7 +76,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.me().await;
         client
             .test(Request::WithUserId {
@@ -90,7 +90,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.user.me().await;
         let (new_user, _) = client.admin.create_user().await;
         client

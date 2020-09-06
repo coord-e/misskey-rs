@@ -31,7 +31,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
 
         let mut stream = client
             .connect(Request {
@@ -44,7 +44,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client
             .connect(Request {
                 q: vec![vec!["test".to_string(), "good".to_string()]],

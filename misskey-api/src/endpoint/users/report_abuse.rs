@@ -22,7 +22,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let (new_user, _) = client.admin.create_user().await;
 
         client

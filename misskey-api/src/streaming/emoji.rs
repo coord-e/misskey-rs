@@ -23,7 +23,7 @@ mod tests {
 
     #[tokio::test]
     async fn broadcast() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let url = client.avatar_url().await;
 
         let mut stream: Broadcast<EmojiAddedEvent> = client.broadcast().await.unwrap();

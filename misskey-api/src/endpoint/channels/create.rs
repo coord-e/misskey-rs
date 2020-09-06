@@ -29,7 +29,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request {
             // random 128 chars
             name: "yCdKKHkRAmqhE49j3TBCVnnsQiZ2KkCK83z6NNKoGaiqQNOALsAOIz6XVJAcaV9lNbQYuuhSe7nAM8qdvUtokhWYWDO999z07N4ajtikDmzANpgwRh7rxMgb8PLsgcbm".to_string(),
@@ -40,7 +40,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_description() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 name: "test channel".to_string(),
@@ -52,7 +52,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_banner() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {

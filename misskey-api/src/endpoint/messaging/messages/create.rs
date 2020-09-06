@@ -35,7 +35,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_text() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
         client
             .user
@@ -50,7 +50,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_group() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let group = client
             .test(crate::endpoint::users::groups::create::Request {
                 name: "test".to_string(),
@@ -68,7 +68,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_file() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
         let file = client.create_text_file("test.txt", "hello").await;
 

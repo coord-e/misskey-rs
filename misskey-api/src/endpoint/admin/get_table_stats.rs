@@ -25,7 +25,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.admin.test(Request::default()).await;
     }
 }

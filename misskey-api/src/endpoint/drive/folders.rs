@@ -39,13 +39,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_folder() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder1 = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,
@@ -71,7 +71,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 folder_id: None,
@@ -84,7 +84,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,

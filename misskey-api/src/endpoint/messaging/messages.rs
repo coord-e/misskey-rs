@@ -48,7 +48,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_user() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
         client
             .user
@@ -65,7 +65,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_group() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let group = client
             .test(crate::endpoint::users::groups::create::Request {
                 name: "test".to_string(),
@@ -85,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_option() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
         client
             .user
@@ -102,7 +102,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
         client
             .test(Request {
@@ -118,7 +118,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
         let user = client.user.me().await;
         let message = client

@@ -218,7 +218,7 @@ mod tests {
     // this will fail with requests without any updates
     #[tokio::test]
     async fn request_with_name() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .admin
             .test(
@@ -231,7 +231,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
 
         client

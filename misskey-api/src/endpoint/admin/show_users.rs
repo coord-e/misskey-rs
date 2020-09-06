@@ -82,13 +82,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.admin.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .admin
             .test(Request {
@@ -105,7 +105,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_offset() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .admin
             .test(Request {
@@ -124,7 +124,7 @@ mod tests {
     async fn request_with_sort() {
         use crate::model::{sort::SortOrder, user::UserSort};
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         client
             .admin
@@ -166,7 +166,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_state() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         client
             .admin
@@ -269,7 +269,7 @@ mod tests {
     async fn request_with_origin() {
         use crate::model::user::UserOrigin;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         client
             .admin
@@ -311,7 +311,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_username_hostname() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         client
             .admin

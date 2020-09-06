@@ -34,14 +34,14 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client.admin.connect(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
     #[tokio::test]
     async fn stream() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let (user, _) = client.admin.create_user().await;
         let mut stream = client.admin.connect(Request::default()).await.unwrap();
 

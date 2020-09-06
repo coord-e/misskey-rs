@@ -26,7 +26,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 body: "hello".to_string(),
@@ -38,7 +38,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let url = client.avatar_url().await;
 
         client

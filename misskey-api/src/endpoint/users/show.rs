@@ -37,7 +37,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_user_id() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.me().await;
 
         client.test(Request::WithUserId { user_id: user.id }).await;
@@ -45,7 +45,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_username() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.me().await;
 
         client
@@ -60,7 +60,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_user_ids() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.user.me().await;
         let admin = client.admin.me().await;
 

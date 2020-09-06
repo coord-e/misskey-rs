@@ -17,30 +17,30 @@ pub use http::{HttpClientExt, TestClient};
 
 #[async_trait::async_trait]
 pub trait ClientExt {
-    async fn test<R: Request + Send>(&mut self, req: R) -> R::Response;
-    async fn create_user(&mut self) -> (User, HttpClient);
-    async fn me(&mut self) -> User;
+    async fn test<R: Request + Send>(&self, req: R) -> R::Response;
+    async fn create_user(&self) -> (User, HttpClient);
+    async fn me(&self) -> User;
     async fn create_note(
-        &mut self,
+        &self,
         text: Option<&str>,
         renote_id: Option<NoteId>,
         reply_id: Option<NoteId>,
     ) -> Note;
-    async fn avatar_url(&mut self) -> Url;
-    async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId;
+    async fn avatar_url(&self) -> Url;
+    async fn add_emoji_from_url(&self, url: Url) -> EmojiId;
 }
 
 #[async_trait::async_trait]
-impl<T: Client + Send> ClientExt for T {
-    async fn test<R: Request + Send>(&mut self, req: R) -> R::Response {
+impl<T: Client + Send + Sync> ClientExt for T {
+    async fn test<R: Request + Send>(&self, req: R) -> R::Response {
         self.request(req).await.unwrap().unwrap()
     }
 
-    async fn me(&mut self) -> User {
+    async fn me(&self) -> User {
         self.test(crate::endpoint::i::Request {}).await
     }
 
-    async fn create_user(&mut self) -> (User, HttpClient) {
+    async fn create_user(&self) -> (User, HttpClient) {
         let uuid = Uuid::new_v4().to_simple().to_string();
         let res = self
             .test(crate::endpoint::admin::accounts::create::Request {
@@ -56,7 +56,7 @@ impl<T: Client + Send> ClientExt for T {
     }
 
     async fn create_note(
-        &mut self,
+        &self,
         text: Option<&str>,
         renote_id: Option<NoteId>,
         reply_id: Option<NoteId>,
@@ -82,7 +82,7 @@ impl<T: Client + Send> ClientExt for T {
         .created_note
     }
 
-    async fn avatar_url(&mut self) -> Url {
+    async fn avatar_url(&self) -> Url {
         let me = self.me().await;
         if let Some(url) = me.avatar_url {
             url
@@ -93,7 +93,7 @@ impl<T: Client + Send> ClientExt for T {
     }
 
     #[cfg(feature = "12-9-0")]
-    async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId {
+    async fn add_emoji_from_url(&self, url: Url) -> EmojiId {
         let file = self
             .test(crate::endpoint::drive::files::upload_from_url::Request {
                 url,
@@ -109,7 +109,7 @@ impl<T: Client + Send> ClientExt for T {
     }
 
     #[cfg(not(feature = "12-9-0"))]
-    async fn add_emoji_from_url(&mut self, url: Url) -> EmojiId {
+    async fn add_emoji_from_url(&self, url: Url) -> EmojiId {
         let uuid = Uuid::new_v4().to_simple().to_string();
         self.test(crate::endpoint::admin::emoji::add::Request {
             name: uuid,

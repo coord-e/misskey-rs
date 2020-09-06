@@ -20,7 +20,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let clip = client
             .test(crate::endpoint::clips::create::Request {
                 name: "clip test".to_string(),

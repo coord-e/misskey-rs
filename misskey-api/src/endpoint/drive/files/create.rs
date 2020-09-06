@@ -53,7 +53,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test_with_file(Request::default(), mime::TEXT_PLAIN, "test.txt", "hello")
             .await;
@@ -61,7 +61,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_image() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
         let image_data = reqwest::get(image_url)
             .await
@@ -87,7 +87,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,

@@ -79,7 +79,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
@@ -87,7 +87,7 @@ mod tests {
     async fn request_with_options() {
         use crate::model::user::UserField;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 name: Some(Some("test".to_string())),
@@ -120,7 +120,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_null_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 name: Some(None),

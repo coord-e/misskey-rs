@@ -29,7 +29,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let uuid = uuid::Uuid::new_v4().to_simple().to_string();
         client
             .admin

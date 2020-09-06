@@ -29,7 +29,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let note = client.create_note(Some("test"), None, None).await;
 
         let mut stream: SubNote<NoteUpdateEvent> = client.subscribe_note(note.id).await.unwrap();
@@ -40,7 +40,7 @@ mod tests {
     async fn reacted() {
         use crate::model::note::Reaction;
 
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let note = client
             .user
             .create_note(Some("looks good"), None, None)
@@ -72,7 +72,7 @@ mod tests {
     async fn unreacted() {
         use crate::model::note::Reaction;
 
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let note = client
             .user
             .create_note(Some("not so good"), None, None)
@@ -106,7 +106,7 @@ mod tests {
 
     #[tokio::test]
     async fn deleted() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let note = client.user.create_note(Some("hmm..."), None, None).await;
 
         let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
@@ -129,7 +129,7 @@ mod tests {
 
     #[tokio::test]
     async fn poll_voted() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let poll = crate::endpoint::notes::create::PollRequest {
             choices: vec!["a".to_string(), "b".to_string()],
             multiple: Some(true),

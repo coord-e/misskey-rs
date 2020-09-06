@@ -26,7 +26,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
         let emoji_id = client.admin.add_emoji_from_url(image_url).await;
 

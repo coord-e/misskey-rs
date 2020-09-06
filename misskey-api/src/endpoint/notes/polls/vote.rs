@@ -21,7 +21,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         let poll = crate::endpoint::notes::create::PollRequest {
             choices: vec!["a".to_string(), "b".to_string(), "c".to_string()],

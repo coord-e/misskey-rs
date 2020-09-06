@@ -7,7 +7,7 @@ pub trait Client {
     type Error: std::error::Error;
 
     fn request<'a, R>(
-        &'a mut self,
+        &'a self,
         request: R,
     ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
     where

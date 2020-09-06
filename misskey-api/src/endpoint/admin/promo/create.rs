@@ -23,7 +23,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("hi"), None, None).await;
 
         client

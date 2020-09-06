@@ -45,13 +45,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 limit: Some(100),
@@ -69,7 +69,7 @@ mod tests {
     async fn request_with_options() {
         use crate::model::notification::NotificationType;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 limit: None,
@@ -90,7 +90,7 @@ mod tests {
     #[tokio::test]
     #[cfg(feature = "12-27-0")]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(crate::endpoint::notifications::create::Request {
                 body: "hi".to_string(),

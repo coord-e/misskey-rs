@@ -44,7 +44,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe_otherparty() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let admin = client.admin.me().await;
         let mut stream = client
             .user
@@ -56,7 +56,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe_group() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let group = client
             .test(crate::endpoint::users::groups::create::Request {
                 name: "test".to_string(),
@@ -68,7 +68,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_message() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let user = client.user.me().await;
         let admin = client.admin.me().await;
         let mut stream = client
@@ -100,7 +100,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_deleted() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let user = client.user.me().await;
         let admin = client.admin.me().await;
         let message = client
@@ -138,7 +138,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_read() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let admin = client.admin.me().await;
         let user = client.user.me().await;
         let message = client

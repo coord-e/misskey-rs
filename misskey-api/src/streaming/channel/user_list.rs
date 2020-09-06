@@ -36,7 +36,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "test".to_string(),
@@ -49,7 +49,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_note() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let admin = client.admin.me().await;
         let list = client
             .user
@@ -89,7 +89,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_added() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let admin = client.admin.me().await;
         let list = client
             .user
@@ -127,7 +127,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_removed() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let admin = client.admin.me().await;
         let list = client
             .user

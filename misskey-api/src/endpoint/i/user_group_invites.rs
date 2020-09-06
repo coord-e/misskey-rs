@@ -31,13 +31,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 limit: Some(100),
@@ -49,8 +49,8 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
-        let (new_user, mut new_user_client) = client.admin.create_user().await;
+        let client = TestClient::new();
+        let (new_user, new_user_client) = client.admin.create_user().await;
         let group = client
             .test(crate::endpoint::users::groups::create::Request {
                 name: "test".to_string(),

@@ -1,7 +1,4 @@
-use std::sync::Arc;
-
 use derive_more::{Display, Error, From};
-use futures::lock::Mutex;
 use futures::never::Never;
 use futures::stream::StreamExt;
 use misskey_core::{streaming::ChannelClient, Client};
@@ -27,7 +24,7 @@ enum Error {
     Client(#[error(source)] misskey_websocket::error::Error),
 }
 
-async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
+async fn post(client: &WebSocketClient) -> Result<Never, Error> {
     use tokio::io::{self, AsyncBufReadExt, BufReader};
     let mut stdin = BufReader::new(io::stdin());
 
@@ -43,8 +40,6 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
 
         // create a note containing `text` as its text
         client
-            .lock()
-            .await
             .request(
                 misskey_api::endpoint::notes::create::Request::builder()
                     .text(text)
@@ -55,13 +50,11 @@ async fn post(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
     }
 }
 
-async fn timeline(client: Arc<Mutex<WebSocketClient>>) -> Result<Never, Error> {
+async fn timeline(client: &WebSocketClient) -> Result<Never, Error> {
     use misskey_api::streaming::channel;
 
     // subscribe to the timeline
     let mut stream = client
-        .lock()
-        .await
         .connect(channel::local_timeline::Request::default())
         .await?;
 
@@ -84,11 +77,8 @@ async fn run(opt: Opt) -> Result<(), Error> {
         .connect()
         .await?;
 
-    // wrap the client to share it between tasks
-    let client = Arc::new(Mutex::new(client));
-
     // run two tasks simultaneously
-    futures::try_join!(post(Arc::clone(&client)), timeline(client))?;
+    futures::try_join!(post(&client), timeline(&client))?;
 
     // we can reason that we won't reach here from `Never` type, but omitted it for brevity
     Ok(())

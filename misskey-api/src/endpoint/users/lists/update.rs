@@ -22,7 +22,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "test".to_string(),

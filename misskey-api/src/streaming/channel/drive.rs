@@ -33,14 +33,14 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client.connect(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
     #[tokio::test]
     async fn stream_folder_created() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client.connect(Request::default()).await.unwrap();
 
         future::join(
@@ -59,7 +59,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_folder_updated() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request::default())
             .await;
@@ -85,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_folder_deleted() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request::default())
             .await;
@@ -109,7 +109,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_file_created() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let url = client.avatar_url().await;
         let mut stream = client.connect(Request::default()).await.unwrap();
 
@@ -134,7 +134,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_file_updated() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {
@@ -167,7 +167,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_file_deleted() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {

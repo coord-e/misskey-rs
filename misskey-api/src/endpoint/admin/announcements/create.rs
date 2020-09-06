@@ -28,7 +28,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .admin
             .test(Request {
@@ -41,7 +41,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_image() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
 
         client

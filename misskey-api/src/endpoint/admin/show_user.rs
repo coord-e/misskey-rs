@@ -28,7 +28,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.user.me().await;
 
         client.admin.test(Request { user_id: user.id }).await;

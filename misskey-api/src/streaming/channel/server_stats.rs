@@ -63,7 +63,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client.connect(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
@@ -72,7 +72,7 @@ mod tests {
     async fn stream_stats() {
         use std::time::Duration;
 
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client.connect(Request::default()).await.unwrap();
 
         // margin of 100 ms
@@ -92,7 +92,7 @@ mod tests {
     async fn stream_stats_log() {
         use uuid::Uuid;
 
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let (mut sink, mut stream) = client.connect(Request::default()).await.unwrap().split();
 
         future::join(

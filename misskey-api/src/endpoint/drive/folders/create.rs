@@ -22,13 +22,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_name() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 name: Some("folder".to_string()),
@@ -39,7 +39,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_parent() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(Request {
                 name: None,

@@ -28,7 +28,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,
@@ -47,7 +47,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_name() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,
@@ -66,7 +66,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_parent() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder1 = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,

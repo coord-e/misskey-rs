@@ -37,7 +37,7 @@ mod tests {
     async fn request() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let antenna = client
             .user
             .test(crate::endpoint::antennas::create::Request {
@@ -72,7 +72,7 @@ mod tests {
     async fn request_with_limit() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let antenna = client
             .user
             .test(crate::endpoint::antennas::create::Request {
@@ -107,7 +107,7 @@ mod tests {
     async fn request_paginate() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let antenna = client
             .user
             .test(crate::endpoint::antennas::create::Request {

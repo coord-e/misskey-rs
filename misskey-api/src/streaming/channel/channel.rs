@@ -31,7 +31,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),
@@ -51,7 +51,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),

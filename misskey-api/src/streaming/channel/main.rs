@@ -70,14 +70,14 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let mut stream = client.connect(Request::default()).await.unwrap();
         stream.disconnect().await.unwrap();
     }
 
     #[tokio::test]
     async fn reply() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
 
         let mut stream = client.user.connect(Request::default()).await.unwrap();
 
@@ -103,7 +103,7 @@ mod tests {
 
     #[tokio::test]
     async fn mention() {
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let me = client.user.me().await;
 
         let mut stream = client.user.connect(Request::default()).await.unwrap();

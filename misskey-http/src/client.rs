@@ -62,7 +62,7 @@ impl HttpClient {
     }
 
     pub async fn request_with_file<R: UploadFileRequest>(
-        &mut self,
+        &self,
         request: R,
         type_: Mime,
         file_name: String,
@@ -134,7 +134,7 @@ impl HttpClient {
 impl Client for HttpClient {
     type Error = Error;
 
-    fn request<'a, R>(&'a mut self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
+    fn request<'a, R>(&'a self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
     where
         R: Request + 'a,
     {
@@ -228,7 +228,7 @@ mod tests {
 
     #[tokio::test]
     async fn tokio_request() {
-        let mut client = test_client();
+        let client = test_client();
         client
             .request(
                 misskey_api::endpoint::notes::create::Request::builder()
@@ -242,7 +242,7 @@ mod tests {
 
     #[async_std::test]
     async fn async_std_request() {
-        let mut client = test_client();
+        let client = test_client();
         client
             .request(
                 misskey_api::endpoint::notes::create::Request::builder()
@@ -268,7 +268,7 @@ mod tests {
 
     #[tokio::test]
     async fn tokio_request_with_file() {
-        let mut client = test_client();
+        let client = test_client();
         let path = write_to_temp_file("test");
 
         client
@@ -285,7 +285,7 @@ mod tests {
 
     #[async_std::test]
     async fn async_std_request_with_file() {
-        let mut client = test_client();
+        let client = test_client();
         let path = write_to_temp_file("test");
 
         client

@@ -36,7 +36,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_name() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test channel".to_string(),
@@ -56,7 +56,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_description() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test channel".to_string(),
@@ -85,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_banner() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test channel".to_string(),

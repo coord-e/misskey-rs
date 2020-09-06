@@ -37,13 +37,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_option() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 following: Some(true),
@@ -59,7 +59,7 @@ mod tests {
     async fn request_with_visibilty() {
         use crate::model::note::Visibility;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         client
             .test(Request {
@@ -101,7 +101,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 following: None,
@@ -115,7 +115,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let me = client.user.me().await;
         let text = format!("hey @{}", me.username);
         let note = client.admin.create_note(Some(&text), None, None).await;

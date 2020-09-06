@@ -30,7 +30,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.user.me().await;
         let note = client.admin.create_note(Some("test"), None, None).await;
         client
@@ -49,7 +49,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let user = client.me().await;
 
         client

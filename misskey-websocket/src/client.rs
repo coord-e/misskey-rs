@@ -48,7 +48,7 @@ impl WebSocketClient {
 impl Client for WebSocketClient {
     type Error = Error;
 
-    fn request<'a, R>(&'a mut self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
+    fn request<'a, R>(&'a self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
     where
         R: misskey_core::Request + 'a,
     {
@@ -61,6 +61,7 @@ impl Client for WebSocketClient {
         Box::pin(async move {
             let (tx, rx) = response_channel(Arc::clone(&self.state));
             self.broker_tx
+                .clone()
                 .send(BrokerControl::HandleApiResponse {
                     id: id.clone(),
                     sender: tx,
@@ -92,7 +93,7 @@ where
     type Error = Error;
     type Stream = SubNote<E>;
 
-    fn subscribe_note<I>(&mut self, id: I) -> BoxFuture<'static, Result<SubNote<E>>>
+    fn subscribe_note<I>(&self, id: I) -> BoxFuture<'static, Result<SubNote<E>>>
     where
         I: Into<misskey_core::streaming::SubNoteId>,
     {
@@ -112,7 +113,7 @@ where
     type Error = Error;
     type Stream = Channel<R::Incoming, R::Outgoing>;
 
-    fn connect<'a>(&mut self, request: R) -> BoxFuture<'a, Result<Self::Stream>>
+    fn connect<'a>(&self, request: R) -> BoxFuture<'a, Result<Self::Stream>>
     where
         R: 'a,
     {
@@ -132,7 +133,7 @@ where
     type Error = Error;
     type Stream = Broadcast<E>;
 
-    fn broadcast(&mut self) -> BoxFuture<'static, Result<Self::Stream>> {
+    fn broadcast(&self) -> BoxFuture<'static, Result<Self::Stream>> {
         Box::pin(Broadcast::start(
             self.broker_tx.clone(),
             Arc::clone(&self.state),
@@ -167,7 +168,7 @@ mod tests {
     #[cfg_attr(feature = "tokio-runtime", tokio::test)]
     #[cfg_attr(feature = "async-std-runtime", async_std::test)]
     async fn request() {
-        let mut client = test_client().await;
+        let client = test_client().await;
 
         client
             .request(
@@ -183,7 +184,7 @@ mod tests {
     #[cfg_attr(feature = "tokio-runtime", tokio::test)]
     #[cfg_attr(feature = "async-std-runtime", async_std::test)]
     async fn subscribe_note() {
-        let mut client = test_client().await;
+        let client = test_client().await;
         let note = client
             .request(
                 misskey_api::endpoint::notes::create::Request::builder()

@@ -21,7 +21,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let (user, _) = client.admin.create_user().await;
         let group = client
             .test(crate::endpoint::users::groups::create::Request {

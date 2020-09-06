@@ -47,7 +47,7 @@ mod tests {
     async fn request_all() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 // random 100 chars
@@ -72,7 +72,7 @@ mod tests {
     async fn request_home() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 name: "test".to_string(),
@@ -96,7 +96,7 @@ mod tests {
     async fn request_list() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "test".to_string(),
@@ -127,7 +127,7 @@ mod tests {
     async fn request_group() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let group = client
             .test(crate::endpoint::users::groups::create::Request {
                 name: "test".to_string(),
@@ -156,7 +156,7 @@ mod tests {
     async fn request_users() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let admin = client.admin.me().await;
 
         client

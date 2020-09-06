@@ -36,7 +36,7 @@ impl TestClient {
 impl Client for TestClient {
     type Error = <WebSocketClient as Client>::Error;
     fn request<'a, R>(
-        &'a mut self,
+        &'a self,
         request: R,
     ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
     where
@@ -53,7 +53,7 @@ where
     type Error = <WebSocketClient as BroadcastClient<E>>::Error;
     type Stream = <WebSocketClient as BroadcastClient<E>>::Stream;
 
-    fn broadcast(&mut self) -> BoxFuture<'static, Result<Self::Stream, Self::Error>> {
+    fn broadcast(&self) -> BoxFuture<'static, Result<Self::Stream, Self::Error>> {
         self.user.broadcast()
     }
 }
@@ -65,7 +65,7 @@ where
     type Error = <WebSocketClient as ChannelClient<R>>::Error;
     type Stream = <WebSocketClient as ChannelClient<R>>::Stream;
 
-    fn connect<'a>(&mut self, request: R) -> BoxFuture<'a, Result<Self::Stream, Self::Error>>
+    fn connect<'a>(&self, request: R) -> BoxFuture<'a, Result<Self::Stream, Self::Error>>
     where
         R: 'a,
     {
@@ -80,7 +80,7 @@ where
     type Error = <WebSocketClient as SubNoteClient<E>>::Error;
     type Stream = <WebSocketClient as SubNoteClient<E>>::Stream;
 
-    fn subscribe_note<I>(&mut self, id: I) -> BoxFuture<'static, Result<Self::Stream, Self::Error>>
+    fn subscribe_note<I>(&self, id: I) -> BoxFuture<'static, Result<Self::Stream, Self::Error>>
     where
         I: Into<SubNoteId>,
     {

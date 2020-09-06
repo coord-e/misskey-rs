@@ -22,7 +22,7 @@ mod tests {
     async fn request() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let antenna = client
             .test(crate::endpoint::antennas::create::Request {
                 name: "test".to_string(),

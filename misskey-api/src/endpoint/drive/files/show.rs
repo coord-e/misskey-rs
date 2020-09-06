@@ -24,7 +24,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_id() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         client
             .test(Request {
@@ -36,7 +36,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_url() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         client
             .test(Request {

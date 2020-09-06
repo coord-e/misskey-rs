@@ -52,7 +52,7 @@ mod tests {
     #[tokio::test]
     #[cfg(feature = "12-9-0")]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {
@@ -69,7 +69,7 @@ mod tests {
     #[tokio::test]
     #[cfg(not(feature = "12-9-0"))]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
         let name = uuid::Uuid::new_v4().to_simple().to_string();
 
@@ -87,7 +87,7 @@ mod tests {
     #[tokio::test]
     #[cfg(not(feature = "12-9-0"))]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let image_url = client.avatar_url().await;
         let name = uuid::Uuid::new_v4().to_simple().to_string();
 

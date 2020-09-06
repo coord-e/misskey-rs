@@ -18,14 +18,14 @@ mod tests {
 
     #[tokio::test]
     async fn request_exists() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let file = client.create_text_file("test.txt", "test").await;
         client.test(Request { md5: file.md5 }).await;
     }
 
     #[tokio::test]
     async fn request_not_exists() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         // dummy
         client
             .test(Request {

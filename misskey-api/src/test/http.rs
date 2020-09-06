@@ -35,7 +35,7 @@ impl TestClient {
 impl Client for TestClient {
     type Error = <HttpClient as Client>::Error;
     fn request<'a, R>(
-        &'a mut self,
+        &'a self,
         request: R,
     ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
     where
@@ -48,7 +48,7 @@ impl Client for TestClient {
 #[async_trait::async_trait]
 pub trait HttpClientExt {
     async fn test_with_file<R, B>(
-        &mut self,
+        &self,
         req: R,
         mime: Mime,
         file_name: &str,
@@ -57,13 +57,13 @@ pub trait HttpClientExt {
     where
         R: UploadFileRequest + Send,
         B: AsRef<[u8]> + Send + Sync;
-    async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile;
+    async fn create_text_file(&self, file_name: &str, content: &str) -> DriveFile;
 }
 
 #[async_trait::async_trait]
 impl HttpClientExt for HttpClient {
     async fn test_with_file<R, B>(
-        &mut self,
+        &self,
         req: R,
         mime: Mime,
         file_name: &str,
@@ -88,7 +88,7 @@ impl HttpClientExt for HttpClient {
             .unwrap()
     }
 
-    async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile {
+    async fn create_text_file(&self, file_name: &str, content: &str) -> DriveFile {
         self.test_with_file(
             crate::endpoint::drive::files::create::Request {
                 folder_id: None,
@@ -107,7 +107,7 @@ impl HttpClientExt for HttpClient {
 #[async_trait::async_trait]
 impl HttpClientExt for TestClient {
     async fn test_with_file<R, B>(
-        &mut self,
+        &self,
         req: R,
         mime: Mime,
         file_name: &str,
@@ -122,7 +122,7 @@ impl HttpClientExt for TestClient {
             .await
     }
 
-    async fn create_text_file(&mut self, file_name: &str, content: &str) -> DriveFile {
+    async fn create_text_file(&self, file_name: &str, content: &str) -> DriveFile {
         self.user.create_text_file(file_name, content).await
     }
 }

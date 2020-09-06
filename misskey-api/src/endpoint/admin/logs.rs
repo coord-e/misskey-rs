@@ -31,13 +31,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.admin.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .admin
             .test(Request {
@@ -53,7 +53,7 @@ mod tests {
     async fn request_with_options() {
         use crate::model::log::LogLevel;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
 
         client
             .admin

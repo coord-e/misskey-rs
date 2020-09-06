@@ -48,7 +48,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),
@@ -71,7 +71,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),
@@ -94,7 +94,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),
@@ -136,7 +136,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_date() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let channel = client
             .test(crate::endpoint::channels::create::Request {
                 name: "test".to_string(),

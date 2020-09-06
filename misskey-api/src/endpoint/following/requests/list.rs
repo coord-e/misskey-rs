@@ -18,8 +18,8 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
-        let (new_user, mut new_client) = client.admin.create_user().await;
+        let client = TestClient::new();
+        let (new_user, new_client) = client.admin.create_user().await;
 
         new_client
             .test(crate::endpoint::i::update::Request {

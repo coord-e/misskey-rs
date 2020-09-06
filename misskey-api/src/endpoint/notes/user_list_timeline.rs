@@ -60,7 +60,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "testlist".to_string(),
@@ -85,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "testlist".to_string(),
@@ -110,7 +110,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "testlist".to_string(),
@@ -135,7 +135,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "testlist".to_string(),
@@ -161,7 +161,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_date() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let list = client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "testlist".to_string(),

@@ -20,7 +20,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let folder = client
             .test(crate::endpoint::drive::folders::create::Request {
                 name: None,

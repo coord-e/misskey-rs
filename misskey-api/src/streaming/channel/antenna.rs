@@ -33,7 +33,7 @@ mod tests {
     async fn subscribe_unsubscribe() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let antenna = client
             .test(crate::endpoint::antennas::create::Request {
                 name: "test".to_string(),
@@ -65,7 +65,7 @@ mod tests {
     async fn stream() {
         use crate::model::antenna::AntennaSource;
 
-        let mut client = TestClient::new().await;
+        let client = TestClient::new().await;
         let antenna = client
             .test(crate::endpoint::antennas::create::Request {
                 name: "test".to_string(),

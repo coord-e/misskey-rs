@@ -32,7 +32,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("test"), None, None).await;
         client
             .test(Request {
@@ -46,7 +46,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("test"), None, None).await;
         client
             .test(Request {
@@ -60,7 +60,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note1 = client.create_note(Some("test1"), None, None).await;
         let note2 = client
             .create_note(Some("test2"), None, Some(note1.id.clone()))

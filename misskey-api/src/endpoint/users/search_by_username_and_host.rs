@@ -35,7 +35,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 username: Some("test".to_string()),
@@ -49,7 +49,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_host() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 username: Some("test".to_string()),
@@ -63,7 +63,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 username: Some("admin".to_string()),
@@ -77,7 +77,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 username: Some("admin".to_string()),
@@ -91,7 +91,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_offset() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 username: Some("admin".to_string()),

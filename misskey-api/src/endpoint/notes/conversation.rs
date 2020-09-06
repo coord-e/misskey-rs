@@ -29,7 +29,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("test"), None, None).await;
         client
             .test(Request {
@@ -42,7 +42,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("test"), None, None).await;
         client
             .test(Request {
@@ -55,7 +55,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_offset() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("test"), None, None).await;
         client
             .test(Request {

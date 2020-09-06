@@ -144,25 +144,25 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_by_admin() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.admin.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_details() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request { detail: Some(true) }).await;
     }
 
     #[tokio::test]
     async fn request_without_details() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 detail: Some(false),

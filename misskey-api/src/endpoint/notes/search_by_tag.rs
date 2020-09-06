@@ -48,7 +48,7 @@ mod tests {
     async fn request_with_tag() {
         use crate::model::note::Tag;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 tag: Some(Tag("tag".to_string())),
@@ -68,7 +68,7 @@ mod tests {
     async fn request_with_query() {
         use crate::model::note::Tag;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 tag: None,
@@ -91,7 +91,7 @@ mod tests {
     async fn request_with_options() {
         use crate::model::note::Tag;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 tag: Some(Tag("tag".to_string())),
@@ -111,7 +111,7 @@ mod tests {
     async fn request_with_limit() {
         use crate::model::note::Tag;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 tag: Some(Tag("tag".to_string())),
@@ -131,7 +131,7 @@ mod tests {
     async fn request_paginate() {
         use crate::model::note::Tag;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.create_note(Some("#tag"), None, None).await;
 
         client

@@ -41,7 +41,7 @@ mod tests {
     async fn request() {
         use crate::model::{chart::ChartSpan, note::Tag};
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 span: ChartSpan::Day,
@@ -64,7 +64,7 @@ mod tests {
     async fn request_with_limit() {
         use crate::model::{chart::ChartSpan, note::Tag};
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 span: ChartSpan::Day,
@@ -79,7 +79,7 @@ mod tests {
     async fn request_with_offset() {
         use crate::model::{chart::ChartSpan, note::Tag};
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 span: ChartSpan::Day,

@@ -21,7 +21,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request {
             // random 100 chars
             name: "PCr35G4uQmQWU5Gypsg14cayVRtO5LHRnQ8EWxTeWo7RxrIIzDrsNDricm6u2wEdvwPEPU3CTIlmovhB98Gv4FwZYHXZEDGTDiy7".to_string()

@@ -24,13 +24,13 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client.test(Request::default()).await;
     }
 
     #[tokio::test]
     async fn request_with_option() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 group: Some(true),
@@ -41,7 +41,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         client
             .test(Request {
                 group: None,

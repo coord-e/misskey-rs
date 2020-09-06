@@ -23,7 +23,7 @@ mod tests {
     async fn request() {
         use crate::model::note::Reaction;
 
-        let mut client = TestClient::new();
+        let client = TestClient::new();
         let note = client.admin.create_note(Some("test"), None, None).await;
 
         client
