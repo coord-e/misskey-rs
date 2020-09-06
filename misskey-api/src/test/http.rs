@@ -1,10 +1,8 @@
 use crate::model::drive::DriveFile;
 use crate::test::env;
 
-use futures::future::BoxFuture;
 use mime::Mime;
-use misskey_core::model::ApiResult;
-use misskey_core::{Client, Request, UploadFileRequest};
+use misskey_core::UploadFileRequest;
 use misskey_http::HttpClient;
 use uuid::Uuid;
 
@@ -32,16 +30,10 @@ impl TestClient {
     }
 }
 
-impl Client for TestClient {
-    type Error = <HttpClient as Client>::Error;
-    fn request<'a, R>(
-        &'a self,
-        request: R,
-    ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
-    where
-        R: Request + 'a,
-    {
-        self.user.request(request)
+impl std::ops::Deref for TestClient {
+    type Target = HttpClient;
+    fn deref(&self) -> &HttpClient {
+        &self.user
     }
 }
 
@@ -101,28 +93,5 @@ impl HttpClientExt for HttpClient {
             content,
         )
         .await
-    }
-}
-
-#[async_trait::async_trait]
-impl HttpClientExt for TestClient {
-    async fn test_with_file<R, B>(
-        &self,
-        req: R,
-        mime: Mime,
-        file_name: &str,
-        content: B,
-    ) -> R::Response
-    where
-        R: UploadFileRequest + Send,
-        B: AsRef<[u8]> + Send + Sync,
-    {
-        self.user
-            .test_with_file(req, mime, file_name, content)
-            .await
-    }
-
-    async fn create_text_file(&self, file_name: &str, content: &str) -> DriveFile {
-        self.user.create_text_file(file_name, content).await
     }
 }
