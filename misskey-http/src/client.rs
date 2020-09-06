@@ -1,3 +1,4 @@
+use std::fmt::{self, Debug};
 use std::path::Path;
 
 use crate::error::{Error, Result};
@@ -22,6 +23,12 @@ pub struct HttpClient {
     url: Url,
     token: Option<String>,
     client: isahc::HttpClient,
+}
+
+impl Debug for HttpClient {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("HttpClient").finish()
+    }
 }
 
 impl HttpClient {

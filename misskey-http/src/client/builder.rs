@@ -4,6 +4,7 @@ use crate::error::Result;
 use isahc::http::header::{HeaderMap, HeaderValue, IntoHeaderName};
 use url::Url;
 
+#[derive(Debug, Clone)]
 pub struct HttpClientBuilder {
     url: Url,
     token: Option<String>,

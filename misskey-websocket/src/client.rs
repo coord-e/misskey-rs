@@ -1,3 +1,4 @@
+use std::fmt::{self, Debug};
 use std::sync::Arc;
 
 use crate::broker::{
@@ -23,11 +24,17 @@ pub mod stream;
 
 use stream::{Broadcast, Channel, SubNote};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct WebSocketClient {
     websocket_tx: SharedWebSocketSender,
     broker_tx: ControlSender,
     state: SharedBrokerState,
+}
+
+impl Debug for WebSocketClient {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("WebSocketClient").finish()
+    }
 }
 
 impl WebSocketClient {
