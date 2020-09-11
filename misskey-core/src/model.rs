@@ -1,3 +1,6 @@
+use std::error::Error;
+use std::fmt::{self, Display};
+
 use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 
@@ -20,6 +23,19 @@ pub struct ApiError {
     pub code: String,
     pub kind: ApiErrorKind,
 }
+
+impl Display for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.kind {
+            ApiErrorKind::Client => write!(f, "Client error: ")?,
+            ApiErrorKind::Server => write!(f, "Server error: ")?,
+        }
+
+        write!(f, "{} ({})", self.message, self.code)
+    }
+}
+
+impl Error for ApiError {}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]

@@ -5,5 +5,5 @@ members = [
   "misskey-core",
   "misskey-http",
   "misskey-websocket",
-  "example/timeline",
+  "example/streaming",
 ]
