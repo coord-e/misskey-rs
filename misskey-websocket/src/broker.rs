@@ -11,7 +11,7 @@ use async_std::task;
 use async_std::task::sleep as delay_for;
 use async_tungstenite::tungstenite::Error as WsError;
 use futures::stream::StreamExt;
-use log::{debug, info, warn};
+use log::{info, warn};
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
 use tokio::task;
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
@@ -213,7 +213,7 @@ impl Broker {
                 Either::Left((msg, _)) => {
                     while let Some(ctrl) = self.broker_rx.try_recv() {
                         #[cfg(feature = "inspect-contents")]
-                        debug!("broker: received control {:?}", ctrl);
+                        log::debug!("broker: received control {:?}", ctrl);
 
                         if let Some(out) = self.handler.control(ctrl) {
                             websocket_tx.try_send(out).await?
@@ -224,7 +224,7 @@ impl Broker {
                 }
                 Either::Right((Some(ctrl), _)) => {
                     #[cfg(feature = "inspect-contents")]
-                    debug!("broker: received control {:?}", ctrl);
+                    log::debug!("broker: received control {:?}", ctrl);
 
                     if let Some(out) = self.handler.control(ctrl) {
                         websocket_tx.try_send(out).await?
