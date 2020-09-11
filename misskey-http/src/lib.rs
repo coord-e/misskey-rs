@@ -1,4 +1,5 @@
 mod client;
-pub mod error;
+mod error;
 
 pub use client::{builder::HttpClientBuilder, HttpClient};
+pub use error::Error;

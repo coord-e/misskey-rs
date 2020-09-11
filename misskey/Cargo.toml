@@ -1,0 +1,36 @@
+[package]
+name = "misskey"
+version = "0.1.0"
+authors = ["coord.e <me@coord-e.com>"]
+edition = "2018"
+
+[features]
+default = ["12-47-0", "http-client", "websocket-client", "tokio-runtime"]
+
+12-47-0 = ["misskey-api/12-47-0"]
+12-39-0 = ["misskey-api/12-39-0"]
+12-37-0 = ["misskey-api/12-37-0"]
+12-31-0 = ["misskey-api/12-31-0"]
+12-29-0 = ["misskey-api/12-29-0"]
+12-28-0 = ["misskey-api/12-28-0"]
+12-27-0 = ["misskey-api/12-27-0"]
+12-19-0 = ["misskey-api/12-19-0"]
+12-13-0 = ["misskey-api/12-13-0"]
+12-10-0 = ["misskey-api/12-10-0"]
+12-9-0 = ["misskey-api/12-9-0"]
+12-8-0 = ["misskey-api/12-8-0"]
+12-5-0 = ["misskey-api/12-5-0"]
+
+http-client = ["misskey-http"]
+websocket-client = ["misskey-websocket"]
+
+tokio-runtime = ["misskey-websocket/tokio-runtime"]
+async-std-runtime = ["misskey-websocket/async-std-runtime"]
+
+inspect-contents = ["misskey-http/inspect-contents", "misskey-websocket/inspect-contents"]
+
+[dependencies]
+misskey-core = { path = "../misskey-core" }
+misskey-api = { path = "../misskey-api", default-features = false }
+misskey-websocket = { path = "../misskey-websocket", default-features = false, optional = true }
+misskey-http = { path = "../misskey-http", default-features = false, optional = true }

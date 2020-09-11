@@ -5,9 +5,7 @@ authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
 
 [dependencies]
-misskey-websocket = { path = "../../misskey-websocket" }
-misskey-api = { path = "../../misskey-api" }
-misskey-core = { path = "../../misskey-core" }
+misskey = { path = "../../misskey" }
 tokio = { version = "0.2", features = ["full"] }
 structopt = "0.3.16"
 url = "2.1.1"

@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "misskey",
   "misskey-api",
   "misskey-core",
   "misskey-http",

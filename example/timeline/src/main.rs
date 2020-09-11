@@ -1,8 +1,8 @@
 use derive_more::{Display, Error, From};
 use futures::never::Never;
 use futures::stream::StreamExt;
-use misskey_core::Client;
-use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
+use misskey::Client;
+use misskey::{WebSocketClient, WebSocketClientBuilder};
 use structopt::StructOpt;
 use url::Url;
 
@@ -19,9 +19,9 @@ enum Error {
     #[display(fmt = "IO error: {}", _0)]
     Io(#[error(source)] tokio::io::Error),
     #[display(fmt = "API error: {} ({})", "_0.message", "_0.id")]
-    Api(#[error(not(source))] misskey_core::model::ApiError),
-    #[display(fmt = "JSON error: {}", _0)]
-    Client(#[error(source)] misskey_websocket::error::Error),
+    Api(#[error(not(source))] misskey::model::ApiError),
+    #[display(fmt = "WebSocket error: {}", _0)]
+    Client(#[error(source)] misskey::websocket::Error),
 }
 
 async fn post(client: &WebSocketClient) -> Result<Never, Error> {
@@ -41,7 +41,7 @@ async fn post(client: &WebSocketClient) -> Result<Never, Error> {
         // create a note containing `text` as its text
         client
             .request(
-                misskey_api::endpoint::notes::create::Request::builder()
+                misskey::endpoint::notes::create::Request::builder()
                     .text(text)
                     .build(),
             )
@@ -51,7 +51,7 @@ async fn post(client: &WebSocketClient) -> Result<Never, Error> {
 }
 
 async fn timeline(client: &WebSocketClient) -> Result<Never, Error> {
-    use misskey_api::streaming::channel;
+    use misskey::streaming::channel;
 
     // subscribe to the timeline
     let mut stream = client
