@@ -64,6 +64,13 @@ impl WebSocketClientBuilder {
         self
     }
 
+    pub fn reconnect_retry_send(&mut self, enable: bool) -> &mut Self {
+        self.reconnect
+            .get_or_insert_with(ReconnectConfig::default)
+            .retry_send = enable;
+        self
+    }
+
     pub async fn connect(&self) -> Result<WebSocketClient> {
         let mut url = self.url.clone();
 

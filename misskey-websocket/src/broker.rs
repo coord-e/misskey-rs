@@ -1,15 +1,15 @@
 use std::fmt::{self, Debug};
 use std::time::Duration;
 
-use crate::channel::{connect_websocket, WebSocketReceiver};
+use crate::channel::{connect_websocket, TrySendError, WebSocketReceiver};
 use crate::error::{Error, Result};
+use crate::model::outgoing::OutgoingMessage;
 
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::task;
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::task::sleep as delay_for;
 use async_tungstenite::tungstenite::Error as WsError;
-use futures::sink::SinkExt;
 use futures::stream::StreamExt;
 use log::{debug, info, warn};
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
@@ -85,6 +85,7 @@ impl Default for ReconnectCondition {
 pub struct ReconnectConfig {
     pub interval: Duration,
     pub condition: ReconnectCondition,
+    pub retry_send: bool,
 }
 
 impl Default for ReconnectConfig {
@@ -92,6 +93,7 @@ impl Default for ReconnectConfig {
         ReconnectConfig {
             interval: Duration::from_secs(5),
             condition: ReconnectCondition::default(),
+            retry_send: true,
         }
     }
 }
@@ -130,8 +132,10 @@ impl Broker {
     }
 
     async fn run(&mut self) -> Option<Error> {
+        let mut remaining_message = None;
+
         loop {
-            let err = match self.task().await {
+            let err = match self.task(remaining_message.take()).await {
                 Ok(()) => {
                     info!("broker: exited normally");
                     return None;
@@ -139,15 +143,19 @@ impl Broker {
                 Err(e) => e,
             };
 
-            info!("broker: task exited with error: {:?}", err);
+            info!("broker: task exited with error: {:?}", err.error);
 
             let config = match &self.reconnect {
-                Some(config) if config.condition.should_reconnect(&err) => config,
+                Some(config) if config.condition.should_reconnect(&err.error) => config,
                 _ => {
                     warn!("broker: died with error");
-                    return Some(err);
+                    return Some(err.error);
                 }
             };
+
+            if config.retry_send {
+                remaining_message = err.remaining_message;
+            }
 
             info!("broker: attempt to reconnect in {:?}", config.interval);
             delay_for(config.interval).await;
@@ -168,15 +176,31 @@ impl Broker {
         Ok(())
     }
 
-    async fn task(&mut self) -> Result<()> {
+    async fn task(
+        &mut self,
+        remaining_message: Option<OutgoingMessage>,
+    ) -> std::result::Result<(), TaskError> {
         use futures::future::{self, Either};
 
-        let (mut websocket_tx, mut websocket_rx) = connect_websocket(self.url.clone()).await?;
+        let (mut websocket_tx, mut websocket_rx) = match connect_websocket(self.url.clone()).await {
+            Ok(x) => x,
+            Err(error) => {
+                // retain `remaining_message` because we've not sent it yet
+                return Err(TaskError {
+                    remaining_message,
+                    error,
+                });
+            }
+        };
 
         info!("broker: started");
 
-        for out in self.handler.restore_messages() {
-            websocket_tx.send(out).await?;
+        if let Some(message) = remaining_message {
+            websocket_tx.try_send(message).await?;
+        }
+
+        for message in self.handler.restore_messages() {
+            websocket_tx.try_send(message).await?;
         }
 
         loop {
@@ -192,7 +216,7 @@ impl Broker {
                         debug!("broker: received control {:?}", ctrl);
 
                         if let Some(out) = self.handler.control(ctrl) {
-                            websocket_tx.send(out).await?;
+                            websocket_tx.try_send(out).await?
                         }
                     }
 
@@ -203,14 +227,39 @@ impl Broker {
                     debug!("broker: received control {:?}", ctrl);
 
                     if let Some(out) = self.handler.control(ctrl) {
-                        websocket_tx.send(out).await?;
+                        websocket_tx.try_send(out).await?
                     }
                 }
                 Either::Right((None, _)) => {
                     info!("broker: all controls terminated, exiting gracefully");
-                    return self.clean_handler(&mut websocket_rx).await;
+                    return Ok(self.clean_handler(&mut websocket_rx).await?);
                 }
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+struct TaskError {
+    remaining_message: Option<OutgoingMessage>,
+    error: Error,
+}
+
+impl From<Error> for TaskError {
+    fn from(error: Error) -> TaskError {
+        TaskError {
+            remaining_message: None,
+            error,
+        }
+    }
+}
+
+impl From<TrySendError> for TaskError {
+    fn from(err: TrySendError) -> TaskError {
+        let TrySendError { message, error } = err;
+        TaskError {
+            remaining_message: Some(message),
+            error,
         }
     }
 }

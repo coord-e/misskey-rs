@@ -77,21 +77,40 @@ impl WebSocketReceiver {
 /// Sender channel that communicates with Misskey
 pub struct WebSocketSender(SplitSink<WebSocketStream<ConnectStream>, WsMessage>);
 
+#[derive(Debug, Clone)]
+pub struct TrySendError {
+    pub message: OutgoingMessage,
+    pub error: Error,
+}
+
+impl WebSocketSender {
+    /// convenient method that retains the message in the error
+    pub async fn try_send(
+        &mut self,
+        item: OutgoingMessage,
+    ) -> std::result::Result<(), TrySendError> {
+        self.send(&item).await.map_err(|error| TrySendError {
+            message: item,
+            error,
+        })
+    }
+}
+
 impl fmt::Debug for WebSocketSender {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("WebSocketSender").finish()
     }
 }
 
-impl Sink<OutgoingMessage> for WebSocketSender {
+impl Sink<&'_ OutgoingMessage> for WebSocketSender {
     type Error = Error;
 
     fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
         self.0.poll_ready_unpin(cx).map_err(Into::into)
     }
 
-    fn start_send(mut self: Pin<&mut Self>, item: OutgoingMessage) -> Result<()> {
-        let msg = WsMessage::Text(serde_json::to_string(&item)?);
+    fn start_send(mut self: Pin<&mut Self>, item: &OutgoingMessage) -> Result<()> {
+        let msg = WsMessage::Text(serde_json::to_string(item)?);
 
         #[cfg(feature = "inspect-contents")]
         debug!("send message: {:?}", msg);
