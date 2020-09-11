@@ -6,4 +6,5 @@ members = [
   "misskey-http",
   "misskey-websocket",
   "example/streaming",
+  "example/ping-pong",
 ]
