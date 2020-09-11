@@ -41,6 +41,7 @@ async fn main() -> Result<()> {
             .unwrap()
             .context("Failed to obtain the next event")?;
 
+        println!("{:?}", event);
         match event {
             // Handle `Mention` event and extract inner `Note`
             MainStreamEvent::Mention(Note {

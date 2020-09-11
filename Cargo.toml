@@ -8,4 +8,6 @@ members = [
   "example/streaming",
   "example/ping-pong",
   "example/upload-file",
+  "example/create-note",
+  "example/word-reply",
 ]
