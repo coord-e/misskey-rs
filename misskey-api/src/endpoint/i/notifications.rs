@@ -99,25 +99,28 @@ mod tests {
             })
             .await;
 
-        let notification = client
-            .test(Request {
-                limit: None,
-                since_id: None,
-                until_id: None,
-                following: None,
-                mark_as_read: None,
-                include_types: None,
-                exclude_types: None,
-            })
-            .await
-            .pop()
-            .unwrap();
+        let mut notification = None;
+        while notification.is_none() {
+            notification = client
+                .test(Request {
+                    limit: None,
+                    since_id: None,
+                    until_id: None,
+                    following: None,
+                    mark_as_read: None,
+                    include_types: None,
+                    exclude_types: None,
+                })
+                .await
+                .pop();
+        }
+        let notification_id = notification.unwrap().id;
 
         client
             .test(Request {
                 limit: None,
-                since_id: Some(notification.id.clone()),
-                until_id: Some(notification.id.clone()),
+                since_id: Some(notification_id.clone()),
+                until_id: Some(notification_id.clone()),
                 following: None,
                 mark_as_read: None,
                 include_types: None,
