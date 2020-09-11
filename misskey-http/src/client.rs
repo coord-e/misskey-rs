@@ -74,7 +74,7 @@ impl HttpClient {
         &self,
         request: R,
         type_: Mime,
-        file_name: String,
+        file_name: impl Into<String>,
         path: impl AsRef<Path>,
     ) -> Result<ApiResult<R::Response>> {
         let url = self

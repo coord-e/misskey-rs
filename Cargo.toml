@@ -7,4 +7,5 @@ members = [
   "misskey-websocket",
   "example/streaming",
   "example/ping-pong",
+  "example/upload-file",
 ]

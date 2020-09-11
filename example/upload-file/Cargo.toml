@@ -1,0 +1,14 @@
+[package]
+name = "upload-file"
+version = "0.1.0"
+authors = ["coord.e <me@coord-e.com>"]
+edition = "2018"
+
+[dependencies]
+misskey = { path = "../../misskey", features = ["http-client"] }
+tokio = { version = "0.2", features = ["full"] }
+mime_guess = "2.0"
+structopt = "0.3.16"
+url = "2.1.1"
+futures = "0.3.5"
+anyhow = "1.0"
