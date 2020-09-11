@@ -5,8 +5,9 @@ authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
 
 [features]
-default = ["12-47-0", "http-client", "websocket-client", "tokio-runtime"]
+default = ["12-47-2", "tokio-runtime"]
 
+12-47-2 = ["misskey-api/12-47-2"]
 12-47-0 = ["misskey-api/12-47-0"]
 12-39-0 = ["misskey-api/12-39-0"]
 12-37-0 = ["misskey-api/12-37-0"]
