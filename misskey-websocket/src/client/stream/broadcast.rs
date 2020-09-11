@@ -10,6 +10,7 @@ use crate::error::Result;
 
 use futures::{
     executor,
+    sink::SinkExt,
     stream::{FusedStream, Stream, StreamExt},
 };
 use log::{info, warn};

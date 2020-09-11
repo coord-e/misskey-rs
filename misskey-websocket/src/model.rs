@@ -15,7 +15,7 @@ impl ChannelId {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct ApiRequestId(pub Uuid);
 

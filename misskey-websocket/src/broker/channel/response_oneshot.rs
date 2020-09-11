@@ -29,7 +29,7 @@ impl<T> ResponseReceiver<T> {
                 let err = state
                     .dead()
                     .expect("broker control channel unexpectedly closed");
-                Err(err.clone())
+                Err(err)
             }
         }
     }

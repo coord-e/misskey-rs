@@ -6,9 +6,7 @@ use crate::broker::{
     channel::{response_stream_channel, ControlSender, ResponseStreamReceiver},
     model::{BrokerControl, SharedBrokerState},
 };
-use crate::channel::SharedWebSocketSender;
 use crate::error::Result;
-use crate::model::outgoing::OutgoingMessage;
 
 use futures::{
     executor,
@@ -25,7 +23,6 @@ pub struct SubNote<E> {
     id: SubNoteId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<Value>,
-    websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
     _marker: PhantomData<fn() -> E>,
 }
@@ -35,7 +32,6 @@ impl<E> SubNote<E> {
         id: SubNoteId,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-        websocket_tx: SharedWebSocketSender,
     ) -> Result<SubNote<E>> {
         let (response_tx, response_rx) = response_stream_channel(state);
         broker_tx
@@ -45,17 +41,10 @@ impl<E> SubNote<E> {
             })
             .await?;
 
-        websocket_tx
-            .lock()
-            .await
-            .send(OutgoingMessage::SubNote { id: id.clone() })
-            .await?;
-
         Ok(SubNote {
             id,
             broker_tx,
             response_rx,
-            websocket_tx,
             is_terminated: false,
             _marker: PhantomData,
         })
@@ -69,14 +58,6 @@ impl<E> SubNote<E> {
 
         self.broker_tx
             .send(BrokerControl::UnsubNote {
-                id: self.id.clone(),
-            })
-            .await?;
-
-        self.websocket_tx
-            .lock()
-            .await
-            .send(OutgoingMessage::UnsubNote {
                 id: self.id.clone(),
             })
             .await?;
@@ -122,7 +103,7 @@ impl<E> Drop for SubNote<E> {
         }
 
         executor::block_on(async {
-            // If the broker or websocket connection is dead, we don't need to unsubscribe anyway
+            // If the broker connection is dead, we don't need to unsubscribe anyway
             // because the client can't be used anymore.
             if let Err(e) = self.unsubscribe().await {
                 warn!(

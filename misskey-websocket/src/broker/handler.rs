@@ -10,6 +10,7 @@ use crate::model::{
         ApiMessage, ChannelMessage, ConnectedMessage, IncomingMessage, IncomingMessageType,
         NoteUpdatedMessage,
     },
+    outgoing::OutgoingMessage,
     ApiRequestId, ChannelId,
 };
 
@@ -36,34 +37,53 @@ impl Handler {
         }
     }
 
-    pub fn update(&mut self, ctrl: BrokerControl) {
+    pub fn control(&mut self, ctrl: BrokerControl) -> Option<OutgoingMessage> {
         match ctrl {
-            BrokerControl::HandleApiResponse { id, sender } => {
+            BrokerControl::Api {
+                id,
+                endpoint,
+                data,
+                sender,
+            } => {
                 self.api.insert(id, sender);
+                Some(OutgoingMessage::Api { id, endpoint, data })
             }
-            // not using `name` because we can determine corresponding sender by ID
             BrokerControl::Connect {
                 id,
                 sender,
-                name: _,
+                params,
+                name,
                 pong,
             } => {
                 self.channel.insert(id, (sender, Some(pong)));
+                Some(OutgoingMessage::Connect {
+                    channel: name,
+                    id,
+                    params,
+                    pong: true,
+                })
+            }
+            BrokerControl::Channel { id, message } => {
+                Some(OutgoingMessage::Channel { id, message })
             }
             BrokerControl::Disconnect { id } => {
                 self.channel.remove(&id);
+                Some(OutgoingMessage::Disconnect { id })
             }
             BrokerControl::SubNote { id, sender } => {
-                self.sub_note.insert(id, sender);
+                self.sub_note.insert(id.clone(), sender);
+                Some(OutgoingMessage::SubNote { id })
             }
             BrokerControl::UnsubNote { id } => {
                 self.sub_note.remove(&id);
+                Some(OutgoingMessage::UnsubNote { id })
             }
             BrokerControl::StartBroadcast { id, type_, sender } => {
                 self.broadcast
                     .entry(type_)
                     .or_insert_with(HashMap::new)
                     .insert(id, sender);
+                None
             }
             BrokerControl::StopBroadcast { id } => {
                 for senders in &mut self.broadcast.values_mut() {
@@ -71,6 +91,7 @@ impl Handler {
                         break;
                     }
                 }
+                None
             }
         }
     }

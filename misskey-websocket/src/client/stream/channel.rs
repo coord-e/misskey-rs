@@ -1,8 +1,6 @@
-use std::collections::VecDeque;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
-use std::sync::Arc;
 use std::task::{Context, Poll};
 
 use crate::broker::{
@@ -11,13 +9,11 @@ use crate::broker::{
     },
     model::{BrokerControl, SharedBrokerState},
 };
-use crate::channel::SharedWebSocketSender;
 use crate::error::{Error, Result};
-use crate::model::{outgoing::OutgoingMessage, ChannelId};
+use crate::model::ChannelId;
 
 use futures::{
     executor,
-    future::FutureExt,
     sink::{Sink, SinkExt},
     stream::{FusedStream, Stream, StreamExt},
 };
@@ -32,9 +28,7 @@ pub struct Channel<I, O> {
     id: ChannelId,
     broker_tx: ControlSender,
     response_rx: ResponseStreamReceiver<Value>,
-    websocket_tx: SharedWebSocketSender,
     is_terminated: bool,
-    sink_buffer: VecDeque<OutgoingMessage>,
     _marker: PhantomData<fn() -> (I, O)>,
 }
 
@@ -47,14 +41,13 @@ where
         req: R,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-        websocket_tx: SharedWebSocketSender,
     ) -> impl Future<Output = Result<Channel<I, O>>>
     where
         R: ConnectChannelRequest<Incoming = I, Outgoing = O>,
     {
         let id = ChannelId::uuid();
 
-        let (response_tx, response_rx) = response_stream_channel(Arc::clone(&state));
+        let (response_tx, response_rx) = response_stream_channel(SharedBrokerState::clone(&state));
         let (pong_tx, pong_rx) = channel_pong_channel(state);
 
         // limit the use of `R` to the outside of `async`
@@ -66,19 +59,9 @@ where
                 .send(BrokerControl::Connect {
                     id,
                     name: R::NAME,
+                    params: serialized_req?,
                     sender: response_tx,
                     pong: pong_tx,
-                })
-                .await?;
-
-            websocket_tx
-                .lock()
-                .await
-                .send(OutgoingMessage::Connect {
-                    channel: R::NAME,
-                    id,
-                    params: serialized_req?,
-                    pong: true,
                 })
                 .await?;
 
@@ -89,9 +72,7 @@ where
                 id,
                 broker_tx,
                 response_rx,
-                websocket_tx,
                 is_terminated: false,
-                sink_buffer: VecDeque::new(),
                 _marker: PhantomData,
             })
         }
@@ -107,12 +88,6 @@ impl<I, O> Channel<I, O> {
 
         self.broker_tx
             .send(BrokerControl::Disconnect { id: self.id })
-            .await?;
-
-        self.websocket_tx
-            .lock()
-            .await
-            .send(OutgoingMessage::Disconnect { id: self.id })
             .await?;
 
         self.is_terminated = true;
@@ -146,60 +121,24 @@ where
 {
     type Error = Error;
 
-    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
-        match self.websocket_tx.lock().poll_unpin(cx) {
-            Poll::Pending => Poll::Pending,
-            Poll::Ready(mut lock) => lock.poll_ready_unpin(cx),
-        }
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.broker_tx.poll_ready_unpin(cx)
     }
 
-    fn start_send(self: Pin<&mut Self>, item: O) -> Result<()> {
-        let message = OutgoingMessage::Channel {
+    fn start_send(mut self: Pin<&mut Self>, item: O) -> Result<()> {
+        let item = BrokerControl::Channel {
             id: self.id,
             message: serde_json::to_value(item)?,
         };
-
-        if let Some(mut lock) = self.websocket_tx.try_lock() {
-            return lock.start_send_unpin(message);
-        }
-
-        self.get_mut().sink_buffer.push_back(message);
-        Ok(())
+        self.broker_tx.start_send_unpin(item)
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
-        let Self {
-            websocket_tx,
-            sink_buffer,
-            ..
-        } = &mut *self;
-
-        let mut lock = match websocket_tx.lock().poll_unpin(cx) {
-            Poll::Pending => return Poll::Pending,
-            Poll::Ready(lock) => lock,
-        };
-
-        while let Some(message) = sink_buffer.pop_front() {
-            lock.start_send_unpin(message)?;
-        }
-
-        lock.poll_flush_unpin(cx)
+        self.broker_tx.poll_flush_unpin(cx)
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
-        if !self.sink_buffer.is_empty() {
-            match self.poll_flush_unpin(cx) {
-                Poll::Ready(Ok(())) => (),
-                p => return p,
-            }
-        }
-
-        assert!(self.sink_buffer.is_empty());
-
-        match self.websocket_tx.lock().poll_unpin(cx) {
-            Poll::Pending => Poll::Pending,
-            Poll::Ready(mut lock) => lock.poll_close_unpin(cx),
-        }
+        self.broker_tx.poll_close_unpin(cx)
     }
 }
 

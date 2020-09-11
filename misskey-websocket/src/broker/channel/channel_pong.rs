@@ -29,7 +29,7 @@ impl ChannelPongReceiver {
                 let err = state
                     .dead()
                     .expect("channel pong channel unexpectedly closed");
-                Err(err.clone())
+                Err(err)
             }
         }
     }

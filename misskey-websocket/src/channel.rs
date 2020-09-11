@@ -1,7 +1,7 @@
+use std::fmt;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use std::{fmt, sync::Arc};
 
 use crate::error::{Error, Result};
 use crate::model::{incoming::IncomingMessage, outgoing::OutgoingMessage};
@@ -13,7 +13,6 @@ use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::{error::Error as WsError, Message as WsMessage};
 use async_tungstenite::WebSocketStream;
 use futures::{
-    lock::Mutex,
     sink::{Sink, SinkExt},
     stream::{SplitSink, SplitStream, Stream, StreamExt},
 };
@@ -108,8 +107,6 @@ impl Sink<OutgoingMessage> for WebSocketSender {
         self.0.poll_close_unpin(cx).map_err(Into::into)
     }
 }
-
-pub type SharedWebSocketSender = Arc<Mutex<WebSocketSender>>;
 
 pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceiver)> {
     let (ws, _) = connect_async(url).await?;

@@ -2,9 +2,10 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use crate::broker::model::{BrokerControl, SharedBrokerState};
-use crate::error::Result;
+use crate::error::{Error, Result};
 
 use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
+use futures::sink::{Sink, SinkExt};
 use futures::stream::{FusedStream, Stream, StreamExt};
 
 /// Sender channel that the client uses to communicate with broker
@@ -15,16 +16,43 @@ pub(crate) struct ControlSender {
 }
 
 impl ControlSender {
-    pub async fn send(&mut self, ctrl: BrokerControl) -> Result<()> {
-        if self.inner.unbounded_send(ctrl).is_err() {
-            let state = self.state.read().await;
-            let err = state
-                .dead()
-                .expect("broker control channel unexpectedly closed");
-            Err(err.clone())
-        } else {
-            Ok(())
-        }
+    /// obtain `Error` from shared state after broker is dead (incompletely witnessed by `SendError`)
+    fn to_error(&self, _witness: &mpsc::SendError) -> Error {
+        let state = self
+            .state
+            .try_read()
+            .expect("broker state must be unlocked after broker is dead");
+        state
+            .dead()
+            .expect("broker control channel unexpectedly closed")
+    }
+}
+
+impl Sink<BrokerControl> for ControlSender {
+    type Error = Error;
+
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.inner
+            .poll_ready_unpin(cx)
+            .map_err(|e| self.to_error(&e))
+    }
+
+    fn start_send(mut self: Pin<&mut Self>, item: BrokerControl) -> Result<()> {
+        self.inner
+            .start_send_unpin(item)
+            .map_err(|e| self.to_error(&e))
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.inner
+            .poll_flush_unpin(cx)
+            .map_err(|e| self.to_error(&e))
+    }
+
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<()>> {
+        self.inner
+            .poll_close_unpin(cx)
+            .map_err(|e| self.to_error(&e))
     }
 }
 
