@@ -4,7 +4,7 @@ use std::future::Future;
 use crate::broker::{
     channel::{response_channel, ControlSender},
     model::{BrokerControl, SharedBrokerState},
-    Broker,
+    Broker, ReconnectConfig,
 };
 use crate::error::{Error, Result};
 use crate::model::ApiRequestId;
@@ -33,8 +33,8 @@ impl Debug for WebSocketClient {
 }
 
 impl WebSocketClient {
-    pub async fn connect(url: Url) -> Result<WebSocketClient> {
-        let (broker_tx, state) = Broker::spawn(url).await?;
+    pub async fn connect(url: Url, reconnect: Option<ReconnectConfig>) -> Result<WebSocketClient> {
+        let (broker_tx, state) = Broker::spawn(url, reconnect).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 

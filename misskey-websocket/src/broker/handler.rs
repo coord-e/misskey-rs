@@ -20,10 +20,29 @@ use misskey_core::streaming::SubNoteId;
 use serde_json::value::{self, Value};
 
 #[derive(Debug)]
+struct ApiHandler {
+    message: OutgoingMessage,
+    sender: ResponseSender<ApiResult<Value>>,
+}
+
+#[derive(Debug)]
+struct SubNoteHandler {
+    message: OutgoingMessage,
+    sender: ResponseStreamSender<Value>,
+}
+
+#[derive(Debug)]
+struct ChannelHandler {
+    message: OutgoingMessage,
+    pong: Option<ChannelPongSender>,
+    sender: ResponseStreamSender<Value>,
+}
+
+#[derive(Debug)]
 pub(crate) struct Handler {
-    api: HashMap<ApiRequestId, ResponseSender<ApiResult<Value>>>,
-    sub_note: HashMap<SubNoteId, ResponseStreamSender<Value>>,
-    channel: HashMap<ChannelId, (ResponseStreamSender<Value>, Option<ChannelPongSender>)>,
+    api: HashMap<ApiRequestId, ApiHandler>,
+    sub_note: HashMap<SubNoteId, SubNoteHandler>,
+    channel: HashMap<ChannelId, ChannelHandler>,
     broadcast: HashMap<&'static str, HashMap<BroadcastId, ResponseStreamSender<Value>>>,
 }
 
@@ -37,6 +56,25 @@ impl Handler {
         }
     }
 
+    pub fn restore_messages(&mut self) -> Vec<OutgoingMessage> {
+        let mut messages = Vec::new();
+
+        for ApiHandler { message, .. } in self.api.values() {
+            messages.push(message.clone());
+        }
+
+        for SubNoteHandler { message, .. } in self.sub_note.values() {
+            messages.push(message.clone());
+        }
+
+        for ChannelHandler { message, .. } in self.channel.values() {
+            // TODO: Handle ping/pong in reconnect
+            messages.push(message.clone());
+        }
+
+        messages
+    }
+
     pub fn control(&mut self, ctrl: BrokerControl) -> Option<OutgoingMessage> {
         match ctrl {
             BrokerControl::Api {
@@ -45,8 +83,13 @@ impl Handler {
                 data,
                 sender,
             } => {
-                self.api.insert(id, sender);
-                Some(OutgoingMessage::Api { id, endpoint, data })
+                let message = OutgoingMessage::Api { id, endpoint, data };
+                let handler = ApiHandler {
+                    message: message.clone(),
+                    sender,
+                };
+                self.api.insert(id, handler);
+                Some(message)
             }
             BrokerControl::Connect {
                 id,
@@ -55,13 +98,19 @@ impl Handler {
                 name,
                 pong,
             } => {
-                self.channel.insert(id, (sender, Some(pong)));
-                Some(OutgoingMessage::Connect {
+                let message = OutgoingMessage::Connect {
                     channel: name,
                     id,
                     params,
                     pong: true,
-                })
+                };
+                let handler = ChannelHandler {
+                    message: message.clone(),
+                    sender,
+                    pong: Some(pong),
+                };
+                self.channel.insert(id, handler);
+                Some(message)
             }
             BrokerControl::Channel { id, message } => {
                 Some(OutgoingMessage::Channel { id, message })
@@ -71,8 +120,13 @@ impl Handler {
                 Some(OutgoingMessage::Disconnect { id })
             }
             BrokerControl::SubNote { id, sender } => {
-                self.sub_note.insert(id.clone(), sender);
-                Some(OutgoingMessage::SubNote { id })
+                let message = OutgoingMessage::SubNote { id: id.clone() };
+                let handler = SubNoteHandler {
+                    message: message.clone(),
+                    sender,
+                };
+                self.sub_note.insert(id, handler);
+                Some(message)
             }
             BrokerControl::UnsubNote { id } => {
                 self.sub_note.remove(&id);
@@ -106,7 +160,7 @@ impl Handler {
     pub async fn handle(&mut self, msg: IncomingMessage) -> Result<()> {
         match msg.type_ {
             IncomingMessageType::Api(id) => {
-                if let Some(sender) = self.api.remove(&id) {
+                if let Some(ApiHandler { sender, .. }) = self.api.remove(&id) {
                     let msg: ApiResult<ApiMessage> = value::from_value(msg.body)?;
                     sender.send(msg.map(Into::into));
                 } else {
@@ -117,7 +171,7 @@ impl Handler {
             IncomingMessageType::Channel => {
                 let ChannelMessage { id, message } = value::from_value(msg.body)?;
 
-                let (sender, _) = match self.channel.get_mut(&id) {
+                let ChannelHandler { sender, .. } = match self.channel.get_mut(&id) {
                     Some(x) => x,
                     None => {
                         warn!("unhandled channel message with id {}, skipping", id);
@@ -133,7 +187,7 @@ impl Handler {
             IncomingMessageType::Connected => {
                 let ConnectedMessage { id } = value::from_value(msg.body)?;
 
-                let (_, pong) = match self.channel.get_mut(&id) {
+                let ChannelHandler { pong, .. } = match self.channel.get_mut(&id) {
                     Some(x) => x,
                     None => {
                         warn!("unhandled connected message with id {}, skipping", id);
@@ -144,13 +198,13 @@ impl Handler {
                 if let Some(pong) = pong.take() {
                     pong.send();
                 } else {
-                    warn!("duplicated connected message with id {}, skipping", id);
+                    info!("duplicated connected message with id {}, skipping", id);
                 }
             }
             IncomingMessageType::NoteUpdated => {
                 let NoteUpdatedMessage { id, message } = value::from_value(msg.body)?;
 
-                let sender = match self.sub_note.get_mut(&id) {
+                let SubNoteHandler { sender, .. } = match self.sub_note.get_mut(&id) {
                     Some(x) => x,
                     None => {
                         warn!("unhandled subnote message with id {}, skipping", id);

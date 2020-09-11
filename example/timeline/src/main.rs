@@ -73,6 +73,7 @@ async fn timeline(client: &WebSocketClient) -> Result<Never, Error> {
 async fn run(opt: Opt) -> Result<(), Error> {
     // create the client with API token
     let client = WebSocketClientBuilder::new(opt.url)
+        .auto_reconnect()
         .token(opt.i)
         .connect()
         .await?;
