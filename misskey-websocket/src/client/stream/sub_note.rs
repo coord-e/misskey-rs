@@ -79,10 +79,9 @@ where
             return Poll::Ready(None);
         }
 
-        match self.response_rx.poll_next_unpin(cx)? {
-            Poll::Pending => Poll::Pending,
-            Poll::Ready(None) => Poll::Ready(None),
-            Poll::Ready(Some(v)) => Poll::Ready(Some(Ok(serde_json::from_value(v)?))),
+        match futures::ready!(self.response_rx.poll_next_unpin(cx)?) {
+            None => Poll::Ready(None),
+            Some(v) => Poll::Ready(Some(Ok(serde_json::from_value(v)?))),
         }
     }
 }

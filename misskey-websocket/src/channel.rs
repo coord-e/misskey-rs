@@ -33,12 +33,7 @@ impl Stream for WebSocketReceiver {
     type Item = Result<IncomingMessage>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let opt = match self.0.poll_next_unpin(cx)? {
-            Poll::Pending => return Poll::Pending,
-            Poll::Ready(opt) => opt,
-        };
-
-        let text = match opt {
+        let text = match futures::ready!(self.0.poll_next_unpin(cx)?) {
             Some(WsMessage::Text(t)) => t,
             Some(WsMessage::Ping(_)) | Some(WsMessage::Pong(_)) => return Poll::Pending,
             None | Some(WsMessage::Close(_)) => return Poll::Ready(None),
