@@ -1,3 +1,4 @@
+use std::fmt::{self, Debug};
 use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
@@ -22,7 +23,6 @@ use misskey_core::streaming::ConnectChannelRequest;
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
-#[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
 pub struct Channel<I, O> {
     id: ChannelId,
@@ -30,6 +30,15 @@ pub struct Channel<I, O> {
     response_rx: ResponseStreamReceiver<Value>,
     is_terminated: bool,
     _marker: PhantomData<fn() -> (I, O)>,
+}
+
+impl<I, O> Debug for Channel<I, O> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Channel")
+            .field("id", &self.id)
+            .field("is_terminated", &self.is_terminated)
+            .finish()
+    }
 }
 
 impl<I, O> Channel<I, O>

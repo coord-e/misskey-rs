@@ -1,3 +1,4 @@
+use std::fmt::{self, Debug};
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -17,7 +18,6 @@ use log::{info, warn};
 use misskey_core::streaming::BroadcastEvent;
 use serde_json::Value;
 
-#[derive(Debug)]
 #[must_use = "streams do nothing unless polled"]
 pub struct Broadcast<E> {
     id: BroadcastId,
@@ -25,6 +25,15 @@ pub struct Broadcast<E> {
     response_rx: ResponseStreamReceiver<Value>,
     is_terminated: bool,
     _marker: PhantomData<fn() -> E>,
+}
+
+impl<E> Debug for Broadcast<E> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Broadcast")
+            .field("id", &self.id)
+            .field("is_terminated", &self.is_terminated)
+            .finish()
+    }
 }
 
 impl<E> Broadcast<E>

@@ -28,7 +28,14 @@ pub struct WebSocketClient {
 
 impl Debug for WebSocketClient {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("WebSocketClient").finish()
+        let mut debug = f.debug_struct("WebSocketClient");
+
+        match self.state.try_read() {
+            Some(state) => debug.field("state", &state),
+            None => debug.field("state", &"exiting"),
+        };
+
+        debug.finish()
     }
 }
 

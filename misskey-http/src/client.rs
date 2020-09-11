@@ -27,7 +27,9 @@ pub struct HttpClient {
 
 impl Debug for HttpClient {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.debug_struct("HttpClient").finish()
+        f.debug_struct("HttpClient")
+            .field("url", &self.url)
+            .finish()
     }
 }
 
