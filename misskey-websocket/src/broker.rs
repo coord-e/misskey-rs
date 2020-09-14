@@ -34,10 +34,14 @@ pub(crate) struct Broker {
     url: Url,
 }
 
+/// Specifies the condition for reconnecting.
 #[derive(Clone, Copy)]
 pub enum ReconnectCondition {
+    /// Reconnect regardless of the errors.
     Always,
+    /// Reconnect when the connection is lost unexpectedly.
     UnexpectedReset,
+    /// Specify the condition with a function that returns `true` when you want to reconnect.
     Custom(fn(&Error) -> bool),
 }
 
@@ -76,19 +80,25 @@ impl ReconnectCondition {
 }
 
 impl Default for ReconnectCondition {
+    /// [`UnexpectedReset`][`ReconnectCondition::UnexpectedReset`] is the default.
     fn default() -> ReconnectCondition {
         ReconnectCondition::UnexpectedReset
     }
 }
 
+/// Reconnection configuration.
 #[derive(Debug, Clone)]
 pub struct ReconnectConfig {
+    /// Sets an interval duration of automatic reconnection.
     pub interval: Duration,
+    /// Specifies the condition for reconnecting.
     pub condition: ReconnectCondition,
+    /// Specifies whether to re-send messages that may have failed to be sent when reconnecting.
     pub retry_send: bool,
 }
 
 impl Default for ReconnectConfig {
+    /// `interval` is 5 secs and `retry_send` is `true` by default.
     fn default() -> ReconnectConfig {
         ReconnectConfig {
             interval: Duration::from_secs(5),

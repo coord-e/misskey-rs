@@ -1,3 +1,13 @@
+//! API endpoints.
+//!
+//! Each endpoint is implemented under modules named by replacing `/` with `::` and `-` with `_` in the endpoint name.
+//! For example, `notes/local-timeline` is implemented under [`notes::local_timeline`] and
+//! `drive/files/create` is implemented under [`drive::files::create`].
+//!
+//! All request types implements [`Request`][`misskey_core::Request`].
+//! We dispatch it actually and get the [response][`misskey_core::Request::Response`]
+//! using [`Client::request`][`misskey_core::Client::request`].
+
 pub mod admin;
 pub mod announcements;
 pub mod antennas;

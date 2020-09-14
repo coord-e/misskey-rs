@@ -20,6 +20,14 @@ pub mod stream;
 
 use stream::{Broadcast, Channel, SubNote};
 
+/// Asynchronous WebSocket-based client for Misskey.
+///
+/// [`WebSocketClient`] can be constructed using [`WebSocketClient::connect`] or
+/// [`WebSocketClientBuilder`][`builder::WebSocketClientBuilder`].
+/// The latter is more flexible and intuitive.
+///
+/// You do not have to wrap this in [`Arc`][`std::sync::Arc`] and [`Mutex`][`std::sync::Mutex`]
+/// to share it because [`WebSocketClient`] is already [`Clone`] and every methods of [`WebSocketClient`] takes `&self`, i.e. they does not require mutability.
 #[derive(Clone)]
 pub struct WebSocketClient {
     broker_tx: ControlSender,
@@ -40,11 +48,18 @@ impl Debug for WebSocketClient {
 }
 
 impl WebSocketClient {
+    /// Connects to Misskey using WebSocket, and returns [`WebSocketClient`].
+    ///
+    /// If `reconnect` contains [`ReconnectConfig`],
+    /// then the returned client will automatically reconnect on disconnection.
     pub async fn connect(url: Url, reconnect: Option<ReconnectConfig>) -> Result<WebSocketClient> {
         let (broker_tx, state) = Broker::spawn(url, reconnect).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 
+    /// Captures the note specified by `id`.
+    ///
+    /// The returned [`SubNote`] implements [`Stream`][`futures::Stream`] so that note events can be retrieved asynchronously via it.
     pub fn subscribe_note<E, Id>(
         &self,
         id: Id,
@@ -60,6 +75,9 @@ impl WebSocketClient {
         )
     }
 
+    /// Connects to the channel using `request`.
+    ///
+    /// The returned [`Channel`] implements [`Stream`][`futures::Stream`] and [`Sink`][`futures::Sink`] so that you can exchange messages with channels on it.
     pub fn channel<'a, R>(
         &self,
         request: R,
@@ -74,6 +92,7 @@ impl WebSocketClient {
         )
     }
 
+    /// Receive messages from the broadcast stream.
     pub fn broadcast<E>(&self) -> impl Future<Output = Result<Broadcast<E>>> + 'static
     where
         E: misskey_core::streaming::BroadcastEvent,

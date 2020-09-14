@@ -3,12 +3,16 @@ use std::sync::Arc;
 use async_tungstenite::tungstenite;
 use derive_more::Display;
 
+/// Possible errors from WebSocket client.
 #[derive(Debug, Display, Clone)]
 pub enum Error {
+    /// Errors from underlying [tungstenite](https://docs.rs/tungstenite) library.
     #[display(fmt = "websocket error: {}", _0)]
     WebSocket(Arc<tungstenite::Error>),
+    /// Received unexpected message from server.
     #[display(fmt = "websocket unexpected message: {}", _0)]
     UnexpectedMessage(tungstenite::Message),
+    /// JSON encode/decode error.
     #[display(fmt = "JSON error: {}", _0)]
     Json(Arc<serde_json::Error>),
 }
@@ -35,6 +39,7 @@ impl From<serde_json::Error> for Error {
     }
 }
 
+/// Specialized Result type for operations on [`WebSocketClient`][`crate::WebSocketClient`].
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[cfg(test)]

@@ -6,6 +6,7 @@ use crate::error::Result;
 
 use url::Url;
 
+/// Builder for [`WebSocketClient`].
 #[derive(Debug, Clone)]
 pub struct WebSocketClientBuilder {
     url: Url,
@@ -14,6 +15,7 @@ pub struct WebSocketClientBuilder {
 }
 
 impl WebSocketClientBuilder {
+    /// Specifies additional query parameters for the URL.
     pub fn query<S1, S2>(&mut self, key: S1, value: S2) -> &mut Self
     where
         S1: AsRef<str>,
@@ -25,6 +27,8 @@ impl WebSocketClientBuilder {
         self
     }
 
+    /// Creates a new builder instance with `url`.
+    /// All configurations are set to default.
     pub fn new(url: Url) -> Self {
         WebSocketClientBuilder {
             url,
@@ -33,16 +37,19 @@ impl WebSocketClientBuilder {
         }
     }
 
+    /// Sets an API token.
     pub fn token<S: Into<String>>(&mut self, token: S) -> &mut Self {
         self.token = Some(token.into());
         self
     }
 
+    /// Enables automatic reconnection.
     pub fn auto_reconnect(&mut self) -> &mut Self {
         self.reconnect = Some(ReconnectConfig::default());
         self
     }
 
+    /// Sets an interval duration of automatic reconnection in seconds.
     pub fn reconnect_secs(&mut self, secs: u64) -> &mut Self {
         self.reconnect
             .get_or_insert_with(ReconnectConfig::default)
@@ -50,6 +57,7 @@ impl WebSocketClientBuilder {
         self
     }
 
+    /// Sets an interval duration of automatic reconnection.
     pub fn reconnect_interval(&mut self, interval: Duration) -> &mut Self {
         self.reconnect
             .get_or_insert_with(ReconnectConfig::default)
@@ -57,6 +65,7 @@ impl WebSocketClientBuilder {
         self
     }
 
+    /// Specifies the condition for reconnecting.
     pub fn reconnect_condition(&mut self, condition: ReconnectCondition) -> &mut Self {
         self.reconnect
             .get_or_insert_with(ReconnectConfig::default)
@@ -64,6 +73,7 @@ impl WebSocketClientBuilder {
         self
     }
 
+    /// Specifies whether to re-send messages that may have failed to be sent when reconnecting.
     pub fn reconnect_retry_send(&mut self, enable: bool) -> &mut Self {
         self.reconnect
             .get_or_insert_with(ReconnectConfig::default)
@@ -71,6 +81,7 @@ impl WebSocketClientBuilder {
         self
     }
 
+    /// Finish this builder instance and connect to Misskey using this configuration.
     pub async fn connect(&self) -> Result<WebSocketClient> {
         let mut url = self.url.clone();
 

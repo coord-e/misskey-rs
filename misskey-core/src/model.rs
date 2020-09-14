@@ -1,26 +1,37 @@
+//! Object types used in API.
+
 use std::error::Error;
 use std::fmt::{self, Display};
 
 use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 
+/// ID of API errors.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct ApiErrorId(pub String);
 
+/// Kind of API error.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum ApiErrorKind {
+    /// The error is considered to be on the client side.
     Client,
+    /// The error is considered to be on the server side.
     Server,
 }
 
+/// API error returned from Misskey.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ApiError {
+    /// ID of the error.
     pub id: ApiErrorId,
+    /// Human-readable description of the error.
     pub message: String,
+    /// The error code, such as `INTERNAL_ERROR`.
     pub code: String,
+    /// Kind of the error.
     pub kind: ApiErrorKind,
 }
 
@@ -37,21 +48,39 @@ impl Display for ApiError {
 
 impl Error for ApiError {}
 
+/// Result type that represents immediate response from Misskey.
+///
+/// [`ApiResult`] is either successful response ([`ApiResult::Ok`]) or an error
+/// ([`ApiResult::Err`]) with [`ApiError`].
+/// We implement this type in a way that distinguishes it from the `Result<T, ApiError>`, since the
+/// [`ApiResult`] is a normal response to a successful request, even if it is an
+/// [`ApiResult::Err`]. (see the return type of [`crate::Client::request`])
+///
+/// You can convert `ApiResult<T>` to `Result<T, ApiError>` by using [`Into::into`] or [`ApiResult::into_result`].
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 #[must_use = "this `ApiResult` may be an `Err` variant, which should be handled"]
 pub enum ApiResult<T> {
-    Err { error: ApiError },
+    /// Contains the error value, namely [`ApiError`].
+    Err {
+        /// The error returned from Misskey.
+        error: ApiError,
+    },
+    /// Contains the success value.
     Ok(T),
 }
 
 impl<T> Into<Result<T, ApiError>> for ApiResult<T> {
+    /// Converts [`ApiResult`] to [`Result`] for convenient handling.
     fn into(self) -> Result<T, ApiError> {
         self.into_result()
     }
 }
 
 impl<T> ApiResult<T> {
+    /// Converts [`ApiResult`] to [`Result`] for convenient handling.
+    ///
+    /// You can also use [`Into::into`], but this is preferred as it expresses the intent more clearly.
     pub fn into_result(self) -> Result<T, ApiError> {
         match self {
             ApiResult::Err { error } => Err(error),
@@ -59,6 +88,7 @@ impl<T> ApiResult<T> {
         }
     }
 
+    /// Converts [`ApiResult<T>`][`ApiResult`] to [`Option<T>`][`Option`], consuming `self`, and discarding the error, if any.
     pub fn ok(self) -> Option<T> {
         match self {
             ApiResult::Err { .. } => None,
@@ -66,6 +96,8 @@ impl<T> ApiResult<T> {
         }
     }
 
+    /// Converts [`ApiResult<T>`][`ApiResult`] to [`Option<ApiError>`][`Option`], consuming `self`, and discarding the success
+    /// value, if any.
     pub fn err(self) -> Option<ApiError> {
         match self {
             ApiResult::Err { error } => Some(error),
@@ -73,6 +105,7 @@ impl<T> ApiResult<T> {
         }
     }
 
+    /// Returns true if the API result is [`ApiResult::Ok`].
     pub fn is_ok(&self) -> bool {
         match self {
             ApiResult::Err { .. } => false,
@@ -80,10 +113,17 @@ impl<T> ApiResult<T> {
         }
     }
 
+    /// Returns true if the API result is [`ApiResult::Err`].
     pub fn is_err(&self) -> bool {
         !self.is_ok()
     }
 
+    /// Returns the contained [`ApiResult::Ok`] value, consuming the `self` value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value is an [`ApiResult::Err`], with a panic message including the
+    /// passed message, and the content of the [`ApiResult::Err`].
     pub fn expect(self, msg: &str) -> T {
         match self {
             ApiResult::Err { error } => panic!("{}: {:?}", msg, error),
@@ -91,10 +131,18 @@ impl<T> ApiResult<T> {
         }
     }
 
+    /// Returns the contained [`ApiResult::Ok`] value, consuming the `self` value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value is an [`ApiResult::Err`], with a panic message provided by the
+    /// [`ApiResult::Err`]'s value.
     pub fn unwrap(self) -> T {
         self.expect("called `ApiResult::unwrap()` on an `ApiResult::Err` value")
     }
 
+    /// Maps a [`ApiResult<T>`][`ApiResult`] to [`ApiResult<U>`][`ApiResult`] by applying a function to a
+    /// contained [`ApiResult::Ok`] value, leaving an [`ApiResult::Err`] value untouched.
     pub fn map<U, F>(self, op: F) -> ApiResult<U>
     where
         F: FnOnce(T) -> U,

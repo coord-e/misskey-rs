@@ -18,6 +18,7 @@ use log::{info, warn};
 use misskey_core::streaming::{SubNoteEvent, SubNoteId};
 use serde_json::Value;
 
+/// Stream for the [`subscribe_note`][`crate::WebSocketClient::subscribe_note`] method.
 #[must_use = "streams do nothing unless polled"]
 pub struct SubNote<E> {
     id: SubNoteId,
@@ -59,6 +60,11 @@ impl<E> SubNote<E> {
         })
     }
 
+    /// Stop this subscription.
+    ///
+    /// After this call, the stream is no longer available (terminated), i.e. [`StreamExt::next`] returns [`None`].
+    /// If you call [`unsubscribe`][`SubNote::unsubscribe`] on a terminated stream, it will simply
+    /// be ignored (with log message if logging is enabled).
     pub async fn unsubscribe(&mut self) -> Result<()> {
         if self.is_terminated {
             info!("unsubscribing already terminated SubNote, skipping");
