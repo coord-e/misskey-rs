@@ -1,5 +1,5 @@
 use crate::model::channel::Channel;
-#[cfg(feature = "12-47-2")]
+#[cfg(feature = "head")]
 use crate::model::channel::ChannelId;
 
 use serde::Serialize;
@@ -10,18 +10,18 @@ use typed_builder::TypedBuilder;
 #[builder(doc)]
 pub struct Request {
     /// 1 .. 100
-    #[cfg(feature = "12-47-2")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-2")))]
+    #[cfg(feature = "head")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "head")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
-    #[cfg(feature = "12-47-2")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-2")))]
+    #[cfg(feature = "head")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "head")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub until_id: Option<ChannelId>,
-    #[cfg(feature = "12-47-2")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-2")))]
+    #[cfg(feature = "head")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "head")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub since_id: Option<ChannelId>,
@@ -43,7 +43,7 @@ mod tests {
         client.test(Request::default()).await;
     }
 
-    #[cfg(feature = "12-47-2")]
+    #[cfg(feature = "head")]
     #[tokio::test]
     async fn request_with_limit() {
         let client = TestClient::new();
@@ -56,7 +56,7 @@ mod tests {
             .await;
     }
 
-    #[cfg(feature = "12-47-2")]
+    #[cfg(feature = "head")]
     #[tokio::test]
     async fn request_paginate() {
         let client = TestClient::new();

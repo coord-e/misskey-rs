@@ -115,9 +115,9 @@ mod tests {
             .test(Request {
                 channel_id: channel.id,
                 // bug in misskey
-                #[cfg(feature = "12-47-2")]
+                #[cfg(feature = "head")]
                 name: None,
-                #[cfg(not(feature = "12-47-2"))]
+                #[cfg(not(feature = "head"))]
                 name: Some("hi".to_string()),
                 description: None,
                 banner_id: Some(None),
