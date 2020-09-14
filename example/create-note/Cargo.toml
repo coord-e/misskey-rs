@@ -6,7 +6,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
-misskey = { path = "../../misskey", features = ["http-client"] }
+misskey = { path = "../../misskey", version = "0.1.0", features = ["http-client"] }
 tokio = { version = "0.2", features = ["full"] }
 structopt = "0.3.16"
 url = "2.1.1"

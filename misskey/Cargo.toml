@@ -39,10 +39,10 @@ async-std-runtime = ["misskey-websocket/async-std-runtime"]
 inspect-contents = ["misskey-http/inspect-contents", "misskey-websocket/inspect-contents"]
 
 [dependencies]
-misskey-core = { path = "../misskey-core" }
-misskey-api = { path = "../misskey-api", default-features = false }
-misskey-websocket = { path = "../misskey-websocket", default-features = false, optional = true }
-misskey-http = { path = "../misskey-http", default-features = false, optional = true }
+misskey-core = { path = "../misskey-core", version = "0.1.0" }
+misskey-api = { path = "../misskey-api", version = "0.1.0", default-features = false }
+misskey-websocket = { path = "../misskey-websocket", version = "0.1.0", default-features = false, optional = true }
+misskey-http = { path = "../misskey-http", version = "0.1.0", default-features = false, optional = true }
 
 [dev-dependencies]
 tokio = { version = "0.2", features = ["macros", "rt-core"] }
