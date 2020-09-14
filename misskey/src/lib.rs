@@ -40,11 +40,11 @@
 //! ```no_run
 //! use futures::stream::StreamExt;
 //! use misskey::streaming::channel::main::{self, MainStreamEvent};
-//! use misskey::{Client, WebSocketClientBuilder};
+//! use misskey::{Client, WebSocketClient};
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = WebSocketClientBuilder::new("wss://your.misskey.instance/streaming".parse()?)
+//! let client = WebSocketClient::builder("wss://your.misskey.instance/streaming".parse()?)
 //!     .token("YOUR_API_TOKEN")
 //!     .connect()
 //!     .await?;
@@ -165,10 +165,10 @@ pub mod streaming {
     //! ```no_run
     //! use futures::stream::StreamExt;
     //! use misskey::streaming::channel::local_timeline::{self, LocalTimelineEvent};
-    //! # use misskey::WebSocketClientBuilder;
+    //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = WebSocketClientBuilder::new("ws://your.misskey.instance/streaming".parse()?)
+    //! # let client = WebSocketClient::builder("ws://your.misskey.instance/streaming".parse()?)
     //! #     .token("API_TOKEN")
     //! #     .connect()
     //! #     .await?;
@@ -191,10 +191,10 @@ pub mod streaming {
     //! use futures::stream::StreamExt;
     //! use misskey::model::note::NoteId;
     //! use misskey::streaming::note::NoteUpdateEvent;
-    //! # use misskey::WebSocketClientBuilder;
+    //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = WebSocketClientBuilder::new("ws://your.misskey.instance/streaming".parse()?)
+    //! # let client = WebSocketClient::builder("ws://your.misskey.instance/streaming".parse()?)
     //! #     .token("API_TOKEN")
     //! #     .connect()
     //! #     .await?;
@@ -230,10 +230,10 @@ pub mod streaming {
     //! ```no_run
     //! use futures::stream::StreamExt;
     //! use misskey::streaming::emoji::EmojiAddedEvent;
-    //! # use misskey::WebSocketClientBuilder;
+    //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = WebSocketClientBuilder::new("ws://your.misskey.instance/streaming".parse()?)
+    //! # let client = WebSocketClient::builder("ws://your.misskey.instance/streaming".parse()?)
     //! #     .token("API_TOKEN")
     //! #     .connect()
     //! #     .await?;
@@ -272,7 +272,7 @@ pub mod http {
 
 #[cfg(feature = "http-client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "http-client")))]
-pub use http::{HttpClient, HttpClientBuilder};
+pub use http::HttpClient;
 
 #[cfg(feature = "websocket-client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "websocket-client")))]
@@ -287,4 +287,4 @@ pub mod websocket {
 
 #[cfg(feature = "websocket-client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "websocket-client")))]
-pub use websocket::{WebSocketClient, WebSocketClientBuilder};
+pub use websocket::WebSocketClient;

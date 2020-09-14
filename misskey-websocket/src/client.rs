@@ -18,6 +18,7 @@ use url::Url;
 pub mod builder;
 pub mod stream;
 
+use builder::WebSocketClientBuilder;
 use stream::{Broadcast, Channel, SubNote};
 
 /// Asynchronous WebSocket-based client for Misskey.
@@ -55,6 +56,14 @@ impl WebSocketClient {
     pub async fn connect(url: Url, reconnect: Option<ReconnectConfig>) -> Result<WebSocketClient> {
         let (broker_tx, state) = Broker::spawn(url, reconnect).await?;
         Ok(WebSocketClient { broker_tx, state })
+    }
+
+    /// Creates a new builder instance with `url`.
+    /// All configurations are set to default.
+    ///
+    /// This function is identical to [`WebSocketClientBuilder::new`].
+    pub fn builder(url: Url) -> WebSocketClientBuilder {
+        WebSocketClientBuilder::new(url)
     }
 
     /// Captures the note specified by `id`.

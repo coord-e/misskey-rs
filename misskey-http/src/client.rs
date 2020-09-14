@@ -18,6 +18,8 @@ use url::Url;
 
 pub mod builder;
 
+use builder::HttpClientBuilder;
+
 /// Asynchronous HTTP-based client for Misskey.
 ///
 /// [`HttpClient`] can be constructed using [`HttpClient::new`] or
@@ -44,6 +46,14 @@ impl HttpClient {
             token,
             client: isahc::HttpClient::new()?,
         })
+    }
+
+    /// Creates a new builder instance with `url`.
+    /// All configurations are set to default.
+    ///
+    /// This function is identical to [`HttpClientBuilder::new`].
+    pub fn builder(url: Url) -> HttpClientBuilder {
+        HttpClientBuilder::new(url)
     }
 
     fn set_api_key<R: Request>(

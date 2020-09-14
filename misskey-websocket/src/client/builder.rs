@@ -29,6 +29,8 @@ impl WebSocketClientBuilder {
 
     /// Creates a new builder instance with `url`.
     /// All configurations are set to default.
+    ///
+    /// This function is identical to [`WebSocketClient::builder`].
     pub fn new(url: Url) -> Self {
         WebSocketClientBuilder {
             url,

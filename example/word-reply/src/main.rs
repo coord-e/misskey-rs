@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use futures::stream::StreamExt;
 use misskey::model::antenna::AntennaSource;
 use misskey::streaming::channel::antenna::{self, AntennaStreamEvent};
-use misskey::{Client, WebSocketClientBuilder};
+use misskey::{Client, WebSocketClient};
 use structopt::StructOpt;
 use url::Url;
 
@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     let opt = Opt::from_args();
 
     // Build a client and connect to Misskey.
-    let client = WebSocketClientBuilder::new(opt.url)
+    let client = WebSocketClient::builder(opt.url)
         .auto_reconnect()
         .token(opt.i)
         .connect()

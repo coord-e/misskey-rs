@@ -15,6 +15,8 @@ pub struct HttpClientBuilder {
 impl HttpClientBuilder {
     /// Creates a new builder instance with `url`.
     /// All configurations are set to default.
+    ///
+    /// This function is identical to [`HttpClient::builder`].
     pub fn new(url: Url) -> Self {
         HttpClientBuilder {
             url,

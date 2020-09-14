@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use futures::stream::StreamExt;
-use misskey::{Client, WebSocketClient, WebSocketClientBuilder};
+use misskey::{Client, WebSocketClient};
 use structopt::StructOpt;
 use url::Url;
 
@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let opt = Opt::from_args();
 
     // Configure and build a client using `WebSocketClientBuilder`.
-    let client = WebSocketClientBuilder::new(opt.url)
+    let client = WebSocketClient::builder(opt.url)
         .auto_reconnect()
         .token(opt.i)
         .connect()
