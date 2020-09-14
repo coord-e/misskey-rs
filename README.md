@@ -28,7 +28,18 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-See the [example](https://github.com/coord-e/misskey-rs/tree/develop/example) directory for more examples and detailed explanations.
+Take a look at the [example](https://github.com/coord-e/misskey-rs/tree/develop/example) directory for more examples and detailed explanations.
+
+## Usage
+
+Add the following to your `Cargo.toml`:
+
+```toml
+[dependencies]
+misskey = "0.1"
+```
+
+See the [API documentation](https://docs.rs/misskey) for further details.
 
 ## License
 
