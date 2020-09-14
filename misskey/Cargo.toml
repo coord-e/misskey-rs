@@ -48,3 +48,7 @@ misskey-http = { path = "../misskey-http", version = "0.1.0", default-features =
 tokio = { version = "0.2", features = ["macros", "rt-core"] }
 anyhow = "1.0"
 futures = "0.3"
+
+[package.metadata.docs.rs]
+features = ["head"]
+rustdoc-args = ["--cfg", "docsrs"]
