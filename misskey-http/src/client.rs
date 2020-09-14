@@ -4,7 +4,6 @@ use std::path::Path;
 use crate::error::{Error, Result};
 
 use common_multipart_rfc7578::client::{multipart, Error as MultipartError};
-use futures::compat::Compat01As03;
 use futures::future::BoxFuture;
 use futures::io::AsyncReadExt;
 use isahc::http;
@@ -123,7 +122,7 @@ impl HttpClient {
             let content_type = form.content_type();
 
             use futures::stream::TryStreamExt;
-            let stream = Compat01As03::new(multipart::Body::from(form)).map_err(|e| match e {
+            let stream = multipart::Body::from(form).map_err(|e| match e {
                 MultipartError::HeaderWrite(e) => e,
                 MultipartError::BoundaryWrite(e) => e,
                 MultipartError::ContentRead(e) => e,
