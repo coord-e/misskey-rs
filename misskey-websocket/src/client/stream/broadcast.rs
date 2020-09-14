@@ -18,6 +18,7 @@ use log::{info, warn};
 use misskey_core::streaming::BroadcastEvent;
 use serde_json::Value;
 
+/// Stream for the [`broadcast`][`crate::WebSocketClient::broadcast`] method.
 #[must_use = "streams do nothing unless polled"]
 pub struct Broadcast<E> {
     id: BroadcastId,
@@ -66,6 +67,11 @@ where
 }
 
 impl<E> Broadcast<E> {
+    /// Stop this subscription.
+    ///
+    /// After this call, the stream is no longer available (terminated), i.e. [`StreamExt::next`] returns [`None`].
+    /// If you call [`stop`][`Broadcast::stop`] on a terminated stream, it will simply
+    /// be ignored (with log message if logging is enabled).
     pub async fn stop(&mut self) -> Result<()> {
         if self.is_terminated {
             info!("stopping already terminated Broadcast, skipping");

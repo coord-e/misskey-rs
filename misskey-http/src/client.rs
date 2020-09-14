@@ -19,6 +19,10 @@ use url::Url;
 
 pub mod builder;
 
+/// Asynchronous HTTP-based client for Misskey.
+///
+/// [`HttpClient`] can be constructed using [`HttpClient::new`] or
+/// [`HttpClientBuilder`][`builder::HttpClientBuilder`].
 pub struct HttpClient {
     url: Url,
     token: Option<String>,
@@ -34,6 +38,7 @@ impl Debug for HttpClient {
 }
 
 impl HttpClient {
+    /// Creates a new HTTP-based client.
     pub fn new(url: Url, token: Option<String>) -> Result<Self> {
         Ok(HttpClient {
             url,
@@ -70,6 +75,9 @@ impl HttpClient {
         }
     }
 
+    /// Dispatches an API request with file.
+    ///
+    /// Takes the file to be attatched and [`UploadFileRequest`], then returns a future that waits for the [`Request::Response`].
     pub async fn request_with_file<R: UploadFileRequest>(
         &self,
         request: R,

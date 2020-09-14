@@ -23,6 +23,7 @@ use misskey_core::streaming::ConnectChannelRequest;
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
+/// Stream for the [`channel`][`crate::WebSocketClient::channel`] method.
 #[must_use = "streams do nothing unless polled"]
 pub struct Channel<I, O> {
     id: ChannelId,
@@ -89,6 +90,11 @@ where
 }
 
 impl<I, O> Channel<I, O> {
+    /// Disconnect from the channel.
+    ///
+    /// After this call, the stream is no longer available (terminated), i.e. [`StreamExt::next`] returns [`None`].
+    /// If you call [`disconnect`][`Channel::disconnect`] on a terminated stream, it will simply
+    /// be ignored (with log message if logging is enabled).
     pub async fn disconnect(&mut self) -> Result<()> {
         if self.is_terminated {
             info!("disconnecting from already terminated Channel, skipping");

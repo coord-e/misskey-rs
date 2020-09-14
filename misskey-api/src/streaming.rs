@@ -1,3 +1,5 @@
+//! Streaming API.
+
 pub mod channel;
 pub mod note;
 

@@ -1,3 +1,5 @@
+//! Object types used in API.
+
 pub mod abuse_user_report;
 pub mod announcement;
 pub mod antenna;
