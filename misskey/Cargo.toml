@@ -5,7 +5,7 @@ authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
 
 [features]
-default = ["12-47-2", "tokio-runtime"]
+default = ["12-47-2", "http-client", "websocket-client", "tokio-runtime"]
 
 12-47-2 = ["misskey-api/12-47-2"]
 12-47-0 = ["misskey-api/12-47-0"]
@@ -35,3 +35,8 @@ misskey-core = { path = "../misskey-core" }
 misskey-api = { path = "../misskey-api", default-features = false }
 misskey-websocket = { path = "../misskey-websocket", default-features = false, optional = true }
 misskey-http = { path = "../misskey-http", default-features = false, optional = true }
+
+[dev-dependencies]
+tokio = { version = "0.2", features = ["macros", "rt-core"] }
+anyhow = "1.0"
+futures = "0.3"
