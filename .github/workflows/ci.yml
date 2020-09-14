@@ -3,6 +3,47 @@ on: [push, pull_request]
 name: CI
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - nightly
+          - beta
+          - stable
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ubuntu-18.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ubuntu-18.04-${{ matrix.toolchain }}-cargo-all-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_VERSION: latest
+      - uses: actions-rs/cargo@v1
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
   test_api:
     name: Test misskey-api
     runs-on: ubuntu-18.04
@@ -65,39 +106,6 @@ jobs:
         with:
           command: test
           args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
-  test_http:
-    name: Test misskey-http
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ubuntu-18.04-stable-cargo-misskey-http-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-websocket/Cargo.toml') }}
-          restore-keys: |
-            ubuntu-18.04-stable-cargo-misskey-http-
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --tests --manifest-path misskey-http/Cargo.toml
-      - id: setup_env
-        run: ./ci/testenv/setup.sh
-        env:
-          MISSKEY_VERSION: 12.0.0
-      - uses: actions-rs/cargo@v1
-        env:
-          TEST_API_URL: http://localhost:3000/api/
-          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
-        with:
-          command: test
-          args: --manifest-path misskey-http/Cargo.toml
   test_websocket:
     name: Test misskey-websocket
     runs-on: ubuntu-18.04
