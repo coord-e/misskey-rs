@@ -3,7 +3,6 @@
 [![crates.io](https://img.shields.io/crates/v/misskey?style=flat-square)](https://crates.io/crates/misskey)
 [![docs.rs](https://img.shields.io/badge/docs.rs-misskey-blue?style=flat-square)](https://docs.rs/misskey)
 [![Actions Status](https://img.shields.io/github/workflow/status/coord-e/misskey-rs/CI?style=flat-square)](https://github.com/coord-e/misskey-rs/actions?workflow=CI)
-[![Actions Status](https://img.shields.io/github/workflow/status/coord-e/misskey-rs/CI?style=flat-square)](https://github.com/coord-e/misskey-rs/actions?workflow=Release)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 `misskey-rs` is an asynchronous [Misskey](https://github.com/syuilo/misskey) client library for Rust.
