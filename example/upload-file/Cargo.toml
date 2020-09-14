@@ -3,6 +3,7 @@ name = "upload-file"
 version = "0.1.0"
 authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
+publish = false
 
 [dependencies]
 misskey = { path = "../../misskey", features = ["http-client"] }
