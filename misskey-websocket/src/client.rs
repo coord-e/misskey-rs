@@ -156,6 +156,7 @@ mod tests {
         let token = std::env::var("TEST_USER_TOKEN").unwrap();
         WebSocketClientBuilder::new(Url::parse(&url).unwrap())
             .token(token)
+            .auto_reconnect()
             .connect()
             .await
             .unwrap()
