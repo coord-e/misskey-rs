@@ -18,8 +18,10 @@ pub struct NotificationId(pub String);
 pub struct Notification {
     pub id: NotificationId,
     pub created_at: DateTime<Utc>,
+    /// This field is [`UserId`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-17-0"</code></strong></span>.
     #[cfg(feature = "12-27-0")]
     pub user_id: Option<UserId>,
+    /// This field is [`User`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-17-0"</code></strong></span>.
     #[cfg(feature = "12-27-0")]
     pub user: Option<User>,
     #[cfg(not(feature = "12-27-0"))]

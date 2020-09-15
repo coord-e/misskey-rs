@@ -2,7 +2,7 @@ use crate::model::emoji::EmojiId;
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
-#[cfg(not(feature = "12-9-0"))]
+#[cfg(any(docsrs, not(feature = "12-9-0")))]
 use url::Url;
 
 #[derive(Serialize, Debug, Clone, TypedBuilder)]
@@ -15,7 +15,7 @@ pub struct Request {
     #[builder(default, setter(strip_option, into))]
     pub category: Option<String>,
     pub aliases: Vec<String>,
-    #[cfg(not(feature = "12-9-0"))]
+    #[cfg(any(docsrs, not(feature = "12-9-0")))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     pub url: Url,
 }

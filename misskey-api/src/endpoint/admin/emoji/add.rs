@@ -3,31 +3,31 @@ use crate::model::drive::DriveFileId;
 use crate::model::emoji::EmojiId;
 
 use serde::{Deserialize, Serialize};
-#[cfg(not(feature = "12-9-0"))]
 use typed_builder::TypedBuilder;
-#[cfg(not(feature = "12-9-0"))]
+#[cfg(any(docsrs, not(feature = "12-9-0")))]
 use url::Url;
 
-#[cfg(feature = "12-9-0")]
-#[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
-#[derive(Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Request {
-    pub file_id: DriveFileId,
-}
-
-#[cfg(not(feature = "12-9-0"))]
-#[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
 #[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
+    #[cfg(feature = "12-9-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
+    pub file_id: DriveFileId,
+    #[cfg(any(docsrs, not(feature = "12-9-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     #[builder(setter(into))]
     pub name: String,
+    #[cfg(any(docsrs, not(feature = "12-9-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     pub url: Url,
+    #[cfg(any(docsrs, not(feature = "12-9-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub category: Option<String>,
+    #[cfg(any(docsrs, not(feature = "12-9-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub aliases: Option<Vec<String>>,

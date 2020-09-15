@@ -5,10 +5,7 @@ use serde::Serialize;
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    #[cfg(feature = "12-8-0")]
-    pub invitation_id: UserGroupInvitationId,
-    #[cfg(not(feature = "12-8-0"))]
-    #[serde(rename = "inviteId")]
+    #[cfg_attr(not(feature = "12-8-0"), serde(rename = "inviteId"))]
     pub invitation_id: UserGroupInvitationId,
 }
 
