@@ -42,8 +42,8 @@ strum_macros = "0.12"
 typed-builder = "0.6"
 
 [dev-dependencies]
-misskey-http = { path = "../misskey-http", version = "0.1.0", features = ["inspect-contents"] }
-misskey-websocket = { path = "../misskey-websocket", version = "0.1.0", features = ["inspect-contents"] }
+misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
+misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"] }
 tokio = { version = "0.2.22", features = ["macros", "fs", "time"] }
 futures = "0.3"
 uuid = { version = "0.8.1", features = ["v4"] }

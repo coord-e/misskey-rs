@@ -31,7 +31,7 @@ futures = { version = "0.3", default-features = false }
 log = { version = "0.4", optional = true }
 
 [dev-dependencies]
-misskey-api = { path = "../misskey-api", version = "0.1.0" }
+misskey-api = { path = "../misskey-api" }
 uuid = { version = "0.8.1", features = ["v4"] }
 tokio = { version = "0.2", features = ["macros", "rt-core"] }
 async-std = { version = "1.6", features = ["attributes"] }
