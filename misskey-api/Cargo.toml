@@ -54,5 +54,5 @@ mime = "0.3"
 env_logger = "0.7"
 
 [package.metadata.docs.rs]
-all-features = true
+features = ["head"]
 rustdoc-args = ["--cfg", "docsrs"]
