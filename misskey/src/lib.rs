@@ -19,7 +19,9 @@
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = HttpClient::new("https://your.misskey.instance/api/".parse()?, Some("API_TOKEN".to_string()))?;
+//! let client = HttpClient::builder("https://your.misskey.instance/api/".parse()?)
+//!     .token("API_TOKEN".to_string())
+//!     .build()?;
 //!
 //! client
 //!     .request(
