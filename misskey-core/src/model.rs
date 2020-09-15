@@ -33,6 +33,9 @@ pub struct ApiError {
     pub code: String,
     /// Kind of the error.
     pub kind: ApiErrorKind,
+    /// Additional information on this error.
+    #[serde(default)]
+    pub info: serde_json::Value,
 }
 
 impl Display for ApiError {
