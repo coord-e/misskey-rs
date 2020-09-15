@@ -19,7 +19,7 @@
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = HttpClient::builder("https://your.misskey.instance/api/".parse()?)
+//! let client = HttpClient::builder("https://your.instance.example/api/".parse()?)
 //!     .token("API_TOKEN".to_string())
 //!     .build()?;
 //!
@@ -46,7 +46,7 @@
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = WebSocketClient::builder("wss://your.misskey.instance/streaming".parse()?)
+//! let client = WebSocketClient::builder("wss://your.instance.example/streaming".parse()?)
 //!     .token("YOUR_API_TOKEN")
 //!     .connect()
 //!     .await?;
@@ -143,7 +143,7 @@ pub mod endpoint {
     //! # use misskey::{Client, HttpClient};
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = HttpClient::new("http://your.misskey.instance/api/".parse()?, Some("API_TOKEN".to_string()))?;
+    //! # let client = HttpClient::new("http://your.instance.example/api/".parse()?, Some("API_TOKEN".to_string()))?;
     //!     let me = client
     //!         .request(misskey::endpoint::i::Request::default())
     //!         .await?
@@ -170,7 +170,7 @@ pub mod streaming {
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = WebSocketClient::builder("ws://your.misskey.instance/streaming".parse()?)
+    //! # let client = WebSocketClient::builder("ws://your.instance.example/streaming".parse()?)
     //! #     .token("API_TOKEN")
     //! #     .connect()
     //! #     .await?;
@@ -196,7 +196,7 @@ pub mod streaming {
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = WebSocketClient::builder("ws://your.misskey.instance/streaming".parse()?)
+    //! # let client = WebSocketClient::builder("ws://your.instance.example/streaming".parse()?)
     //! #     .token("API_TOKEN")
     //! #     .connect()
     //! #     .await?;
@@ -235,7 +235,7 @@ pub mod streaming {
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = WebSocketClient::builder("ws://your.misskey.instance/streaming".parse()?)
+    //! # let client = WebSocketClient::builder("ws://your.instance.example/streaming".parse()?)
     //! #     .token("API_TOKEN")
     //! #     .connect()
     //! #     .await?;

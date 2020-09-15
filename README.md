@@ -12,7 +12,7 @@ use misskey::{Client, HttpClient};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  let client = HttpClient::builder("https://your.misskey.instance/api/".parse()?)
+  let client = HttpClient::builder("https://your.instance.example/api/".parse()?)
       .token("API_TOKEN".to_string())
       .build()?;
 
