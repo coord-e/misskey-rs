@@ -1,15 +1,29 @@
 //! Object types used in API.
 
+use std::convert::Infallible;
 use std::error::Error;
 use std::fmt::{self, Display};
+use std::str::FromStr;
 
-use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 
 /// ID of API errors.
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct ApiErrorId(pub String);
+
+impl FromStr for ApiErrorId {
+    type Err = Infallible;
+    fn from_str(s: &str) -> Result<ApiErrorId, Infallible> {
+        Ok(ApiErrorId(s.to_string()))
+    }
+}
+
+impl Display for ApiErrorId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 /// Kind of API error.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]

@@ -1,6 +1,5 @@
 use crate::model::{ApiRequestId, ChannelId};
 
-use derive_more::Into;
 use misskey_core::streaming::SubNoteId;
 use serde::de::{self, Deserializer};
 use serde::Deserialize;
@@ -57,25 +56,25 @@ impl<'de> Deserialize<'de> for IncomingMessageType {
     }
 }
 
-#[derive(Deserialize, Debug, Clone, Into)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ApiMessage {
     #[serde(default)]
     pub res: Value,
 }
 
-#[derive(Deserialize, Debug, Clone, Into)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ChannelMessage {
     pub id: ChannelId,
     #[serde(flatten)]
     pub message: Value,
 }
 
-#[derive(Deserialize, Debug, Clone, Into)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ConnectedMessage {
     pub id: ChannelId,
 }
 
-#[derive(Deserialize, Debug, Clone, Into)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct NoteUpdatedMessage {
     pub id: SubNoteId,
     #[serde(flatten)]

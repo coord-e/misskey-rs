@@ -162,9 +162,9 @@ impl Handler {
             IncomingMessageType::Api(id) => {
                 if let Some(ApiHandler { sender, .. }) = self.api.remove(&id) {
                     let msg: ApiResult<ApiMessage> = value::from_value(msg.body)?;
-                    sender.send(msg.map(Into::into));
+                    sender.send(msg.map(|m| m.res));
                 } else {
-                    warn!("unknown API response message with id {}, skipping", id);
+                    warn!("unknown API response message with {:?}, skipping", id);
                     return Ok(());
                 }
             }
@@ -174,13 +174,13 @@ impl Handler {
                 let ChannelHandler { sender, .. } = match self.channel.get_mut(&id) {
                     Some(x) => x,
                     None => {
-                        warn!("unhandled channel message with id {}, skipping", id);
+                        warn!("unhandled channel message with {:?}, skipping", id);
                         return Ok(());
                     }
                 };
 
                 if sender.try_send(message).is_err() {
-                    warn!("stale channel handler for id {}, deleted", id);
+                    warn!("stale channel handler for {:?}, deleted", id);
                     self.channel.remove(&id);
                 }
             }
@@ -190,7 +190,7 @@ impl Handler {
                 let ChannelHandler { pong, .. } = match self.channel.get_mut(&id) {
                     Some(x) => x,
                     None => {
-                        warn!("unhandled connected message with id {}, skipping", id);
+                        warn!("unhandled connected message with {:?}, skipping", id);
                         return Ok(());
                     }
                 };
@@ -198,7 +198,7 @@ impl Handler {
                 if let Some(pong) = pong.take() {
                     pong.send();
                 } else {
-                    info!("duplicated connected message with id {}, skipping", id);
+                    info!("duplicated connected message with {:?}, skipping", id);
                 }
             }
             IncomingMessageType::NoteUpdated => {
@@ -207,13 +207,13 @@ impl Handler {
                 let SubNoteHandler { sender, .. } = match self.sub_note.get_mut(&id) {
                     Some(x) => x,
                     None => {
-                        warn!("unhandled subnote message with id {}, skipping", id);
+                        warn!("unhandled subnote message with {:?}, skipping", id);
                         return Ok(());
                     }
                 };
 
                 if sender.try_send(message).is_err() {
-                    warn!("stale subnote handler for id {}, deleted", id);
+                    warn!("stale subnote handler for {:?}, deleted", id);
                     self.sub_note.remove(&id);
                 }
             }
@@ -231,7 +231,7 @@ impl Handler {
                 let body = msg.body;
                 senders.retain(|id, sender| {
                     if sender.try_send(body.clone()).is_err() {
-                        warn!("stale broadcast handler {}:{}, deleted", type_, id);
+                        warn!("stale broadcast handler {}:{:?}, deleted", type_, id);
                         false
                     } else {
                         true

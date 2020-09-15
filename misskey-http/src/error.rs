@@ -1,17 +1,17 @@
-use derive_more::{Display, Error, From};
+use thiserror::Error;
 
 /// Possible errors from HTTP client.
-#[derive(Debug, Display, From, Error)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// Errors from underlying [isahc](https://docs.rs/isahc) library.
-    #[display(fmt = "network error: {}", _0)]
-    Network(#[error(source)] isahc::Error),
+    #[error("network error: {0}")]
+    Network(#[from] isahc::Error),
     /// IO error.
-    #[display(fmt = "IO error: {}", _0)]
-    Io(#[error(source)] std::io::Error),
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
     /// JSON encode/decode error.
-    #[display(fmt = "JSON error: {}", _0)]
-    Json(#[error(source)] serde_json::Error),
+    #[error("JSON error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
 /// Specialized Result type for operations on [`HttpClient`][`crate::HttpClient`].

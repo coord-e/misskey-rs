@@ -8,14 +8,13 @@ use crate::error::Error;
 use crate::model::{ApiRequestId, ChannelId};
 
 use async_rwlock::RwLock;
-use derive_more::{Display, FromStr};
 use futures::future::{BoxFuture, Future, FutureExt};
 use misskey_core::model::ApiResult;
 use misskey_core::streaming::SubNoteId;
 use serde_json::Value;
 use uuid::Uuid;
 
-#[derive(Clone, PartialEq, Eq, Hash, FromStr, Debug, Display, Copy)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug, Copy)]
 pub(crate) struct BroadcastId(pub Uuid);
 
 impl BroadcastId {

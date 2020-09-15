@@ -1,30 +1,20 @@
 use std::sync::Arc;
 
 use async_tungstenite::tungstenite;
-use derive_more::Display;
+use thiserror::Error;
 
 /// Possible errors from WebSocket client.
-#[derive(Debug, Display, Clone)]
+#[derive(Debug, Error, Clone)]
 pub enum Error {
     /// Errors from underlying [tungstenite](https://docs.rs/tungstenite) library.
-    #[display(fmt = "websocket error: {}", _0)]
-    WebSocket(Arc<tungstenite::Error>),
+    #[error("websocket error: {0}")]
+    WebSocket(#[source] Arc<tungstenite::Error>),
     /// Received unexpected message from server.
-    #[display(fmt = "websocket unexpected message: {}", _0)]
+    #[error("websocket unexpected message: {0}")]
     UnexpectedMessage(tungstenite::Message),
     /// JSON encode/decode error.
-    #[display(fmt = "JSON error: {}", _0)]
-    Json(Arc<serde_json::Error>),
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::WebSocket(e) => Some(e.as_ref()),
-            Error::UnexpectedMessage(_) => None,
-            Error::Json(e) => Some(e.as_ref()),
-        }
-    }
+    #[error("JSON error: {0}")]
+    Json(#[source] Arc<serde_json::Error>),
 }
 
 impl From<tungstenite::Error> for Error {
