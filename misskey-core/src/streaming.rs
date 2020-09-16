@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 /// ID of a subscribing note.
 ///
 /// This unquestionably corresponds to `NoteId` in [misskey-api](https://docs.rs/misskey-api).
-/// We have a distinct ID type here because this crate cannot depend on [misskey-api](https://docs.rs/misskey-api) for various reasons.
+/// We have a distinct ID type here because [misskey-core](https://docs.rs/misskey-core) cannot depend on [misskey-api](https://docs.rs/misskey-api) for various reasons.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct SubNoteId(pub String);
@@ -30,7 +30,7 @@ impl Display for SubNoteId {
 
 /// Request to connect to the channel.
 ///
-/// It's similar to [`Request`][`crate::Request`] but for connecting to a channel.
+/// It's similar to `Request` but for connecting to a channel.
 pub trait ConnectChannelRequest: Serialize {
     /// Type of the data we receive from the channel.
     type Incoming: DeserializeOwned + 'static;
@@ -74,7 +74,7 @@ where
 /// Events you receive with a subscription to the note.
 ///
 /// This unquestionably corresponds to `NoteUpdateEvent` in [misskey-api](https://docs.rs/misskey-api).
-/// We treat it abstractly here since this crate cannot depend on [misskey-api](https://docs.rs/misskey-api).
+/// We treat it abstractly here since [misskey-core](https://docs.rs/misskey-core) cannot depend on [misskey-api](https://docs.rs/misskey-api).
 pub trait SubNoteEvent: DeserializeOwned + 'static {}
 
 /// Events you receive from broadcast stream.

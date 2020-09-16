@@ -5,7 +5,7 @@
 //! - Clients that handles the connection between Misskey. As Misskey provides HTTP and WebSocket
 //!   interfaces to interact with, we have [`HttpClient`] and [`WebSocketClient`] implementations
 //!   correspondingly.
-//! - API data types, including requests/responses of [endpoints][`endpoint`] and messages on
+//! - API bindings, including requests/responses of [endpoints][`endpoint`] and messages on
 //!   [channels][`streaming::channel`].
 //! - Abstraction that connects API datatypes and client implementations: [`Request`][`endpoint::Request`],
 //!   [`ConnectChannelRequest`][`streaming::ConnectChannelRequest`], etc.
