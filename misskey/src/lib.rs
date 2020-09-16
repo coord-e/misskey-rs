@@ -153,6 +153,9 @@ pub mod endpoint {
     //! # }
     //! ```
 
+    // Because the `docsrs` cfg flag does not propagate to `misskey-api`, we're dealing with this
+    // by specifying `no_inline` as a workaround.
+    #[doc(no_inline)]
     pub use misskey_api::endpoint::*;
     pub use misskey_core::{Request, UploadFileRequest};
 }
@@ -251,6 +254,9 @@ pub mod streaming {
     //! # }
     //! ```
 
+    // Because the `docsrs` cfg flag does not propagate to `misskey-api`, we're dealing with this
+    // by specifying `no_inline` as a workaround.
+    #[doc(no_inline)]
     pub use misskey_api::streaming::*;
     pub use misskey_core::streaming::*;
 }
