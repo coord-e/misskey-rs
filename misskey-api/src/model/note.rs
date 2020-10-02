@@ -72,7 +72,6 @@ pub struct Poll {
     pub choices: Vec<PollChoice>,
     pub multiple: bool,
     pub expires_at: Option<DateTime<Utc>>,
-    // pub expired_after: Option<DateTime<Utc>>,
 }
 
 // packed `Emoji` for `Note`

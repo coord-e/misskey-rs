@@ -27,6 +27,7 @@ mod tests {
             choices: vec!["a".to_string(), "b".to_string(), "c".to_string()],
             multiple: None,
             expires_at: None,
+            expired_after: None,
         };
         let note = client
             .test(crate::endpoint::notes::create::Request {

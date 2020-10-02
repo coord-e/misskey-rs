@@ -133,6 +133,7 @@ mod tests {
             choices: vec!["a".to_string(), "b".to_string()],
             multiple: Some(true),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
+            expired_after: None,
         };
         let note = client
             .user
