@@ -36,6 +36,26 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "users/followers";
 }
 
+impl misskey_core::PaginationRequest for Request {
+    type Item = FollowingWithFollower;
+
+    fn set_since(&mut self, item: &FollowingWithFollower) {
+        let id = item.follower_id.clone();
+        match self {
+            Request::WithUserId { since_id, .. } => since_id.replace(id),
+            Request::WithUsername { since_id, .. } => since_id.replace(id),
+        };
+    }
+
+    fn set_until(&mut self, item: &FollowingWithFollower) {
+        let id = item.follower_id.clone();
+        match self {
+            Request::WithUserId { until_id, .. } => until_id.replace(id),
+            Request::WithUsername { until_id, .. } => until_id.replace(id),
+        };
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Request;

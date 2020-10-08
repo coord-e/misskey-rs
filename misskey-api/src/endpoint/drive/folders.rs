@@ -32,6 +32,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "drive/folders";
 }
 
+impl_pagination!(Request, DriveFolder);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

@@ -8,6 +8,33 @@
 //! We dispatch it actually and get the [response][`misskey_core::Request::Response`]
 //! using [`Client::request`][`misskey_core::Client::request`].
 
+macro_rules! impl_pagination {
+    ($name:ident, $item:ty) => {
+        impl ::misskey_core::PaginationRequest for $name {
+            type Item = $item;
+            fn set_since(&mut self, item: &$item) {
+                self.since_id
+                    .replace(::misskey_core::model::Entity::id(item));
+            }
+            fn set_until(&mut self, item: &$item) {
+                self.until_id
+                    .replace(::misskey_core::model::Entity::id(item));
+            }
+        }
+    };
+}
+
+macro_rules! impl_offset_pagination {
+    ($name:ident, $item:ty) => {
+        impl ::misskey_core::OffsetPaginationRequest for $name {
+            type Item = $item;
+            fn set_offset(&mut self, offset: u64) {
+                self.offset.replace(offset);
+            }
+        }
+    };
+}
+
 pub mod admin;
 pub mod announcements;
 pub mod antennas;

@@ -28,6 +28,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "antennas/notes";
 }
 
+impl_pagination!(Request, Note);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

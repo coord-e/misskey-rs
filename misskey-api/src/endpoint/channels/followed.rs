@@ -32,6 +32,9 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "channels/followed";
 }
 
+#[cfg(feature = "head")]
+impl_pagination!(Request, Channel);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

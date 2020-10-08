@@ -27,6 +27,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "drive/stream";
 }
 
+impl_pagination!(Request, DriveFile);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

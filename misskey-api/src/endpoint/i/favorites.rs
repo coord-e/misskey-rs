@@ -24,6 +24,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "i/favorites";
 }
 
+impl_pagination!(Request, NoteFavorite);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

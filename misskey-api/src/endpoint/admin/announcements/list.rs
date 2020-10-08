@@ -24,6 +24,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "admin/announcements/list";
 }
 
+impl_pagination!(Request, Announcement);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

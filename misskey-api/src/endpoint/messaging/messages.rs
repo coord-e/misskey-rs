@@ -41,6 +41,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "messaging/messages";
 }
 
+impl_pagination!(Request, MessagingMessage);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

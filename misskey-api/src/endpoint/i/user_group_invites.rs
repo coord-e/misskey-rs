@@ -24,6 +24,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "i/user-group-invites";
 }
 
+impl_pagination!(Request, UserGroupInvitation);
+
 #[cfg(test)]
 mod tests {
     use super::Request;
