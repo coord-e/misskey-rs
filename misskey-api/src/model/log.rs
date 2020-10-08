@@ -50,6 +50,8 @@ pub struct Log {
     pub data: serde_json::Map<String, serde_json::Value>,
 }
 
+impl_entity!(Log, LogId);
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct ModerationLogId(pub String);
@@ -65,3 +67,5 @@ pub struct ModerationLog {
     pub type_: String,
     pub info: serde_json::Map<String, serde_json::Value>,
 }
+
+impl_entity!(ModerationLog, ModerationLogId);

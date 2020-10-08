@@ -90,6 +90,8 @@ fn default_zero() -> u64 {
     0
 }
 
+impl_entity!(User, UserId);
+
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Display)]
 pub enum UserSort {
     #[display(fmt = "follower")]

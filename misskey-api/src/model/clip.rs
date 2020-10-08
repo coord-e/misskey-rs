@@ -13,3 +13,5 @@ pub struct Clip {
     pub created_at: DateTime<Utc>,
     pub name: String,
 }
+
+impl_entity!(Clip, ClipId);

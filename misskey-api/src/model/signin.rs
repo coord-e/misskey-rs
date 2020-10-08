@@ -19,3 +19,5 @@ pub struct Signin {
     pub id: SigninId,
     pub created_at: DateTime<Utc>,
 }
+
+impl_entity!(Signin, SigninId);

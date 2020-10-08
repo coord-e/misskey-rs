@@ -16,3 +16,5 @@ pub struct Emoji {
     pub category: Option<String>,
     pub aliases: Vec<String>,
 }
+
+impl_entity!(Emoji, EmojiId);

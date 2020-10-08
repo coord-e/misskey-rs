@@ -26,6 +26,8 @@ pub struct DriveFile {
     pub is_sensitive: bool,
 }
 
+impl_entity!(DriveFile, DriveFileId);
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DriveFolder {
@@ -40,3 +42,5 @@ pub struct DriveFolder {
     #[serde(default)]
     pub parent: Option<Box<DriveFolder>>,
 }
+
+impl_entity!(DriveFolder, DriveFolderId);

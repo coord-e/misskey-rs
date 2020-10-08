@@ -17,3 +17,5 @@ pub struct Announcement {
     pub title: String,
     pub image_url: Option<Url>,
 }
+
+impl_entity!(Announcement, AnnouncementId);

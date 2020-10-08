@@ -22,6 +22,8 @@ pub struct UserGroup {
     pub user_ids: Vec<UserId>,
 }
 
+impl_entity!(UserGroup, UserGroupId);
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct MessagingMessageId(pub String);
@@ -56,3 +58,5 @@ pub struct MessagingMessage {
 fn default_false() -> bool {
     false
 }
+
+impl_entity!(MessagingMessage, MessagingMessageId);

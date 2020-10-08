@@ -18,6 +18,8 @@ pub struct FollowingWithFollowee {
     pub follower_id: UserId,
 }
 
+impl_entity!(FollowingWithFollowee, FollowingId);
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FollowingWithFollower {
@@ -27,6 +29,8 @@ pub struct FollowingWithFollower {
     pub follower_id: UserId,
     pub follower: User,
 }
+
+impl_entity!(FollowingWithFollower, FollowingId);
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
@@ -39,3 +43,5 @@ pub struct FollowRequest {
     pub followee: User,
     pub follower: User,
 }
+
+impl_entity!(FollowRequest, FollowRequestId);

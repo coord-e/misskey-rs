@@ -16,3 +16,5 @@ pub struct Muting {
     pub mutee_id: UserId,
     pub mutee: User,
 }
+
+impl_entity!(Muting, MutingId);

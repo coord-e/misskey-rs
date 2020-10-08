@@ -19,3 +19,5 @@ pub struct AbuseUserReport {
     pub user_id: UserId,
     pub user: User,
 }
+
+impl_entity!(AbuseUserReport, AbuseUserReportId);

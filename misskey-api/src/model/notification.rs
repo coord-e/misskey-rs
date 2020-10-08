@@ -35,6 +35,8 @@ pub struct Notification {
     pub body: NotificationBody,
 }
 
+impl_entity!(Notification, NotificationId);
+
 #[derive(Serialize, Deserialize, Debug, Clone, EnumDiscriminants)]
 #[serde(rename_all = "camelCase", tag = "type")]
 #[strum_discriminants(name(NotificationType))]

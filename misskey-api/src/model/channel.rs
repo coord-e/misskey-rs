@@ -26,3 +26,5 @@ pub struct Channel {
     #[serde(default)]
     pub has_unread_note: Option<bool>,
 }
+
+impl_entity!(Channel, ChannelId);

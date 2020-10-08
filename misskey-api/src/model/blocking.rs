@@ -16,3 +16,5 @@ pub struct Blocking {
     pub blockee_id: UserId,
     pub blockee: User,
 }
+
+impl_entity!(Blocking, BlockingId);

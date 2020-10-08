@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Trait for entity model types: `Entity` and `EntityRef`
+
 ### Changed
 
 - Update some words in the description

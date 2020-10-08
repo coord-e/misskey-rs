@@ -140,3 +140,5 @@ pub struct Note {
 fn default_false() -> bool {
     false
 }
+
+impl_entity!(Note, NoteId);

@@ -18,6 +18,8 @@ pub struct UserGroup {
     pub user_ids: Vec<UserId>,
 }
 
+impl_entity!(UserGroup, UserGroupId);
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
 #[serde(transparent)]
 pub struct UserGroupInvitationId(pub String);
@@ -28,3 +30,5 @@ pub struct UserGroupInvitation {
     pub id: UserGroupInvitationId,
     pub group: UserGroup,
 }
+
+impl_entity!(UserGroupInvitation, UserGroupInvitationId);

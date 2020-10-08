@@ -33,6 +33,8 @@ pub struct Antenna {
     pub with_replies: bool,
 }
 
+impl_entity!(Antenna, AntennaId);
+
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum AntennaSource {

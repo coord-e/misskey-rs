@@ -16,3 +16,5 @@ pub struct NoteFavorite {
     pub note_id: NoteId,
     pub note: Note,
 }
+
+impl_entity!(NoteFavorite, NoteFavoriteId);

@@ -1,5 +1,31 @@
 //! Object types used in API.
 
+macro_rules! impl_entity {
+    ($name:ident, $id_name:ident) => {
+        impl ::misskey_core::model::Entity for $name {
+            type Id = $id_name;
+            fn id(&self) -> Self::Id {
+                self.id.clone()
+            }
+        }
+        impl ::misskey_core::model::EntityRef<$name> for &$name {
+            fn entity_ref(self) -> $id_name {
+                self.id.clone()
+            }
+        }
+        impl ::misskey_core::model::EntityRef<$name> for $id_name {
+            fn entity_ref(self) -> $id_name {
+                self
+            }
+        }
+        impl ::misskey_core::model::EntityRef<$name> for &$id_name {
+            fn entity_ref(self) -> $id_name {
+                self.clone()
+            }
+        }
+    };
+}
+
 pub mod abuse_user_report;
 pub mod announcement;
 pub mod antenna;
