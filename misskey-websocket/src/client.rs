@@ -116,10 +116,10 @@ impl WebSocketClient {
 impl Client for WebSocketClient {
     type Error = Error;
 
-    fn request<'a, R>(&'a self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
-    where
-        R: misskey_core::Request + 'a,
-    {
+    fn request<R: misskey_core::Request>(
+        &self,
+        request: R,
+    ) -> BoxFuture<Result<ApiResult<R::Response>>> {
         let id = ApiRequestId::uuid();
 
         // limit the use of `R` to the outside of `async`

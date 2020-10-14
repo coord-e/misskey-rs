@@ -11,10 +11,8 @@ pub trait Client {
     /// Dispatch an API request.
     ///
     /// Takes [`Request`] and returns a future that waits for the [`Response`][`Request::Response`].
-    fn request<'a, R>(
-        &'a self,
+    fn request<R: Request>(
+        &self,
         request: R,
-    ) -> BoxFuture<'a, Result<ApiResult<R::Response>, Self::Error>>
-    where
-        R: Request + 'a;
+    ) -> BoxFuture<Result<ApiResult<R::Response>, Self::Error>>;
 }

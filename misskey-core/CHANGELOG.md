@@ -11,3 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update the documentation
 - Take `io::Read` instead of file path in file uploads
+- Adjust lifetime specification of request methods

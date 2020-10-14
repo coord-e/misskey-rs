@@ -154,10 +154,7 @@ impl HttpClient {
 impl Client for HttpClient {
     type Error = Error;
 
-    fn request<'a, R>(&'a self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
-    where
-        R: Request + 'a,
-    {
+    fn request<R: Request>(&self, request: R) -> BoxFuture<Result<ApiResult<R::Response>>> {
         let url = self
             .url
             .join(R::ENDPOINT)
