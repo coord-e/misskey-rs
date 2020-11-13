@@ -1,4 +1,4 @@
-use crate::model::messaging::{MessagingMessage, MessagingMessageId};
+use crate::model::{id::Id, messaging::MessagingMessage};
 
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MessagingIndexStreamEvent {
     Message(MessagingMessage),
-    Read(Vec<MessagingMessageId>),
+    Read(Vec<Id<MessagingMessage>>),
 }
 
 #[derive(Serialize, Default, Debug, Clone)]

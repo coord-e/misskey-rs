@@ -1,7 +1,4 @@
-use crate::model::{
-    channel::{Channel, ChannelId},
-    drive::DriveFileId,
-};
+use crate::model::{channel::Channel, drive::DriveFile, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -10,7 +7,7 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub channel_id: ChannelId,
+    pub channel_id: Id<Channel>,
     /// [ 1 .. 128 ] characters
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
@@ -21,7 +18,7 @@ pub struct Request {
     pub description: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub banner_id: Option<Option<DriveFileId>>,
+    pub banner_id: Option<Option<Id<DriveFile>>>,
 }
 
 impl misskey_core::Request for Request {

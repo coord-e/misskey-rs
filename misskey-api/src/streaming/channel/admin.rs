@@ -1,4 +1,4 @@
-use crate::model::{abuse_user_report::AbuseUserReportId, user::UserId};
+use crate::model::{abuse_user_report::AbuseUserReport, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
 
@@ -7,9 +7,9 @@ use serde::{Deserialize, Serialize};
 pub enum AdminStreamEvent {
     #[serde(rename_all = "camelCase")]
     NewAbuseUserReport {
-        id: AbuseUserReportId,
-        user_id: UserId,
-        reporter_id: UserId,
+        id: Id<AbuseUserReport>,
+        user_id: Id<User>,
+        reporter_id: Id<User>,
         comment: String,
     },
 }

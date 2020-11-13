@@ -1,6 +1,5 @@
-use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(transparent)]
-pub struct PageId(pub String);
+pub struct Page(pub serde_json::Value);

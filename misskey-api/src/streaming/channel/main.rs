@@ -1,11 +1,6 @@
 use crate::model::{
-    antenna::Antenna,
-    drive::DriveFile,
-    messaging::MessagingMessage,
-    note::{Note, NoteId},
-    notification::Notification,
-    signin::Signin,
-    user::User,
+    antenna::Antenna, drive::DriveFile, id::Id, messaging::MessagingMessage, note::Note,
+    notification::Notification, signin::Signin, user::User,
 };
 
 use serde::{Deserialize, Serialize};
@@ -42,8 +37,8 @@ pub enum MainStreamEvent {
     Mention(Note),
     Renote(Note),
     ReadAntenna(Antenna),
-    UnreadMention(NoteId),
-    UnreadSpecifiedNote(NoteId),
+    UnreadMention(Id<Note>),
+    UnreadSpecifiedNote(Id<Note>),
     UnreadMessagingMessage(MessagingMessage),
     UnreadNotification(Notification),
     UnreadAntenna(Antenna),

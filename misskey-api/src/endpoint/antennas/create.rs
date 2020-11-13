@@ -1,8 +1,9 @@
 #[cfg(feature = "12-10-0")]
-use crate::model::user_group::UserGroupId;
+use crate::model::user_group::UserGroup;
 use crate::model::{
     antenna::{Antenna, AntennaSource},
-    user_list::UserListId,
+    id::Id,
+    user_list::UserList,
 };
 
 use serde::Serialize;
@@ -17,11 +18,11 @@ pub struct Request {
     pub name: String,
     pub src: AntennaSource,
     #[builder(default, setter(strip_option))]
-    pub user_list_id: Option<UserListId>,
+    pub user_list_id: Option<Id<UserList>>,
     #[cfg(feature = "12-10-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
     #[builder(default, setter(strip_option))]
-    pub user_group_id: Option<UserGroupId>,
+    pub user_group_id: Option<Id<UserGroup>>,
     pub keywords: Vec<Vec<String>>,
     #[cfg(feature = "12-19-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]

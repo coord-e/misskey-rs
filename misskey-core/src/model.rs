@@ -7,20 +7,6 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
-/// Trait for entity types that has an ID.
-pub trait Entity {
-    /// The ID type.
-    type Id;
-    /// Gets the ID.
-    fn id(&self) -> Self::Id;
-}
-
-/// Trait for types that serves as a reference (i.e. ID) to `E`.
-pub trait EntityRef<E: Entity> {
-    /// Gets the reference to the entity.
-    fn entity_ref(self) -> E::Id;
-}
-
 /// ID of API errors.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]

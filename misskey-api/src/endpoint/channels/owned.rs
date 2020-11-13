@@ -1,6 +1,6 @@
 use crate::model::channel::Channel;
 #[cfg(feature = "head")]
-use crate::model::channel::ChannelId;
+use crate::model::id::Id;
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -19,12 +19,12 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "head")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<ChannelId>,
+    pub until_id: Option<Id<Channel>>,
     #[cfg(feature = "head")]
     #[cfg_attr(docsrs, doc(cfg(feature = "head")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<ChannelId>,
+    pub since_id: Option<Id<Channel>>,
 }
 
 impl misskey_core::Request for Request {

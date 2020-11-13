@@ -1,13 +1,9 @@
-use crate::model::note::{Note, NoteId};
+use crate::model::{id::Id, note::Note};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error, FromStr};
+use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
 use url::Url;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct UserId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -29,7 +25,7 @@ pub struct UserEmoji {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
-    pub id: UserId,
+    pub id: Id<User>,
     pub username: String,
     pub name: Option<String>,
     #[serde(default)]
@@ -61,7 +57,7 @@ pub struct User {
     #[serde(default = "default_false")]
     pub is_bot: bool,
     #[serde(default)]
-    pub pinned_note_ids: Vec<NoteId>,
+    pub pinned_note_ids: Vec<Id<Note>>,
     #[serde(default)]
     pub pinned_notes: Vec<Note>,
     #[serde(default = "default_false")]
@@ -90,7 +86,7 @@ fn default_zero() -> u64 {
     0
 }
 
-impl_entity!(User, UserId);
+impl_entity!(User);
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Display)]
 pub enum UserSort {
@@ -147,7 +143,7 @@ impl std::str::FromStr for UserOrigin {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UserRelation {
-    pub id: UserId,
+    pub id: Id<User>,
     pub is_following: bool,
     pub has_pending_follow_request_from_you: bool,
     pub has_pending_follow_request_to_you: bool,

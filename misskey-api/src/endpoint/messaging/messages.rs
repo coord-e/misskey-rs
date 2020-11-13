@@ -1,8 +1,4 @@
-use crate::model::{
-    messaging::{MessagingMessage, MessagingMessageId},
-    user::UserId,
-    user_group::UserGroupId,
-};
+use crate::model::{id::Id, messaging::MessagingMessage, user::User, user_group::UserGroup};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -20,20 +16,20 @@ pub struct Request {
     pub mark_as_read: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub user_id: Option<UserId>,
+    pub user_id: Option<Id<User>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub group_id: Option<UserGroupId>,
+    pub group_id: Option<Id<UserGroup>>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<MessagingMessageId>,
+    pub since_id: Option<Id<MessagingMessage>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<MessagingMessageId>,
+    pub until_id: Option<Id<MessagingMessage>>,
 }
 
 impl misskey_core::Request for Request {

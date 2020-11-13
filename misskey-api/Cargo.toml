@@ -13,7 +13,7 @@ keywords = ["async", "misskey"]
 categories = ["api-bindings"]
 
 [features]
-default = ["12-47-0"]
+default = ["12-47-0", "aid"]
 
 head = ["12-47-0"]
 12-47-0 = ["12-39-0"]
@@ -30,12 +30,17 @@ head = ["12-47-0"]
 12-8-0 = ["12-5-0"]
 12-5-0 = []
 
+aid = []
+meid = []
+ulid = []
+objectid = []
+
 [dependencies]
 misskey-core = { path = "../misskey-core", version = "0.1.0" }
 serde = { version = "1.0.103", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "0.8", features = ["serde", "v4"] }
+ulid_crate = { package = "ulid", version = "0.4", features = ["serde"] }
 url = { version = "2.1", features = ["serde"] }
 derive_more = "0.99.5"
 strum_macros = "0.12"
@@ -45,8 +50,9 @@ typed-builder = "0.6"
 misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
 misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"] }
 tokio = { version = "0.2.22", features = ["macros", "fs", "time"] }
+ulid_crate = { package = "ulid", version = "0.4" }
+rand = "0.7"
 futures = "0.3"
-uuid = { version = "0.8.1", features = ["v4"] }
 reqwest = "0.10.7"
 lazy_static = "1.4.0"
 async-trait = "0.1.35"

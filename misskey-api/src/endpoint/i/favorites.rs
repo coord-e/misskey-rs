@@ -1,4 +1,4 @@
-use crate::model::note_favorite::{NoteFavorite, NoteFavoriteId};
+use crate::model::{id::Id, note_favorite::NoteFavorite};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,10 +13,10 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteFavoriteId>,
+    pub since_id: Option<Id<NoteFavorite>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteFavoriteId>,
+    pub until_id: Option<Id<NoteFavorite>>,
 }
 
 impl misskey_core::Request for Request {

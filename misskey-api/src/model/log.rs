@@ -1,7 +1,7 @@
-use crate::model::user::{User, UserId};
+use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error, FromStr};
+use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
@@ -33,14 +33,10 @@ impl std::str::FromStr for LogLevel {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct LogId(pub String);
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Log {
-    pub id: LogId,
+    pub id: Id<Log>,
     pub created_at: DateTime<Utc>,
     pub domain: Vec<String>,
     pub level: LogLevel,
@@ -50,22 +46,18 @@ pub struct Log {
     pub data: serde_json::Map<String, serde_json::Value>,
 }
 
-impl_entity!(Log, LogId);
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct ModerationLogId(pub String);
+impl_entity!(Log);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ModerationLog {
-    pub id: ModerationLogId,
+    pub id: Id<ModerationLog>,
     pub created_at: DateTime<Utc>,
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     pub user: User,
     #[serde(rename = "type")]
     pub type_: String,
     pub info: serde_json::Map<String, serde_json::Value>,
 }
 
-impl_entity!(ModerationLog, ModerationLogId);
+impl_entity!(ModerationLog);

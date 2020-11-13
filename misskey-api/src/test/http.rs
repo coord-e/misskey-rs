@@ -4,7 +4,7 @@ use crate::test::env;
 use mime::Mime;
 use misskey_core::UploadFileRequest;
 use misskey_http::HttpClient;
-use uuid::Uuid;
+use ulid_crate::Ulid;
 
 pub struct TestClient {
     pub admin: HttpClient,
@@ -65,7 +65,7 @@ impl HttpClientExt for HttpClient {
         R: UploadFileRequest + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
-        let tmp_name = Uuid::new_v4().to_simple().to_string();
+        let tmp_name = Ulid::new().to_string();
         let path = std::env::temp_dir().join(tmp_name);
         {
             use tokio::{fs::File, io::AsyncWriteExt};

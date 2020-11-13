@@ -1,4 +1,7 @@
-use crate::model::drive::{DriveFile, DriveFileId, DriveFolderId};
+use crate::model::{
+    drive::{DriveFile, DriveFolder},
+    id::Id,
+};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -21,17 +24,17 @@ pub struct Request {
     #[builder(default, setter(strip_option, into))]
     pub type_: Option<String>,
     #[builder(default, setter(strip_option))]
-    pub folder_id: Option<DriveFolderId>,
+    pub folder_id: Option<Id<DriveFolder>>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<DriveFileId>,
+    pub since_id: Option<Id<DriveFile>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<DriveFileId>,
+    pub until_id: Option<Id<DriveFile>>,
 }
 
 impl misskey_core::Request for Request {

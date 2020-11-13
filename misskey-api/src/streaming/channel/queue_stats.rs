@@ -75,7 +75,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_stats_log() {
-        use uuid::Uuid;
+        use ulid_crate::Ulid;
 
         let client = TestClient::new().await;
         let (mut sink, mut stream) = client.channel(Request::default()).await.unwrap().split();
@@ -83,7 +83,7 @@ mod tests {
         future::join(
             async {
                 sink.send(Message::RequestLog {
-                    id: Uuid::new_v4().to_string(),
+                    id: Ulid::new().to_string(),
                     length: 50,
                 })
                 .await

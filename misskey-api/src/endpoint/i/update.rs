@@ -1,6 +1,7 @@
 use crate::model::{
-    drive::DriveFileId,
-    page::PageId,
+    drive::DriveFile,
+    id::Id,
+    page::Page,
     user::{User, UserField},
 };
 
@@ -28,10 +29,10 @@ pub struct Request {
     pub birthday: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub avatar_id: Option<Option<DriveFileId>>,
+    pub avatar_id: Option<Option<Id<DriveFile>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub banner_id: Option<Option<DriveFileId>>,
+    pub banner_id: Option<Option<Id<DriveFile>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub fields: Option<Vec<UserField>>,
@@ -61,7 +62,7 @@ pub struct Request {
     pub always_mark_nsfw: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub pinned_page_id: Option<Option<PageId>>,
+    pub pinned_page_id: Option<Option<Id<Page>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub muted_words: Option<Vec<Vec<String>>>,

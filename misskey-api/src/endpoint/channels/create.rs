@@ -1,4 +1,4 @@
-use crate::model::{channel::Channel, drive::DriveFileId};
+use crate::model::{channel::Channel, drive::DriveFile, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -14,7 +14,7 @@ pub struct Request {
     #[builder(default, setter(strip_option, into))]
     pub description: Option<String>,
     #[builder(default, setter(strip_option))]
-    pub banner_id: Option<DriveFileId>,
+    pub banner_id: Option<Id<DriveFile>>,
 }
 
 impl misskey_core::Request for Request {

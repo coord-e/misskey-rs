@@ -1,19 +1,15 @@
 #[cfg(feature = "12-10-0")]
-use crate::model::user_group::UserGroupId;
-use crate::model::{user::UserId, user_list::UserListId};
+use crate::model::user_group::UserGroup;
+use crate::model::{id::Id, user::User, user_list::UserList};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error, FromStr};
+use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct AntennaId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Antenna {
-    pub id: AntennaId,
+    pub id: Id<Antenna>,
     pub created_at: DateTime<Utc>,
     pub name: String,
     pub case_sensitive: bool,
@@ -25,15 +21,15 @@ pub struct Antenna {
     pub src: AntennaSource,
     #[cfg(feature = "12-10-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
-    pub user_group_id: Option<UserGroupId>,
-    pub user_list_id: Option<UserListId>,
-    pub users: Vec<UserId>,
+    pub user_group_id: Option<Id<UserGroup>>,
+    pub user_list_id: Option<Id<UserList>>,
+    pub users: Vec<Id<User>>,
     pub notify: bool,
     pub with_file: bool,
     pub with_replies: bool,
 }
 
-impl_entity!(Antenna, AntennaId);
+impl_entity!(Antenna);
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]

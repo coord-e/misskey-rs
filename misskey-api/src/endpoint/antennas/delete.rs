@@ -1,11 +1,11 @@
-use crate::model::antenna::AntennaId;
+use crate::model::{antenna::Antenna, id::Id};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub antenna_id: AntennaId,
+    pub antenna_id: Id<Antenna>,
 }
 
 impl misskey_core::Request for Request {

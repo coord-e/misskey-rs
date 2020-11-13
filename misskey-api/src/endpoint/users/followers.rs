@@ -1,21 +1,28 @@
-use crate::model::following::FollowingWithFollower;
-use crate::model::user::UserId;
+use crate::model::{following::Following, id::Id, user::User};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct FollowingWithFollower {
+    #[serde(flatten)]
+    pub following: Following,
+    pub follower: User,
+}
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum Request {
     #[serde(rename_all = "camelCase")]
     WithUserId {
-        user_id: UserId,
+        user_id: Id<User>,
         /// 1 .. 100
         #[serde(skip_serializing_if = "Option::is_none")]
         limit: Option<u8>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        since_id: Option<UserId>,
+        since_id: Option<Id<User>>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        until_id: Option<UserId>,
+        until_id: Option<Id<User>>,
     },
     #[serde(rename_all = "camelCase")]
     WithUsername {
@@ -25,9 +32,9 @@ pub enum Request {
         #[serde(skip_serializing_if = "Option::is_none")]
         limit: Option<u8>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        since_id: Option<UserId>,
+        since_id: Option<Id<User>>,
         #[serde(skip_serializing_if = "Option::is_none")]
-        until_id: Option<UserId>,
+        until_id: Option<Id<User>>,
     },
 }
 

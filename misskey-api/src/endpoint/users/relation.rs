@@ -1,11 +1,14 @@
-use crate::model::user::{UserId, UserRelation};
+use crate::model::{
+    id::Id,
+    user::{User, UserRelation},
+};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub user_id: UserId,
+    pub user_id: Id<User>,
 }
 
 impl misskey_core::Request for Request {
@@ -17,7 +20,7 @@ impl misskey_core::Request for Request {
 #[serde(rename_all = "camelCase")]
 pub struct RequestWithUserIds {
     #[serde(rename = "userId")]
-    pub user_ids: Vec<UserId>,
+    pub user_ids: Vec<Id<User>>,
 }
 
 impl misskey_core::Request for RequestWithUserIds {

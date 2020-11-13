@@ -1,7 +1,4 @@
-use crate::model::{
-    channel::ChannelId,
-    note::{Note, NoteId},
-};
+use crate::model::{channel::Channel, id::Id, note::Note};
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
 use serde::Serialize;
@@ -11,17 +8,17 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub channel_id: ChannelId,
+    pub channel_id: Id<Channel>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteId>,
+    pub since_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteId>,
+    pub until_id: Option<Id<Note>>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"

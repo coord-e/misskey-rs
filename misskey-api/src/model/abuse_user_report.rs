@@ -1,23 +1,18 @@
-use crate::model::user::{User, UserId};
+use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct AbuseUserReportId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AbuseUserReport {
-    pub id: AbuseUserReportId,
+    pub id: Id<AbuseUserReport>,
     pub created_at: DateTime<Utc>,
     pub comment: String,
-    pub reporter_id: UserId,
+    pub reporter_id: Id<User>,
     pub reporter: User,
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     pub user: User,
 }
 
-impl_entity!(AbuseUserReport, AbuseUserReportId);
+impl_entity!(AbuseUserReport);

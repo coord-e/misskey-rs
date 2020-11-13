@@ -1,4 +1,4 @@
-use crate::model::drive::{DriveFile, DriveFileId};
+use crate::model::{drive::DriveFile, id::Id};
 
 use serde::Serialize;
 use url::Url;
@@ -7,7 +7,7 @@ use url::Url;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub file_id: Option<DriveFileId>,
+    pub file_id: Option<Id<DriveFile>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub url: Option<Url>,
 }

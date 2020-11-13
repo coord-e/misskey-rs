@@ -194,7 +194,7 @@ pub mod streaming {
     //!
     //! ```no_run
     //! use futures::stream::StreamExt;
-    //! use misskey::model::note::NoteId;
+    //! use misskey::model::{note::Note, id::Id};
     //! use misskey::streaming::note::NoteUpdateEvent;
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
@@ -204,7 +204,7 @@ pub mod streaming {
     //! #     .connect()
     //! #     .await?;
     //!
-    //! let note_id = NoteId("NOTE_ID_TO_WATCH".to_string());
+    //! let note_id: Id<Note> = "NOTE_ID_TO_WATCH".parse().unwrap();
     //! let mut stream = client.subscribe_note(note_id).await?;
     //!
     //! loop {

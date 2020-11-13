@@ -1,47 +1,25 @@
-use crate::model::user::{User, UserId};
+use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct FollowingId(pub String);
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct FollowingWithFollowee {
-    pub id: FollowingId,
+pub struct Following {
+    pub id: Id<Following>,
     pub created_at: DateTime<Utc>,
-    pub followee_id: UserId,
-    pub followee: User,
-    pub follower_id: UserId,
+    pub followee_id: Id<User>,
+    pub follower_id: Id<User>,
 }
 
-impl_entity!(FollowingWithFollowee, FollowingId);
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct FollowingWithFollower {
-    pub id: FollowingId,
-    pub created_at: DateTime<Utc>,
-    pub followee_id: UserId,
-    pub follower_id: UserId,
-    pub follower: User,
-}
-
-impl_entity!(FollowingWithFollower, FollowingId);
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct FollowRequestId(pub String);
+impl_entity!(Following);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FollowRequest {
-    pub id: FollowRequestId,
+    pub id: Id<FollowRequest>,
     pub followee: User,
     pub follower: User,
 }
 
-impl_entity!(FollowRequest, FollowRequestId);
+impl_entity!(FollowRequest);

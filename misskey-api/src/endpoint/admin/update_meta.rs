@@ -1,4 +1,4 @@
-use crate::model::user::UserId;
+use crate::model::{id::Id, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -78,7 +78,7 @@ pub struct Request {
     pub recaptcha_secret_key: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub proxy_account_id: Option<Option<UserId>>,
+    pub proxy_account_id: Option<Option<Id<User>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub maintainer_name: Option<Option<String>>,

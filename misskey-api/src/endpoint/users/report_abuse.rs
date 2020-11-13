@@ -1,11 +1,11 @@
-use crate::model::user::UserId;
+use crate::model::{id::Id, user::User};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     /// 1 .. 3000 characters
     pub comment: String,
 }

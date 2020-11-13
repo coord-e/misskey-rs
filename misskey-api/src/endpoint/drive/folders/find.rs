@@ -1,4 +1,4 @@
-use crate::model::drive::{DriveFolder, DriveFolderId};
+use crate::model::{drive::DriveFolder, id::Id};
 
 use serde::Serialize;
 
@@ -6,7 +6,7 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub name: String,
-    pub parent_id: Option<DriveFolderId>,
+    pub parent_id: Option<Id<DriveFolder>>,
 }
 
 impl misskey_core::Request for Request {

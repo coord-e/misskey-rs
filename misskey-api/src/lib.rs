@@ -5,5 +5,9 @@ pub mod endpoint;
 pub mod model;
 pub mod streaming;
 
+mod entity;
+
+pub use entity::{Entity, EntityRef};
+
 #[cfg(test)]
 mod test;

@@ -1,4 +1,4 @@
-use crate::model::{antenna::AntennaId, note::Note};
+use crate::model::{antenna::Antenna, id::Id, note::Note};
 
 use serde::{Deserialize, Serialize};
 
@@ -11,7 +11,7 @@ pub enum AntennaStreamEvent {
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub antenna_id: AntennaId,
+    pub antenna_id: Id<Antenna>,
 }
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {

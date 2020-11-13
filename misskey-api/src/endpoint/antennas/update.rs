@@ -1,8 +1,9 @@
 #[cfg(feature = "12-10-0")]
-use crate::model::user_group::UserGroupId;
+use crate::model::user_group::UserGroup;
 use crate::model::{
-    antenna::{Antenna, AntennaId, AntennaSource},
-    user_list::UserListId,
+    antenna::{Antenna, AntennaSource},
+    id::Id,
+    user_list::UserList,
 };
 
 use serde::Serialize;
@@ -12,17 +13,17 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub antenna_id: AntennaId,
+    pub antenna_id: Id<Antenna>,
     /// [ 1 .. 100 ] characters
     #[builder(setter(into))]
     pub name: String,
     pub src: AntennaSource,
     #[builder(default, setter(strip_option))]
-    pub user_list_id: Option<UserListId>,
+    pub user_list_id: Option<Id<UserList>>,
     #[cfg(feature = "12-10-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
     #[builder(default, setter(strip_option))]
-    pub user_group_id: Option<UserGroupId>,
+    pub user_group_id: Option<Id<UserGroup>>,
     pub keywords: Vec<Vec<String>>,
     #[cfg(feature = "12-19-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]

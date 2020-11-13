@@ -1,15 +1,12 @@
-use derive_more::{Display, FromStr};
+use crate::model::id::Id;
+
 use serde::{Deserialize, Serialize};
 use url::Url;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct EmojiId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Emoji {
-    pub id: EmojiId,
+    pub id: Id<Emoji>,
     pub name: String,
     pub url: Url,
     pub host: Option<String>,
@@ -17,4 +14,4 @@ pub struct Emoji {
     pub aliases: Vec<String>,
 }
 
-impl_entity!(Emoji, EmojiId);
+impl_entity!(Emoji);

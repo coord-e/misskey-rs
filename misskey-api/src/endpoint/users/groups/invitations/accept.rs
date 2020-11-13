@@ -1,4 +1,4 @@
-use crate::model::user_group::UserGroupInvitationId;
+use crate::model::{id::Id, user_group::UserGroupInvitation};
 
 use serde::Serialize;
 
@@ -6,7 +6,7 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     #[cfg_attr(not(feature = "12-8-0"), serde(rename = "inviteId"))]
-    pub invitation_id: UserGroupInvitationId,
+    pub invitation_id: Id<UserGroupInvitation>,
 }
 
 impl misskey_core::Request for Request {

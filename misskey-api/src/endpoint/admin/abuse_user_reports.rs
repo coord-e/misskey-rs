@@ -1,4 +1,4 @@
-use crate::model::abuse_user_report::{AbuseUserReport, AbuseUserReportId};
+use crate::model::{abuse_user_report::AbuseUserReport, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,10 +13,10 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<AbuseUserReportId>,
+    pub since_id: Option<Id<AbuseUserReport>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<AbuseUserReportId>,
+    pub until_id: Option<Id<AbuseUserReport>>,
 }
 
 impl misskey_core::Request for Request {

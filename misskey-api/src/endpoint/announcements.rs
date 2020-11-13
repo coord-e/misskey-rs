@@ -1,4 +1,4 @@
-use crate::model::announcement::{Announcement, AnnouncementId};
+use crate::model::{announcement::Announcement, id::Id};
 
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -18,10 +18,10 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<AnnouncementId>,
+    pub since_id: Option<Id<Announcement>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<AnnouncementId>,
+    pub until_id: Option<Id<Announcement>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

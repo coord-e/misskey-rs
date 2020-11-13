@@ -1,10 +1,6 @@
 use std::collections::HashMap;
 
-use crate::model::{
-    channel::ChannelId,
-    drive::{DriveFile, DriveFileId},
-    user::{User, UserId},
-};
+use crate::model::{channel::Channel, drive::DriveFile, id::Id, user::User};
 
 use chrono::{DateTime, Utc};
 use derive_more::{Display, Error, FromStr};
@@ -12,14 +8,10 @@ use misskey_core::streaming::SubNoteId;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct NoteId(pub String);
-
 /// in order to use as ID in [`streaming::note`](crate::streaming::note)
-impl From<NoteId> for SubNoteId {
-    fn from(id: NoteId) -> SubNoteId {
-        SubNoteId(id.0)
+impl From<Id<Note>> for SubNoteId {
+    fn from(id: Id<Note>) -> SubNoteId {
+        SubNoteId(id.to_string())
     }
 }
 
@@ -84,24 +76,24 @@ pub struct NoteEmoji {
 // packed `Channel` for `Note`
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NoteChannel {
-    pub id: ChannelId,
+    pub id: Id<Channel>,
     pub name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Note {
-    pub id: NoteId,
+    pub id: Id<Note>,
     pub created_at: DateTime<Utc>,
     pub text: Option<String>,
     #[serde(default)]
     pub cw: Option<String>,
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     pub user: User,
     #[serde(default)]
-    pub reply_id: Option<NoteId>,
+    pub reply_id: Option<Id<Note>>,
     #[serde(default)]
-    pub renote_id: Option<NoteId>,
+    pub renote_id: Option<Id<Note>>,
     #[serde(default)]
     pub reply: Option<Box<Note>>,
     #[serde(default)]
@@ -112,11 +104,11 @@ pub struct Note {
     pub is_hidden: bool,
     pub visibility: Visibility,
     #[serde(default)]
-    pub mentions: Vec<UserId>,
+    pub mentions: Vec<Id<User>>,
     #[serde(default)]
-    pub visible_user_ids: Vec<UserId>,
+    pub visible_user_ids: Vec<Id<User>>,
     #[serde(default)]
-    pub file_ids: Vec<DriveFileId>,
+    pub file_ids: Vec<Id<DriveFile>>,
     #[serde(default)]
     pub files: Vec<DriveFile>,
     #[serde(default)]
@@ -131,7 +123,7 @@ pub struct Note {
     pub replies_count: u64,
     #[cfg(feature = "12-47-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
-    pub channel_id: Option<ChannelId>,
+    pub channel_id: Option<Id<Channel>>,
     #[cfg(feature = "12-47-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
     pub channel: Option<NoteChannel>,
@@ -141,4 +133,4 @@ fn default_false() -> bool {
     false
 }
 
-impl_entity!(Note, NoteId);
+impl_entity!(Note);

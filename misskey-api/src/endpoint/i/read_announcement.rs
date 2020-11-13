@@ -1,11 +1,11 @@
-use crate::model::announcement::AnnouncementId;
+use crate::model::{announcement::Announcement, id::Id};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub announcement_id: AnnouncementId,
+    pub announcement_id: Id<Announcement>,
 }
 
 impl misskey_core::Request for Request {

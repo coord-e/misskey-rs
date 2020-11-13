@@ -1,6 +1,9 @@
 use std::collections::HashSet;
 
-use crate::model::notification::{Notification, NotificationId, NotificationType};
+use crate::model::{
+    id::Id,
+    notification::{Notification, NotificationType},
+};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -15,10 +18,10 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NotificationId>,
+    pub since_id: Option<Id<Notification>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NotificationId>,
+    pub until_id: Option<Id<Notification>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub following: Option<bool>,

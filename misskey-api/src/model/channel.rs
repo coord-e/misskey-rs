@@ -1,18 +1,13 @@
-use crate::model::user::UserId;
+use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, FromStr};
 use serde::{Deserialize, Serialize};
 use url::Url;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct ChannelId(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Channel {
-    pub id: ChannelId,
+    pub id: Id<Channel>,
     pub created_at: DateTime<Utc>,
     pub last_noted_at: Option<DateTime<Utc>>,
     pub name: String,
@@ -20,11 +15,11 @@ pub struct Channel {
     pub banner_id: Option<Url>,
     pub notes_count: u64,
     pub users_count: u64,
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     #[serde(default)]
     pub is_following: Option<bool>,
     #[serde(default)]
     pub has_unread_note: Option<bool>,
 }
 
-impl_entity!(Channel, ChannelId);
+impl_entity!(Channel);

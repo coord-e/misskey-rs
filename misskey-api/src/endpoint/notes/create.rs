@@ -1,9 +1,10 @@
 #[cfg(feature = "12-47-0")]
-use crate::model::channel::ChannelId;
+use crate::model::channel::Channel;
 use crate::model::{
-    drive::DriveFileId,
-    note::{Note, NoteId, Visibility},
-    user::UserId,
+    drive::DriveFile,
+    id::Id,
+    note::{Note, Visibility},
+    user::User,
 };
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Duration, Utc};
@@ -54,7 +55,7 @@ pub struct Request {
     pub visibility: Option<Visibility>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub visible_user_ids: Option<Vec<UserId>>,
+    pub visible_user_ids: Option<Vec<Id<User>>>,
     #[builder(default, setter(strip_option, into))]
     pub text: Option<String>,
     #[builder(default, setter(strip_option, into))]
@@ -76,13 +77,13 @@ pub struct Request {
     pub no_extract_emojis: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub file_ids: Option<Vec<DriveFileId>>,
+    pub file_ids: Option<Vec<Id<DriveFile>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub reply_id: Option<NoteId>,
+    pub reply_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub renote_id: Option<NoteId>,
+    pub renote_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub poll: Option<PollRequest>,
@@ -90,7 +91,7 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub channel_id: Option<ChannelId>,
+    pub channel_id: Option<Id<Channel>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

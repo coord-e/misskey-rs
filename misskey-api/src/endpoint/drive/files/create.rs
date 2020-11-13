@@ -1,4 +1,7 @@
-use crate::model::drive::{DriveFile, DriveFolderId};
+use crate::model::{
+    drive::{DriveFile, DriveFolder},
+    id::Id,
+};
 
 use serde::ser::Serializer;
 use serde::Serialize;
@@ -21,7 +24,7 @@ fn bool_string_option<S: Serializer>(
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub folder_id: Option<DriveFolderId>,
+    pub folder_id: Option<Id<DriveFolder>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub name: Option<String>,

@@ -1,26 +1,10 @@
 //! Object types used in API.
 
 macro_rules! impl_entity {
-    ($name:ident, $id_name:ident) => {
-        impl ::misskey_core::model::Entity for $name {
-            type Id = $id_name;
-            fn id(&self) -> Self::Id {
-                self.id.clone()
-            }
-        }
-        impl ::misskey_core::model::EntityRef<$name> for &$name {
-            fn entity_ref(self) -> $id_name {
-                self.id.clone()
-            }
-        }
-        impl ::misskey_core::model::EntityRef<$name> for $id_name {
-            fn entity_ref(self) -> $id_name {
-                self
-            }
-        }
-        impl ::misskey_core::model::EntityRef<$name> for &$id_name {
-            fn entity_ref(self) -> $id_name {
-                self.clone()
+    ($name:ident) => {
+        impl crate::Entity for $name {
+            fn id(&self) -> crate::model::id::Id<$name> {
+                self.id
             }
         }
     };
@@ -36,6 +20,7 @@ pub mod clip;
 pub mod drive;
 pub mod emoji;
 pub mod following;
+pub mod id;
 pub mod log;
 pub mod messaging;
 pub mod muting;
