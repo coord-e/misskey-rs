@@ -10,15 +10,14 @@
 
 macro_rules! impl_pagination {
     ($name:ident, $item:ty) => {
-        impl ::misskey_core::PaginationRequest for $name {
+        impl crate::PaginationRequest for $name {
             type Item = $item;
-            fn set_since(&mut self, item: &$item) {
-                self.since_id
-                    .replace(::misskey_core::model::Entity::id(item));
+
+            fn set_since_id(&mut self, since_id: <$item as crate::PaginationItem>::Id) {
+                self.since_id.replace(since_id);
             }
-            fn set_until(&mut self, item: &$item) {
-                self.until_id
-                    .replace(::misskey_core::model::Entity::id(item));
+            fn set_until_id(&mut self, until_id: <$item as crate::PaginationItem>::Id) {
+                self.until_id.replace(until_id);
             }
         }
     };
@@ -26,7 +25,7 @@ macro_rules! impl_pagination {
 
 macro_rules! impl_offset_pagination {
     ($name:ident, $item:ty) => {
-        impl ::misskey_core::OffsetPaginationRequest for $name {
+        impl crate::OffsetPaginationRequest for $name {
             type Item = $item;
             fn set_offset(&mut self, offset: u64) {
                 self.offset.replace(offset);

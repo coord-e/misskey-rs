@@ -7,6 +7,12 @@ macro_rules! impl_entity {
                 self.id
             }
         }
+        impl crate::PaginationItem for $name {
+            type Id = crate::model::id::Id<$name>;
+            fn item_id(&self) -> crate::model::id::Id<$name> {
+                self.id
+            }
+        }
     };
 }
 

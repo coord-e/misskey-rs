@@ -10,6 +10,13 @@ pub struct FollowingWithFollowee {
     pub followee: User,
 }
 
+impl crate::PaginationItem for FollowingWithFollowee {
+    type Id = Id<User>;
+    fn item_id(&self) -> Id<User> {
+        self.following.followee_id
+    }
+}
+
 #[derive(Serialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum Request {
@@ -43,19 +50,17 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "users/following";
 }
 
-impl misskey_core::PaginationRequest for Request {
+impl crate::PaginationRequest for Request {
     type Item = FollowingWithFollowee;
 
-    fn set_since(&mut self, item: &FollowingWithFollowee) {
-        let id = item.followee_id.clone();
+    fn set_since_id(&mut self, id: Id<User>) {
         match self {
             Request::WithUserId { since_id, .. } => since_id.replace(id),
             Request::WithUsername { since_id, .. } => since_id.replace(id),
         };
     }
 
-    fn set_until(&mut self, item: &FollowingWithFollowee) {
-        let id = item.followee_id.clone();
+    fn set_until_id(&mut self, id: Id<User>) {
         match self {
             Request::WithUserId { until_id, .. } => until_id.replace(id),
             Request::WithUsername { until_id, .. } => until_id.replace(id),
