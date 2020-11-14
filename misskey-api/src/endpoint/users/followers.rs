@@ -1,6 +1,7 @@
 use crate::model::{following::Following, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
+use typed_builder::TypedBuilder;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -17,60 +18,80 @@ impl crate::PaginationItem for FollowingWithFollower {
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
-#[serde(untagged)]
-pub enum Request {
-    #[serde(rename_all = "camelCase")]
-    WithUserId {
-        user_id: Id<User>,
-        /// 1 .. 100
-        #[serde(skip_serializing_if = "Option::is_none")]
-        limit: Option<u8>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        since_id: Option<Id<User>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        until_id: Option<Id<User>>,
-    },
-    #[serde(rename_all = "camelCase")]
-    WithUsername {
-        username: String,
-        host: Option<String>,
-        /// 1 .. 100
-        #[serde(skip_serializing_if = "Option::is_none")]
-        limit: Option<u8>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        since_id: Option<Id<User>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        until_id: Option<Id<User>>,
-    },
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
+#[serde(rename_all = "camelCase")]
+#[builder(doc)]
+pub struct RequestWithUserId {
+    user_id: Id<User>,
+    /// 1 .. 100
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    limit: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    since_id: Option<Id<User>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    until_id: Option<Id<User>>,
 }
 
-impl misskey_core::Request for Request {
+impl misskey_core::Request for RequestWithUserId {
     type Response = Vec<FollowingWithFollower>;
     const ENDPOINT: &'static str = "users/followers";
 }
 
-impl crate::PaginationRequest for Request {
+impl crate::PaginationRequest for RequestWithUserId {
     type Item = FollowingWithFollower;
 
     fn set_since_id(&mut self, id: Id<User>) {
-        match self {
-            Request::WithUserId { since_id, .. } => since_id.replace(id),
-            Request::WithUsername { since_id, .. } => since_id.replace(id),
-        };
+        self.since_id.replace(id);
     }
 
     fn set_until_id(&mut self, id: Id<User>) {
-        match self {
-            Request::WithUserId { until_id, .. } => until_id.replace(id),
-            Request::WithUsername { until_id, .. } => until_id.replace(id),
-        };
+        self.until_id.replace(id);
+    }
+}
+
+#[derive(Serialize, Debug, Clone, TypedBuilder)]
+#[serde(rename_all = "camelCase")]
+#[builder(doc)]
+pub struct RequestWithUsername {
+    #[builder(setter(into))]
+    username: String,
+    #[builder(default, setter(strip_option, into))]
+    host: Option<String>,
+    /// 1 .. 100
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    limit: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    since_id: Option<Id<User>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    until_id: Option<Id<User>>,
+}
+
+impl misskey_core::Request for RequestWithUsername {
+    type Response = Vec<FollowingWithFollower>;
+    const ENDPOINT: &'static str = "users/followers";
+}
+
+impl crate::PaginationRequest for RequestWithUsername {
+    type Item = FollowingWithFollower;
+
+    fn set_since_id(&mut self, id: Id<User>) {
+        self.since_id.replace(id);
+    }
+
+    fn set_until_id(&mut self, id: Id<User>) {
+        self.until_id.replace(id);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Request;
+    use super::{RequestWithUserId, RequestWithUsername};
     use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
@@ -79,7 +100,7 @@ mod tests {
         let user = client.me().await;
 
         client
-            .test(Request::WithUserId {
+            .test(RequestWithUserId {
                 user_id: user.id,
                 limit: None,
                 since_id: None,
@@ -94,7 +115,7 @@ mod tests {
         let user = client.me().await;
 
         client
-            .test(Request::WithUsername {
+            .test(RequestWithUsername {
                 username: user.username,
                 host: None,
                 limit: None,
@@ -111,7 +132,7 @@ mod tests {
         let client = TestClient::new();
         let user = client.me().await;
         client
-            .test(Request::WithUserId {
+            .test(RequestWithUserId {
                 user_id: user.id,
                 limit: Some(100),
                 since_id: None,
@@ -133,7 +154,7 @@ mod tests {
 
         client
             .user
-            .test(Request::WithUserId {
+            .test(RequestWithUserId {
                 user_id: user.id,
                 limit: None,
                 since_id: Some(new_user.id.clone()),
