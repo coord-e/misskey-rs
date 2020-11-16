@@ -17,3 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update some words in the description
+- Use `Mime` from `mime` crate for file types
+
+### Removed
+
+- `model::messaging::UserGroup`, which is duplicate of `model::user_group::UserGroup`

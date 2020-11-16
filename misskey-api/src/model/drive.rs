@@ -1,6 +1,7 @@
 use crate::model::id::Id;
 
 use chrono::{DateTime, Utc};
+use mime::Mime;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -10,8 +11,8 @@ pub struct DriveFile {
     pub id: Id<DriveFile>,
     pub created_at: DateTime<Utc>,
     pub name: String,
-    #[serde(rename = "type")]
-    pub type_: String,
+    #[serde(rename = "type", with = "crate::serde::string")]
+    pub type_: Mime,
     pub md5: String,
     pub size: u64,
     pub url: Option<Url>,

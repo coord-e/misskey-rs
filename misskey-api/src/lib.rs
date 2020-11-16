@@ -5,6 +5,8 @@ pub mod endpoint;
 pub mod model;
 pub mod streaming;
 
+pub(crate) mod serde;
+
 mod entity;
 mod pagination;
 

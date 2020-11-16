@@ -1,6 +1,7 @@
 use crate::model::{id::Id, note::Note, user::User};
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
+use mime::Mime;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -18,9 +19,12 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "crate::serde::serialize_string_vec_option"
+    )]
     #[builder(default, setter(strip_option))]
-    pub file_type: Option<Vec<String>>,
+    pub file_type: Option<Vec<Mime>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub exclude_nsfw: Option<bool>,
@@ -60,6 +64,8 @@ mod tests {
     use super::Request;
     use crate::test::{ClientExt, TestClient};
 
+    use mime::IMAGE_PNG;
+
     #[tokio::test]
     async fn request() {
         let client = TestClient::new();
@@ -93,7 +99,7 @@ mod tests {
                 include_replies: Some(false),
                 include_my_renotes: Some(false),
                 with_files: Some(true),
-                file_type: Some(vec!["image/png".to_string()]),
+                file_type: Some(vec![IMAGE_PNG]),
                 exclude_nsfw: Some(true),
                 limit: None,
                 since_id: None,

@@ -3,6 +3,7 @@ use crate::model::{
     id::Id,
 };
 
+use mime::Mime;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -20,9 +21,13 @@ pub mod upload_from_url;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option, into))]
-    pub type_: Option<String>,
+    #[serde(
+        rename = "type",
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "crate::serde::serialize_string_option"
+    )]
+    #[builder(default, setter(strip_option))]
+    pub type_: Option<Mime>,
     #[builder(default, setter(strip_option))]
     pub folder_id: Option<Id<DriveFolder>>,
     /// 1 .. 100
@@ -48,6 +53,8 @@ impl_pagination!(Request, DriveFile);
 mod tests {
     use super::Request;
     use crate::test::{ClientExt, HttpClientExt, TestClient};
+
+    use mime::TEXT_PLAIN;
 
     #[tokio::test]
     async fn request() {
@@ -85,7 +92,7 @@ mod tests {
 
         client
             .test(Request {
-                type_: Some("text/plain".to_string()),
+                type_: Some(TEXT_PLAIN),
                 folder_id: None,
                 limit: Some(100),
                 since_id: None,
