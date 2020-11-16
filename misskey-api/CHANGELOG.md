@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trait for pagination: `PaginationRequest` and `OffsetPaginationRequest`
 - Unified representation of IDs: `Id<T>`
 - Support for ID generation methods
+- `Query` type for DNF queries
 
 ### Changed
 

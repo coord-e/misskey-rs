@@ -1,4 +1,4 @@
-use crate::model::note::Note;
+use crate::model::{note::Note, query::Query};
 
 use serde::{Deserialize, Serialize};
 
@@ -11,7 +11,7 @@ pub enum HashtagEvent {
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub q: Vec<Vec<String>>,
+    pub q: Query<String>,
 }
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
@@ -24,6 +24,7 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::Request;
+    use crate::model::query::Query;
     use crate::test::{websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
@@ -34,7 +35,7 @@ mod tests {
 
         let mut stream = client
             .channel(Request {
-                q: vec![vec!["tag".to_string()]],
+                q: Query(vec![vec!["tag".to_string()]]),
             })
             .await
             .unwrap();
@@ -46,7 +47,7 @@ mod tests {
         let client = TestClient::new().await;
         let mut stream = client
             .channel(Request {
-                q: vec![vec!["test".to_string(), "good".to_string()]],
+                q: Query(vec![vec!["test".to_string(), "good".to_string()]]),
             })
             .await
             .unwrap();

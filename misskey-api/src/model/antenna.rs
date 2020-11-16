@@ -1,6 +1,6 @@
 #[cfg(feature = "12-10-0")]
 use crate::model::user_group::UserGroup;
-use crate::model::{id::Id, user::User, user_list::UserList};
+use crate::model::{id::Id, query::Query, user::User, user_list::UserList};
 
 use chrono::{DateTime, Utc};
 use derive_more::{Display, Error};
@@ -15,8 +15,8 @@ pub struct Antenna {
     pub case_sensitive: bool,
     #[cfg(feature = "12-19-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]
-    pub exclude_keywords: Vec<Vec<String>>,
-    pub keywords: Vec<Vec<String>>,
+    pub exclude_keywords: Query<String>,
+    pub keywords: Query<String>,
     pub expression: Option<String>,
     pub src: AntennaSource,
     #[cfg(feature = "12-10-0")]

@@ -3,6 +3,7 @@ use crate::model::user_group::UserGroup;
 use crate::model::{
     antenna::{Antenna, AntennaSource},
     id::Id,
+    query::Query,
     user_list::UserList,
 };
 
@@ -24,10 +25,12 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
     #[builder(default, setter(strip_option))]
     pub user_group_id: Option<Id<UserGroup>>,
-    pub keywords: Vec<Vec<String>>,
+    #[builder(default, setter(into))]
+    pub keywords: Query<String>,
     #[cfg(feature = "12-19-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]
-    pub exclude_keywords: Vec<Vec<String>>,
+    #[builder(default, setter(into))]
+    pub exclude_keywords: Query<String>,
     pub users: Vec<String>,
     pub case_sensitive: bool,
     pub with_replies: bool,
@@ -47,7 +50,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new();
         let antenna = client
@@ -58,9 +61,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["hello".to_string(), "awesome".to_string()]],
+                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: Vec::new(),
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: true,
                 with_replies: false,
@@ -83,9 +86,9 @@ mod tests {
                 user_list_id: Some(list.id),
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["cool".to_string()], vec!["nice".to_string()]],
+                keywords: Query::from_vec(vec![vec!["cool".to_string()], vec!["nice".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: Vec::new(),
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: true,

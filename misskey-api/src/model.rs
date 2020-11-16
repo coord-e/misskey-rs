@@ -34,6 +34,7 @@ pub mod note;
 pub mod note_favorite;
 pub mod notification;
 pub mod page;
+pub mod query;
 pub mod signin;
 pub mod sort;
 pub mod user;

@@ -30,7 +30,7 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new().await;
         let antenna = client
@@ -40,9 +40,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["hello".to_string(), "awesome".to_string()]],
+                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: vec![],
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,
@@ -62,7 +62,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new().await;
         let antenna = client
@@ -72,9 +72,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["hello".to_string()]],
+                keywords: Query::from_vec(vec![vec!["hello".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: Vec::new(),
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,

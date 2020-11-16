@@ -2,6 +2,7 @@ use crate::model::{
     drive::DriveFile,
     id::Id,
     page::Page,
+    query::Query,
     user::{User, UserField},
 };
 
@@ -65,7 +66,7 @@ pub struct Request {
     pub pinned_page_id: Option<Option<Id<Page>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub muted_words: Option<Vec<Vec<String>>>,
+    pub muted_words: Option<Query<String>>,
 }
 
 impl misskey_core::Request for Request {
@@ -86,7 +87,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        use crate::model::user::UserField;
+        use crate::model::{query::Query, user::UserField};
 
         let client = TestClient::new();
         client
@@ -111,10 +112,10 @@ mod tests {
                 inject_featured_note: Some(true),
                 always_mark_nsfw: Some(true),
                 pinned_page_id: None,
-                muted_words: Some(vec![
+                muted_words: Some(Query::from_vec(vec![
                     vec!["mute1".to_string(), "mute2".to_string()],
                     vec!["mute3".to_string()],
-                ]),
+                ])),
             })
             .await;
     }
