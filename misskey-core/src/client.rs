@@ -16,3 +16,36 @@ pub trait Client {
         request: R,
     ) -> BoxFuture<Result<ApiResult<R::Response>, Self::Error>>;
 }
+
+impl<C: Client + ?Sized> Client for &C {
+    type Error = C::Error;
+
+    fn request<R: Request>(
+        &self,
+        request: R,
+    ) -> BoxFuture<Result<ApiResult<R::Response>, Self::Error>> {
+        C::request(self, request)
+    }
+}
+
+impl<C: Client + ?Sized> Client for &mut C {
+    type Error = C::Error;
+
+    fn request<R: Request>(
+        &self,
+        request: R,
+    ) -> BoxFuture<Result<ApiResult<R::Response>, Self::Error>> {
+        C::request(self, request)
+    }
+}
+
+impl<C: Client + ?Sized> Client for Box<C> {
+    type Error = C::Error;
+
+    fn request<R: Request>(
+        &self,
+        request: R,
+    ) -> BoxFuture<Result<ApiResult<R::Response>, Self::Error>> {
+        C::request(self, request)
+    }
+}
