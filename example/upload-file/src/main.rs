@@ -1,3 +1,4 @@
+use std::fs::File;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
@@ -30,6 +31,7 @@ async fn main() -> Result<()> {
     // Miscellaneous code to compute some necessary values
     let mime = mime_guess::from_path(&opt.file).first_or_octet_stream();
     let file_name = opt.file.file_name().unwrap().to_str().unwrap();
+    let file = File::open(&opt.file)?;
 
     // Upload a file to drive
     let file = client
@@ -43,7 +45,7 @@ async fn main() -> Result<()> {
             },
             mime,
             file_name,
-            &opt.file,
+            file,
         )
         .await
         .context("Failed to call an API")?

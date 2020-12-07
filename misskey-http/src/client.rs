@@ -1,5 +1,4 @@
 use std::fmt::{self, Debug};
-use std::path::Path;
 
 use crate::error::{Error, Result};
 
@@ -92,7 +91,7 @@ impl HttpClient {
         request: R,
         type_: Mime,
         file_name: impl Into<String>,
-        path: impl AsRef<Path>,
+        read: impl std::io::Read + Send + Sync + 'static,
     ) -> Result<ApiResult<R::Response>> {
         let url = self
             .url
@@ -108,17 +107,12 @@ impl HttpClient {
 
             #[cfg(feature = "inspect-contents")]
             debug!(
-                "sending request to {} with {} ({}) file: {}",
-                url,
-                path.as_ref().display(),
-                type_,
-                value
+                "sending request to {} with {} content: {}",
+                url, type_, value
             );
 
             let mut form = multipart::Form::default();
 
-            // TODO: Can't we just take `AsyncRead` or `Read` and use it directly?
-            let read = std::fs::File::open(path)?;
             form.add_reader_file_with_mime("file", read, file_name, type_);
 
             let obj = value.as_object().expect("Request must be an object");
