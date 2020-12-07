@@ -1,20 +1,7 @@
-use crate::model::{drive::DriveFile, id::Id, user::User};
+use crate::model::{drive::DriveFile, id::Id, user::User, user_group::UserGroup};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct UserGroup {
-    pub id: Id<UserGroup>,
-    pub created_at: DateTime<Utc>,
-    pub name: String,
-    pub owner_id: Id<User>,
-    #[serde(default)]
-    pub user_ids: Vec<Id<User>>,
-}
-
-impl_entity!(UserGroup);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
