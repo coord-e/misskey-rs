@@ -37,6 +37,7 @@ jobs:
         run: ./ci/testenv/setup.sh
         env:
           MISSKEY_VERSION: '12.47.1'
+          MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 5
         env:
@@ -99,11 +100,12 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
+          args: --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
           MISSKEY_VERSION: ${{ matrix.version }}
+          MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 5
         env:
@@ -113,7 +115,7 @@ jobs:
           TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
         with:
           command: test
-          args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
+          args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
   test_websocket:
     name: Test misskey-websocket
     runs-on: ubuntu-18.04
@@ -146,6 +148,7 @@ jobs:
         run: ./ci/testenv/setup.sh
         env:
           MISSKEY_VERSION: 12.0.0
+          MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 3
         env:
@@ -154,6 +157,50 @@ jobs:
         with:
           command: test
           args: --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
+  test_id:
+    name: Test misskey-api with different ID generation methods
+    runs-on: ubuntu-18.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        include:
+          - method: meid
+          - method: objectid
+          - method: ulid
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}
+          restore-keys: |
+            ubuntu-18.04-stable-cargo-misskey-api-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_VERSION: 12.47.1
+          MISSKEY_ID: ${{ matrix.method }}
+      - uses: actions-rs/cargo@v1
+        timeout-minutes: 5
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
   minimal_version:
     name: Minimal versions build
     runs-on: ubuntu-18.04

@@ -11,5 +11,3 @@ db:
 redis:
   host: redis
   port: 6379
-
-id: 'aid'
