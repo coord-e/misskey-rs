@@ -6,9 +6,9 @@ use serde::Serialize;
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    note_id: Id<Note>,
+    pub note_id: Id<Note>,
     #[serde(with = "ts_milliseconds")]
-    expires_at: DateTime<Utc>,
+    pub expires_at: DateTime<Utc>,
 }
 
 impl misskey_core::Request for Request {

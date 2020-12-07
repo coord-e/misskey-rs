@@ -10,13 +10,13 @@ pub struct Request {
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    limit: Option<u8>,
+    pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    level: Option<LogLevel>,
+    pub level: Option<LogLevel>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
-    domain: Option<String>,
+    pub domain: Option<String>,
 }
 
 impl misskey_core::Request for Request {

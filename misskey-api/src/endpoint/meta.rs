@@ -118,7 +118,7 @@ pub struct FeaturesMeta {
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
-    detail: Option<bool>,
+    pub detail: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

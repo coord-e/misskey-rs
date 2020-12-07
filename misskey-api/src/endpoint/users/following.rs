@@ -22,17 +22,17 @@ impl crate::PaginationItem for FollowingWithFollowee {
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct RequestWithUserId {
-    user_id: Id<User>,
+    pub user_id: Id<User>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    limit: Option<u8>,
+    pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    since_id: Option<Id<User>>,
+    pub since_id: Option<Id<User>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    until_id: Option<Id<User>>,
+    pub until_id: Option<Id<User>>,
 }
 
 impl misskey_core::Request for RequestWithUserId {
@@ -57,19 +57,19 @@ impl crate::PaginationRequest for RequestWithUserId {
 #[builder(doc)]
 pub struct RequestWithUsername {
     #[builder(setter(into))]
-    username: String,
+    pub username: String,
     #[builder(default, setter(strip_option, into))]
-    host: Option<String>,
+    pub host: Option<String>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    limit: Option<u8>,
+    pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    since_id: Option<Id<User>>,
+    pub since_id: Option<Id<User>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    until_id: Option<Id<User>>,
+    pub until_id: Option<Id<User>>,
 }
 
 impl misskey_core::Request for RequestWithUsername {
