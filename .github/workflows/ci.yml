@@ -40,7 +40,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_VERSION: latest
+          MISSKEY_VERSION: '12.47.1'
       - uses: actions-rs/cargo@v1
         timeout-minutes: 5
         env:
