@@ -1,8 +1,4 @@
-use crate::model::{
-    messaging::{MessagingMessage, MessagingMessageId},
-    user::UserId,
-    user_group::UserGroupId,
-};
+use crate::model::{id::Id, messaging::MessagingMessage, user::User, user_group::UserGroup};
 
 use serde::{Deserialize, Serialize};
 
@@ -10,21 +6,21 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MessagingStreamEvent {
     Message(MessagingMessage),
-    Deleted(MessagingMessageId),
-    Read(Vec<MessagingMessageId>),
+    Deleted(Id<MessagingMessage>),
+    Read(Vec<Id<MessagingMessage>>),
 }
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum Message {
-    Read { id: MessagingMessageId },
+    Read { id: Id<MessagingMessage> },
 }
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum Request {
-    Otherparty(UserId),
-    Group(UserGroupId),
+    Otherparty(Id<User>),
+    Group(Id<UserGroup>),
 }
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {

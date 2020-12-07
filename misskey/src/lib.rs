@@ -108,7 +108,8 @@
 //! | -------------------------- | -------------------------------------- | ---------------------- |
 //! | `head`                     | HEAD                                   | not tested             |
 //! | `12-47-0`                  | v12.47.0 ~ v12.47.1                    | v12.47.1               |
-//! | `12-39-0`                  | v12.39.0 ~ v12.46.0                    | v12.39.0               |
+//! | `12-42-0`                  | v12.42.0 ~ v12.46.0                    | v12.42.0               |
+//! | `12-39-0`                  | v12.39.0 ~ v12.41.3                    | v12.39.0               |
 //! | `12-37-0`                  | v12.37.0 ~ v12.38.1                    | v12.37.0               |
 //! | `12-31-0`                  | v12.31.0 ~ v12.36.1                    | v12.31.0               |
 //! | `12-29-0`                  | v12.29.0 ~ v12.30.0                    | v12.29.0               |
@@ -194,7 +195,7 @@ pub mod streaming {
     //!
     //! ```no_run
     //! use futures::stream::StreamExt;
-    //! use misskey::model::note::NoteId;
+    //! use misskey::model::{note::Note, id::Id};
     //! use misskey::streaming::note::NoteUpdateEvent;
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
@@ -204,7 +205,7 @@ pub mod streaming {
     //! #     .connect()
     //! #     .await?;
     //!
-    //! let note_id = NoteId("NOTE_ID_TO_WATCH".to_string());
+    //! let note_id: Id<Note> = "NOTE_ID_TO_WATCH".parse().unwrap();
     //! let mut stream = client.subscribe_note(note_id).await?;
     //!
     //! loop {

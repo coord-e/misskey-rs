@@ -1,7 +1,4 @@
-use crate::model::{
-    note::{Note, NoteId},
-    user::UserId,
-};
+use crate::model::{id::Id, note::Note, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,7 +10,7 @@ pub struct Request {
     #[builder(setter(into))]
     pub query: String,
     #[builder(default, setter(strip_option))]
-    pub user_id: Option<UserId>,
+    pub user_id: Option<Id<User>>,
     #[builder(default, setter(strip_option, into))]
     pub host: Option<String>,
     /// 1 .. 100
@@ -22,16 +19,18 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteId>,
+    pub since_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteId>,
+    pub until_id: Option<Id<Note>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes/search";
 }
+
+impl_pagination!(Request, Note);
 
 #[cfg(test)]
 mod tests {

@@ -1,6 +1,6 @@
 #[cfg(feature = "12-9-0")]
-use crate::model::drive::DriveFileId;
-use crate::model::emoji::EmojiId;
+use crate::model::drive::DriveFile;
+use crate::model::{emoji::Emoji, id::Id};
 
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -13,7 +13,7 @@ use url::Url;
 pub struct Request {
     #[cfg(feature = "12-9-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
-    pub file_id: DriveFileId,
+    pub file_id: Id<DriveFile>,
     #[cfg(any(docsrs, not(feature = "12-9-0")))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     #[builder(setter(into))]
@@ -36,7 +36,7 @@ pub struct Request {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Response {
-    pub id: EmojiId,
+    pub id: Id<Emoji>,
 }
 
 impl misskey_core::Request for Request {
@@ -48,6 +48,9 @@ impl misskey_core::Request for Request {
 mod tests {
     use super::Request;
     use crate::test::{ClientExt, TestClient};
+
+    #[cfg(not(feature = "12-9-0"))]
+    use ulid_crate::Ulid;
 
     #[tokio::test]
     #[cfg(feature = "12-9-0")]
@@ -71,7 +74,7 @@ mod tests {
     async fn request() {
         let client = TestClient::new();
         let image_url = client.avatar_url().await;
-        let name = uuid::Uuid::new_v4().to_simple().to_string();
+        let name = Ulid::new().to_string();
 
         client
             .admin
@@ -89,7 +92,7 @@ mod tests {
     async fn request_with_options() {
         let client = TestClient::new();
         let image_url = client.avatar_url().await;
-        let name = uuid::Uuid::new_v4().to_simple().to_string();
+        let name = Ulid::new().to_string();
 
         client
             .admin

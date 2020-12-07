@@ -1,4 +1,4 @@
-use crate::model::note::NoteId;
+use crate::model::{id::Id, note::Note};
 
 use chrono::{serde::ts_milliseconds, DateTime, Utc};
 use serde::Serialize;
@@ -6,9 +6,9 @@ use serde::Serialize;
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    note_id: NoteId,
+    pub note_id: Id<Note>,
     #[serde(with = "ts_milliseconds")]
-    expires_at: DateTime<Utc>,
+    pub expires_at: DateTime<Utc>,
 }
 
 impl misskey_core::Request for Request {

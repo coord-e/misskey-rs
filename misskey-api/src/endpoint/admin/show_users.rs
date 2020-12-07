@@ -3,8 +3,8 @@ use crate::model::{
     user::{User, UserOrigin, UserSort},
 };
 
-use derive_more::{Display, Error};
 use serde::Serialize;
+use thiserror::Error;
 use typed_builder::TypedBuilder;
 
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
@@ -20,9 +20,11 @@ pub enum UserState {
     Suspended,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid user state")]
-pub struct ParseUserStateError;
+#[derive(Debug, Error, Clone)]
+#[error("invalid user state")]
+pub struct ParseUserStateError {
+    _priv: (),
+}
 
 impl std::str::FromStr for UserState {
     type Err = ParseUserStateError;
@@ -37,7 +39,7 @@ impl std::str::FromStr for UserState {
             "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
             "silenced" | "Silenced" => Ok(UserState::Silenced),
             "suspended" | "Suspended" => Ok(UserState::Suspended),
-            _ => Err(ParseUserStateError),
+            _ => Err(ParseUserStateError { _priv: () }),
         }
     }
 }
@@ -74,6 +76,8 @@ impl misskey_core::Request for Request {
     type Response = Vec<User>;
     const ENDPOINT: &'static str = "admin/show-users";
 }
+
+impl_offset_pagination!(Request, User);
 
 #[cfg(test)]
 mod tests {

@@ -7,7 +7,7 @@ pub struct Request {}
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Response {
-    code: String,
+    pub code: String,
 }
 
 impl misskey_core::Request for Request {

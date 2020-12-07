@@ -1,31 +1,28 @@
 use crate::model::{
+    id::Id,
     note::{Note, Reaction},
-    user::{User, UserId},
+    user::User,
     user_group::UserGroupInvitation,
 };
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error, FromStr};
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumDiscriminants;
-
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct NotificationId(pub String);
+use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Notification {
-    pub id: NotificationId,
+    pub id: Id<Notification>,
     pub created_at: DateTime<Utc>,
-    /// This field is [`UserId`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-17-0"</code></strong></span>.
+    /// This field is [`Id<User>`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-17-0"</code></strong></span>.
     #[cfg(feature = "12-27-0")]
-    pub user_id: Option<UserId>,
+    pub user_id: Option<Id<User>>,
     /// This field is [`User`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-17-0"</code></strong></span>.
     #[cfg(feature = "12-27-0")]
     pub user: Option<User>,
     #[cfg(not(feature = "12-27-0"))]
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     #[cfg(not(feature = "12-27-0"))]
     pub user: User,
     #[cfg(feature = "12-39-0")]
@@ -34,6 +31,8 @@ pub struct Notification {
     #[serde(flatten)]
     pub body: NotificationBody,
 }
+
+impl_entity!(Notification);
 
 #[derive(Serialize, Deserialize, Debug, Clone, EnumDiscriminants)]
 #[serde(rename_all = "camelCase", tag = "type")]
@@ -55,9 +54,11 @@ pub enum NotificationBody {
     App {},
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid notification type")]
-pub struct ParseNotificationTypeError;
+#[derive(Debug, Error, Clone)]
+#[error("invalid notification type")]
+pub struct ParseNotificationTypeError {
+    _priv: (),
+}
 
 impl std::str::FromStr for NotificationType {
     type Err = ParseNotificationTypeError;
@@ -79,7 +80,7 @@ impl std::str::FromStr for NotificationType {
             "pollVote" | "PollVote" => Ok(NotificationType::PollVote),
             "groupInvited" | "GroupInvited" => Ok(NotificationType::GroupInvited),
             "app" | "App" => Ok(NotificationType::App),
-            _ => Err(ParseNotificationTypeError),
+            _ => Err(ParseNotificationTypeError { _priv: () }),
         }
     }
 }

@@ -1,4 +1,8 @@
-use crate::model::drive::{DriveFile, DriveFileId, DriveFolder, DriveFolderId};
+use crate::model::{
+    drive::{DriveFile, DriveFolder},
+    id::Id,
+};
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -7,10 +11,10 @@ use serde::{Deserialize, Serialize};
 pub enum DriveStreamEvent {
     FolderCreated(DriveFolder),
     FolderUpdated(DriveFolder),
-    FolderDeleted(DriveFolderId),
+    FolderDeleted(Id<DriveFolder>),
     FileCreated(DriveFile),
     FileUpdated(DriveFile),
-    FileDeleted(DriveFileId),
+    FileDeleted(Id<DriveFile>),
 }
 
 #[derive(Serialize, Default, Debug, Clone)]
@@ -18,7 +22,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = DriveStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "drive";
 }

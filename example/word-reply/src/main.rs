@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use futures::stream::StreamExt;
-use misskey::model::antenna::AntennaSource;
+use misskey::model::{antenna::AntennaSource, query::Query};
 use misskey::streaming::channel::antenna::{self, AntennaStreamEvent};
 use misskey::{Client, WebSocketClient};
 use structopt::StructOpt;
@@ -36,8 +36,7 @@ async fn main() -> Result<()> {
         .request(
             misskey::endpoint::antennas::create::Request::builder()
                 .name("word-reply example")
-                .keywords(opt.words.into_iter().map(|x| vec![x]).collect())
-                .exclude_keywords(vec![])
+                .keywords(Query(opt.words.into_iter().map(|x| vec![x]).collect()))
                 .src(AntennaSource::All)
                 .users(vec![])
                 .case_sensitive(opt.case_sensitive)

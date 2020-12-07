@@ -1,11 +1,14 @@
-use crate::model::note::{NoteId, Reaction};
+use crate::model::{
+    id::Id,
+    note::{Note, Reaction},
+};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub note_id: NoteId,
+    pub note_id: Id<Note>,
     pub reaction: Reaction,
 }
 

@@ -1,3 +1,16 @@
+use serde::Serialize;
+
+/// A type with no possible values.
+///
+/// This is used to indicate that [`ConnectChannelRequest::Outgoing`][`misskey_core::streaming::ConnectChannelRequest`] does not exist,
+/// that is, we do not send messages through that channel.
+///
+/// In the future when [`!`][never] is stabilized, this may be an alias for [`!`][never].
+///
+/// [never]: https://doc.rust-lang.org/nightly/std/primitive.never.html
+#[derive(Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum NoOutgoing {}
+
 pub mod admin;
 pub mod antenna;
 pub mod drive;

@@ -1,4 +1,4 @@
-use crate::model::user_group::{UserGroupInvitation, UserGroupInvitationId};
+use crate::model::{id::Id, user_group::UserGroupInvitation};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,16 +13,18 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<UserGroupInvitationId>,
+    pub since_id: Option<Id<UserGroupInvitation>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<UserGroupInvitationId>,
+    pub until_id: Option<Id<UserGroupInvitation>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<UserGroupInvitation>;
     const ENDPOINT: &'static str = "i/user-group-invites";
 }
+
+impl_pagination!(Request, UserGroupInvitation);
 
 #[cfg(test)]
 mod tests {

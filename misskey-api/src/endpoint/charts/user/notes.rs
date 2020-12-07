@@ -1,6 +1,7 @@
 use crate::model::{
     chart::{ChartSpan, NotesChart},
-    user::UserId,
+    id::Id,
+    user::User,
 };
 
 use serde::Serialize;
@@ -11,7 +12,7 @@ use typed_builder::TypedBuilder;
 #[builder(doc)]
 pub struct Request {
     pub span: ChartSpan,
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     /// 1 .. 500
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]

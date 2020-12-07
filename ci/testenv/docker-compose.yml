@@ -11,6 +11,7 @@ services:
       context: web
       args:
         MISSKEY_VERSION: ${MISSKEY_VERSION:?}
+        MISSKEY_ID: ${MISSKEY_ID:?}
     depends_on:
       - db
       - redis

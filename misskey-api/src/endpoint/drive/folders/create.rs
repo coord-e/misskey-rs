@@ -1,4 +1,4 @@
-use crate::model::drive::{DriveFolder, DriveFolderId};
+use crate::model::{drive::DriveFolder, id::Id};
 
 use serde::Serialize;
 
@@ -7,7 +7,7 @@ use serde::Serialize;
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    pub parent_id: Option<DriveFolderId>,
+    pub parent_id: Option<Id<DriveFolder>>,
 }
 
 impl misskey_core::Request for Request {

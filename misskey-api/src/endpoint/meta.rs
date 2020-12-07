@@ -1,4 +1,4 @@
-use crate::model::{emoji::Emoji, user::UserId};
+use crate::model::{emoji::Emoji, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -59,7 +59,7 @@ pub struct AdminMeta {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
     pub hcaptcha_secret_key: Option<String>,
     pub recaptcha_secret_key: Option<String>,
-    pub proxy_account_id: Option<UserId>,
+    pub proxy_account_id: Option<Id<User>>,
     pub twitter_consumer_key: Option<String>,
     pub twitter_consumer_secret: Option<String>,
     pub github_client_id: Option<String>,
@@ -118,7 +118,7 @@ pub struct FeaturesMeta {
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
-    detail: Option<bool>,
+    pub detail: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

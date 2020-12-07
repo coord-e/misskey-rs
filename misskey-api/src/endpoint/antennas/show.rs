@@ -1,11 +1,11 @@
-use crate::model::antenna::{Antenna, AntennaId};
+use crate::model::{antenna::Antenna, id::Id};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub antenna_id: AntennaId,
+    pub antenna_id: Id<Antenna>,
 }
 
 impl misskey_core::Request for Request {
@@ -20,7 +20,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new();
         let antenna = client
@@ -31,9 +31,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["hello".to_string(), "awesome".to_string()]],
+                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: vec![vec!["oh".to_string()]],
+                exclude_keywords: Query(vec![vec!["oh".to_string()]]),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,

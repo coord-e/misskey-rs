@@ -1,4 +1,4 @@
-use crate::model::user::{User, UserId};
+use crate::model::{id::Id, user::User};
 
 use serde::Serialize;
 
@@ -6,7 +6,7 @@ use serde::Serialize;
 #[serde(untagged)]
 pub enum Request {
     #[serde(rename_all = "camelCase")]
-    WithUserId { user_id: UserId },
+    WithUserId { user_id: Id<User> },
     #[serde(rename_all = "camelCase")]
     WithUsername {
         username: String,
@@ -22,7 +22,7 @@ impl misskey_core::Request for Request {
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RequestWithUserIds {
-    pub user_ids: Vec<UserId>,
+    pub user_ids: Vec<Id<User>>,
 }
 
 impl misskey_core::Request for RequestWithUserIds {

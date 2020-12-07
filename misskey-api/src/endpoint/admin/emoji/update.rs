@@ -1,4 +1,4 @@
-use crate::model::emoji::EmojiId;
+use crate::model::{emoji::Emoji, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -9,7 +9,7 @@ use url::Url;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub id: EmojiId,
+    pub id: Id<Emoji>,
     #[builder(setter(into))]
     pub name: String,
     #[builder(default, setter(strip_option, into))]
@@ -35,7 +35,7 @@ mod tests {
         let client = TestClient::new();
         let image_url = client.avatar_url().await;
         let id = client.admin.add_emoji_from_url(image_url.clone()).await;
-        let name = uuid::Uuid::new_v4().to_simple().to_string();
+        let name = ulid_crate::Ulid::new().to_string();
 
         client
             .admin

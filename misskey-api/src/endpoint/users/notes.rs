@@ -1,9 +1,7 @@
-use crate::model::{
-    note::{Note, NoteId},
-    user::UserId,
-};
+use crate::model::{id::Id, note::Note, user::User};
 
 use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
+use mime::Mime;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -11,7 +9,7 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub user_id: UserId,
+    pub user_id: Id<User>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub include_replies: Option<bool>,
@@ -21,9 +19,12 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "crate::serde::serialize_string_vec_option"
+    )]
     #[builder(default, setter(strip_option))]
-    pub file_type: Option<Vec<String>>,
+    pub file_type: Option<Vec<Mime>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub exclude_nsfw: Option<bool>,
@@ -33,10 +34,10 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteId>,
+    pub since_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteId>,
+    pub until_id: Option<Id<Note>>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         with = "ts_milliseconds_option"
@@ -56,10 +57,14 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "users/notes";
 }
 
+impl_pagination!(Request, Note);
+
 #[cfg(test)]
 mod tests {
     use super::Request;
     use crate::test::{ClientExt, TestClient};
+
+    use mime::IMAGE_PNG;
 
     #[tokio::test]
     async fn request() {
@@ -94,7 +99,7 @@ mod tests {
                 include_replies: Some(false),
                 include_my_renotes: Some(false),
                 with_files: Some(true),
-                file_type: Some(vec!["image/png".to_string()]),
+                file_type: Some(vec![IMAGE_PNG]),
                 exclude_nsfw: Some(true),
                 limit: None,
                 since_id: None,

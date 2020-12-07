@@ -1,4 +1,5 @@
-use crate::model::messaging::{MessagingMessage, MessagingMessageId};
+use crate::model::{id::Id, messaging::MessagingMessage};
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +7,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MessagingIndexStreamEvent {
     Message(MessagingMessage),
-    Read(Vec<MessagingMessageId>),
+    Read(Vec<Id<MessagingMessage>>),
 }
 
 #[derive(Serialize, Default, Debug, Clone)]
@@ -14,7 +15,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = MessagingIndexStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "messagingIndex";
 }

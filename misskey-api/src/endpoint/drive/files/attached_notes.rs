@@ -1,11 +1,11 @@
-use crate::model::{drive::DriveFileId, note::Note};
+use crate::model::{drive::DriveFile, id::Id, note::Note};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub file_id: DriveFileId,
+    pub file_id: Id<DriveFile>,
 }
 
 impl misskey_core::Request for Request {

@@ -1,5 +1,5 @@
 use crate::model::{
-    drive::DriveFileId, messaging::MessagingMessage, user::UserId, user_group::UserGroupId,
+    drive::DriveFile, id::Id, messaging::MessagingMessage, user::User, user_group::UserGroup,
 };
 
 use serde::Serialize;
@@ -14,13 +14,13 @@ pub struct Request {
     pub text: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub user_id: Option<UserId>,
+    pub user_id: Option<Id<User>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub group_id: Option<UserGroupId>,
+    pub group_id: Option<Id<UserGroup>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub file_id: Option<DriveFileId>,
+    pub file_id: Option<Id<DriveFile>>,
 }
 
 impl misskey_core::Request for Request {

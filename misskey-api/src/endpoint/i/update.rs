@@ -1,11 +1,13 @@
-use crate::model::{
-    drive::DriveFileId,
-    page::PageId,
-    user::{User, UserField},
-};
+use crate::model::{drive::DriveFile, id::Id, page::Page, query::Query, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
+
+#[derive(Serialize, Default, Debug, Clone)]
+pub struct UserFieldRequest {
+    pub name: Option<String>,
+    pub value: Option<String>,
+}
 
 #[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
@@ -28,13 +30,13 @@ pub struct Request {
     pub birthday: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub avatar_id: Option<Option<DriveFileId>>,
+    pub avatar_id: Option<Option<Id<DriveFile>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub banner_id: Option<Option<DriveFileId>>,
+    pub banner_id: Option<Option<Id<DriveFile>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub fields: Option<Vec<UserField>>,
+    pub fields: Option<[UserFieldRequest; 4]>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_locked: Option<bool>,
@@ -61,10 +63,10 @@ pub struct Request {
     pub always_mark_nsfw: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub pinned_page_id: Option<Option<PageId>>,
+    pub pinned_page_id: Option<Option<Id<Page>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub muted_words: Option<Vec<Vec<String>>>,
+    pub muted_words: Option<Query<String>>,
 }
 
 impl misskey_core::Request for Request {
@@ -74,7 +76,7 @@ impl misskey_core::Request for Request {
 
 #[cfg(test)]
 mod tests {
-    use super::Request;
+    use super::{Request, UserFieldRequest};
     use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
@@ -85,7 +87,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
-        use crate::model::user::UserField;
+        use crate::model::query::Query;
 
         let client = TestClient::new();
         client
@@ -97,10 +99,15 @@ mod tests {
                 birthday: None,
                 avatar_id: None,
                 banner_id: None,
-                fields: Some(vec![UserField {
-                    name: "key".to_string(),
-                    value: "value".to_string(),
-                }]),
+                fields: Some([
+                    UserFieldRequest {
+                        name: Some("key".to_string()),
+                        value: Some("value".to_string()),
+                    },
+                    Default::default(),
+                    Default::default(),
+                    Default::default(),
+                ]),
                 is_locked: Some(true),
                 careful_bot: Some(true),
                 auto_accept_followed: Some(true),
@@ -110,10 +117,10 @@ mod tests {
                 inject_featured_note: Some(true),
                 always_mark_nsfw: Some(true),
                 pinned_page_id: None,
-                muted_words: Some(vec![
+                muted_words: Some(Query::from_vec(vec![
                     vec!["mute1".to_string(), "mute2".to_string()],
                     vec!["mute3".to_string()],
-                ]),
+                ])),
             })
             .await;
     }

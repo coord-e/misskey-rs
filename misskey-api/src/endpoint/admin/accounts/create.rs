@@ -30,11 +30,11 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let client = TestClient::new();
-        let uuid = uuid::Uuid::new_v4().to_simple().to_string();
+        let ulid = ulid_crate::Ulid::new().to_string();
         client
             .admin
             .test(Request {
-                username: uuid[..20].to_owned(),
+                username: ulid[..20].to_owned(),
                 password: "password".to_string(),
             })
             .await;

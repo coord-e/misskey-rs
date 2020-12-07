@@ -1,4 +1,4 @@
-use crate::model::log::{ModerationLog, ModerationLogId};
+use crate::model::{id::Id, log::ModerationLog};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,16 +13,18 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<ModerationLogId>,
+    pub since_id: Option<Id<ModerationLog>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<ModerationLogId>,
+    pub until_id: Option<Id<ModerationLog>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<ModerationLog>;
     const ENDPOINT: &'static str = "admin/show-moderation-logs";
 }
+
+impl_pagination!(Request, ModerationLog);
 
 #[cfg(test)]
 mod tests {

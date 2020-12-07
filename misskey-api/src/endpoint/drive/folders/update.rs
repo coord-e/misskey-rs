@@ -1,4 +1,4 @@
-use crate::model::drive::{DriveFolder, DriveFolderId};
+use crate::model::{drive::DriveFolder, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -7,13 +7,13 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub folder_id: DriveFolderId,
+    pub folder_id: Id<DriveFolder>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub parent_id: Option<Option<DriveFolderId>>,
+    pub parent_id: Option<Option<Id<DriveFolder>>>,
 }
 
 impl misskey_core::Request for Request {

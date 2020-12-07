@@ -1,4 +1,5 @@
-use crate::model::{note::Note, user::User, user_list::UserListId};
+use crate::model::{id::Id, note::Note, user::User, user_list::UserList};
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -16,12 +17,12 @@ pub enum UserListEvent {
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub list_id: UserListId,
+    pub list_id: Id<UserList>,
 }
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = UserListEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "userList";
 }

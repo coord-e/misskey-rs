@@ -1,5 +1,5 @@
-use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Deserialize, Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
@@ -8,9 +8,11 @@ pub enum ChartSpan {
     Hour,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid chart span")]
-pub struct ParseChartSpanError;
+#[derive(Debug, Error, Clone)]
+#[error("invalid chart span")]
+pub struct ParseChartSpanError {
+    _priv: (),
+}
 
 impl std::str::FromStr for ChartSpan {
     type Err = ParseChartSpanError;
@@ -19,7 +21,7 @@ impl std::str::FromStr for ChartSpan {
         match s {
             "day" | "Day" => Ok(ChartSpan::Day),
             "hour" | "Hour" => Ok(ChartSpan::Hour),
-            _ => Err(ParseChartSpanError),
+            _ => Err(ParseChartSpanError { _priv: () }),
         }
     }
 }

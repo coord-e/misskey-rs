@@ -1,4 +1,4 @@
-use crate::model::{note::Reaction, user::UserId};
+use crate::model::{id::Id, note::Reaction, user::User};
 
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
@@ -7,13 +7,19 @@ use serde::Deserialize;
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum NoteUpdateEvent {
     #[serde(rename_all = "camelCase")]
-    Reacted { reaction: Reaction, user_id: UserId },
+    Reacted {
+        reaction: Reaction,
+        user_id: Id<User>,
+    },
     #[serde(rename_all = "camelCase")]
-    Unreacted { reaction: Reaction, user_id: UserId },
+    Unreacted {
+        reaction: Reaction,
+        user_id: Id<User>,
+    },
     #[serde(rename_all = "camelCase")]
     Deleted { deleted_at: DateTime<Utc> },
     #[serde(rename_all = "camelCase")]
-    PollVoted { choice: u64, user_id: UserId },
+    PollVoted { choice: u64, user_id: Id<User> },
 }
 
 impl misskey_core::streaming::SubNoteEvent for NoteUpdateEvent {}
@@ -133,6 +139,7 @@ mod tests {
             choices: vec!["a".to_string(), "b".to_string()],
             multiple: Some(true),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
+            expired_after: None,
         };
         let note = client
             .user

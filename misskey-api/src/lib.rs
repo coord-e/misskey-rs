@@ -5,5 +5,13 @@ pub mod endpoint;
 pub mod model;
 pub mod streaming;
 
+pub(crate) mod serde;
+
+mod entity;
+mod pagination;
+
+pub use entity::{Entity, EntityRef};
+pub use pagination::{OffsetPaginationRequest, PaginationItem, PaginationRequest};
+
 #[cfg(test)]
 mod test;

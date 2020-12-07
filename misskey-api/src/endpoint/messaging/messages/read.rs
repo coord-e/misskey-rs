@@ -1,11 +1,11 @@
-use crate::model::messaging::MessagingMessageId;
+use crate::model::{id::Id, messaging::MessagingMessage};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub message_id: MessagingMessageId,
+    pub message_id: Id<MessagingMessage>,
 }
 
 impl misskey_core::Request for Request {

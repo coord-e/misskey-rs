@@ -8,6 +8,32 @@
 //! We dispatch it actually and get the [response][`misskey_core::Request::Response`]
 //! using [`Client::request`][`misskey_core::Client::request`].
 
+macro_rules! impl_pagination {
+    ($name:ident, $item:ty) => {
+        impl crate::PaginationRequest for $name {
+            type Item = $item;
+
+            fn set_since_id(&mut self, since_id: <$item as crate::PaginationItem>::Id) {
+                self.since_id.replace(since_id);
+            }
+            fn set_until_id(&mut self, until_id: <$item as crate::PaginationItem>::Id) {
+                self.until_id.replace(until_id);
+            }
+        }
+    };
+}
+
+macro_rules! impl_offset_pagination {
+    ($name:ident, $item:ty) => {
+        impl crate::OffsetPaginationRequest for $name {
+            type Item = $item;
+            fn set_offset(&mut self, offset: u64) {
+                self.offset.replace(offset);
+            }
+        }
+    };
+}
+
 pub mod admin;
 pub mod announcements;
 pub mod antennas;

@@ -1,4 +1,4 @@
-use crate::model::muting::{Muting, MutingId};
+use crate::model::{id::Id, muting::Muting};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,16 +13,18 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<MutingId>,
+    pub since_id: Option<Id<Muting>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<MutingId>,
+    pub until_id: Option<Id<Muting>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<Muting>;
     const ENDPOINT: &'static str = "mute/list";
 }
+
+impl_pagination!(Request, Muting);
 
 #[cfg(test)]
 mod tests {

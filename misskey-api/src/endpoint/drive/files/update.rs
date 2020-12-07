@@ -1,4 +1,7 @@
-use crate::model::drive::{DriveFile, DriveFileId, DriveFolderId};
+use crate::model::{
+    drive::{DriveFile, DriveFolder},
+    id::Id,
+};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -7,10 +10,10 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub file_id: DriveFileId,
+    pub file_id: Id<DriveFile>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub folder_id: Option<Option<DriveFolderId>>,
+    pub folder_id: Option<Option<Id<DriveFolder>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub name: Option<String>,

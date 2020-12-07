@@ -3,22 +3,22 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MemStats {
-    used: u64,
-    active: u64,
+    pub used: u64,
+    pub active: u64,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct NetStats {
-    rx: f64,
-    tx: f64,
+    pub rx: f64,
+    pub tx: f64,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FsStats {
-    r: f64,
-    w: f64,
+    pub r: f64,
+    pub w: f64,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -89,7 +89,7 @@ mod tests {
 
     #[tokio::test]
     async fn stream_stats_log() {
-        use uuid::Uuid;
+        use ulid_crate::Ulid;
 
         let client = TestClient::new().await;
         let (mut sink, mut stream) = client.channel(Request::default()).await.unwrap().split();
@@ -97,7 +97,7 @@ mod tests {
         future::join(
             async {
                 sink.send(Message::RequestLog {
-                    id: Uuid::new_v4().to_string(),
+                    id: Ulid::new().to_string(),
                     length: 50,
                 })
                 .await

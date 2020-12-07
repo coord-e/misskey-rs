@@ -1,4 +1,4 @@
-use crate::model::blocking::{Blocking, BlockingId};
+use crate::model::{blocking::Blocking, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -13,16 +13,18 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<BlockingId>,
+    pub since_id: Option<Id<Blocking>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<BlockingId>,
+    pub until_id: Option<Id<Blocking>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<Blocking>;
     const ENDPOINT: &'static str = "blocking/list";
 }
+
+impl_pagination!(Request, Blocking);
 
 #[cfg(test)]
 mod tests {

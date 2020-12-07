@@ -1,13 +1,9 @@
-use crate::model::{
-    emoji::EmojiId,
-    note::{Note, NoteId},
-    user::User,
-};
+use crate::model::{emoji::Emoji, id::Id, note::Note, user::User};
 
 use misskey_core::{Client, Request};
 use misskey_http::HttpClient;
+use ulid_crate::Ulid;
 use url::Url;
-use uuid::Uuid;
 
 mod env;
 pub mod http;
@@ -23,11 +19,11 @@ pub trait ClientExt {
     async fn create_note(
         &self,
         text: Option<&str>,
-        renote_id: Option<NoteId>,
-        reply_id: Option<NoteId>,
+        renote_id: Option<Id<Note>>,
+        reply_id: Option<Id<Note>>,
     ) -> Note;
     async fn avatar_url(&self) -> Url;
-    async fn add_emoji_from_url(&self, url: Url) -> EmojiId;
+    async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji>;
 }
 
 #[async_trait::async_trait]
@@ -41,10 +37,10 @@ impl<T: Client + Send + Sync> ClientExt for T {
     }
 
     async fn create_user(&self) -> (User, HttpClient) {
-        let uuid = Uuid::new_v4().to_simple().to_string();
+        let ulid = Ulid::new().to_string();
         let res = self
             .test(crate::endpoint::admin::accounts::create::Request {
-                username: uuid[..20].to_owned(),
+                username: ulid[..20].to_owned(),
                 password: "test".to_string(),
             })
             .await;
@@ -58,8 +54,8 @@ impl<T: Client + Send + Sync> ClientExt for T {
     async fn create_note(
         &self,
         text: Option<&str>,
-        renote_id: Option<NoteId>,
-        reply_id: Option<NoteId>,
+        renote_id: Option<Id<Note>>,
+        reply_id: Option<Id<Note>>,
     ) -> Note {
         self.test(crate::endpoint::notes::create::Request {
             visibility: None,
@@ -93,7 +89,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
     }
 
     #[cfg(feature = "12-9-0")]
-    async fn add_emoji_from_url(&self, url: Url) -> EmojiId {
+    async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
         let file = self
             .test(crate::endpoint::drive::files::upload_from_url::Request {
                 url,
@@ -109,10 +105,10 @@ impl<T: Client + Send + Sync> ClientExt for T {
     }
 
     #[cfg(not(feature = "12-9-0"))]
-    async fn add_emoji_from_url(&self, url: Url) -> EmojiId {
-        let uuid = Uuid::new_v4().to_simple().to_string();
+    async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
+        let ulid = Ulid::new().to_string();
         self.test(crate::endpoint::admin::emoji::add::Request {
-            name: uuid,
+            name: ulid,
             url,
             category: None,
             aliases: None,

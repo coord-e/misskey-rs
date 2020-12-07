@@ -1,4 +1,4 @@
-use crate::model::drive::{DriveFolder, DriveFolderId};
+use crate::model::{drive::DriveFolder, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -14,23 +14,25 @@ pub mod update;
 #[builder(doc)]
 pub struct Request {
     #[builder(default, setter(strip_option))]
-    pub folder_id: Option<DriveFolderId>,
+    pub folder_id: Option<Id<DriveFolder>>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<DriveFolderId>,
+    pub since_id: Option<Id<DriveFolder>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<DriveFolderId>,
+    pub until_id: Option<Id<DriveFolder>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<DriveFolder>;
     const ENDPOINT: &'static str = "drive/folders";
 }
+
+impl_pagination!(Request, DriveFolder);
 
 #[cfg(test)]
 mod tests {

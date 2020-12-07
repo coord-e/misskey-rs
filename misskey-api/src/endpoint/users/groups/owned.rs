@@ -2,7 +2,7 @@ use crate::model::user_group::UserGroup;
 
 use serde::Serialize;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {}
 

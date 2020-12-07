@@ -1,7 +1,4 @@
-use crate::model::{
-    antenna::AntennaId,
-    note::{Note, NoteId},
-};
+use crate::model::{antenna::Antenna, id::Id, note::Note};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -10,23 +7,25 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub antenna_id: AntennaId,
+    pub antenna_id: Id<Antenna>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteId>,
+    pub since_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteId>,
+    pub until_id: Option<Id<Note>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "antennas/notes";
 }
+
+impl_pagination!(Request, Note);
 
 #[cfg(test)]
 mod tests {
@@ -35,7 +34,7 @@ mod tests {
 
     #[tokio::test]
     async fn request() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new();
         let antenna = client
@@ -46,9 +45,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: Vec::new(),
+                keywords: Query::default(),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: Vec::new(),
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,
@@ -70,7 +69,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_limit() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new();
         let antenna = client
@@ -81,9 +80,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["hello".to_string(), "awesome".to_string()]],
+                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: Vec::new(),
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,
@@ -105,7 +104,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_paginate() {
-        use crate::model::antenna::AntennaSource;
+        use crate::model::{antenna::AntennaSource, query::Query};
 
         let client = TestClient::new();
         let antenna = client
@@ -116,9 +115,9 @@ mod tests {
                 user_list_id: None,
                 #[cfg(feature = "12-10-0")]
                 user_group_id: None,
-                keywords: vec![vec!["hello".to_string(), "awesome".to_string()]],
+                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
-                exclude_keywords: Vec::new(),
+                exclude_keywords: Query::default(),
                 users: Vec::new(),
                 case_sensitive: false,
                 with_replies: false,

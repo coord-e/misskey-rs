@@ -1,11 +1,11 @@
-use crate::model::emoji::EmojiId;
+use crate::model::{emoji::Emoji, id::Id};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub id: EmojiId,
+    pub id: Id<Emoji>,
 }
 
 impl misskey_core::Request for Request {

@@ -1,14 +1,28 @@
 #[cfg(feature = "12-47-0")]
-use crate::model::channel::ChannelId;
+use crate::model::channel::Channel;
 use crate::model::{
-    drive::DriveFileId,
-    note::{Note, NoteId, Visibility},
-    user::UserId,
+    drive::DriveFile,
+    id::Id,
+    note::{Note, Visibility},
+    user::User,
 };
 
-use chrono::{serde::ts_milliseconds_option, DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use chrono::{serde::ts_milliseconds_option, DateTime, Duration, Utc};
+use serde::{Deserialize, Serialize, Serializer};
 use typed_builder::TypedBuilder;
+
+fn serialize_duration_milliseconds_option<S>(
+    duration: &Option<Duration>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match duration {
+        None => serializer.serialize_none(),
+        Some(x) => serializer.serialize_some(&x.num_milliseconds()),
+    }
+}
 
 #[derive(Serialize, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
@@ -24,7 +38,12 @@ pub struct PollRequest {
     )]
     #[builder(default, setter(strip_option, into))]
     pub expires_at: Option<DateTime<Utc>>,
-    // pub expired_after: Option<DateTime<Utc>>,
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "serialize_duration_milliseconds_option"
+    )]
+    #[builder(default, setter(strip_option))]
+    pub expired_after: Option<Duration>,
 }
 
 #[derive(Serialize, Debug, Clone, TypedBuilder)]
@@ -36,7 +55,7 @@ pub struct Request {
     pub visibility: Option<Visibility>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub visible_user_ids: Option<Vec<UserId>>,
+    pub visible_user_ids: Option<Vec<Id<User>>>,
     #[builder(default, setter(strip_option, into))]
     pub text: Option<String>,
     #[builder(default, setter(strip_option, into))]
@@ -58,13 +77,13 @@ pub struct Request {
     pub no_extract_emojis: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub file_ids: Option<Vec<DriveFileId>>,
+    pub file_ids: Option<Vec<Id<DriveFile>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub reply_id: Option<NoteId>,
+    pub reply_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub renote_id: Option<NoteId>,
+    pub renote_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub poll: Option<PollRequest>,
@@ -72,7 +91,7 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub channel_id: Option<ChannelId>,
+    pub channel_id: Option<Id<Channel>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -341,30 +360,40 @@ mod tests {
     async fn request_with_poll() {
         let client = TestClient::new();
 
-        let poll = PollRequest {
+        let poll1 = PollRequest {
             choices: vec!["a".to_string(), "b".to_string()],
             multiple: Some(true),
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
+            expired_after: None,
         };
-        client
-            .test(Request {
-                visibility: None,
-                visible_user_ids: None,
-                text: Some("poll".to_string()),
-                cw: None,
-                via_mobile: None,
-                local_only: None,
-                no_extract_mentions: None,
-                no_extract_hashtags: None,
-                no_extract_emojis: None,
-                file_ids: None,
-                reply_id: None,
-                renote_id: None,
-                poll: Some(poll),
-                #[cfg(feature = "12-47-0")]
-                channel_id: None,
-            })
-            .await;
+        let poll2 = PollRequest {
+            choices: vec!["c".to_string(), "d".to_string()],
+            multiple: Some(false),
+            expires_at: None,
+            expired_after: Some(chrono::Duration::hours(1)),
+        };
+
+        for poll in &[poll1, poll2] {
+            client
+                .test(Request {
+                    visibility: None,
+                    visible_user_ids: None,
+                    text: Some("poll".to_string()),
+                    cw: None,
+                    via_mobile: None,
+                    local_only: None,
+                    no_extract_mentions: None,
+                    no_extract_hashtags: None,
+                    no_extract_emojis: None,
+                    file_ids: None,
+                    reply_id: None,
+                    renote_id: None,
+                    poll: Some(poll.clone()),
+                    #[cfg(feature = "12-47-0")]
+                    channel_id: None,
+                })
+                .await;
+        }
     }
 
     #[tokio::test]

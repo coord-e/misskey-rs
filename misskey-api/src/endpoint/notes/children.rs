@@ -1,4 +1,4 @@
-use crate::model::note::{Note, NoteId};
+use crate::model::{id::Id, note::Note};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -7,23 +7,25 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub note_id: NoteId,
+    pub note_id: Id<Note>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteId>,
+    pub since_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteId>,
+    pub until_id: Option<Id<Note>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes/children";
 }
+
+impl_pagination!(Request, Note);
 
 #[cfg(test)]
 mod tests {

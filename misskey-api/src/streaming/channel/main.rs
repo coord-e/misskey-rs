@@ -1,12 +1,8 @@
 use crate::model::{
-    antenna::Antenna,
-    drive::DriveFile,
-    messaging::MessagingMessage,
-    note::{Note, NoteId},
-    notification::Notification,
-    signin::Signin,
-    user::User,
+    antenna::Antenna, drive::DriveFile, id::Id, messaging::MessagingMessage, note::Note,
+    notification::Notification, signin::Signin, user::User,
 };
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -42,8 +38,8 @@ pub enum MainStreamEvent {
     Mention(Note),
     Renote(Note),
     ReadAntenna(Antenna),
-    UnreadMention(NoteId),
-    UnreadSpecifiedNote(NoteId),
+    UnreadMention(Id<Note>),
+    UnreadSpecifiedNote(Id<Note>),
     UnreadMessagingMessage(MessagingMessage),
     UnreadNotification(Notification),
     UnreadAntenna(Antenna),
@@ -55,7 +51,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = MainStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "main";
 }

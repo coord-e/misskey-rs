@@ -1,35 +1,92 @@
-use std::{fmt::Display, str::FromStr};
+use std::fmt::{self, Debug, Display};
+use std::str::FromStr;
 
-use derive_more::{Display, Error, From};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy, Display)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum SortOrder<T> {
-    #[display(fmt = "+{}", _0)]
     Ascending(T),
-    #[display(fmt = "-{}", _0)]
     Descending(T),
 }
 
-#[derive(Debug, Display, From, Error)]
-pub enum ParseSortOrderError<E> {
-    #[from(ignore)]
-    #[display(fmt = "invalid sort order prefix")]
+impl<T: Display> Display for SortOrder<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SortOrder::Ascending(k) => write!(f, "+{}", k),
+            SortOrder::Descending(k) => write!(f, "-{}", k),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ParseSortOrderError<E> {
+    _priv: InternalParseSortOrderError<E>,
+}
+
+impl<E> std::error::Error for ParseSortOrderError<E>
+where
+    E: std::error::Error + 'static,
+{
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        self._priv.source()
+    }
+}
+
+impl<E> Display for ParseSortOrderError<E> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self._priv.fmt(f)
+    }
+}
+
+#[derive(Debug, Clone)]
+enum InternalParseSortOrderError<E> {
     InvalidPrefix,
-    #[display(fmt = "{}", _0)]
-    InvalidKey(#[error(source)] E),
+    InvalidKey(E),
+}
+
+impl<E> std::error::Error for InternalParseSortOrderError<E>
+where
+    E: std::error::Error + 'static,
+{
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            InternalParseSortOrderError::InvalidPrefix => None,
+            InternalParseSortOrderError::InvalidKey(err) => Some(err),
+        }
+    }
+}
+
+impl<E> Display for InternalParseSortOrderError<E> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            InternalParseSortOrderError::InvalidPrefix => f.write_str("invalid sort order prefix"),
+            InternalParseSortOrderError::InvalidKey(_) => f.write_str("invalid sort key"),
+        }
+    }
 }
 
 impl<T: FromStr> FromStr for SortOrder<T> {
     type Err = ParseSortOrderError<T::Err>;
 
     fn from_str(s: &str) -> Result<SortOrder<T>, Self::Err> {
+        fn invalid_key<E>(e: E) -> ParseSortOrderError<E> {
+            ParseSortOrderError {
+                _priv: InternalParseSortOrderError::InvalidKey(e),
+            }
+        }
+
         if let Some(key) = s.strip_prefix('+') {
-            Ok(SortOrder::Ascending(T::from_str(key)?))
+            T::from_str(key)
+                .map_err(invalid_key)
+                .map(SortOrder::Ascending)
         } else if let Some(key) = s.strip_prefix('-') {
-            Ok(SortOrder::Descending(T::from_str(key)?))
+            T::from_str(key)
+                .map_err(invalid_key)
+                .map(SortOrder::Descending)
         } else {
-            Err(ParseSortOrderError::InvalidPrefix)
+            Err(ParseSortOrderError {
+                _priv: InternalParseSortOrderError::InvalidPrefix,
+            })
         }
     }
 }
@@ -52,7 +109,7 @@ where
     where
         D: Deserializer<'de>,
     {
-        <&'de str>::deserialize(deserializer)?
+        String::deserialize(deserializer)?
             .parse()
             .map_err(serde::de::Error::custom)
     }

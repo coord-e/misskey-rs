@@ -1,4 +1,4 @@
-use crate::model::announcement::{Announcement, AnnouncementId};
+use crate::model::{announcement::Announcement, id::Id};
 
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
@@ -18,23 +18,42 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<AnnouncementId>,
+    pub since_id: Option<Id<Announcement>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<AnnouncementId>,
+    pub until_id: Option<Id<Announcement>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Response {
+pub struct AnnouncementWithIsRead {
     pub is_read: bool,
     #[serde(flatten)]
     pub announcement: Announcement,
 }
 
+impl crate::PaginationItem for AnnouncementWithIsRead {
+    type Id = Id<Announcement>;
+    fn item_id(&self) -> Id<Announcement> {
+        self.announcement.id
+    }
+}
+
 impl misskey_core::Request for Request {
-    type Response = Vec<Announcement>;
+    type Response = Vec<AnnouncementWithIsRead>;
     const ENDPOINT: &'static str = "announcements";
+}
+
+impl crate::PaginationRequest for Request {
+    type Item = AnnouncementWithIsRead;
+
+    fn set_since_id(&mut self, id: Id<Announcement>) {
+        self.since_id.replace(id);
+    }
+
+    fn set_until_id(&mut self, id: Id<Announcement>) {
+        self.until_id.replace(id);
+    }
 }
 
 #[cfg(test)]

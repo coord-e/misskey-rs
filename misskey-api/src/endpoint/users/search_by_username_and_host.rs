@@ -28,6 +28,8 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "users/search-by-username-and-host";
 }
 
+impl_offset_pagination!(Request, User);
+
 #[cfg(test)]
 mod tests {
     use super::Request;

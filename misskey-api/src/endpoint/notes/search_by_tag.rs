@@ -1,4 +1,8 @@
-use crate::model::note::{Note, NoteId, Tag};
+use crate::model::{
+    id::Id,
+    note::{Note, Tag},
+    query::Query,
+};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -11,8 +15,8 @@ pub struct Request {
     #[builder(default, setter(strip_option))]
     pub tag: Option<Tag>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[builder(default, setter(strip_option))]
-    pub query: Option<Vec<Vec<Tag>>>,
+    #[builder(default, setter(strip_option, into))]
+    pub query: Option<Query<Tag>>,
     #[builder(default, setter(strip_option))]
     pub reply: Option<bool>,
     #[builder(default, setter(strip_option))]
@@ -28,16 +32,18 @@ pub struct Request {
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<NoteId>,
+    pub since_id: Option<Id<Note>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<NoteId>,
+    pub until_id: Option<Id<Note>>,
 }
 
 impl misskey_core::Request for Request {
     type Response = Vec<Note>;
     const ENDPOINT: &'static str = "notes/search-by-tag";
 }
+
+impl_pagination!(Request, Note);
 
 #[cfg(test)]
 mod tests {
@@ -66,16 +72,16 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_query() {
-        use crate::model::note::Tag;
+        use crate::model::{note::Tag, query::Query};
 
         let client = TestClient::new();
         client
             .test(Request {
                 tag: None,
-                query: Some(vec![
+                query: Some(Query::from_vec(vec![
                     vec![Tag("tag1".to_string()), Tag("tag2".to_string())],
                     vec![Tag("tag3".to_string())],
-                ]),
+                ])),
                 reply: None,
                 renote: None,
                 poll: None,

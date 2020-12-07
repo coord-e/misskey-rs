@@ -1,4 +1,4 @@
-use crate::model::announcement::AnnouncementId;
+use crate::model::{announcement::Announcement, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -8,7 +8,7 @@ use url::Url;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub id: AnnouncementId,
+    pub id: Id<Announcement>,
     #[builder(setter(into))]
     pub title: String,
     #[builder(setter(into))]

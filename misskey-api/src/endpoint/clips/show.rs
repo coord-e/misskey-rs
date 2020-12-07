@@ -1,11 +1,11 @@
-use crate::model::clip::{Clip, ClipId};
+use crate::model::{clip::Clip, id::Id};
 
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {
-    pub clip_id: ClipId,
+    pub clip_id: Id<Clip>,
 }
 
 impl misskey_core::Request for Request {

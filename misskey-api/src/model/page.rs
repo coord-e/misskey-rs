@@ -1,6 +1,12 @@
-use derive_more::{Display, FromStr};
+use crate::model::id::Id;
+
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug, Display)]
-#[serde(transparent)]
-pub struct PageId(pub String);
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Page {
+    pub id: Id<Page>,
+    #[serde(flatten)]
+    pub content: serde_json::Map<String, serde_json::Value>,
+}
+
+impl_entity!(Page);

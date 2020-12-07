@@ -9,8 +9,8 @@ pub struct Request {}
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Stat {
-    count: u64,
-    size: u64,
+    pub count: u64,
+    pub size: u64,
 }
 
 impl misskey_core::Request for Request {
