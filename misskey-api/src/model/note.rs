@@ -109,25 +109,23 @@ pub struct Note {
     pub mentions: Vec<Id<User>>,
     #[serde(default)]
     pub visible_user_ids: Vec<Id<User>>,
-    #[serde(default)]
     pub file_ids: Vec<Id<DriveFile>>,
-    #[serde(default)]
     pub files: Vec<DriveFile>,
     #[serde(default)]
     pub tags: Vec<Tag>,
     #[serde(default)]
     pub poll: Option<Poll>,
-    #[serde(default)]
     pub reactions: HashMap<Reaction, u64>,
-    #[serde(default)]
     pub emojis: Vec<NoteEmoji>,
     pub renote_count: u64,
     pub replies_count: u64,
     #[cfg(feature = "12-47-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    #[serde(default)]
     pub channel_id: Option<Id<Channel>>,
     #[cfg(feature = "12-47-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    #[serde(default)]
     pub channel: Option<NoteChannel>,
 }
 

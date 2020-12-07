@@ -14,24 +14,17 @@ pub struct MessagingMessage {
     #[serde(default)]
     pub file_id: Option<Id<DriveFile>>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<DriveFile>,
     pub recipient_id: Option<Id<User>>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub recipient: Option<User>,
     pub group_id: Option<Id<UserGroup>>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub group: Option<UserGroup>,
-    #[serde(default = "default_false")]
-    pub is_read: bool,
     #[serde(default)]
-    pub reads: Vec<Id<User>>,
-}
-
-fn default_false() -> bool {
-    false
+    pub is_read: Option<bool>,
+    #[serde(default)]
+    pub reads: Option<Vec<Id<User>>>,
 }
 
 impl_entity!(MessagingMessage);

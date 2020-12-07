@@ -17,6 +17,8 @@ pub struct DriveFile {
     pub size: u64,
     pub url: Option<Url>,
     pub folder_id: Option<Id<DriveFolder>>,
+    #[serde(default)]
+    pub folder: Option<DriveFolder>,
     pub is_sensitive: bool,
 }
 

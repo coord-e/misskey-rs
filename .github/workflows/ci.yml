@@ -55,6 +55,8 @@ jobs:
         include:
           - version: '12.47.1'
             flags: --no-default-features --features 12-47-0
+          - version: '12.42.0'
+            flags: --no-default-features --features 12-42-0
           - version: '12.39.0'
             flags: --no-default-features --features 12-39-0
           - version: '12.37.0'

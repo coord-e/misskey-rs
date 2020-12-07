@@ -9,9 +9,7 @@ pub struct UserList {
     pub id: Id<UserList>,
     pub created_at: DateTime<Utc>,
     pub name: String,
-    #[serde(default)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_ids: Option<Vec<Id<User>>>,
+    pub user_ids: Vec<Id<User>>,
 }
 
 impl_entity!(UserList);

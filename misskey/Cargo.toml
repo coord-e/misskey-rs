@@ -17,6 +17,7 @@ default = ["12-47-0", "http-client", "websocket-client", "tokio-runtime", "aid"]
 
 head = ["misskey-api/head"]
 12-47-0 = ["misskey-api/12-47-0"]
+12-42-0 = ["misskey-api/12-42-0"]
 12-39-0 = ["misskey-api/12-39-0"]
 12-37-0 = ["misskey-api/12-37-0"]
 12-31-0 = ["misskey-api/12-31-0"]

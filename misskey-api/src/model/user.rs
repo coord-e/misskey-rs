@@ -1,4 +1,4 @@
-use crate::model::{id::Id, note::Note};
+use crate::model::{id::Id, note::Note, page::Page};
 
 use chrono::{DateTime, Utc};
 use derive_more::{Display, Error};
@@ -31,11 +31,22 @@ pub struct User {
     #[serde(default)]
     pub url: Option<Url>,
     pub avatar_url: Option<Url>,
+    #[cfg(feature = "12-42-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-42-0")))]
+    #[serde(default)]
     pub avatar_blurhash: Option<String>,
+    #[cfg(not(feature = "12-42-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-42-0"))))]
+    pub avatar_color: Option<String>,
     #[serde(default)]
     pub banner_url: Option<Url>,
+    #[cfg(feature = "12-42-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-42-0")))]
     #[serde(default)]
     pub banner_blurhash: Option<String>,
+    #[cfg(not(feature = "12-42-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-42-0"))))]
+    pub banner_color: Option<String>,
     pub emojis: Option<Vec<UserEmoji>>,
     pub host: Option<String>,
     #[serde(default)]
@@ -48,42 +59,52 @@ pub struct User {
     pub updated_at: Option<DateTime<Utc>>,
     #[serde(default)]
     pub location: Option<String>,
-    #[serde(default = "default_zero")]
-    pub followers_count: u64,
-    #[serde(default = "default_zero")]
-    pub following_count: u64,
-    #[serde(default = "default_zero")]
-    pub notes_count: u64,
+    #[serde(default)]
+    pub followers_count: Option<u64>,
+    #[serde(default)]
+    pub following_count: Option<u64>,
+    #[serde(default)]
+    pub notes_count: Option<u64>,
     #[serde(default = "default_false")]
     pub is_bot: bool,
     #[serde(default)]
-    pub pinned_note_ids: Vec<Id<Note>>,
+    pub pinned_note_ids: Option<Vec<Id<Note>>>,
     #[serde(default)]
-    pub pinned_notes: Vec<Note>,
+    pub pinned_notes: Option<Vec<Note>>,
+    #[serde(default)]
+    pub pinned_page_id: Option<Id<Page>>,
+    #[serde(default)]
+    pub pinned_page: Option<Page>,
     #[serde(default = "default_false")]
     pub is_cat: bool,
     #[serde(default = "default_false")]
     pub is_admin: bool,
     #[serde(default = "default_false")]
     pub is_moderator: bool,
-    #[serde(default = "default_false")]
-    pub is_locked: bool,
-    #[serde(default = "default_false")]
-    pub has_unread_specified_notes: bool,
-    #[serde(default = "default_false")]
-    pub has_unread_mentions: bool,
-    #[serde(default = "default_false")]
-    pub has_unread_channel: bool,
     #[serde(default)]
-    pub fields: Vec<UserField>,
+    pub is_locked: Option<bool>,
+    #[serde(default)]
+    pub is_silenced: Option<bool>,
+    #[serde(default)]
+    pub is_suspended: Option<bool>,
+    #[serde(default)]
+    pub has_unread_specified_notes: Option<bool>,
+    #[serde(default)]
+    pub has_unread_mentions: Option<bool>,
+    #[serde(default)]
+    pub has_unread_channel: Option<bool>,
+    #[serde(default)]
+    pub two_factor_enabled: Option<bool>,
+    #[serde(default)]
+    pub use_password_less_login: Option<bool>,
+    #[serde(default)]
+    pub security_keys: Option<bool>,
+    #[serde(default)]
+    pub fields: Option<Vec<UserField>>,
 }
 
 fn default_false() -> bool {
     false
-}
-
-fn default_zero() -> u64 {
-    0
 }
 
 impl_entity!(User);
