@@ -2,8 +2,8 @@ use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use chrono::{DateTime, TimeZone, Utc};
-use derive_more::{Display, Error};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ObjectId {
@@ -17,8 +17,8 @@ impl ObjectId {
     }
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid object id")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid object id")]
 pub struct ParseObjectIdError {
     _priv: (),
 }

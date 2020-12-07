@@ -5,8 +5,8 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use thiserror::Error;
 
 #[cfg(any(test, feature = "aid"))]
 mod aid;
@@ -84,8 +84,8 @@ impl<T> Id<T> {
     }
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid id")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid id")]
 pub struct ParseIdError {
     _priv: (),
 }

@@ -6,9 +6,9 @@ use crate::model::{
 };
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumDiscriminants;
+use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -54,8 +54,8 @@ pub enum NotificationBody {
     App {},
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid notification type")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid notification type")]
 pub struct ParseNotificationTypeError;
 
 impl std::str::FromStr for NotificationType {

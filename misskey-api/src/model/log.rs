@@ -1,8 +1,8 @@
 use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
 #[serde(rename_all = "camelCase")]
@@ -14,8 +14,8 @@ pub enum LogLevel {
     Debug,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid log level")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid log level")]
 pub struct ParseLogLevelError;
 
 impl std::str::FromStr for LogLevel {

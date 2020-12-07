@@ -2,8 +2,8 @@ use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use chrono::{DateTime, TimeZone, Utc};
-use derive_more::{Display, Error};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Meid {
@@ -21,8 +21,8 @@ impl Meid {
 // https://github.com/syuilo/misskey/blob/develop/src/misc/id/meid.ts#L9
 const TIME_OFFSET: i64 = 0x800000000000;
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid meid")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid meid")]
 pub struct ParseMeidError {
     _priv: (),
 }

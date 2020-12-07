@@ -1,8 +1,10 @@
+use std::fmt::{self, Display};
+
 use crate::model::{id::Id, note::Note, page::Page};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -109,18 +111,25 @@ fn default_false() -> bool {
 
 impl_entity!(User);
 
-#[derive(PartialEq, Eq, Clone, Debug, Copy, Display)]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
 pub enum UserSort {
-    #[display(fmt = "follower")]
     Follower,
-    #[display(fmt = "createdAt")]
     CreatedAt,
-    #[display(fmt = "updatedAt")]
     UpdatedAt,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid sort key")]
+impl Display for UserSort {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            UserSort::Follower => f.write_str("follower"),
+            UserSort::CreatedAt => f.write_str("createdAt"),
+            UserSort::UpdatedAt => f.write_str("updatedAt"),
+        }
+    }
+}
+
+#[derive(Debug, Error, Clone)]
+#[error("invalid sort key")]
 pub struct ParseUserSortError;
 
 impl std::str::FromStr for UserSort {
@@ -144,8 +153,8 @@ pub enum UserOrigin {
     Combined,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid user origin")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid user origin")]
 pub struct ParseUserOriginError;
 
 impl std::str::FromStr for UserOrigin {

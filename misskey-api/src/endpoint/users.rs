@@ -3,8 +3,8 @@ use crate::model::{
     user::{User, UserOrigin, UserSort},
 };
 
-use derive_more::{Display, Error};
 use serde::Serialize;
+use thiserror::Error;
 use typed_builder::TypedBuilder;
 
 pub mod followers;
@@ -30,8 +30,8 @@ pub enum UserState {
     AdminOrModerator,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid user state")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid user state")]
 pub struct ParseUserStateError;
 
 impl std::str::FromStr for UserState {

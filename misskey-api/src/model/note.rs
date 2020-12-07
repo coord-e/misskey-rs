@@ -1,11 +1,12 @@
 use std::collections::HashMap;
+use std::str::FromStr;
 
 use crate::model::{channel::Channel, drive::DriveFile, id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error, FromStr};
 use misskey_core::streaming::SubNoteId;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 use url::Url;
 
 /// in order to use as ID in [`streaming::note`](crate::streaming::note)
@@ -15,13 +16,27 @@ impl From<Id<Note>> for SubNoteId {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct Tag(pub String);
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, FromStr, Debug)]
+impl FromStr for Tag {
+    type Err = std::convert::Infallible;
+    fn from_str(s: &str) -> Result<Tag, Self::Err> {
+        Ok(Tag(s.to_string()))
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct Reaction(pub String);
+
+impl FromStr for Reaction {
+    type Err = std::convert::Infallible;
+    fn from_str(s: &str) -> Result<Reaction, Self::Err> {
+        Ok(Reaction(s.to_string()))
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
 #[serde(rename_all = "camelCase")]
@@ -32,8 +47,8 @@ pub enum Visibility {
     Specified,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid note visibility")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid note visibility")]
 pub struct ParseVisibilityError;
 
 impl std::str::FromStr for Visibility {

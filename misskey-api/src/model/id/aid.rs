@@ -3,8 +3,8 @@ use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use chrono::{DateTime, TimeZone, Utc};
-use derive_more::{Display, Error};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Aid {
@@ -22,8 +22,8 @@ impl Aid {
 // https://github.com/syuilo/misskey/blob/develop/src/misc/id/aid.ts#L6
 const TIME2000: i64 = 946684800000;
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid aid")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid aid")]
 pub struct ParseAidError {
     _priv: (),
 }

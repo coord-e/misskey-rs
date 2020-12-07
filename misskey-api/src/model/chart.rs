@@ -1,5 +1,5 @@
-use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Deserialize, Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
@@ -8,8 +8,8 @@ pub enum ChartSpan {
     Hour,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid chart span")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid chart span")]
 pub struct ParseChartSpanError;
 
 impl std::str::FromStr for ChartSpan {

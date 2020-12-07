@@ -3,8 +3,8 @@ use crate::model::user_group::UserGroup;
 use crate::model::{id::Id, query::Query, user_list::UserList};
 
 use chrono::{DateTime, Utc};
-use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -42,8 +42,8 @@ pub enum AntennaSource {
     Group,
 }
 
-#[derive(Debug, Display, Error, Clone)]
-#[display(fmt = "invalid antenna source")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid antenna source")]
 pub struct ParseAntennaSourceError;
 
 impl std::str::FromStr for AntennaSource {
