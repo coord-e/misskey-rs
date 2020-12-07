@@ -42,6 +42,8 @@ serde = { version = "1.0.103", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 ulid_crate = { package = "ulid", version = "0.4", features = ["serde"] }
+# rand_core <= 0.2.1 fails to build rand_isaac in the dependency tree
+rand_core = "0.2.2"
 url = { version = "2.1", features = ["serde"] }
 thiserror = "1.0.2"
 strum_macros = "0.12"
