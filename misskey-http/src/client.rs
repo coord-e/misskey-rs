@@ -10,7 +10,7 @@ use isahc::http;
 use log::debug;
 use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{Client, Request, UploadFileRequest};
+use misskey_core::{Client, Request, UploadFileClient, UploadFileRequest};
 use serde::Serialize;
 use serde_json::value::{self, Value};
 use url::Url;
@@ -82,17 +82,62 @@ impl HttpClient {
             Ok(ValueOrRequest::Request(request))
         }
     }
+}
 
-    /// Dispatches an API request with file.
-    ///
-    /// Takes the file to be attatched and [`UploadFileRequest`], then returns a future that waits for the [`Request::Response`].
-    pub async fn request_with_file<R: UploadFileRequest>(
+impl Client for HttpClient {
+    type Error = Error;
+
+    fn request<R: Request>(&self, request: R) -> BoxFuture<Result<ApiResult<R::Response>>> {
+        let url = self
+            .url
+            .join(R::ENDPOINT)
+            .expect("Request::ENDPOINT must be a fragment of valid URL");
+
+        // limit the use of `R` value to the outside of `async`
+        // in order not to require `Send` on `R`
+        let body = self
+            .set_api_key(request)
+            .and_then(|b| serde_json::to_vec(&b));
+
+        Box::pin(async move {
+            let body = body?;
+
+            #[cfg(feature = "inspect-contents")]
+            debug!(
+                "sending request to {}: {}",
+                url,
+                String::from_utf8_lossy(&body)
+            );
+
+            use isahc::http::header::CONTENT_TYPE;
+            let response = self
+                .client
+                .send_async(
+                    // TODO: uncomfortable conversion from `Url` to `Uri`
+                    http::Request::post(url.to_string())
+                        .header(CONTENT_TYPE, "application/json")
+                        .body(body)
+                        .unwrap(),
+                )
+                .await?;
+
+            response_to_result::<R>(response).await
+        })
+    }
+}
+
+impl UploadFileClient for HttpClient {
+    fn request_with_file<R, T>(
         &self,
         request: R,
         type_: Mime,
-        file_name: impl Into<String>,
-        read: impl std::io::Read + Send + Sync + 'static,
-    ) -> Result<ApiResult<R::Response>> {
+        file_name: String,
+        read: T,
+    ) -> BoxFuture<Result<ApiResult<R::Response>>>
+    where
+        R: UploadFileRequest,
+        T: std::io::Read + Send + Sync + 'static,
+    {
         let url = self
             .url
             .join(R::ENDPOINT)
@@ -102,7 +147,7 @@ impl HttpClient {
         // in order not to require `Send` on `R`
         let value = self.set_api_key(request).and_then(value::to_value);
 
-        async move {
+        Box::pin(async move {
             let value = value?;
 
             #[cfg(feature = "inspect-contents")]
@@ -140,49 +185,6 @@ impl HttpClient {
                     // TODO: uncomfortable conversion from `Url` to `Uri`
                     http::Request::post(url.into_string())
                         .header(CONTENT_TYPE, content_type)
-                        .body(body)
-                        .unwrap(),
-                )
-                .await?;
-
-            response_to_result::<R>(response).await
-        }
-        .await
-    }
-}
-
-impl Client for HttpClient {
-    type Error = Error;
-
-    fn request<R: Request>(&self, request: R) -> BoxFuture<Result<ApiResult<R::Response>>> {
-        let url = self
-            .url
-            .join(R::ENDPOINT)
-            .expect("Request::ENDPOINT must be a fragment of valid URL");
-
-        // limit the use of `R` value to the outside of `async`
-        // in order not to require `Send` on `R`
-        let body = self
-            .set_api_key(request)
-            .and_then(|b| serde_json::to_vec(&b));
-
-        Box::pin(async move {
-            let body = body?;
-
-            #[cfg(feature = "inspect-contents")]
-            debug!(
-                "sending request to {}: {}",
-                url,
-                String::from_utf8_lossy(&body)
-            );
-
-            use isahc::http::header::CONTENT_TYPE;
-            let response = self
-                .client
-                .send_async(
-                    // TODO: uncomfortable conversion from `Url` to `Uri`
-                    http::Request::post(url.to_string())
-                        .header(CONTENT_TYPE, "application/json")
                         .body(body)
                         .unwrap(),
                 )

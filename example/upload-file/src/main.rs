@@ -2,7 +2,7 @@ use std::fs::File;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use misskey::{Client, HttpClient};
+use misskey::{Client, HttpClient, UploadFileClient};
 use structopt::StructOpt;
 use url::Url;
 
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
                 ..Default::default()
             },
             mime,
-            file_name,
+            file_name.to_string(),
             file,
         )
         .await

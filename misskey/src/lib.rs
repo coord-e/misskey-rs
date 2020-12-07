@@ -269,7 +269,7 @@ pub mod model {
     pub use misskey_core::model::*;
 }
 
-pub use misskey_core::Client;
+pub use misskey_core::{Client, UploadFileClient};
 
 #[cfg(feature = "http-client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "http-client")))]
