@@ -2,6 +2,7 @@ use crate::model::{
     antenna::Antenna, drive::DriveFile, id::Id, messaging::MessagingMessage, note::Note,
     notification::Notification, signin::Signin, user::User,
 };
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -50,7 +51,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = MainStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "main";
 }

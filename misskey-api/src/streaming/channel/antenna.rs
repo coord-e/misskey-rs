@@ -1,4 +1,5 @@
 use crate::model::{antenna::Antenna, id::Id, note::Note};
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +17,7 @@ pub struct Request {
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = AntennaStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "antenna";
 }

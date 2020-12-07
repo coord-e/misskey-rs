@@ -1,4 +1,5 @@
 use crate::model::{abuse_user_report::AbuseUserReport, id::Id, user::User};
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +20,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = AdminStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "admin";
 }

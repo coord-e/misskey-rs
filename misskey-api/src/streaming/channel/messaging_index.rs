@@ -1,4 +1,5 @@
 use crate::model::{id::Id, messaging::MessagingMessage};
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -14,7 +15,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = MessagingIndexStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "messagingIndex";
 }

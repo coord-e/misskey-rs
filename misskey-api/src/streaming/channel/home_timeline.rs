@@ -1,4 +1,5 @@
 use crate::model::note::Note;
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -13,7 +14,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = HomeTimelineEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "homeTimeline";
 }

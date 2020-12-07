@@ -2,6 +2,7 @@ use crate::model::{
     drive::{DriveFile, DriveFolder},
     id::Id,
 };
+use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
@@ -21,7 +22,7 @@ pub struct Request {}
 
 impl misskey_core::streaming::ConnectChannelRequest for Request {
     type Incoming = DriveStreamEvent;
-    type Outgoing = ();
+    type Outgoing = NoOutgoing;
 
     const NAME: &'static str = "drive";
 }
