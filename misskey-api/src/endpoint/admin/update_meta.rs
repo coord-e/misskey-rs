@@ -4,7 +4,7 @@ use serde::Serialize;
 use typed_builder::TypedBuilder;
 use url::Url;
 
-#[derive(Serialize, Debug, Clone, TypedBuilder)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {

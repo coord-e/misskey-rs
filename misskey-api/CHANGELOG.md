@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unified representation of IDs: `Id<T>`
 - Support for ID generation methods
 - `Query` type for DNF queries
+- Missing `Default` implementations on some request types
 
 ### Changed
 
