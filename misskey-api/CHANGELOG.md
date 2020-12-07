@@ -24,3 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `model::messaging::UserGroup`, which is duplicate of `model::user_group::UserGroup`
+
+### Fixed
+
+- Fix some model and request definitions

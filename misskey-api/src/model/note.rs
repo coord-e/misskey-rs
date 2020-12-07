@@ -102,6 +102,8 @@ pub struct Note {
     pub via_mobile: bool,
     #[serde(default = "default_false")]
     pub is_hidden: bool,
+    #[serde(default = "default_false")]
+    pub local_only: bool,
     pub visibility: Visibility,
     #[serde(default)]
     pub mentions: Vec<Id<User>>,
