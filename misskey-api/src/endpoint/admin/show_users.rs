@@ -22,7 +22,9 @@ pub enum UserState {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid user state")]
-pub struct ParseUserStateError;
+pub struct ParseUserStateError {
+    _priv: (),
+}
 
 impl std::str::FromStr for UserState {
     type Err = ParseUserStateError;
@@ -37,7 +39,7 @@ impl std::str::FromStr for UserState {
             "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
             "silenced" | "Silenced" => Ok(UserState::Silenced),
             "suspended" | "Suspended" => Ok(UserState::Suspended),
-            _ => Err(ParseUserStateError),
+            _ => Err(ParseUserStateError { _priv: () }),
         }
     }
 }

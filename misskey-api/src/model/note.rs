@@ -49,7 +49,9 @@ pub enum Visibility {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid note visibility")]
-pub struct ParseVisibilityError;
+pub struct ParseVisibilityError {
+    _priv: (),
+}
 
 impl std::str::FromStr for Visibility {
     type Err = ParseVisibilityError;
@@ -60,7 +62,7 @@ impl std::str::FromStr for Visibility {
             "home" | "Home" => Ok(Visibility::Home),
             "followers" | "Followers" => Ok(Visibility::Followers),
             "specified" | "Specified" => Ok(Visibility::Specified),
-            _ => Err(ParseVisibilityError),
+            _ => Err(ParseVisibilityError { _priv: () }),
         }
     }
 }

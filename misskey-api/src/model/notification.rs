@@ -56,7 +56,9 @@ pub enum NotificationBody {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid notification type")]
-pub struct ParseNotificationTypeError;
+pub struct ParseNotificationTypeError {
+    _priv: (),
+}
 
 impl std::str::FromStr for NotificationType {
     type Err = ParseNotificationTypeError;
@@ -78,7 +80,7 @@ impl std::str::FromStr for NotificationType {
             "pollVote" | "PollVote" => Ok(NotificationType::PollVote),
             "groupInvited" | "GroupInvited" => Ok(NotificationType::GroupInvited),
             "app" | "App" => Ok(NotificationType::App),
-            _ => Err(ParseNotificationTypeError),
+            _ => Err(ParseNotificationTypeError { _priv: () }),
         }
     }
 }

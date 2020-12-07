@@ -130,7 +130,9 @@ impl Display for UserSort {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid sort key")]
-pub struct ParseUserSortError;
+pub struct ParseUserSortError {
+    _priv: (),
+}
 
 impl std::str::FromStr for UserSort {
     type Err = ParseUserSortError;
@@ -140,7 +142,7 @@ impl std::str::FromStr for UserSort {
             "follower" | "Follower" => Ok(UserSort::Follower),
             "createdAt" | "CreatedAt" => Ok(UserSort::CreatedAt),
             "updatedAt" | "UpdatedAt" => Ok(UserSort::UpdatedAt),
-            _ => Err(ParseUserSortError),
+            _ => Err(ParseUserSortError { _priv: () }),
         }
     }
 }
@@ -155,7 +157,9 @@ pub enum UserOrigin {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid user origin")]
-pub struct ParseUserOriginError;
+pub struct ParseUserOriginError {
+    _priv: (),
+}
 
 impl std::str::FromStr for UserOrigin {
     type Err = ParseUserOriginError;
@@ -165,7 +169,7 @@ impl std::str::FromStr for UserOrigin {
             "local" | "Local" => Ok(UserOrigin::Local),
             "remote" | "Remote" => Ok(UserOrigin::Remote),
             "combined" | "Combined" => Ok(UserOrigin::Combined),
-            _ => Err(ParseUserOriginError),
+            _ => Err(ParseUserOriginError { _priv: () }),
         }
     }
 }

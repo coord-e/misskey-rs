@@ -10,7 +10,9 @@ pub enum ChartSpan {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid chart span")]
-pub struct ParseChartSpanError;
+pub struct ParseChartSpanError {
+    _priv: (),
+}
 
 impl std::str::FromStr for ChartSpan {
     type Err = ParseChartSpanError;
@@ -19,7 +21,7 @@ impl std::str::FromStr for ChartSpan {
         match s {
             "day" | "Day" => Ok(ChartSpan::Day),
             "hour" | "Hour" => Ok(ChartSpan::Hour),
-            _ => Err(ParseChartSpanError),
+            _ => Err(ParseChartSpanError { _priv: () }),
         }
     }
 }

@@ -44,7 +44,9 @@ pub enum AntennaSource {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid antenna source")]
-pub struct ParseAntennaSourceError;
+pub struct ParseAntennaSourceError {
+    _priv: (),
+}
 
 impl std::str::FromStr for AntennaSource {
     type Err = ParseAntennaSourceError;
@@ -57,7 +59,7 @@ impl std::str::FromStr for AntennaSource {
             "list" | "List" => Ok(AntennaSource::List),
             #[cfg(feature = "12-10-0")]
             "group" | "Group" => Ok(AntennaSource::Group),
-            _ => Err(ParseAntennaSourceError),
+            _ => Err(ParseAntennaSourceError { _priv: () }),
         }
     }
 }

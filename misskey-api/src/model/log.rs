@@ -16,7 +16,9 @@ pub enum LogLevel {
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid log level")]
-pub struct ParseLogLevelError;
+pub struct ParseLogLevelError {
+    _priv: (),
+}
 
 impl std::str::FromStr for LogLevel {
     type Err = ParseLogLevelError;
@@ -28,7 +30,7 @@ impl std::str::FromStr for LogLevel {
             "info" | "Info" => Ok(LogLevel::Info),
             "success" | "Success" => Ok(LogLevel::Success),
             "debug" | "Debug" => Ok(LogLevel::Debug),
-            _ => Err(ParseLogLevelError),
+            _ => Err(ParseLogLevelError { _priv: () }),
         }
     }
 }
