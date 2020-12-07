@@ -26,18 +26,35 @@ pub struct Request {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Response {
+pub struct AnnouncementWithIsRead {
     pub is_read: bool,
     #[serde(flatten)]
     pub announcement: Announcement,
 }
 
+impl crate::PaginationItem for AnnouncementWithIsRead {
+    type Id = Id<Announcement>;
+    fn item_id(&self) -> Id<Announcement> {
+        self.announcement.id
+    }
+}
+
 impl misskey_core::Request for Request {
-    type Response = Vec<Announcement>;
+    type Response = Vec<AnnouncementWithIsRead>;
     const ENDPOINT: &'static str = "announcements";
 }
 
-impl_pagination!(Request, Announcement);
+impl crate::PaginationRequest for Request {
+    type Item = AnnouncementWithIsRead;
+
+    fn set_since_id(&mut self, id: Id<Announcement>) {
+        self.since_id.replace(id);
+    }
+
+    fn set_until_id(&mut self, id: Id<Announcement>) {
+        self.until_id.replace(id);
+    }
+}
 
 #[cfg(test)]
 mod tests {
