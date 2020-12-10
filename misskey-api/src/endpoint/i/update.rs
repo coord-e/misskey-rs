@@ -69,6 +69,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub muted_words: Option<Query<String>>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub no_crawle: Option<bool>,
 }
 
 impl misskey_core::Request for Request {
@@ -124,6 +129,8 @@ mod tests {
                     vec!["mute1".to_string(), "mute2".to_string()],
                     vec!["mute3".to_string()],
                 ])),
+                #[cfg(feature = "12-60-0")]
+                no_crawle: Some(true),
             })
             .await;
     }
@@ -152,6 +159,8 @@ mod tests {
                 always_mark_nsfw: None,
                 pinned_page_id: Some(None),
                 muted_words: None,
+                #[cfg(feature = "12-60-0")]
+                no_crawle: None,
             })
             .await;
     }

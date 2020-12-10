@@ -36,6 +36,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub icon_url: Option<Option<String>>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub background_image_url: Option<Option<String>>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub logo_image_url: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub name: Option<Option<String>>,
@@ -254,6 +264,10 @@ mod tests {
                 mascot_image_url: Some(Some(image_url.to_string())),
                 bannar_url: Some(Some(image_url.to_string())),
                 icon_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "12-60-0")]
+                background_image_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "12-60-0")]
+                logo_image_url: Some(Some(image_url.to_string())),
                 name: None,
                 description: Some(Some("description!".to_string())),
                 max_note_text_length: Some(1000),

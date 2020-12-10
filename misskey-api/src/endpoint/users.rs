@@ -20,6 +20,10 @@ pub mod search;
 pub mod search_by_username_and_host;
 pub mod show;
 
+#[cfg(feature = "12-60-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+pub mod stats;
+
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum UserState {

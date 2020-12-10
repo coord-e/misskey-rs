@@ -118,6 +118,10 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-51-0")))]
     #[serde(default)]
     pub instance: Option<UserInstance>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    #[serde(default)]
+    pub no_crawle: Option<bool>,
 }
 
 fn default_false() -> bool {

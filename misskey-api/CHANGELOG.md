@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.51.0 ~ v12.54.0
 - Support for Misskey v12.55.0 ~ v12.56.0
 - Support for Misskey v12.57.0 ~ v12.57.4
-- Support for Misskey v12.58.0
+- Support for Misskey v12.58.0 ~ v12.59.0
+- Support for Misskey v12.60.0
 
 ### Changed
 
