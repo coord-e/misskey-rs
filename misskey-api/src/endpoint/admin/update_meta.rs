@@ -18,6 +18,11 @@ pub struct Request {
     pub use_star_for_reaction_fallback: Option<bool>,
     #[builder(default, setter(strip_option))]
     pub pinned_users: Option<Vec<String>>,
+    #[cfg(feature = "12-58-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub pinned_pages: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
     pub hidden_tags: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
@@ -241,6 +246,8 @@ mod tests {
                 disable_local_timeline: Some(false),
                 disable_global_timeline: Some(false),
                 use_star_for_reaction_fallback: Some(false),
+                #[cfg(feature = "12-58-0")]
+                pinned_pages: Some(vec!["/announcements".to_string()]),
                 pinned_users: Some(vec!["@admin".to_string(), "@testuser".to_string()]),
                 hidden_tags: Some(vec!["not_good".to_string()]),
                 blocked_hosts: Some(vec!["not.good.host".to_string()]),

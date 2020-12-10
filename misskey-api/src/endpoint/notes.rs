@@ -26,6 +26,10 @@ pub mod unrenote;
 pub mod user_list_timeline;
 pub mod watching;
 
+#[cfg(feature = "12-58-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+pub mod clips;
+
 #[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
