@@ -38,6 +38,7 @@ mod tests {
                 auto_accept_followed: Some(false),
                 is_bot: None,
                 is_cat: None,
+                #[cfg(not(feature = "12-55-0"))]
                 auto_watch: None,
                 inject_featured_note: None,
                 always_mark_nsfw: None,

@@ -54,6 +54,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - version: '12.55.0'
+            flags: --no-default-features --features 12-55-0
           - version: '12.51.0'
             flags: --no-default-features --features 12-51-0
           - version: '12.49.0'

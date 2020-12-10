@@ -52,6 +52,8 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_cat: Option<bool>,
+    #[cfg(any(docsrs, not(feature = "12-55-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-55-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub auto_watch: Option<bool>,
@@ -113,6 +115,7 @@ mod tests {
                 auto_accept_followed: Some(true),
                 is_bot: Some(true),
                 is_cat: Some(true),
+                #[cfg(not(feature = "12-55-0"))]
                 auto_watch: Some(true),
                 inject_featured_note: Some(true),
                 always_mark_nsfw: Some(true),
@@ -143,6 +146,7 @@ mod tests {
                 auto_accept_followed: None,
                 is_bot: None,
                 is_cat: None,
+                #[cfg(not(feature = "12-55-0"))]
                 auto_watch: None,
                 inject_featured_note: None,
                 always_mark_nsfw: None,
