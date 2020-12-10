@@ -10,7 +10,7 @@ pub struct Request {
 
 impl misskey_core::Request for Request {
     type Response = ();
-    const ENDPOINT: &'static str = "admin/remove-abuse-user-report";
+    const ENDPOINT: &'static str = "admin/resolve-abuse-user-report";
 }
 
 #[cfg(test)]

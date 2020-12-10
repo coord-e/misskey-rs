@@ -7,7 +7,6 @@ pub mod get_table_stats;
 pub mod invite;
 pub mod logs;
 pub mod moderators;
-pub mod remove_abuse_user_report;
 pub mod reset_password;
 pub mod resync_chart;
 pub mod server_info;
@@ -24,3 +23,11 @@ pub mod vacuum;
 #[cfg(feature = "12-13-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-13-0")))]
 pub mod promo;
+
+#[cfg(any(docsrs, not(feature = "12-49-0")))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-49-0"))))]
+pub mod remove_abuse_user_report;
+
+#[cfg(feature = "12-49-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-49-0")))]
+pub mod resolve_abuse_user_report;

@@ -9,7 +9,12 @@ pub enum AdminStreamEvent {
     #[serde(rename_all = "camelCase")]
     NewAbuseUserReport {
         id: Id<AbuseUserReport>,
+        #[cfg(any(docsrs, not(feature = "12-49-0")))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "12-49-0"))))]
         user_id: Id<User>,
+        #[cfg(feature = "12-49-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-49-0")))]
+        target_user_id: Id<User>,
         reporter_id: Id<User>,
         comment: String,
     },
