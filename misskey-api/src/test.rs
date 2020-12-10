@@ -2,6 +2,7 @@ use crate::model::{drive::DriveFile, emoji::Emoji, id::Id, note::Note, user::Use
 
 use misskey_core::{Client, Request};
 use misskey_http::HttpClient;
+use misskey_websocket::WebSocketClient;
 use ulid_crate::Ulid;
 use url::Url;
 
@@ -15,6 +16,7 @@ pub use http::{HttpClientExt, TestClient};
 pub trait ClientExt {
     async fn test<R: Request + Send>(&self, req: R) -> R::Response;
     async fn create_user(&self) -> (User, HttpClient);
+    async fn create_streaming_user(&self) -> (User, WebSocketClient);
     async fn me(&self) -> User;
     async fn create_note(
         &self,
@@ -51,6 +53,25 @@ impl<T: Client + Send + Sync> ClientExt for T {
         (
             res.user,
             HttpClient::new(env::TEST_API_URL.clone(), Some(res.token)).unwrap(),
+        )
+    }
+
+    async fn create_streaming_user(&self) -> (User, WebSocketClient) {
+        let ulid = Ulid::new().to_string();
+        let res = self
+            .test(crate::endpoint::admin::accounts::create::Request {
+                username: ulid[..20].to_owned(),
+                password: "test".to_string(),
+            })
+            .await;
+
+        (
+            res.user,
+            WebSocketClient::builder(env::TEST_WEBSOCKET_URL.clone())
+                .token(res.token)
+                .connect()
+                .await
+                .unwrap(),
         )
     }
 

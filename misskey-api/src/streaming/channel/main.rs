@@ -78,15 +78,18 @@ mod tests {
 
     #[tokio::test]
     async fn reply() {
-        let client = TestClient::new().await;
+        let test_client = TestClient::new().await;
+        // create fresh user (for new main stream) to avoid events
+        // to be captured by other test cases
+        let (_, client) = test_client.admin.create_streaming_user().await;
 
-        let mut stream = client.user.channel(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             async {
-                let note = client.user.create_note(Some("awesome"), None, None).await;
-                client
-                    .admin
+                let note = client.create_note(Some("awesome"), None, None).await;
+                test_client
+                    .user
                     .create_note(Some("nice"), None, Some(note.id))
                     .await;
             },
@@ -104,14 +107,15 @@ mod tests {
 
     #[tokio::test]
     async fn mention() {
-        let client = TestClient::new().await;
-        let me = client.user.me().await;
+        let test_client = TestClient::new().await;
+        // ditto
+        let (me, client) = test_client.admin.create_streaming_user().await;
 
-        let mut stream = client.user.channel(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         futures::future::join(
-            client
-                .admin
+            test_client
+                .user
                 .create_note(Some(&format!("@{} hello", me.username)), None, None),
             async {
                 loop {
@@ -130,8 +134,10 @@ mod tests {
     async fn url_upload_finished() {
         use crate::model::drive::DriveFile;
 
-        let client = TestClient::new().await;
-        let mut stream = client.user.channel(Request::default()).await.unwrap();
+        // ditto
+        let (_, client) = TestClient::new().await.admin.create_streaming_user().await;
+
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         let expected_marker = ulid_crate::Ulid::new().to_string();
         let expected_comment = ulid_crate::Ulid::new().to_string();
