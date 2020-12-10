@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Query` type for DNF queries
 - Missing `Default` implementations on some request types
 - Support for Misskey v12.48.0 ~ v12.48.3
-- Support for Misskey v12.49.0
+- Support for Misskey v12.49.0 ~ v12.50.0
+- Support for Misskey v12.51.0
 
 ### Changed
 

@@ -26,6 +26,17 @@ pub struct UserEmoji {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct UserInstance {
+    pub name: Option<String>,
+    pub software_name: Option<String>,
+    pub software_version: Option<String>,
+    pub icon_url: Option<String>,
+    pub favicon_url: Option<String>,
+    pub theme_color: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct User {
     pub id: Id<User>,
     pub username: String,
@@ -103,6 +114,10 @@ pub struct User {
     pub security_keys: Option<bool>,
     #[serde(default)]
     pub fields: Option<Vec<UserField>>,
+    #[cfg(feature = "12-51-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-51-0")))]
+    #[serde(default)]
+    pub instance: Option<UserInstance>,
 }
 
 fn default_false() -> bool {
