@@ -11,12 +11,11 @@ use crate::model::{
         NoteUpdatedMessage,
     },
     outgoing::OutgoingMessage,
-    ApiRequestId, ChannelId,
+    ApiRequestId, ChannelId, SubNoteId,
 };
 
 use log::{info, warn};
 use misskey_core::model::ApiResult;
-use misskey_core::streaming::SubNoteId;
 use serde_json::value::{self, Value};
 
 #[derive(Debug)]

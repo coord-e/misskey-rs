@@ -11,3 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Follow changes of `Client` in `misskey-core`
   - Adjust lifetime specification of request methods
+- Implement `StreamingClient`

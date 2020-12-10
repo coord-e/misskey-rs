@@ -1,10 +1,11 @@
+use std::io::Cursor;
+
 use crate::model::drive::DriveFile;
 use crate::test::env;
 
 use mime::Mime;
-use misskey_core::UploadFileRequest;
+use misskey_core::{UploadFileClient, UploadFileRequest};
 use misskey_http::HttpClient;
-use ulid_crate::Ulid;
 
 pub struct TestClient {
     pub admin: HttpClient,
@@ -65,19 +66,15 @@ impl HttpClientExt for HttpClient {
         R: UploadFileRequest + Send,
         B: AsRef<[u8]> + Send + Sync,
     {
-        let tmp_name = Ulid::new().to_string();
-        let path = std::env::temp_dir().join(tmp_name);
-        {
-            use tokio::{fs::File, io::AsyncWriteExt};
-            let mut file = File::create(&path).await.unwrap();
-            file.write_all(content.as_ref()).await.unwrap();
-            file.sync_all().await.unwrap();
-        }
-
-        self.request_with_file(req, mime, file_name.to_string(), &path)
-            .await
-            .unwrap()
-            .unwrap()
+        self.request_with_file(
+            req,
+            mime,
+            file_name.to_string(),
+            Cursor::new(content.as_ref().to_vec()),
+        )
+        .await
+        .unwrap()
+        .unwrap()
     }
 
     async fn create_text_file(&self, file_name: &str, content: &str) -> DriveFile {

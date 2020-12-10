@@ -4,17 +4,9 @@ use std::str::FromStr;
 use crate::model::{channel::Channel, drive::DriveFile, id::Id, user::User};
 
 use chrono::{DateTime, Utc};
-use misskey_core::streaming::SubNoteId;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use url::Url;
-
-/// in order to use as ID in [`streaming::note`](crate::streaming::note)
-impl From<Id<Note>> for SubNoteId {
-    fn from(id: Id<Note>) -> SubNoteId {
-        SubNoteId(id.to_string())
-    }
-}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]

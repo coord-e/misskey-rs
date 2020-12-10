@@ -205,8 +205,7 @@ pub mod streaming {
     //! #     .connect()
     //! #     .await?;
     //!
-    //! let note_id: Id<Note> = "NOTE_ID_TO_WATCH".parse().unwrap();
-    //! let mut stream = client.subscribe_note(note_id).await?;
+    //! let mut stream = client.subnote("NOTE_ID_TO_WATCH").await?;
     //!
     //! loop {
     //!     // Wait for the event note using `next` method from `StreamExt`.

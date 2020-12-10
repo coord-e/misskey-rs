@@ -37,7 +37,7 @@ mod tests {
         let note = client.create_note(Some("test"), None, None).await;
 
         let mut stream = client
-            .subscribe_note::<NoteUpdateEvent, _>(note.id)
+            .subnote::<NoteUpdateEvent, _>(note.id.to_string())
             .await
             .unwrap();
         stream.unsubscribe().await.unwrap();
@@ -53,7 +53,7 @@ mod tests {
             .create_note(Some("looks good"), None, None)
             .await;
 
-        let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         future::join(
             client
@@ -91,7 +91,7 @@ mod tests {
             })
             .await;
 
-        let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         future::join(
             client
@@ -114,7 +114,7 @@ mod tests {
         let client = TestClient::new().await;
         let note = client.user.create_note(Some("hmm..."), None, None).await;
 
-        let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         future::join(
             client
@@ -163,7 +163,7 @@ mod tests {
             .await
             .created_note;
 
-        let mut stream = client.user.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         futures::future::join(
             client

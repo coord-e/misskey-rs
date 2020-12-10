@@ -231,7 +231,7 @@ mod tests {
 
     use super::HttpClient;
 
-    use misskey_core::Client;
+    use misskey_core::{Client, UploadFileClient};
     use url::Url;
     use uuid::Uuid;
 
@@ -301,13 +301,14 @@ mod tests {
     async fn tokio_request_with_file() {
         let client = test_client();
         let path = write_to_temp_file("test");
+        let file = std::fs::File::open(path).unwrap();
 
         client
             .request_with_file(
                 misskey_api::endpoint::drive::files::create::Request::default(),
                 mime::TEXT_PLAIN,
                 "test.txt".to_string(),
-                path,
+                file,
             )
             .await
             .unwrap()
@@ -318,13 +319,14 @@ mod tests {
     async fn async_std_request_with_file() {
         let client = test_client();
         let path = write_to_temp_file("test");
+        let file = std::fs::File::open(path).unwrap();
 
         client
             .request_with_file(
                 misskey_api::endpoint::drive::files::create::Request::default(),
                 mime::TEXT_PLAIN,
                 "test.txt".to_string(),
-                path,
+                file,
             )
             .await
             .unwrap()

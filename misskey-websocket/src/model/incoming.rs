@@ -1,6 +1,5 @@
-use crate::model::{ApiRequestId, ChannelId};
+use crate::model::{ApiRequestId, ChannelId, SubNoteId};
 
-use misskey_core::streaming::SubNoteId;
 use serde::de::{self, Deserializer};
 use serde::Deserialize;
 use serde_json::Value;

@@ -1,5 +1,4 @@
 use std::fmt::{self, Debug};
-use std::future::Future;
 
 use crate::broker::{
     channel::{response_channel, ControlSender},
@@ -7,11 +6,18 @@ use crate::broker::{
     Broker, ReconnectConfig,
 };
 use crate::error::{Error, Result};
-use crate::model::ApiRequestId;
+use crate::model::{ApiRequestId, SubNoteId};
 
-use futures::{future::BoxFuture, sink::SinkExt};
+use futures::{
+    future::{BoxFuture, FutureExt, TryFutureExt},
+    sink::SinkExt,
+    stream::{BoxStream, StreamExt},
+};
 use misskey_core::model::ApiResult;
-use misskey_core::Client;
+use misskey_core::{
+    streaming::{BoxStreamSink, StreamingClient},
+    Client,
+};
 use serde_json::value;
 use url::Url;
 
@@ -68,31 +74,31 @@ impl WebSocketClient {
 
     /// Captures the note specified by `id`.
     ///
-    /// The returned [`SubNote`] implements [`Stream`][`futures::Stream`] so that note events can be retrieved asynchronously via it.
-    pub fn subscribe_note<E, Id>(
-        &self,
-        id: Id,
-    ) -> impl Future<Output = Result<SubNote<E>>> + 'static
+    /// The returned [`SubNote`] implements [`Stream`][`futures::Stream`]
+    /// so that note events can be retrieved asynchronously via it.
+    pub fn subnote<E, Id>(&self, note_id: Id) -> BoxFuture<'static, Result<SubNote<E>>>
     where
         E: misskey_core::streaming::SubNoteEvent,
-        Id: Into<misskey_core::streaming::SubNoteId>,
+        Id: Into<String>,
     {
         SubNote::subscribe(
-            id.into(),
+            SubNoteId(note_id.into()),
             self.broker_tx.clone(),
             SharedBrokerState::clone(&self.state),
         )
+        .boxed()
     }
 
     /// Connects to the channel using `request`.
     ///
-    /// The returned [`Channel`] implements [`Stream`][`futures::Stream`] and [`Sink`][`futures::Sink`] so that you can exchange messages with channels on it.
-    pub fn channel<'a, R>(
+    /// The returned [`Channel`] implements [`Stream`][`futures::Stream`] and [`Sink`][`futures::Sink`]
+    /// so that you can exchange messages with channels on it.
+    pub fn channel<R>(
         &self,
         request: R,
-    ) -> impl Future<Output = Result<Channel<R::Incoming, R::Outgoing>>> + 'a
+    ) -> BoxFuture<'static, Result<Channel<R::Incoming, R::Outgoing>>>
     where
-        R: misskey_core::streaming::ConnectChannelRequest + 'a,
+        R: misskey_core::streaming::ConnectChannelRequest,
     {
         Channel::connect(
             request,
@@ -102,7 +108,10 @@ impl WebSocketClient {
     }
 
     /// Receive messages from the broadcast stream.
-    pub fn broadcast<E>(&self) -> impl Future<Output = Result<Broadcast<E>>> + 'static
+    ///
+    /// The returned [`Broadcast`] implements [`Stream`][`futures::Stream`]
+    /// so that broadcast events can be retrieved asynchronously via it.
+    pub fn broadcast<E>(&self) -> BoxFuture<'static, Result<Broadcast<E>>>
     where
         E: misskey_core::streaming::BroadcastEvent,
     {
@@ -110,6 +119,7 @@ impl WebSocketClient {
             self.broker_tx.clone(),
             SharedBrokerState::clone(&self.state),
         )
+        .boxed()
     }
 }
 
@@ -142,6 +152,62 @@ impl Client for WebSocketClient {
                 ApiResult::Ok(x) => ApiResult::Ok(value::from_value(x)?),
                 ApiResult::Err { error } => ApiResult::Err { error },
             })
+        })
+    }
+}
+
+fn boxed_stream_sink<'a, I, O, E, S>(s: S) -> BoxStreamSink<'a, I, O, E>
+where
+    S: futures::Stream<Item = std::result::Result<I, E>> + futures::Sink<O, Error = E> + Send + 'a,
+{
+    Box::pin(s)
+}
+
+impl StreamingClient for WebSocketClient {
+    type Error = Error;
+
+    fn subnote<E>(&self, note_id: String) -> BoxFuture<Result<BoxStream<Result<E>>>>
+    where
+        E: misskey_core::streaming::SubNoteEvent,
+    {
+        Box::pin(async move {
+            Ok(SubNote::subscribe(
+                SubNoteId(note_id),
+                self.broker_tx.clone(),
+                SharedBrokerState::clone(&self.state),
+            )
+            .await?
+            .boxed())
+        })
+    }
+
+    fn channel<R>(
+        &self,
+        request: R,
+    ) -> BoxFuture<Result<misskey_core::streaming::ChannelStream<R, Error>>>
+    where
+        R: misskey_core::streaming::ConnectChannelRequest,
+    {
+        Channel::connect(
+            request,
+            self.broker_tx.clone(),
+            SharedBrokerState::clone(&self.state),
+        )
+        .map_ok(boxed_stream_sink)
+        .boxed()
+    }
+
+    fn broadcast<E>(&self) -> BoxFuture<Result<BoxStream<Result<E>>>>
+    where
+        E: misskey_core::streaming::BroadcastEvent,
+    {
+        Box::pin(async move {
+            Ok(Broadcast::start(
+                self.broker_tx.clone(),
+                SharedBrokerState::clone(&self.state),
+            )
+            .await?
+            .boxed())
         })
     }
 }
@@ -214,8 +280,10 @@ mod tests {
             .unwrap()
             .created_note;
 
-        let mut stream: crate::stream::SubNote<misskey_api::streaming::note::NoteUpdateEvent> =
-            client.subscribe_note(note.id.clone()).await.unwrap();
+        let mut stream = client
+            .subnote::<misskey_api::streaming::note::NoteUpdateEvent, _>(note.id.to_string())
+            .await
+            .unwrap();
 
         futures::future::join(
             async {
