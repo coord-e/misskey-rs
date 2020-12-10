@@ -64,7 +64,7 @@ jobs:
             flags: --no-default-features --features 12-60-0
           - version: '12.58.0'
             flags: --no-default-features --features 12-58-0
-          - version: '12.57.0'
+          - version: '12.57.1'
             flags: --no-default-features --features 12-57-0
           - version: '12.55.0'
             flags: --no-default-features --features 12-55-0
