@@ -116,26 +116,14 @@ mod tests {
         let url = client.avatar_url().await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
-        future::join(
-            client.test(crate::endpoint::drive::files::upload_from_url::Request {
-                #[cfg(feature = "12-48-0")]
-                comment: None,
-                #[cfg(feature = "12-48-0")]
-                marker: None,
-                url,
-                folder_id: None,
-                is_sensitive: None,
-                force: Some(true),
-            }),
-            async {
-                loop {
-                    match stream.next().await.unwrap().unwrap() {
-                        DriveStreamEvent::FileCreated(_) => break,
-                        _ => continue,
-                    }
+        future::join(client.upload_from_url(url), async {
+            loop {
+                match stream.next().await.unwrap().unwrap() {
+                    DriveStreamEvent::FileCreated(_) => break,
+                    _ => continue,
                 }
-            },
-        )
+            }
+        })
         .await;
     }
 
@@ -143,18 +131,7 @@ mod tests {
     async fn stream_file_updated() {
         let client = TestClient::new().await;
         let url = client.avatar_url().await;
-        let file = client
-            .test(crate::endpoint::drive::files::upload_from_url::Request {
-                #[cfg(feature = "12-48-0")]
-                comment: None,
-                #[cfg(feature = "12-48-0")]
-                marker: None,
-                url,
-                folder_id: None,
-                is_sensitive: None,
-                force: Some(true),
-            })
-            .await;
+        let file = client.upload_from_url(url).await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
@@ -180,18 +157,7 @@ mod tests {
     async fn stream_file_deleted() {
         let client = TestClient::new().await;
         let url = client.avatar_url().await;
-        let file = client
-            .test(crate::endpoint::drive::files::upload_from_url::Request {
-                #[cfg(feature = "12-48-0")]
-                comment: None,
-                #[cfg(feature = "12-48-0")]
-                marker: None,
-                url,
-                folder_id: None,
-                is_sensitive: None,
-                force: Some(true),
-            })
-            .await;
+        let file = client.upload_from_url(url).await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(

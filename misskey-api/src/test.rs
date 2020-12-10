@@ -1,4 +1,4 @@
-use crate::model::{emoji::Emoji, id::Id, note::Note, user::User};
+use crate::model::{drive::DriveFile, emoji::Emoji, id::Id, note::Note, user::User};
 
 use misskey_core::{Client, Request};
 use misskey_http::HttpClient;
@@ -22,6 +22,9 @@ pub trait ClientExt {
         renote_id: Option<Id<Note>>,
         reply_id: Option<Id<Note>>,
     ) -> Note;
+    // `drive/files/upload-from-url` does not return `DriveFile` since 12.48.0
+    // so we need this
+    async fn upload_from_url(&self, url: Url) -> DriveFile;
     async fn avatar_url(&self) -> Url;
     async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji>;
 }
@@ -88,21 +91,47 @@ impl<T: Client + Send + Sync> ClientExt for T {
         }
     }
 
-    #[cfg(feature = "12-9-0")]
-    async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
-        let file = self
-            .test(crate::endpoint::drive::files::upload_from_url::Request {
-                #[cfg(feature = "12-48-0")]
-                comment: None,
-                #[cfg(feature = "12-48-0")]
-                marker: None,
-                url,
-                folder_id: None,
-                is_sensitive: None,
-                force: None,
+    // TODO: better impl
+    async fn upload_from_url(&self, url: Url) -> DriveFile {
+        let random = ulid_crate::Ulid::new().to_string();
+        let folder = self
+            .test(crate::endpoint::drive::folders::create::Request {
+                name: Some(random),
+                parent_id: None,
             })
             .await;
 
+        self.test(crate::endpoint::drive::files::upload_from_url::Request {
+            #[cfg(feature = "12-48-0")]
+            comment: None,
+            #[cfg(feature = "12-48-0")]
+            marker: None,
+            url,
+            folder_id: Some(folder.id),
+            is_sensitive: None,
+            force: Some(true),
+        })
+        .await;
+
+        loop {
+            let files = self
+                .test(crate::endpoint::drive::files::Request {
+                    type_: None,
+                    folder_id: Some(folder.id),
+                    limit: Some(1),
+                    since_id: None,
+                    until_id: None,
+                })
+                .await;
+            if let Some(file) = files.into_iter().next() {
+                break file;
+            }
+        }
+    }
+
+    #[cfg(feature = "12-9-0")]
+    async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
+        let file = self.upload_from_url(url).await;
         self.test(crate::endpoint::admin::emoji::add::Request { file_id: file.id })
             .await
             .id

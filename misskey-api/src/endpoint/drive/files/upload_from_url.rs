@@ -1,7 +1,6 @@
-use crate::model::{
-    drive::{DriveFile, DriveFolder},
-    id::Id,
-};
+#[cfg(not(feature = "12-48-0"))]
+use crate::model::drive::DriveFile;
+use crate::model::{drive::DriveFolder, id::Id};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -34,6 +33,10 @@ pub struct Request {
 }
 
 impl misskey_core::Request for Request {
+    /// This `type` is [`DriveFile`][`crate::model::drive::DriveFile`] on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-48-0"</code></strong></span>.
+    #[cfg(feature = "12-48-0")]
+    type Response = ();
+    #[cfg(not(feature = "12-48-0"))]
     type Response = DriveFile;
     const ENDPOINT: &'static str = "drive/files/upload-from-url";
 }
