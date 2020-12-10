@@ -1,5 +1,4 @@
 use std::fmt::{self, Debug};
-use std::future::Future;
 use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -15,6 +14,7 @@ use crate::model::ChannelId;
 
 use futures::{
     executor,
+    future::BoxFuture,
     sink::{Sink, SinkExt},
     stream::{FusedStream, Stream, StreamExt},
 };
@@ -45,13 +45,17 @@ impl<I, O> Debug for Channel<I, O> {
 impl<I, O> Channel<I, O>
 where
     I: DeserializeOwned + 'static,
-    O: Serialize,
+    O: Serialize + 'static,
 {
+    // We can't use return-position `impl Trait` syntax here because it assumes all type parameters (i.e. `R`)
+    // are "in scope" of (hidden) returned type, and they indirectly brings (unmentioned) lifetime of `R`.
+    // Thus we can't express our returned (anonymous) `Future` without `BoxFuture` for now
+    // because it is actually independent from `req: R` argument.
     pub(crate) fn connect<R>(
         req: R,
         mut broker_tx: ControlSender,
         state: SharedBrokerState,
-    ) -> impl Future<Output = Result<Channel<I, O>>>
+    ) -> BoxFuture<'static, Result<Channel<I, O>>>
     where
         R: ConnectChannelRequest<Incoming = I, Outgoing = O>,
     {
@@ -64,7 +68,7 @@ where
         // in order not to require `Send` on `R`
         let serialized_req = serde_json::to_value(req);
 
-        async move {
+        Box::pin(async move {
             broker_tx
                 .send(BrokerControl::Connect {
                     id,
@@ -85,7 +89,7 @@ where
                 is_terminated: false,
                 _marker: PhantomData,
             })
-        }
+        })
     }
 }
 

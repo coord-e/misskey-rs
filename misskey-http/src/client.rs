@@ -1,5 +1,4 @@
 use std::fmt::{self, Debug};
-use std::path::Path;
 
 use crate::error::{Error, Result};
 
@@ -11,7 +10,7 @@ use isahc::http;
 use log::debug;
 use mime::Mime;
 use misskey_core::model::ApiResult;
-use misskey_core::{Client, Request, UploadFileRequest};
+use misskey_core::{Client, Request, UploadFileClient, UploadFileRequest};
 use serde::Serialize;
 use serde_json::value::{self, Value};
 use url::Url;
@@ -83,87 +82,12 @@ impl HttpClient {
             Ok(ValueOrRequest::Request(request))
         }
     }
-
-    /// Dispatches an API request with file.
-    ///
-    /// Takes the file to be attatched and [`UploadFileRequest`], then returns a future that waits for the [`Request::Response`].
-    pub async fn request_with_file<R: UploadFileRequest>(
-        &self,
-        request: R,
-        type_: Mime,
-        file_name: impl Into<String>,
-        path: impl AsRef<Path>,
-    ) -> Result<ApiResult<R::Response>> {
-        let url = self
-            .url
-            .join(R::ENDPOINT)
-            .expect("Request::ENDPOINT must be a fragment of valid URL");
-
-        // limit the use of `R` value to the outside of `async`
-        // in order not to require `Send` on `R`
-        let value = self.set_api_key(request).and_then(value::to_value);
-
-        async move {
-            let value = value?;
-
-            #[cfg(feature = "inspect-contents")]
-            debug!(
-                "sending request to {} with {} ({}) file: {}",
-                url,
-                path.as_ref().display(),
-                type_,
-                value
-            );
-
-            let mut form = multipart::Form::default();
-
-            // TODO: Can't we just take `AsyncRead` or `Read` and use it directly?
-            let read = std::fs::File::open(path)?;
-            form.add_reader_file_with_mime("file", read, file_name, type_);
-
-            let obj = value.as_object().expect("Request must be an object");
-            for (k, v) in obj {
-                let v = v
-                    .as_str()
-                    .expect("UploadFileRequest must be an object that all values are string");
-                form.add_text(k.to_owned(), v.to_owned());
-            }
-
-            let content_type = form.content_type();
-
-            use futures::stream::TryStreamExt;
-            let stream = multipart::Body::from(form).map_err(|e| match e {
-                MultipartError::HeaderWrite(e) => e,
-                MultipartError::BoundaryWrite(e) => e,
-                MultipartError::ContentRead(e) => e,
-            });
-            let body = isahc::Body::from_reader(async_dup::Mutex::new(stream.into_async_read()));
-
-            use isahc::http::header::CONTENT_TYPE;
-            let response = self
-                .client
-                .send_async(
-                    // TODO: uncomfortable conversion from `Url` to `Uri`
-                    http::Request::post(url.into_string())
-                        .header(CONTENT_TYPE, content_type)
-                        .body(body)
-                        .unwrap(),
-                )
-                .await?;
-
-            response_to_result::<R>(response).await
-        }
-        .await
-    }
 }
 
 impl Client for HttpClient {
     type Error = Error;
 
-    fn request<'a, R>(&'a self, request: R) -> BoxFuture<'a, Result<ApiResult<R::Response>>>
-    where
-        R: Request + 'a,
-    {
+    fn request<R: Request>(&self, request: R) -> BoxFuture<Result<ApiResult<R::Response>>> {
         let url = self
             .url
             .join(R::ENDPOINT)
@@ -192,6 +116,75 @@ impl Client for HttpClient {
                     // TODO: uncomfortable conversion from `Url` to `Uri`
                     http::Request::post(url.to_string())
                         .header(CONTENT_TYPE, "application/json")
+                        .body(body)
+                        .unwrap(),
+                )
+                .await?;
+
+            response_to_result::<R>(response).await
+        })
+    }
+}
+
+impl UploadFileClient for HttpClient {
+    fn request_with_file<R, T>(
+        &self,
+        request: R,
+        type_: Mime,
+        file_name: String,
+        read: T,
+    ) -> BoxFuture<Result<ApiResult<R::Response>>>
+    where
+        R: UploadFileRequest,
+        T: std::io::Read + Send + Sync + 'static,
+    {
+        let url = self
+            .url
+            .join(R::ENDPOINT)
+            .expect("Request::ENDPOINT must be a fragment of valid URL");
+
+        // limit the use of `R` value to the outside of `async`
+        // in order not to require `Send` on `R`
+        let value = self.set_api_key(request).and_then(value::to_value);
+
+        Box::pin(async move {
+            let value = value?;
+
+            #[cfg(feature = "inspect-contents")]
+            debug!(
+                "sending request to {} with {} content: {}",
+                url, type_, value
+            );
+
+            let mut form = multipart::Form::default();
+
+            form.add_reader_file_with_mime("file", read, file_name, type_);
+
+            let obj = value.as_object().expect("Request must be an object");
+            for (k, v) in obj {
+                let v = v
+                    .as_str()
+                    .expect("UploadFileRequest must be an object that all values are string");
+                form.add_text(k.to_owned(), v.to_owned());
+            }
+
+            let content_type = form.content_type();
+
+            use futures::stream::TryStreamExt;
+            let stream = multipart::Body::from(form).map_err(|e| match e {
+                MultipartError::HeaderWrite(e) => e,
+                MultipartError::BoundaryWrite(e) => e,
+                MultipartError::ContentRead(e) => e,
+            });
+            let body = isahc::Body::from_reader(async_dup::Mutex::new(stream.into_async_read()));
+
+            use isahc::http::header::CONTENT_TYPE;
+            let response = self
+                .client
+                .send_async(
+                    // TODO: uncomfortable conversion from `Url` to `Uri`
+                    http::Request::post(url.into_string())
+                        .header(CONTENT_TYPE, content_type)
                         .body(body)
                         .unwrap(),
                 )
@@ -238,7 +231,7 @@ mod tests {
 
     use super::HttpClient;
 
-    use misskey_core::Client;
+    use misskey_core::{Client, UploadFileClient};
     use url::Url;
     use uuid::Uuid;
 
@@ -308,13 +301,14 @@ mod tests {
     async fn tokio_request_with_file() {
         let client = test_client();
         let path = write_to_temp_file("test");
+        let file = std::fs::File::open(path).unwrap();
 
         client
             .request_with_file(
                 misskey_api::endpoint::drive::files::create::Request::default(),
                 mime::TEXT_PLAIN,
                 "test.txt".to_string(),
-                path,
+                file,
             )
             .await
             .unwrap()
@@ -325,13 +319,14 @@ mod tests {
     async fn async_std_request_with_file() {
         let client = test_client();
         let path = write_to_temp_file("test");
+        let file = std::fs::File::open(path).unwrap();
 
         client
             .request_with_file(
                 misskey_api::endpoint::drive::files::create::Request::default(),
                 mime::TEXT_PLAIN,
                 "test.txt".to_string(),
-                path,
+                file,
             )
             .await
             .unwrap()

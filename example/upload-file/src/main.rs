@@ -1,7 +1,8 @@
+use std::fs::File;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use misskey::{Client, HttpClient};
+use misskey::{Client, HttpClient, UploadFileClient};
 use structopt::StructOpt;
 use url::Url;
 
@@ -30,6 +31,7 @@ async fn main() -> Result<()> {
     // Miscellaneous code to compute some necessary values
     let mime = mime_guess::from_path(&opt.file).first_or_octet_stream();
     let file_name = opt.file.file_name().unwrap().to_str().unwrap();
+    let file = File::open(&opt.file)?;
 
     // Upload a file to drive
     let file = client
@@ -42,8 +44,8 @@ async fn main() -> Result<()> {
                 ..Default::default()
             },
             mime,
-            file_name,
-            &opt.file,
+            file_name.to_string(),
+            file,
         )
         .await
         .context("Failed to call an API")?

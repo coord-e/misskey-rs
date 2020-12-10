@@ -205,8 +205,7 @@ pub mod streaming {
     //! #     .connect()
     //! #     .await?;
     //!
-    //! let note_id: Id<Note> = "NOTE_ID_TO_WATCH".parse().unwrap();
-    //! let mut stream = client.subscribe_note(note_id).await?;
+    //! let mut stream = client.subnote("NOTE_ID_TO_WATCH").await?;
     //!
     //! loop {
     //!     // Wait for the event note using `next` method from `StreamExt`.
@@ -269,7 +268,7 @@ pub mod model {
     pub use misskey_core::model::*;
 }
 
-pub use misskey_core::Client;
+pub use misskey_core::{Client, UploadFileClient};
 
 #[cfg(feature = "http-client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "http-client")))]

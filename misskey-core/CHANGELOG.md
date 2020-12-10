@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Blanket `impl`s to `Client`
+- `StreamingClient` for streaming connections
+- `UploadFileClient` for uploading files
+
 ### Changed
 
 - Update the documentation
+- Take `io::Read` instead of file path in file uploads
+- Adjust lifetime specification of request methods

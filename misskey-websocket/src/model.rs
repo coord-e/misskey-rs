@@ -4,6 +4,10 @@ use uuid::Uuid;
 pub mod incoming;
 pub mod outgoing;
 
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
+#[serde(transparent)]
+pub struct SubNoteId(pub String);
+
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct ChannelId(pub Uuid);

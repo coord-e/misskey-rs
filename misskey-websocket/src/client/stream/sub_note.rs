@@ -8,6 +8,7 @@ use crate::broker::{
     model::{BrokerControl, SharedBrokerState},
 };
 use crate::error::Result;
+use crate::model::SubNoteId;
 
 use futures::{
     executor,
@@ -15,7 +16,7 @@ use futures::{
     stream::{FusedStream, Stream, StreamExt},
 };
 use log::{info, warn};
-use misskey_core::streaming::{SubNoteEvent, SubNoteId};
+use misskey_core::streaming::SubNoteEvent;
 use serde_json::Value;
 
 /// Stream for the [`subscribe_note`][`crate::WebSocketClient::subscribe_note`] method.

@@ -7,4 +7,4 @@ pub mod model;
 pub mod streaming;
 
 pub use api::*;
-pub use client::Client;
+pub use client::*;
