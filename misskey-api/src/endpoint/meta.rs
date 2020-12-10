@@ -1,3 +1,5 @@
+#[cfg(feature = "12-62-0")]
+use crate::model::clip::Clip;
 use crate::model::{emoji::Emoji, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
@@ -77,6 +79,9 @@ pub struct Meta {
         )))
     )]
     pub pinned_pages: Option<Vec<String>>,
+    #[cfg(feature = "12-62-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    pub pinned_clip_id: Option<Id<Clip>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

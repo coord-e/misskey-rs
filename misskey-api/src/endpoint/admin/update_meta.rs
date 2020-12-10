@@ -1,3 +1,5 @@
+#[cfg(feature = "12-62-0")]
+use crate::model::clip::Clip;
 use crate::model::{id::Id, user::User};
 
 use serde::Serialize;
@@ -23,6 +25,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_pages: Option<Vec<String>>,
+    #[cfg(feature = "12-62-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub pinned_clip_id: Option<Option<Id<Clip>>>,
     #[builder(default, setter(strip_option))]
     pub hidden_tags: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
@@ -258,6 +265,8 @@ mod tests {
                 use_star_for_reaction_fallback: Some(false),
                 #[cfg(feature = "12-58-0")]
                 pinned_pages: Some(vec!["/announcements".to_string()]),
+                #[cfg(feature = "12-62-0")]
+                pinned_clip_id: Some(None),
                 pinned_users: Some(vec!["@admin".to_string(), "@testuser".to_string()]),
                 hidden_tags: Some(vec!["not_good".to_string()]),
                 blocked_hosts: Some(vec!["not.good.host".to_string()]),

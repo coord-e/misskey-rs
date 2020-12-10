@@ -36,7 +36,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_VERSION: '12.47.1'
+          MISSKEY_VERSION: '12.62.2'
           MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 5
@@ -54,6 +54,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - version: '12.62.0'
+            flags: --no-default-features --features 12-62-0
           - version: '12.61.0'
             flags: --no-default-features --features 12-61-0
           - version: '12.60.0'

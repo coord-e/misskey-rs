@@ -11,6 +11,9 @@ pub struct Response {
     pub original_notes_count: u64,
     pub users_count: u64,
     pub original_users_count: u64,
+    #[cfg(feature = "12-62-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    pub reactions_count: u64,
     pub instances: u64,
     pub drive_usage_local: u64,
     pub drive_usage_remote: u64,
