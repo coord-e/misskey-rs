@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for ID generation methods
 - `Query` type for DNF queries
 - Missing `Default` implementations on some request types
+- Support for Misskey v12.48.0 ~ v12.48.3
+- Support for Misskey v12.49.0 ~ v12.50.0
+- Support for Misskey v12.51.0 ~ v12.54.0
+- Support for Misskey v12.55.0 ~ v12.56.0
+- Support for Misskey v12.57.0 ~ v12.57.4
+- Support for Misskey v12.58.0 ~ v12.59.0
+- Support for Misskey v12.60.0 ~ v12.60.1
+- Support for Misskey v12.61.0 ~ v12.61.1
+- Support for Misskey v12.62.0 ~ v12.62.1
+- Support for Misskey v12.62.2
 
 ### Changed
 

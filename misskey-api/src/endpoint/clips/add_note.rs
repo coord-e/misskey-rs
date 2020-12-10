@@ -1,4 +1,4 @@
-use crate::model::{clip::Clip, id::Id};
+use crate::model::{clip::Clip, id::Id, note::Note};
 
 use serde::Serialize;
 
@@ -6,11 +6,12 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     pub clip_id: Id<Clip>,
+    pub note_id: Id<Note>,
 }
 
 impl misskey_core::Request for Request {
-    type Response = Clip;
-    const ENDPOINT: &'static str = "clips/show";
+    type Response = ();
+    const ENDPOINT: &'static str = "clips/add-note";
 }
 
 #[cfg(test)]
@@ -21,16 +22,20 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let client = TestClient::new();
+        let note = client.user.create_note(Some("test"), None, None).await;
         let clip = client
+            .user
             .test(crate::endpoint::clips::create::Request {
-                name: "clip test".to_string(),
-                #[cfg(feature = "12-57-0")]
+                name: "testclip".to_string(),
                 is_public: None,
-                #[cfg(feature = "12-57-0")]
                 description: None,
             })
             .await;
-
-        client.test(Request { clip_id: clip.id }).await;
+        client
+            .test(Request {
+                clip_id: clip.id,
+                note_id: note.id,
+            })
+            .await;
     }
 }

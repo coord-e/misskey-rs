@@ -24,6 +24,10 @@ mod tests {
         let clip = client
             .test(crate::endpoint::clips::create::Request {
                 name: "clip test".to_string(),
+                #[cfg(feature = "12-57-0")]
+                is_public: None,
+                #[cfg(feature = "12-57-0")]
+                description: None,
             })
             .await;
 

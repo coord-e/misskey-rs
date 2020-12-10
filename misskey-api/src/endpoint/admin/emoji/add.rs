@@ -57,15 +57,7 @@ mod tests {
     async fn request() {
         let client = TestClient::new();
         let image_url = client.avatar_url().await;
-        let file = client
-            .test(crate::endpoint::drive::files::upload_from_url::Request {
-                url: image_url,
-                folder_id: None,
-                is_sensitive: None,
-                force: None,
-            })
-            .await;
-
+        let file = client.upload_from_url(image_url).await;
         client.admin.test(Request { file_id: file.id }).await;
     }
 

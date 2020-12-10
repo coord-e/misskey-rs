@@ -44,6 +44,12 @@ pub enum MainStreamEvent {
     UnreadNotification(Notification),
     UnreadAntenna(Antenna),
     DriveFileCreated(DriveFile),
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    UrlUploadFinished {
+        marker: Option<String>,
+        file: DriveFile,
+    },
 }
 
 #[derive(Serialize, Default, Debug, Clone)]
@@ -72,15 +78,18 @@ mod tests {
 
     #[tokio::test]
     async fn reply() {
-        let client = TestClient::new().await;
+        let test_client = TestClient::new().await;
+        // create fresh user (for new main stream) to avoid events
+        // to be captured by other test cases
+        let (_, client) = test_client.admin.create_streaming_user().await;
 
-        let mut stream = client.user.channel(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             async {
-                let note = client.user.create_note(Some("awesome"), None, None).await;
-                client
-                    .admin
+                let note = client.create_note(Some("awesome"), None, None).await;
+                test_client
+                    .user
                     .create_note(Some("nice"), None, Some(note.id))
                     .await;
             },
@@ -98,19 +107,61 @@ mod tests {
 
     #[tokio::test]
     async fn mention() {
-        let client = TestClient::new().await;
-        let me = client.user.me().await;
+        let test_client = TestClient::new().await;
+        // ditto
+        let (me, client) = test_client.admin.create_streaming_user().await;
 
-        let mut stream = client.user.channel(Request::default()).await.unwrap();
+        let mut stream = client.channel(Request::default()).await.unwrap();
 
         futures::future::join(
-            client
-                .admin
+            test_client
+                .user
                 .create_note(Some(&format!("@{} hello", me.username)), None, None),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
                         MainStreamEvent::Mention(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[cfg(feature = "12-48-0")]
+    #[tokio::test]
+    async fn url_upload_finished() {
+        use crate::model::drive::DriveFile;
+
+        // ditto
+        let (_, client) = TestClient::new().await.admin.create_streaming_user().await;
+
+        let mut stream = client.channel(Request::default()).await.unwrap();
+
+        let expected_marker = ulid_crate::Ulid::new().to_string();
+        let expected_comment = ulid_crate::Ulid::new().to_string();
+
+        futures::future::join(
+            client.test(crate::endpoint::drive::files::upload_from_url::Request {
+                url: url::Url::parse("http://example.com/index.html").unwrap(),
+                folder_id: None,
+                is_sensitive: None,
+                force: None,
+                marker: Some(expected_marker.clone()),
+                comment: Some(expected_comment.clone()),
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        MainStreamEvent::UrlUploadFinished {
+                            marker: Some(marker),
+                            file:
+                                DriveFile {
+                                    comment: Some(comment),
+                                    ..
+                                },
+                        } if marker == expected_marker && comment == expected_comment => break,
                         _ => continue,
                     }
                 }

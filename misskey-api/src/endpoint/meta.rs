@@ -1,3 +1,5 @@
+#[cfg(feature = "12-62-0")]
+use crate::model::clip::Clip;
 use crate::model::{emoji::Emoji, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
@@ -22,7 +24,15 @@ pub struct Meta {
     pub disable_global_timeline: bool,
     pub drive_capacity_per_local_user_mb: u64,
     pub drive_capacity_per_remote_user_mb: u64,
+    /// This field is [`bool`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
+    #[cfg(feature = "12-58-0")]
+    pub cache_remote_files: Option<bool>,
+    #[cfg(not(feature = "12-58-0"))]
     pub cache_remote_files: bool,
+    /// This field is [`bool`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
+    #[cfg(feature = "12-58-0")]
+    pub proxy_remote_files: Option<bool>,
+    #[cfg(not(feature = "12-58-0"))]
     pub proxy_remote_files: bool,
     #[cfg(feature = "12-37-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
@@ -40,12 +50,38 @@ pub struct Meta {
     pub icon_url: Option<String>,
     pub max_note_text_length: u64,
     pub emojis: Vec<Emoji>,
+    /// This field is [`bool`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
+    #[cfg(feature = "12-58-0")]
+    pub require_setup: Option<bool>,
+    #[cfg(not(feature = "12-58-0"))]
     pub require_setup: bool,
     pub enable_email: bool,
     pub enable_twitter_integration: bool,
     pub enable_github_integration: bool,
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
+    /// This field is [`Option<String>`][`Option`] on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
+    #[cfg(feature = "12-58-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    #[serde(default)]
+    pub proxy_account_name: Option<Option<String>>,
+    #[cfg(all(feature = "12-48-0", not(feature = "12-58-0")))]
+    pub proxy_account_name: Option<String>,
+    #[cfg(all(
+        feature = "12-58-0",
+        any(not(feature = "12-62-0"), feature = "12-62-2")
+    ))]
+    #[cfg_attr(
+        docsrs,
+        doc(cfg(all(
+            feature = "12-58-0",
+            any(not(feature = "12-62-0"), feature = "12-62-2")
+        )))
+    )]
+    pub pinned_pages: Option<Vec<String>>,
+    #[cfg(feature = "12-62-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    pub pinned_clip_id: Option<Id<Clip>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

@@ -1,3 +1,5 @@
+#[cfg(feature = "12-62-0")]
+use crate::model::clip::Clip;
 use crate::model::{id::Id, user::User};
 
 use serde::Serialize;
@@ -18,6 +20,16 @@ pub struct Request {
     pub use_star_for_reaction_fallback: Option<bool>,
     #[builder(default, setter(strip_option))]
     pub pinned_users: Option<Vec<String>>,
+    #[cfg(feature = "12-58-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub pinned_pages: Option<Vec<String>>,
+    #[cfg(feature = "12-62-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub pinned_clip_id: Option<Option<Id<Clip>>>,
     #[builder(default, setter(strip_option))]
     pub hidden_tags: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
@@ -31,6 +43,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub icon_url: Option<Option<String>>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub background_image_url: Option<Option<String>>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub logo_image_url: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub name: Option<Option<String>>,
@@ -241,12 +263,20 @@ mod tests {
                 disable_local_timeline: Some(false),
                 disable_global_timeline: Some(false),
                 use_star_for_reaction_fallback: Some(false),
+                #[cfg(feature = "12-58-0")]
+                pinned_pages: Some(vec!["/announcements".to_string()]),
+                #[cfg(feature = "12-62-0")]
+                pinned_clip_id: Some(None),
                 pinned_users: Some(vec!["@admin".to_string(), "@testuser".to_string()]),
                 hidden_tags: Some(vec!["not_good".to_string()]),
                 blocked_hosts: Some(vec!["not.good.host".to_string()]),
                 mascot_image_url: Some(Some(image_url.to_string())),
                 bannar_url: Some(Some(image_url.to_string())),
                 icon_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "12-60-0")]
+                background_image_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "12-60-0")]
+                logo_image_url: Some(Some(image_url.to_string())),
                 name: None,
                 description: Some(Some("description!".to_string())),
                 max_note_text_length: Some(1000),

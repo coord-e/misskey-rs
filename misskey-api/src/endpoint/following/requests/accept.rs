@@ -38,11 +38,14 @@ mod tests {
                 auto_accept_followed: None,
                 is_bot: None,
                 is_cat: None,
+                #[cfg(not(feature = "12-55-0"))]
                 auto_watch: None,
                 inject_featured_note: None,
                 always_mark_nsfw: None,
                 pinned_page_id: None,
                 muted_words: None,
+                #[cfg(feature = "12-60-0")]
+                no_crawle: None,
             })
             .await;
         client

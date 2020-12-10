@@ -51,6 +51,7 @@ pub mod meta;
 pub mod mute;
 pub mod notes;
 pub mod notifications;
+pub mod pages;
 pub mod pinned_users;
 pub mod stats;
 pub mod username;
