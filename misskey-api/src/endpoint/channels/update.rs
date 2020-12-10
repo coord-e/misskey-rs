@@ -93,6 +93,10 @@ mod tests {
         let url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
                 url,
                 folder_id: None,
                 is_sensitive: None,
@@ -112,9 +116,9 @@ mod tests {
             .test(Request {
                 channel_id: channel.id,
                 // bug in misskey
-                #[cfg(feature = "head")]
+                #[cfg(feature = "12-48-0")]
                 name: None,
-                #[cfg(not(feature = "head"))]
+                #[cfg(not(feature = "12-48-0"))]
                 name: Some("hi".to_string()),
                 description: None,
                 banner_id: Some(None),

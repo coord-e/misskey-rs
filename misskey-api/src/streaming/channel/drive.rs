@@ -118,6 +118,10 @@ mod tests {
 
         future::join(
             client.test(crate::endpoint::drive::files::upload_from_url::Request {
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
                 url,
                 folder_id: None,
                 is_sensitive: None,
@@ -141,6 +145,10 @@ mod tests {
         let url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
                 url,
                 folder_id: None,
                 is_sensitive: None,
@@ -174,6 +182,10 @@ mod tests {
         let url = client.avatar_url().await;
         let file = client
             .test(crate::endpoint::drive::files::upload_from_url::Request {
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
                 url,
                 folder_id: None,
                 is_sensitive: None,

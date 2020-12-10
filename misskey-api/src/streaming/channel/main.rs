@@ -44,6 +44,12 @@ pub enum MainStreamEvent {
     UnreadNotification(Notification),
     UnreadAntenna(Antenna),
     DriveFileCreated(DriveFile),
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    UrlUploadFinished {
+        marker: Option<String>,
+        file: DriveFile,
+    },
 }
 
 #[derive(Serialize, Default, Debug, Clone)]
@@ -111,6 +117,45 @@ mod tests {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
                         MainStreamEvent::Mention(_) => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[cfg(feature = "12-48-0")]
+    #[tokio::test]
+    async fn url_upload_finished() {
+        use crate::model::drive::DriveFile;
+
+        let client = TestClient::new().await;
+        let mut stream = client.user.channel(Request::default()).await.unwrap();
+
+        let expected_marker = ulid_crate::Ulid::new().to_string();
+        let expected_comment = ulid_crate::Ulid::new().to_string();
+
+        futures::future::join(
+            client.test(crate::endpoint::drive::files::upload_from_url::Request {
+                url: url::Url::parse("http://example.com/index.html").unwrap(),
+                folder_id: None,
+                is_sensitive: None,
+                force: None,
+                marker: Some(expected_marker.clone()),
+                comment: Some(expected_comment.clone()),
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        MainStreamEvent::UrlUploadFinished {
+                            marker: Some(marker),
+                            file:
+                                DriveFile {
+                                    comment: Some(comment),
+                                    ..
+                                },
+                        } if marker == expected_marker && comment == expected_comment => break,
                         _ => continue,
                     }
                 }

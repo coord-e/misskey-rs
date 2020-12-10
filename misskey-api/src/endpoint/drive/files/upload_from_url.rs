@@ -21,6 +21,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub force: Option<bool>,
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub comment: Option<String>,
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub marker: Option<String>,
 }
 
 impl misskey_core::Request for Request {
@@ -42,6 +52,10 @@ mod tests {
                 folder_id: None,
                 is_sensitive: None,
                 force: None,
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
             })
             .await;
     }
@@ -57,6 +71,10 @@ mod tests {
                 folder_id: None,
                 is_sensitive: None,
                 force: None,
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
             })
             .await;
     }
@@ -77,6 +95,10 @@ mod tests {
                 folder_id: Some(folder.id),
                 is_sensitive: Some(true),
                 force: Some(true),
+                #[cfg(feature = "12-48-0")]
+                comment: Some("comment".to_string()),
+                #[cfg(feature = "12-48-0")]
+                marker: Some("marker".to_string()),
             })
             .await;
     }

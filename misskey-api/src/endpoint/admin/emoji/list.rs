@@ -7,6 +7,11 @@ use typed_builder::TypedBuilder;
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
+    pub query: Option<String>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -43,6 +48,8 @@ mod tests {
         client
             .admin
             .test(Request {
+                #[cfg(feature = "12-48-0")]
+                query: Some("a".to_string()),
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -59,6 +66,8 @@ mod tests {
         client
             .admin
             .test(Request {
+                #[cfg(feature = "12-48-0")]
+                query: None,
                 limit: None,
                 since_id: Some(emoji_id.clone()),
                 until_id: Some(emoji_id.clone()),

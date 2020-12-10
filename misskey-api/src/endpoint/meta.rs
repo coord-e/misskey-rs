@@ -46,6 +46,9 @@ pub struct Meta {
     pub enable_github_integration: bool,
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    pub proxy_account_name: Option<String>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

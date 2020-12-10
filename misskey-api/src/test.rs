@@ -92,6 +92,10 @@ impl<T: Client + Send + Sync> ClientExt for T {
     async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
         let file = self
             .test(crate::endpoint::drive::files::upload_from_url::Request {
+                #[cfg(feature = "12-48-0")]
+                comment: None,
+                #[cfg(feature = "12-48-0")]
+                marker: None,
                 url,
                 folder_id: None,
                 is_sensitive: None,
