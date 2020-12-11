@@ -1,5 +1,4 @@
-use crate::test::env;
-
+use misskey_test::env;
 use misskey_websocket::{WebSocketClient, WebSocketClientBuilder};
 
 pub struct TestClient {
@@ -9,16 +8,16 @@ pub struct TestClient {
 
 impl TestClient {
     pub async fn new() -> Self {
-        env::init_logger();
+        misskey_test::init_logger();
 
-        let admin = WebSocketClientBuilder::new(env::TEST_WEBSOCKET_URL.clone())
-            .token(env::TEST_ADMIN_TOKEN.clone())
+        let admin = WebSocketClientBuilder::new(env::websocket_url())
+            .token(env::admin_token())
             .auto_reconnect()
             .connect()
             .await
             .unwrap();
-        let user = WebSocketClientBuilder::new(env::TEST_WEBSOCKET_URL.clone())
-            .token(env::TEST_USER_TOKEN.clone())
+        let user = WebSocketClientBuilder::new(env::websocket_url())
+            .token(env::user_token())
             .auto_reconnect()
             .connect()
             .await

@@ -5,6 +5,7 @@ members = [
   "misskey-core",
   "misskey-http",
   "misskey-websocket",
+  "misskey-test",
   "example/streaming",
   "example/ping-pong",
   "example/upload-file",

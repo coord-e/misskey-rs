@@ -227,22 +227,15 @@ async fn response_to_result<R: Request>(
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Once;
-
     use super::HttpClient;
 
     use misskey_core::{Client, UploadFileClient};
-    use url::Url;
+    use misskey_test::{self, env};
     use uuid::Uuid;
 
-    static INIT_LOGGER: Once = Once::new();
-
     fn test_client() -> HttpClient {
-        INIT_LOGGER.call_once(env_logger::init);
-
-        let url = std::env::var("TEST_API_URL").unwrap();
-        let token = std::env::var("TEST_USER_TOKEN").unwrap();
-        HttpClient::new(Url::parse(&url).unwrap(), Some(token)).unwrap()
+        misskey_test::init_logger();
+        HttpClient::new(env::api_url(), Some(env::token())).unwrap()
     }
 
     #[test]

@@ -2,11 +2,11 @@ use crate::model::{drive::DriveFile, emoji::Emoji, id::Id, note::Note, user::Use
 
 use misskey_core::{Client, Request};
 use misskey_http::HttpClient;
+use misskey_test::env;
 use misskey_websocket::WebSocketClient;
 use ulid_crate::Ulid;
 use url::Url;
 
-mod env;
 pub mod http;
 pub mod websocket;
 
@@ -52,7 +52,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
 
         (
             res.user,
-            HttpClient::new(env::TEST_API_URL.clone(), Some(res.token)).unwrap(),
+            HttpClient::new(env::api_url(), Some(res.token)).unwrap(),
         )
     }
 
@@ -67,7 +67,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
 
         (
             res.user,
-            WebSocketClient::builder(env::TEST_WEBSOCKET_URL.clone())
+            WebSocketClient::builder(env::websocket_url())
                 .token(res.token)
                 .connect()
                 .await
@@ -108,7 +108,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
             url
         } else {
             let path = format!("/avatar/{}", me.id);
-            env::TEST_API_URL.join(&path).unwrap()
+            env::api_url().join(&path).unwrap()
         }
     }
 

@@ -214,23 +214,17 @@ impl StreamingClient for WebSocketClient {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Once;
-
     use super::{builder::WebSocketClientBuilder, WebSocketClient};
 
     use futures::stream::StreamExt;
     use misskey_core::Client;
-    use url::Url;
-
-    static INIT_LOGGER: Once = Once::new();
+    use misskey_test::{self, env};
 
     async fn test_client() -> WebSocketClient {
-        INIT_LOGGER.call_once(env_logger::init);
+        misskey_test::init_logger();
 
-        let url = std::env::var("TEST_WEBSOCKET_URL").unwrap();
-        let token = std::env::var("TEST_USER_TOKEN").unwrap();
-        WebSocketClientBuilder::new(Url::parse(&url).unwrap())
-            .token(token)
+        WebSocketClientBuilder::new(env::websocket_url())
+            .token(env::token())
             .auto_reconnect()
             .connect()
             .await
