@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Handle ping/pong with server
+
 ### Changed
 
 - Follow changes of `Client` in `misskey-core`
