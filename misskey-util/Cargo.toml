@@ -1,0 +1,66 @@
+[package]
+name = "misskey-util"
+version = "0.1.0"
+authors = ["coord.e <me@coord-e.com>"]
+edition = "2018"
+repository = "https://github.com/coord-e/misskey-rs.git"
+homepage = "https://github.com/coord-e/misskey-rs"
+description = "High-level API for the misskey-rs library"
+documentation = "https://docs.rs/misskey-util/0.1.0"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["async", "client", "misskey"]
+
+[features]
+default = ["12-62-2", "aid"]
+
+12-62-2 = ["misskey-api/12-62-2", "12-62-0"]
+12-62-0 = ["misskey-api/12-62-0", "12-61-0"]
+12-61-0 = ["misskey-api/12-61-0", "12-60-0"]
+12-60-0 = ["misskey-api/12-60-0", "12-58-0"]
+12-58-0 = ["misskey-api/12-58-0", "12-57-0"]
+12-57-0 = ["misskey-api/12-57-0", "12-55-0"]
+12-55-0 = ["misskey-api/12-55-0", "12-51-0"]
+12-51-0 = ["misskey-api/12-51-0", "12-49-0"]
+12-49-0 = ["misskey-api/12-49-0", "12-48-0"]
+12-48-0 = ["misskey-api/12-48-0", "12-47-0"]
+12-47-0 = ["misskey-api/12-47-0", "12-42-0"]
+12-42-0 = ["misskey-api/12-42-0", "12-39-0"]
+12-39-0 = ["misskey-api/12-39-0", "12-37-0"]
+12-37-0 = ["misskey-api/12-37-0", "12-31-0"]
+12-31-0 = ["misskey-api/12-31-0", "12-29-0"]
+12-29-0 = ["misskey-api/12-29-0", "12-28-0"]
+12-28-0 = ["misskey-api/12-28-0", "12-27-0"]
+12-27-0 = ["misskey-api/12-27-0", "12-19-0"]
+12-19-0 = ["misskey-api/12-19-0", "12-13-0"]
+12-13-0 = ["misskey-api/12-13-0", "12-10-0"]
+12-10-0 = ["misskey-api/12-10-0", "12-9-0"]
+12-9-0 = ["misskey-api/12-9-0", "12-8-0"]
+12-8-0 = ["misskey-api/12-8-0", "12-5-0"]
+12-5-0 = ["misskey-api/12-5-0"]
+
+aid = ["misskey-api/aid"]
+meid = ["misskey-api/meid"]
+ulid = ["misskey-api/ulid"]
+objectid = ["misskey-api/objectid"]
+
+[dependencies]
+misskey-core = { path = "../misskey-core", version = "0.1.0" }
+misskey-api = { path = "../misskey-api", version = "0.1.0", default-features = false }
+futures = "0.3"
+chrono = "0.4"
+paste = "1.0"
+mime = "0.3"
+mime_guess = "2.0"
+derivative = "2.1"
+ulid_crate = { package = "ulid", version = "0.4" }
+url = "2.1"
+
+[dev-dependencies]
+misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
+misskey-test = { path = "../misskey-test" }
+tokio = { version = "0.2.22", features = ["macros"] }
+anyhow = "1.0"
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--cfg", "docsrs"]

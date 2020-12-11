@@ -305,3 +305,20 @@ pub mod websocket {
 #[cfg(feature = "websocket-client")]
 #[cfg_attr(docsrs, doc(cfg(feature = "websocket-client")))]
 pub use websocket::WebSocketClient;
+
+pub use misskey_util::ClientExt;
+pub use misskey_util::{builder, pager};
+
+/// Prelude for crates using `misskey-rs`.
+///
+/// This module provides a set of useful re-exports, including helper traits.
+/// The standard usage of this module is to import its entire contents as follows:
+///
+/// ```
+/// use misskey::prelude::*;
+/// ```
+pub mod prelude {
+    pub use crate::Client;
+    #[doc(no_inline)]
+    pub use crate::ClientExt as _;
+}

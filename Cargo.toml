@@ -3,6 +3,7 @@ members = [
   "misskey",
   "misskey-api",
   "misskey-core",
+  "misskey-util",
   "misskey-http",
   "misskey-websocket",
   "misskey-test",
