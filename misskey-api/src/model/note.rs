@@ -19,6 +19,12 @@ impl FromStr for Tag {
     }
 }
 
+impl<S: Into<String>> From<S> for Tag {
+    fn from(s: S) -> Tag {
+        Tag(s.into())
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct Reaction(pub String);
@@ -27,6 +33,12 @@ impl FromStr for Reaction {
     type Err = std::convert::Infallible;
     fn from_str(s: &str) -> Result<Reaction, Self::Err> {
         Ok(Reaction(s.to_string()))
+    }
+}
+
+impl<S: Into<String>> From<S> for Reaction {
+    fn from(s: S) -> Reaction {
+        Reaction(s.into())
     }
 }
 
