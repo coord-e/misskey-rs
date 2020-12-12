@@ -29,6 +29,7 @@ pub mod following;
 pub mod id;
 pub mod log;
 pub mod messaging;
+pub mod meta;
 pub mod muting;
 pub mod note;
 pub mod note_favorite;
