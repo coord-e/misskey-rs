@@ -32,6 +32,7 @@ pub mod messaging;
 pub mod muting;
 pub mod note;
 pub mod note_favorite;
+pub mod note_reaction;
 pub mod notification;
 pub mod page;
 pub mod query;

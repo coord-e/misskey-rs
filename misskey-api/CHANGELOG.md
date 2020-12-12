@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.61.0 ~ v12.61.1
 - Support for Misskey v12.62.0 ~ v12.62.1
 - Support for Misskey v12.62.2
+- `notes/reactions` endpoint
+- `NoteReaction` entity
 
 ### Changed
 
