@@ -24,6 +24,9 @@ pub enum MainStreamEvent {
     ReadAllUnreadSpecifiedNotes,
     ReadAllMessagingMessages,
     ReadAllAnnouncements,
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    ReadAllChannels,
     MyTokenRegenerated,
     ReversiNoInvites,
     /// TODO: Implement
@@ -39,6 +42,9 @@ pub enum MainStreamEvent {
     Renote(Note),
     ReadAntenna(Antenna),
     UnreadMention(Id<Note>),
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    UnreadChannel(Id<Note>),
     UnreadSpecifiedNote(Id<Note>),
     UnreadMessagingMessage(MessagingMessage),
     UnreadNotification(Notification),
