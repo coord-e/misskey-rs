@@ -17,6 +17,19 @@ use misskey_core::Client;
 /// An extension trait for [`Client`][client] that provides convenient high-level APIs.
 ///
 /// [client]: misskey_core::Client
+///
+/// # Streams
+///
+/// Some methods (e.g. [`followers`][followers], [`local_notes`][local_notes], etc.) return a [`Stream`][stream]
+/// that uses pagination to fetch all entries.
+/// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
+/// to work with this.
+///
+/// [followers]: ClientExt::followers
+/// [local_notes]: ClientExt::local_notes
+/// [stream]: futures::stream::Stream
+/// [try_stream_ext]: futures::stream::TryStreamExt
+/// [stream_ext]: futures::stream::StreamExt
 pub trait ClientExt: Client + Sync {
     // {{{ User
     /// Gets the information of the user who is logged in with this client.
@@ -155,14 +168,6 @@ pub trait ClientExt: Client + Sync {
 
     /// Lists the followers of the specified user.
     ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
-    ///
     /// # Examples
     ///
     /// This example uses [`TryStreamExt::try_next`][try_next] and [`while let`][while_let]
@@ -207,14 +212,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the users that the specified user is following.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     fn following(&self, user: impl EntityRef<User>) -> PagerStream<BoxPager<Self, User>> {
         let pager = BackwardPager::new(
             self,
@@ -329,14 +326,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the users muted by the user logged in with this client.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     fn muting_users(&self) -> PagerStream<BoxPager<Self, User>> {
         let pager = BackwardPager::new(self, endpoint::mute::list::Request::default())
             .map_ok(|v| v.into_iter().map(|m| m.mutee).collect());
@@ -344,14 +333,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the users blocked by the user logged in with this client.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     fn blocking_users(&self) -> PagerStream<BoxPager<Self, User>> {
         let pager = BackwardPager::new(self, endpoint::blocking::list::Request::default())
             .map_ok(|v| v.into_iter().map(|b| b.blockee).collect());
@@ -359,14 +340,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the notes favorited by the user logged in with this client.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     fn favorited_notes(&self) -> PagerStream<BoxPager<Self, Note>> {
         let pager = BackwardPager::new(self, endpoint::i::favorites::Request::default())
             .map_ok(|v| v.into_iter().map(|f| f.note).collect());
@@ -374,14 +347,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the notifications to the user logged in with this client.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     ///
     /// # Examples
     ///
@@ -720,14 +685,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the recommended users of the instance.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     fn recommended_users(&self) -> PagerStream<BoxPager<Self, User>> {
         let pager = OffsetPager::new(self, endpoint::users::recommendation::Request::default());
         PagerStream::new(Box::pin(pager))
@@ -935,14 +892,6 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the user group invitations sent to the user who is logged in with this client.
-    ///
-    /// This method returns a [`Stream`][stream] that uses pagination to fetch all entries.
-    /// You can use methods from [`TryStreamExt`][try_stream_ext] or [`StreamExt`][stream_ext]
-    /// to work with this.
-    ///
-    /// [stream]: futures::stream::Stream
-    /// [try_stream_ext]: futures::stream::TryStreamExt
-    /// [stream_ext]: futures::stream::StreamExt
     ///
     /// # Examples
     ///
