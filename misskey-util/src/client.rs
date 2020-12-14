@@ -1,4 +1,6 @@
-use crate::builder::{MeUpdateBuilder, NoteBuilder, UserListBuilder};
+use crate::builder::{
+    ChannelBuilder, ChannelUpdateBuilder, MeUpdateBuilder, NoteBuilder, UserListBuilder,
+};
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
 use crate::{TimelineCursor, TimelineRange};
@@ -1717,6 +1719,174 @@ pub trait ClientExt: Client + Sync {
                 .map_err(Error::Client)?
                 .into_result()?;
             Ok(groups)
+        })
+    }
+    // }}}
+
+    // {{{ Channel
+    /// Creates a channel with the given name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let channel = client.create_channel("name").await?;
+    /// assert_eq!(channel.name, "name");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn create_channel(
+        &self,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<Channel, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move { self.build_channel().name(name).create().await })
+    }
+
+    /// Returns a builder for creating a channel.
+    ///
+    /// The returned builder provides methods to customize details of the channel,
+    /// and you can chain them to create a channel incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a channel.
+    /// See [`ChannelBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: ChannelBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let channel = client
+    ///     .build_channel()
+    ///     .name("bot devs")
+    ///     .description("Let's talk about Misskey's bot development!")
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(channel.name, "bot devs");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn build_channel(&self) -> ChannelBuilder<&Self> {
+        ChannelBuilder::new(self)
+    }
+
+    /// Gets the corresponding channel from the ID.
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn get_channel(&self, id: Id<Channel>) -> BoxFuture<Result<Channel, Error<Self::Error>>> {
+        Box::pin(async move {
+            let channel = self
+                .request(endpoint::channels::show::Request { channel_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(channel)
+        })
+    }
+
+    /// Updates the specified channel.
+    ///
+    /// This method actually returns a builder, namely [`ChannelUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`ChannelUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: ChannelUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let channel = client.create_channel("feedback").await?;
+    /// client
+    ///     .update_channel(&channel)
+    ///     .set_description("Give us feedback on the instance.")
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn update_channel(&self, channel: impl EntityRef<Channel>) -> ChannelUpdateBuilder<&Self> {
+        ChannelUpdateBuilder::new(self, channel)
+    }
+
+    /// Follows the specified channel.
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn follow_channel(
+        &self,
+        channel: impl EntityRef<Channel>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let channel_id = channel.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::channels::follow::Request { channel_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unfollows the specified channel.
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn unfollow_channel(
+        &self,
+        channel: impl EntityRef<Channel>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let channel_id = channel.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::channels::unfollow::Request { channel_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the channels followed by the user logged in with this client.
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    fn followed_channels(&self) -> PagerStream<BoxPager<Self, Channel>> {
+        let pager = BackwardPager::new(self, endpoint::channels::followed::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the channels owned by the user logged in with this client.
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    fn owned_channels(&self) -> PagerStream<BoxPager<Self, Channel>> {
+        let pager = BackwardPager::new(self, endpoint::channels::owned::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured channels.
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    fn featured_channels(&self) -> BoxFuture<Result<Vec<Channel>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let channels = self
+                .request(endpoint::channels::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(channels)
         })
     }
     // }}}
