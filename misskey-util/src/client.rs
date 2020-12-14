@@ -1,6 +1,6 @@
 use crate::builder::{
-    AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder, ChannelUpdateBuilder, MeUpdateBuilder,
-    NoteBuilder, UserListBuilder,
+    AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder, ChannelUpdateBuilder, ClipBuilder,
+    ClipUpdateBuilder, MeUpdateBuilder, NoteBuilder, UserListBuilder,
 };
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
@@ -12,6 +12,7 @@ use mime::Mime;
 use misskey_api::model::{
     antenna::Antenna,
     channel::Channel,
+    clip::Clip,
     following::FollowRequest,
     id::Id,
     note::{Note, Reaction, Tag},
@@ -2062,6 +2063,238 @@ pub trait ClientExt: Client + Sync {
                 .into_result()?;
             Ok(channels)
         })
+    }
+    // }}}
+
+    // {{{ Clip
+    /// Creates a clip with the given name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let clip = client.create_clip("name").await?;
+    /// assert_eq!(clip.name, "name");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn create_clip(&self, name: impl Into<String>) -> BoxFuture<Result<Clip, Error<Self::Error>>> {
+        let name = name.into();
+        #[cfg(not(feature = "12-57-0"))]
+        let request = endpoint::clips::create::Request { name };
+        #[cfg(feature = "12-57-0")]
+        let request = endpoint::clips::create::Request {
+            name,
+            is_public: Some(false),
+            description: None,
+        };
+        Box::pin(async move {
+            let clip = self
+                .request(request)
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(clip)
+        })
+    }
+
+    /// Returns a builder for creating a clip.
+    ///
+    /// The returned builder provides methods to customize details of the clip,
+    /// and you can chain them to create a clip incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a clip.
+    /// See [`ClipBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: ClipBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let clip = client
+    ///     .build_clip()
+    ///     .name("kawaii notes")
+    ///     .public(true)
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(clip.name, "kawaii notes");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-57-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-57-0")))]
+    fn build_clip(&self) -> ClipBuilder<&Self> {
+        ClipBuilder::new(&self)
+    }
+
+    /// Deletes the specified clip.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let clip = client.create_clip("Oops!").await?;
+    /// client.delete_clip(&clip).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn delete_clip(&self, clip: impl EntityRef<Clip>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::clips::delete::Request { clip_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the clips created by the user logged in with this client.
+    fn clips(&self) -> BoxFuture<Result<Vec<Clip>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let clips = self
+                .request(endpoint::clips::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(clips)
+        })
+    }
+
+    /// Lists the clips that contain the specified note.
+    #[cfg(feature = "12-58-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+    fn note_clips(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<Vec<Clip>, Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            let clips = self
+                .request(endpoint::notes::clips::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(clips)
+        })
+    }
+
+    /// Clips the specified note.
+    #[cfg(feature = "12-57-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-57-0")))]
+    fn clip_note(
+        &self,
+        clip: impl EntityRef<Clip>,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::clips::add_note::Request { clip_id, note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the notes that are clipped to the specified clip.
+    fn clip_notes(&self, clip: impl EntityRef<Clip>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::clips::notes::Request::builder()
+                .clip_id(clip.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Gets the corresponding clip from the ID.
+    fn get_clip(&self, id: Id<Clip>) -> BoxFuture<Result<Clip, Error<Self::Error>>> {
+        Box::pin(async move {
+            let clip = self
+                .request(endpoint::clips::show::Request { clip_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(clip)
+        })
+    }
+
+    /// Updates the name of the specified clip to the given one.
+    #[cfg(not(feature = "12-57-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-57-0"))))]
+    fn rename_clip(
+        &self,
+        clip: impl EntityRef<Clip>,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<Clip, Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        let name = name.into();
+        Box::pin(async move {
+            let clip = self
+                .request(endpoint::clips::update::Request { clip_id, name })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(clip)
+        })
+    }
+
+    /// Updates the specified clip.
+    ///
+    /// This method actually returns a builder, namely [`ClipUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`ClipUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: ClipUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let clip = client.create_clip("kawaii notes").await?;
+    /// // Update the description and publish it.
+    /// client
+    ///     .update_clip(clip)
+    ///     .public(true)
+    ///     .description("collection of kawaii notes")
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-57-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-57-0")))]
+    fn update_clip(&self, clip: Clip) -> ClipUpdateBuilder<&Self> {
+        ClipUpdateBuilder::new(self, clip)
+    }
+
+    /// Lists the clips created by the specified user.
+    #[cfg(feature = "12-61-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-61-0")))]
+    fn user_clips(&self, user: impl EntityRef<User>) -> PagerStream<BoxPager<Self, Clip>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::users::clips::Request::builder()
+                .user_id(user.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
     }
     // }}}
 }

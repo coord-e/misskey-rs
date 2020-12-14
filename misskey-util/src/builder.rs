@@ -10,12 +10,14 @@
 
 mod antenna;
 mod channel;
+mod clip;
 mod me;
 mod note;
 mod user;
 
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
+pub use clip::{ClipBuilder, ClipUpdateBuilder};
 pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use note::NoteBuilder;
 pub use user::UserListBuilder;
