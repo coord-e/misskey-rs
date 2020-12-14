@@ -1,5 +1,6 @@
 use crate::builder::{
-    ChannelBuilder, ChannelUpdateBuilder, MeUpdateBuilder, NoteBuilder, UserListBuilder,
+    AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder, ChannelUpdateBuilder, MeUpdateBuilder,
+    NoteBuilder, UserListBuilder,
 };
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
@@ -9,6 +10,7 @@ use chrono::Utc;
 use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
 use misskey_api::model::{
+    antenna::Antenna,
     channel::Channel,
     following::FollowRequest,
     id::Id,
@@ -1720,6 +1722,178 @@ pub trait ClientExt: Client + Sync {
                 .into_result()?;
             Ok(groups)
         })
+    }
+    // }}}
+
+    // {{{ Antenna
+    /// Creates an antenna with the given name and query.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::query::Query;
+    ///
+    /// // Create an antenna for notes containing "misskey" or "msky"
+    /// let antenna = client
+    ///     .create_antenna("misskey antenna", Query::atom("misskey").or("msky"))
+    ///     .await?;
+    ///
+    /// assert_eq!(antenna.name, "misskey antenna");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn create_antenna(
+        &self,
+        name: impl Into<String>,
+        query: impl Into<Query<String>>,
+    ) -> BoxFuture<Result<Antenna, Error<Self::Error>>> {
+        let name = name.into();
+        let query = query.into();
+        Box::pin(async move {
+            self.build_antenna()
+                .name(name)
+                .include(query)
+                .create()
+                .await
+        })
+    }
+
+    /// Returns a builder for creating an antenna.
+    ///
+    /// The returned builder provides methods to customize details of the antenna,
+    /// and you can chain them to create an antenna incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create an antenna.
+    /// See [`AntennaBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: AntennaBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// // Create an antenna for non-reply notes in home timeline that include "misskey"
+    /// let antenna = client
+    ///     .build_antenna()
+    ///     .name("misskey antenna")
+    ///     .include("misskey")
+    ///     .home()
+    ///     .exclude_replies(true)
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(antenna.name, "misskey antenna");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn build_antenna(&self) -> AntennaBuilder<&Self> {
+        AntennaBuilder::new(self)
+    }
+
+    /// Deletes the specified antenna.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let antenna = client
+    ///     .create_antenna("antenna", "misskey")
+    ///     .await?;
+    /// client.delete_antenna(&antenna).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn delete_antenna(
+        &self,
+        antenna: impl EntityRef<Antenna>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let antenna_id = antenna.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::antennas::delete::Request { antenna_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding antenna from the ID.
+    fn get_antenna(&self, id: Id<Antenna>) -> BoxFuture<Result<Antenna, Error<Self::Error>>> {
+        Box::pin(async move {
+            let antenna = self
+                .request(endpoint::antennas::show::Request { antenna_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(antenna)
+        })
+    }
+
+    /// Updates the antenna.
+    ///
+    /// This method actually returns a builder, namely [`AntennaUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`AntennaUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: AntennaUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let antenna = client
+    ///     .create_antenna("antenna", "misskey")
+    ///     .await?;
+    ///
+    /// // Change source and case sensitivity of the antenna
+    /// client
+    ///     .update_antenna(antenna)
+    ///     .case_sensitive(true)
+    ///     .all()
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn update_antenna(&self, antenna: Antenna) -> AntennaUpdateBuilder<&Self> {
+        AntennaUpdateBuilder::new(self, antenna)
+    }
+
+    /// Lists the antennas created by the user logged in with this client.
+    fn antennas(&self) -> BoxFuture<Result<Vec<Antenna>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let antennas = self
+                .request(endpoint::antennas::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(antennas)
+        })
+    }
+
+    /// Lists the notes that hit the specified antenna.
+    fn antenna_notes(&self, antenna: impl EntityRef<Antenna>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::antennas::notes::Request::builder()
+                .antenna_id(antenna.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
     }
     // }}}
 

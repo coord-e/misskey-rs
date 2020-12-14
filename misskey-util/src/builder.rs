@@ -8,11 +8,13 @@
 //! [client_ext]: crate::ClientExt
 //! [request]: misskey_core::Request
 
+mod antenna;
 mod channel;
 mod me;
 mod note;
 mod user;
 
+pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
 pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use note::NoteBuilder;
