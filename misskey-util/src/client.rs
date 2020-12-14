@@ -1,18 +1,213 @@
-use crate::builder::{MeUpdateBuilder, UserListBuilder};
-use crate::pager::{BackwardPager, BoxPager, OffsetPager, PagerStream};
+use crate::builder::{MeUpdateBuilder, NoteBuilder, UserListBuilder};
+use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
+use crate::{TimelineCursor, TimelineRange};
 
+use chrono::Utc;
 use futures::{future::BoxFuture, stream::TryStreamExt};
+use mime::Mime;
 use misskey_api::model::{
+    channel::Channel,
     following::FollowRequest,
     id::Id,
-    note::Note,
+    note::{Note, Reaction, Tag},
     notification::Notification,
+    query::Query,
     user::{User, UserRelation},
     user_group::{UserGroup, UserGroupInvitation},
+    user_list::UserList,
 };
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
+
+// {{{ Utility
+macro_rules! impl_timeline_method {
+    ($timeline:ident, $endpoint:path $(,$reqname:ident = $argname:ident : $argentity:ident)* ) => {
+        paste::paste! {
+            #[doc = "Lists the notes in the specified range of the " $timeline " timeline."]
+            ///
+            /// The bound `Into<TimelineRange<Note>>` on the argument type is satisfied by the type
+            /// of some range expressions such as `..` or `start..` (which are desugared into [`RangeFull`][range_full] and
+            /// [`RangeFrom`][range_from] respectively). A note or [`DateTime<Utc>`][datetime] can
+            /// be used to specify the start and end bounds of the range.
+            ///
+            /// [range_full]: std::ops::RangeFull
+            /// [range_from]: std::ops::RangeFrom
+            /// [datetime]: chrono::DateTime
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # use misskey_util::ClientExt;
+            /// # use futures::stream::TryStreamExt;
+            /// # #[tokio::main]
+            /// # async fn main() -> anyhow::Result<()> {
+            /// # let client = misskey_test::test_client().await?;
+            /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # let channel = client.create_channel("test").await?;
+            /// # let list = client.create_user_list("test").await?;
+            /// use futures::stream::TryStreamExt;
+            ///
+            #[doc = "// `notes` variable here is a `Stream` to enumerate all " $timeline " notes."]
+            #[doc = "let mut notes = client." $timeline "_notes(" $("&" $argname ", ")* "..);"]
+            ///
+            /// // Retrieve all notes until there are no more.
+            /// while let Some(note) = notes.try_next().await? {
+            ///     // Print the text of the note, if any.
+            ///     if let Some(text) = note.text {
+            ///         println!("@{}: {}", note.user.username, text);
+            ///     }
+            /// }
+            /// # Ok(())
+            /// # }
+            /// ```
+            ///
+            /// ```
+            /// # use misskey_util::ClientExt;
+            /// # use futures::stream::TryStreamExt;
+            /// # #[tokio::main]
+            /// # async fn main() -> anyhow::Result<()> {
+            /// # let client = misskey_test::test_client().await?;
+            /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # let channel = client.create_channel("test").await?;
+            /// # let list = client.create_user_list("test").await?;
+            /// use chrono::Utc;
+            ///
+            #[doc = "// Get the " $timeline " notes since `time`."]
+            /// let time = Utc::today().and_hms(0, 0, 0);
+            #[doc = "let mut notes = client." $timeline "_notes(" $("&" $argname ", ")* "time..);"]
+            /// # Ok(())
+            /// # }
+            /// ```
+            fn [<$timeline _notes>] (
+                &self,
+                $($argname : impl EntityRef<$argentity>,)*
+                range: impl Into<TimelineRange<Note>>,
+            ) -> PagerStream<BoxPager<Self, Note>> {
+                $(
+                let $reqname = $argname.entity_ref();
+                )*
+                let base_request =
+                    endpoint::$endpoint::Request::builder()
+                      $(.$reqname($reqname))*
+                      .build();
+                let pager = match range.into() {
+                    TimelineRange::Id {
+                        since_id,
+                        until_id: None,
+                    } => BackwardPager::with_since_id(
+                        self,
+                        since_id,
+                        base_request
+                    ),
+                    TimelineRange::Id {
+                        since_id,
+                        until_id: Some(until_id),
+                    } => BackwardPager::new(
+                        self,
+                        endpoint::$endpoint::Request {
+                            since_id,
+                            until_id: Some(until_id),
+                            ..base_request
+                        },
+                    ),
+                    TimelineRange::DateTime {
+                        since_date,
+                        until_date,
+                    } => BackwardPager::new(
+                        self,
+                        endpoint::$endpoint::Request {
+                            since_date,
+                            until_date: Some(until_date.unwrap_or(Utc::now())),
+                            ..base_request
+                        },
+                    ),
+                    TimelineRange::Unbounded => {
+                        BackwardPager::new(self, base_request)
+                    }
+                };
+                PagerStream::new(Box::pin(pager))
+            }
+
+            #[doc = "Lists all notes since the specified point in the " $timeline " timeline in reverse order (i.e. the old note comes first, the new note comes after)."]
+            ///
+            /// # Examples
+            ///
+            /// ```
+            /// # use misskey_util::ClientExt;
+            /// # use futures::stream::TryStreamExt;
+            /// # #[tokio::main]
+            /// # async fn main() -> anyhow::Result<()> {
+            /// # let client = misskey_test::test_client().await?;
+            /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # let channel = client.create_channel("test").await?;
+            /// # let list = client.create_user_list("test").await?;
+            /// use futures::stream::TryStreamExt;
+            /// use chrono::Utc;
+            ///
+            /// let time = Utc::today().and_hms(0, 0, 0);
+            ///
+            #[doc = "// `notes_since` is a `Stream` to enumerate the " $timeline " notes since `time` in reverse order."]
+            #[doc = "let mut notes_since = client." $timeline "_notes_since(" $("&" $argname ", ")* "time);"]
+            ///
+            /// // Retrieve all notes until there are no more.
+            /// while let Some(note) = notes_since.try_next().await? {
+            ///     // Print the text of the note, if any.
+            ///     if let Some(text) = note.text {
+            ///         println!("@{}: {}", note.user.username, text);
+            ///     }
+            /// }
+            /// # Ok(())
+            /// # }
+            /// ```
+            fn [<$timeline _notes_since>] (
+                &self,
+                $($argname : impl EntityRef<$argentity>,)*
+                since: impl Into<TimelineCursor<Note>>,
+            ) -> PagerStream<BoxPager<Self, Note>> {
+                $(
+                let $reqname = $argname.entity_ref();
+                )*
+                let base_request =
+                    endpoint::$endpoint::Request::builder()
+                      $(.$reqname($reqname))*
+                      .build();
+                let request = match since.into() {
+                    TimelineCursor::DateTime(since_date) => endpoint::$endpoint::Request {
+                        since_date: Some(since_date),
+                        ..base_request
+                    },
+                    TimelineCursor::Id(since_id) => endpoint::$endpoint::Request {
+                        since_id: Some(since_id),
+                        ..base_request
+                    },
+                };
+                let pager = ForwardPager::new(self, request);
+                PagerStream::new(Box::pin(pager))
+            }
+
+            #[doc = "Returns a set of streams that fetch notes around the specified point in the " $timeline " timeline in both directions."]
+            fn [<$timeline _notes_around>](
+                &self,
+                $($argname : impl EntityRef<$argentity>,)*
+                cursor: impl Into<TimelineCursor<Note>>,
+            ) -> (
+                PagerStream<BoxPager<Self, Note>>,
+                PagerStream<BoxPager<Self, Note>>,
+            ) {
+                let cursor = cursor.into();
+                $(
+                let $reqname = $argname.entity_ref();
+                )*
+                (
+                    self.[<$timeline _notes_since>]($($reqname,)* cursor),
+                    self.[<$timeline _notes>]($($reqname,)* TimelineRange::until(cursor)),
+                )
+            }
+        }
+    };
+}
+// }}}
 
 /// An extension trait for [`Client`][client] that provides convenient high-level APIs.
 ///
@@ -726,6 +921,417 @@ pub trait ClientExt: Client + Sync {
 
     // }}}
 
+    // {{{ Note
+    /// Returns a builder for composing a note.
+    ///
+    /// The returned builder provides methods to customize details of the note,
+    /// and you can chain them to compose a note incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a note.
+    /// See [`NoteBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: NoteBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let note = client
+    ///     .build_note()
+    ///     .text("Hello, World")
+    ///     .followers_only()
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(note.text.unwrap(), "Hello, World");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn build_note(&self) -> NoteBuilder<&Self> {
+        NoteBuilder::new(self)
+    }
+
+    /// Deletes the specified note.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let note = client.create_note("Oops!").await?;
+    /// client.delete_note(&note).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn delete_note(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::delete::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding note from the ID.
+    fn get_note(&self, id: Id<Note>) -> BoxFuture<Result<Note, Error<Self::Error>>> {
+        Box::pin(async move {
+            let note = self
+                .request(endpoint::notes::show::Request { note_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(note)
+        })
+    }
+
+    /// Creates a note with the given text.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let note = client.create_note("Hello, Misskey!").await?;
+    /// assert_eq!(note.text.unwrap(), "Hello, Misskey!");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn create_note(&self, text: impl Into<String>) -> BoxFuture<Result<Note, Error<Self::Error>>> {
+        let text = text.into();
+        Box::pin(async move { self.build_note().text(text).create().await })
+    }
+
+    /// Creates a poll with the given text and choices.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let note = client
+    ///     .poll("Which fruit is your favorite?", vec!["Apple", "Orange", "Banana"])
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn poll(
+        &self,
+        text: impl Into<String>,
+        choices: impl IntoIterator<Item = impl Into<String>>,
+    ) -> BoxFuture<Result<Note, Error<Self::Error>>> {
+        let text = text.into();
+        let choices: Vec<_> = choices.into_iter().map(Into::into).collect();
+        Box::pin(async move { self.build_note().text(text).poll(choices).create().await })
+    }
+
+    /// Creates a reply note with the given text.
+    fn reply(
+        &self,
+        note: impl EntityRef<Note>,
+        text: impl Into<String>,
+    ) -> BoxFuture<Result<Note, Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        let text = text.into();
+        Box::pin(async move { self.build_note().reply(note_id).text(text).create().await })
+    }
+
+    /// Creates a renote.
+    fn renote(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<Note, Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move { self.build_note().renote(note_id).create().await })
+    }
+
+    /// Creates a quote note with the given text.
+    fn quote(
+        &self,
+        note: impl EntityRef<Note>,
+        text: impl Into<String>,
+    ) -> BoxFuture<Result<Note, Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        let text = text.into();
+        Box::pin(async move { self.build_note().renote(note_id).text(text).create().await })
+    }
+
+    /// Adds the reaction to the specified note.
+    fn react(
+        &self,
+        note: impl EntityRef<Note>,
+        reaction: impl Into<Reaction>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        let reaction = reaction.into();
+        Box::pin(async move {
+            self.request(endpoint::notes::reactions::create::Request { note_id, reaction })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Deletes a reaction from the specified note.
+    fn unreact(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::reactions::delete::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Favorites the specified note.
+    fn favorite(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::favorites::create::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unfavorites the specified note.
+    fn unfavorite(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::favorites::delete::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Watches the specified note.
+    fn watch(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::watching::create::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unwatches the specified note.
+    fn unwatch(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::watching::delete::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Checks if the specified note is favorited by the user logged in with this client.
+    fn is_favorited(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<bool, Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            let state = self
+                .request(endpoint::notes::state::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(state.is_favorited)
+        })
+    }
+
+    /// Checks if the specified note is watched by the user logged in with this client.
+    fn is_watched(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<bool, Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            let state = self
+                .request(endpoint::notes::state::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(state.is_watching)
+        })
+    }
+
+    /// Vote on the specified note.
+    fn vote(
+        &self,
+        note: impl EntityRef<Note>,
+        choice: u64,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::polls::vote::Request { note_id, choice })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the featured notes.
+    fn featured_notes(&self) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = OffsetPager::new(self, endpoint::notes::featured::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the notes of the conversation.
+    fn conversation(&self, note: impl EntityRef<Note>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::notes::conversation::Request::builder()
+                .note_id(note.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the reply notes to the specified note.
+    fn children_notes(&self, note: impl EntityRef<Note>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::children::Request::builder()
+                .note_id(note.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the notes that are mentioning the account you are logged into with this client.
+    fn mentioned_notes(&self) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(self, endpoint::notes::mentions::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the renotes of the specified note.
+    fn renotes(&self, note: impl EntityRef<Note>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::renotes::Request::builder()
+                .note_id(note.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the replies to the specified note.
+    fn replies(&self, note: impl EntityRef<Note>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::renotes::Request::builder()
+                .note_id(note.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Searches for notes with the specified query string.
+    fn search_notes(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::search::Request::builder()
+                .query(query)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    impl_timeline_method! { local, notes::local_timeline }
+    impl_timeline_method! { global, notes::global_timeline }
+    impl_timeline_method! { social, notes::hybrid_timeline }
+    impl_timeline_method! { home, notes::timeline }
+    impl_timeline_method! { user, users::notes, user_id = user : User }
+    impl_timeline_method! { user_list, notes::user_list_timeline, list_id = list : UserList }
+
+    #[cfg(feature = "12-47-0")]
+    impl_timeline_method! { channel, channels::timeline, channel_id = channel : Channel }
+
+    /// Lists the notes with tags as specified in the given query.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// // Get all notes with the "linux" tag.
+    /// let mut notes = client.tagged_notes("linux");
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::query::Query;
+    ///
+    /// // Get all notes tagged with "test" or "bot".
+    /// let mut notes = client.tagged_notes(Query::atom("test").or("bot"));
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn tagged_notes(&self, query: impl Into<Query<Tag>>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::search_by_tag::Request::builder()
+                .query(query)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the local notes with the given file types.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// use mime::IMAGE_STAR;
+    ///
+    /// // Get all local notes with image files.
+    /// let mut notes = client.local_notes_with_file_types(vec![IMAGE_STAR]);
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn local_notes_with_file_types(
+        &self,
+        types: impl IntoIterator<Item = Mime>,
+    ) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::local_timeline::Request::builder()
+                .file_type(types.into_iter().map(Into::into).collect())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
     // {{{ User Group
     /// Creates a user group with the given name.
     ///
@@ -976,6 +1582,7 @@ pub trait ClientExt: Client + Sync {
             Ok(groups)
         })
     }
+    // }}}
 }
 
 impl<C: Client + Sync> ClientExt for C {}

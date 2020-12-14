@@ -307,7 +307,7 @@ pub mod websocket {
 pub use websocket::WebSocketClient;
 
 pub use misskey_util::ClientExt;
-pub use misskey_util::{builder, pager};
+pub use misskey_util::{builder, pager, TimelineCursor, TimelineRange};
 
 /// Prelude for crates using `misskey-rs`.
 ///

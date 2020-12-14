@@ -131,3 +131,6 @@ pub use client::ClientExt;
 
 pub mod builder;
 pub mod pager;
+
+mod timeline;
+pub use timeline::{TimelineCursor, TimelineRange};

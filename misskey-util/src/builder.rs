@@ -9,7 +9,9 @@
 //! [request]: misskey_core::Request
 
 mod me;
+mod note;
 mod user;
 
 pub use me::{IntoUserFields, MeUpdateBuilder};
+pub use note::NoteBuilder;
 pub use user::UserListBuilder;
