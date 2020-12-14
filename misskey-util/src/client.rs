@@ -1332,6 +1332,143 @@ pub trait ClientExt: Client + Sync {
     }
     // }}}
 
+    // {{{ User List
+    /// Creates a user list with the given name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let list = client.create_user_list("list").await?;
+    /// assert_eq!(list.name, "list");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn create_user_list(
+        &self,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<UserList, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move {
+            let list = self
+                .request(endpoint::users::lists::create::Request { name })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(list)
+        })
+    }
+
+    /// Deletes the specified user list.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let list = client.create_user_list("list").await?;
+    /// client.delete_user_list(&list).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn delete_user_list(
+        &self,
+        list: impl EntityRef<UserList>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let list_id = list.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::lists::delete::Request { list_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the name of the specified user list to the given one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let list = client.create_user_list("list").await?;
+    /// let renamed_list = client.rename_user_list(&list, "list2").await?;
+    /// assert_eq!(renamed_list.name, "list2");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn rename_user_list(
+        &self,
+        list: impl EntityRef<UserList>,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<UserList, Error<Self::Error>>> {
+        let list_id = list.entity_ref();
+        let name = name.into();
+        Box::pin(async move {
+            let list = self
+                .request(endpoint::users::lists::update::Request { list_id, name })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(list)
+        })
+    }
+
+    /// Gets the corresponding user list from the ID.
+    fn get_user_list(&self, id: Id<UserList>) -> BoxFuture<Result<UserList, Error<Self::Error>>> {
+        Box::pin(async move {
+            let list = self
+                .request(endpoint::users::lists::show::Request { list_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(list)
+        })
+    }
+
+    /// Adds the user from the specified user list.
+    fn push_to_user_list(
+        &self,
+        list: impl EntityRef<UserList>,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let list_id = list.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::lists::push::Request { list_id, user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Deletes the user from the specified user list.
+    fn pull_from_user_list(
+        &self,
+        list: impl EntityRef<UserList>,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let list_id = list.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::lists::pull::Request { list_id, user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+    // }}}
+
     // {{{ User Group
     /// Creates a user group with the given name.
     ///
