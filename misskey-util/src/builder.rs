@@ -15,6 +15,7 @@ mod clip;
 mod drive;
 mod me;
 mod messaging;
+mod misc;
 mod note;
 mod user;
 
@@ -30,5 +31,6 @@ pub use drive::{
 };
 pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use messaging::MessagingMessageBuilder;
+pub use misc::NotificationBuilder;
 pub use note::NoteBuilder;
 pub use user::UserListBuilder;

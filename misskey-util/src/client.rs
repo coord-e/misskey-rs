@@ -4,8 +4,8 @@ use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder,
     ChannelUpdateBuilder, ClipBuilder, ClipUpdateBuilder, DriveFileBuilder, DriveFileListBuilder,
     DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder, EmojiUpdateBuilder,
-    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, ServerLogListBuilder,
-    UserListBuilder,
+    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, NotificationBuilder,
+    ServerLogListBuilder, UserListBuilder,
 };
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
@@ -14,6 +14,8 @@ use crate::{TimelineCursor, TimelineRange};
 use chrono::{DateTime, Utc};
 use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
+#[cfg(feature = "12-58-0")]
+use misskey_api::model::page::Page;
 use misskey_api::model::{
     abuse_user_report::AbuseUserReport,
     announcement::Announcement,
@@ -3200,6 +3202,86 @@ pub trait ClientExt: Client + Sync {
             },
         );
         PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
+    // {{{ Miscellaneous
+    /// Gets information about the instance.
+    fn meta(&self) -> BoxFuture<Result<Meta, Error<Self::Error>>> {
+        Box::pin(async move {
+            let meta = self
+                .request(endpoint::meta::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(meta)
+        })
+    }
+
+    /// Lists announcements of the instance.
+    fn announcements(&self) -> PagerStream<BoxPager<Self, Announcement>> {
+        let pager = BackwardPager::new(self, endpoint::announcements::Request::default())
+            .map_ok(|v| v.into_iter().map(|f| f.announcement).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured pages.
+    #[cfg(feature = "12-58-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+    fn featured_pages(&self) -> BoxFuture<Result<Vec<Page>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let pages = self
+                .request(endpoint::pages::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(pages)
+        })
+    }
+
+    /// Lists the pages created by the specified user.
+    #[cfg(feature = "12-61-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-61-0")))]
+    fn user_pages(&self, user: impl EntityRef<User>) -> PagerStream<BoxPager<Self, Page>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::users::pages::Request::builder()
+                .user_id(user.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Marks all notifications as read.
+    fn mark_all_notifications_as_read(&self) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        Box::pin(async move {
+            self.request(endpoint::notifications::mark_all_as_read::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Creates a notification with the given text.
+    fn create_notification(
+        &self,
+        body: impl Into<String>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let body = body.into();
+        Box::pin(async move { self.build_notification().body(body).create().await })
+    }
+
+    /// Returns a builder for creating a notification.
+    ///
+    /// The returned builder provides methods to customize details of the notification,
+    /// and you can chain them to create a notification incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a notification.
+    /// See [`NotificationBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: NotificationBuilder::create
+    fn build_notification(&self) -> NotificationBuilder<&Self> {
+        NotificationBuilder::new(self)
     }
     // }}}
 }
