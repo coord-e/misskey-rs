@@ -127,7 +127,7 @@ mod error;
 pub use error::Error;
 
 mod client;
-pub use client::ClientExt;
+pub use client::{ClientExt, UploadFileClientExt};
 
 pub mod builder;
 pub mod pager;

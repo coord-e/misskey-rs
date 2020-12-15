@@ -1,6 +1,10 @@
+use std::path::Path;
+
 use crate::builder::{
     AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder, ChannelUpdateBuilder, ClipBuilder,
-    ClipUpdateBuilder, MeUpdateBuilder, MessagingMessageBuilder, NoteBuilder, UserListBuilder,
+    ClipUpdateBuilder, DriveFileBuilder, DriveFileListBuilder, DriveFileUpdateBuilder,
+    DriveFileUrlBuilder, DriveFolderUpdateBuilder, MeUpdateBuilder, MessagingMessageBuilder,
+    NoteBuilder, UserListBuilder,
 };
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
@@ -13,6 +17,7 @@ use misskey_api::model::{
     antenna::Antenna,
     channel::Channel,
     clip::Clip,
+    drive::{DriveFile, DriveFolder},
     following::FollowRequest,
     id::Id,
     messaging::MessagingMessage,
@@ -24,7 +29,8 @@ use misskey_api::model::{
     user_list::UserList,
 };
 use misskey_api::{endpoint, EntityRef};
-use misskey_core::Client;
+use misskey_core::{Client, UploadFileClient};
+use url::Url;
 
 // {{{ Utility
 macro_rules! impl_timeline_method {
@@ -2430,6 +2436,379 @@ pub trait ClientExt: Client + Sync {
         })
     }
     // }}}
+
+    // {{{ Drive
+    /// Uploads the file from the given url to the drive.
+    ///
+    /// The difference between [`upload_file_from_url_`][alt] and this method is that the former
+    /// can get the [`DriveFile`][drive_file] of the uploaded file, while the latter cannot.
+    /// If you want to obtain the [`DriveFile`] of an uploaded file in v12.48.0 or later, you can
+    /// use [`DriveFileUrlBuilder::upload_and_wait`] or download the file once on the client side
+    /// and the use [`UploadFileClientExt::upload_file`] to upload it.
+    ///
+    /// [alt]: ClientExt::upload_file_from_url_
+    /// [drive_file]: misskey_api::model::drive::DriveFile
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    fn upload_file_from_url(&self, url: Url) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        Box::pin(async move { self.build_file_from_url(url).upload().await })
+    }
+
+    /// Uploads the file from the given url to the drive.
+    ///
+    /// See [`upload_file_from_url`][alt] for the difference between them.
+    ///
+    /// [alt]: ClientExt::upload_file_from_url
+    #[cfg(any(docsrs, not(feature = "12-48-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-48-0"))))]
+    fn upload_file_from_url_(&self, url: Url) -> BoxFuture<Result<DriveFile, Error<Self::Error>>> {
+        Box::pin(async move { self.build_file_from_url(url).upload_().await })
+    }
+
+    /// Returns a builder for creating a file on the drive.
+    ///
+    /// The returned builder provides methods to customize details of the file,
+    /// and you can chain them to create a file incrementally.
+    /// See [`DriveFileUrlBuilder`] for the provided methods.
+    fn build_file_from_url(&self, url: Url) -> DriveFileUrlBuilder<&Self> {
+        DriveFileUrlBuilder::with_url(self, url)
+    }
+
+    /// Deletes the specified file on the drive.
+    fn delete_file(
+        &self,
+        file: impl EntityRef<DriveFile>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let file_id = file.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::drive::files::delete::Request { file_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the specified file
+    ///
+    /// This method actually returns a builder, namely [`DriveFileUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`DriveFileUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: DriveFileUpdateBuilder::update
+    fn update_file(&self, file: impl EntityRef<DriveFile>) -> DriveFileUpdateBuilder<&Self> {
+        DriveFileUpdateBuilder::new(self, file)
+    }
+
+    /// Gets the corresponding file from the ID.
+    fn get_file(&self, id: Id<DriveFile>) -> BoxFuture<Result<DriveFile, Error<Self::Error>>> {
+        Box::pin(async move {
+            let file = self
+                .request(endpoint::drive::files::show::Request {
+                    file_id: Some(id),
+                    url: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(file)
+        })
+    }
+
+    /// Creates a folder on the drive with the given name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let folder = client.create_folder("Folder1").await?;
+    /// assert_eq!(folder.name, "Folder1");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn create_folder(
+        &self,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<DriveFolder, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move {
+            let folder = self
+                .request(endpoint::drive::folders::create::Request {
+                    name: Some(name),
+                    parent_id: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(folder)
+        })
+    }
+
+    /// Creates a folder on the drive with the given name and parent folder.
+    fn create_folder_with_parent(
+        &self,
+        name: impl Into<String>,
+        parent: impl EntityRef<DriveFolder>,
+    ) -> BoxFuture<Result<DriveFolder, Error<Self::Error>>> {
+        let name = name.into();
+        let parent_id = parent.entity_ref();
+        Box::pin(async move {
+            let folder = self
+                .request(endpoint::drive::folders::create::Request {
+                    name: Some(name),
+                    parent_id: Some(parent_id),
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(folder)
+        })
+    }
+
+    /// Deletes the specified folder on the drive.
+    fn delete_folder(
+        &self,
+        folder: impl EntityRef<DriveFolder>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let folder_id = folder.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::drive::folders::delete::Request { folder_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the specified folder.
+    ///
+    /// This method actually returns a builder, namely [`DriveFolderUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`DriveFolderUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: DriveFolderUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let folder = client.create_folder("Folder1").await?;
+    /// client
+    ///     .update_folder(&folder)
+    ///     .name("Folder2")
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn update_folder(
+        &self,
+        folder: impl EntityRef<DriveFolder>,
+    ) -> DriveFolderUpdateBuilder<&Self> {
+        DriveFolderUpdateBuilder::new(self, folder)
+    }
+
+    /// Gets the corresponding folder from the ID.
+    fn get_folder(
+        &self,
+        id: Id<DriveFolder>,
+    ) -> BoxFuture<Result<DriveFolder, Error<Self::Error>>> {
+        Box::pin(async move {
+            let folder = self
+                .request(endpoint::drive::folders::show::Request { folder_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(folder)
+        })
+    }
+
+    /// Lists the notes that have the specified file attached.
+    fn attached_notes(
+        &self,
+        file: impl EntityRef<DriveFile>,
+    ) -> BoxFuture<Result<Vec<Note>, Error<Self::Error>>> {
+        let file_id = file.entity_ref();
+        Box::pin(async move {
+            let notes = self
+                .request(endpoint::drive::files::attached_notes::Request { file_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(notes)
+        })
+    }
+
+    /// Lists the files with the specified name.
+    fn find_file_by_name(
+        &self,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<Vec<DriveFile>, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move {
+            let files = self
+                .request(endpoint::drive::files::find::Request {
+                    name,
+                    folder_id: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(files)
+        })
+    }
+
+    /// Lists the files with the specified name in the folder.
+    fn find_file_by_name_in_folder(
+        &self,
+        name: impl Into<String>,
+        folder: impl EntityRef<DriveFolder>,
+    ) -> BoxFuture<Result<Vec<DriveFile>, Error<Self::Error>>> {
+        let name = name.into();
+        let folder_id = folder.entity_ref();
+        Box::pin(async move {
+            let files = self
+                .request(endpoint::drive::files::find::Request {
+                    name,
+                    folder_id: Some(folder_id),
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(files)
+        })
+    }
+
+    /// Lists the folders with the specified name.
+    fn find_folder_by_name(
+        &self,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<Vec<DriveFolder>, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move {
+            let files = self
+                .request(endpoint::drive::folders::find::Request {
+                    name,
+                    parent_id: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(files)
+        })
+    }
+
+    /// Lists the folders with the specified name in the folder.
+    fn find_folder_by_name_in_folder(
+        &self,
+        name: impl Into<String>,
+        folder: impl EntityRef<DriveFolder>,
+    ) -> BoxFuture<Result<Vec<DriveFolder>, Error<Self::Error>>> {
+        let name = name.into();
+        let folder_id = folder.entity_ref();
+        Box::pin(async move {
+            let files = self
+                .request(endpoint::drive::folders::find::Request {
+                    name,
+                    parent_id: Some(folder_id),
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(files)
+        })
+    }
+
+    /// Lists the files on the drive.
+    ///
+    /// This method actually returns a builder, namely [`DriveFileListBuilder`].
+    /// You can specify how you want to list files by chaining methods.
+    /// The [`list`][builder_list] method of the builder returns a [`Stream`][stream]
+    /// that lists files in the specified way.
+    ///
+    /// [builder_list]: DriveFileListBuilder::list
+    /// [stream]: futures::stream::Stream
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use futures::stream::TryStreamExt;
+    /// use mime::IMAGE_STAR;
+    /// use misskey::model::drive::DriveFile;
+    ///
+    /// // Get a list of image files
+    /// let images: Vec<DriveFile> = client
+    ///     .files()
+    ///     .type_(IMAGE_STAR)
+    ///     .list()
+    ///     .try_collect()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn files(&self) -> DriveFileListBuilder<&Self> {
+        DriveFileListBuilder::new(self)
+    }
+
+    /// Lists the folders.
+    fn folders(&self) -> PagerStream<BoxPager<Self, DriveFolder>> {
+        let pager = BackwardPager::new(self, endpoint::drive::folders::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the folders in the folder.
+    fn folders_in_folder(
+        &self,
+        folder: impl EntityRef<DriveFolder>,
+    ) -> PagerStream<BoxPager<Self, DriveFolder>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::drive::folders::Request {
+                folder_id: Some(folder.entity_ref()),
+                ..Default::default()
+            },
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+    // }}}
 }
 
 impl<C: Client + Sync> ClientExt for C {}
+
+/// An extension trait for [`UploadFileClient`][client] that provides convenient high-level APIs.
+///
+/// [client]: misskey_core::UploadFileClient
+pub trait UploadFileClientExt: UploadFileClient + Sync {
+    /// Uploads the file from the specified local path.
+    fn upload_file(
+        &self,
+        path: impl AsRef<Path>,
+    ) -> BoxFuture<Result<DriveFile, Error<Self::Error>>> {
+        let path = path.as_ref().to_owned();
+        Box::pin(async move { self.build_file(path).upload().await })
+    }
+
+    /// Returns a builder for creating a file on the drive.
+    ///
+    /// The returned builder provides methods to customize details of the file,
+    /// and you can chain them to create a file incrementally.
+    /// See [`DriveFileBuilder`] for the provided methods.
+    fn build_file(&self, path: impl AsRef<Path>) -> DriveFileBuilder<&Self> {
+        DriveFileBuilder::with_path(self, path)
+    }
+}
+
+impl<C: UploadFileClient + Sync> UploadFileClientExt for C {}

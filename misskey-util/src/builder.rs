@@ -11,6 +11,7 @@
 mod antenna;
 mod channel;
 mod clip;
+mod drive;
 mod me;
 mod messaging;
 mod note;
@@ -19,6 +20,10 @@ mod user;
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
 pub use clip::{ClipBuilder, ClipUpdateBuilder};
+pub use drive::{
+    DriveFileBuilder, DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder,
+    DriveFolderUpdateBuilder,
+};
 pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use messaging::MessagingMessageBuilder;
 pub use note::NoteBuilder;

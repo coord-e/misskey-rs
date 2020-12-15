@@ -306,8 +306,8 @@ pub mod websocket {
 #[cfg_attr(docsrs, doc(cfg(feature = "websocket-client")))]
 pub use websocket::WebSocketClient;
 
-pub use misskey_util::ClientExt;
 pub use misskey_util::{builder, pager, TimelineCursor, TimelineRange};
+pub use misskey_util::{ClientExt, UploadFileClientExt};
 
 /// Prelude for crates using `misskey-rs`.
 ///
@@ -321,4 +321,6 @@ pub mod prelude {
     pub use crate::Client;
     #[doc(no_inline)]
     pub use crate::ClientExt as _;
+    #[doc(no_inline)]
+    pub use crate::UploadFileClientExt as _;
 }
