@@ -8,6 +8,7 @@
 //! [client_ext]: crate::ClientExt
 //! [request]: misskey_core::Request
 
+mod admin;
 mod antenna;
 mod channel;
 mod clip;
@@ -17,6 +18,9 @@ mod messaging;
 mod note;
 mod user;
 
+pub use admin::{
+    AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder, ServerLogListBuilder,
+};
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
 pub use clip::{ClipBuilder, ClipUpdateBuilder};

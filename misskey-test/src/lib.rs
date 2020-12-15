@@ -43,17 +43,17 @@ pub fn init_logger() {
     INIT_LOGGER.call_once(env_logger::init);
 }
 
-pub fn test_http_client() -> Result<HttpClient> {
+pub fn test_http_client(token: String) -> Result<HttpClient> {
     init_logger();
 
-    HttpClient::new(env::api_url(), Some(env::token())).context("Failed to initialize HttpClient")
+    HttpClient::new(env::api_url(), Some(token)).context("Failed to initialize HttpClient")
 }
 
-pub async fn test_websocket_client() -> Result<WebSocketClient> {
+pub async fn test_websocket_client(token: String) -> Result<WebSocketClient> {
     init_logger();
 
     WebSocketClient::builder(env::websocket_url())
-        .token(env::token())
+        .token(token)
         .auto_reconnect()
         .connect()
         .await
@@ -61,5 +61,9 @@ pub async fn test_websocket_client() -> Result<WebSocketClient> {
 }
 
 pub async fn test_client() -> Result<HttpClient> {
-    test_http_client()
+    test_http_client(env::token())
+}
+
+pub async fn test_admin_client() -> Result<HttpClient> {
+    test_http_client(env::admin_token())
 }

@@ -1,26 +1,32 @@
 use std::path::Path;
 
 use crate::builder::{
-    AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder, ChannelUpdateBuilder, ClipBuilder,
-    ClipUpdateBuilder, DriveFileBuilder, DriveFileListBuilder, DriveFileUpdateBuilder,
-    DriveFileUrlBuilder, DriveFolderUpdateBuilder, MeUpdateBuilder, MessagingMessageBuilder,
-    NoteBuilder, UserListBuilder,
+    AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder,
+    ChannelUpdateBuilder, ClipBuilder, ClipUpdateBuilder, DriveFileBuilder, DriveFileListBuilder,
+    DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder, EmojiUpdateBuilder,
+    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, ServerLogListBuilder,
+    UserListBuilder,
 };
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
 use crate::{TimelineCursor, TimelineRange};
 
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
 use misskey_api::model::{
+    abuse_user_report::AbuseUserReport,
+    announcement::Announcement,
     antenna::Antenna,
     channel::Channel,
     clip::Clip,
     drive::{DriveFile, DriveFolder},
+    emoji::Emoji,
     following::FollowRequest,
     id::Id,
+    log::ModerationLog,
     messaging::MessagingMessage,
+    meta::Meta,
     note::{Note, Reaction, Tag},
     notification::Notification,
     query::Query,
@@ -2778,6 +2784,418 @@ pub trait ClientExt: Client + Sync {
             self,
             endpoint::drive::folders::Request {
                 folder_id: Some(folder.entity_ref()),
+                ..Default::default()
+            },
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
+    // {{{ Admin
+    /// Sets moderator privileges for the specified user.
+    ///
+    /// This operation may require this client to be logged in with an admin account.
+    fn add_moderator(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::moderators::add::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes moderator privileges for the specified user.
+    ///
+    /// This operation may require this client to be logged in with an admin account.
+    fn remove_moderator(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::moderators::remove::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Promotes the specified note until the time.
+    ///
+    /// This operation may require moderator privileges.
+    fn promote_note(
+        &self,
+        note: impl EntityRef<Note>,
+        expires_at: DateTime<Utc>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::promo::create::Request {
+                note_id,
+                expires_at,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the abuse user reports.
+    ///
+    /// This operation may require moderator privileges.
+    fn abuse_user_reports(&self) -> PagerStream<BoxPager<Self, AbuseUserReport>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::admin::abuse_user_reports::Request::default(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Removes the specified abuse user report.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(any(docsrs, not(feature = "12-49-0")))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-49-0"))))]
+    fn remove_abuse_user_report(
+        &self,
+        report: impl EntityRef<AbuseUserReport>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let report_id = report.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::remove_abuse_user_report::Request { report_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Marks the specified abuse user report as resolved.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-49-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-49-0")))]
+    fn resolve_abuse_user_report(
+        &self,
+        report: impl EntityRef<AbuseUserReport>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let report_id = report.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::resolve_abuse_user_report::Request { report_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the server logs in the instance.
+    ///
+    /// This method actually returns a builder, namely [`ServerLogListBuilder`].
+    /// You can specify how you want to list users by chaining methods.
+    /// The [`list`][builder_list] method of the builder fetches the actual logs.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_list]: ServerLogListBuilder::list
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// // Get a first 10 entries of 'info' logs with 'chart' domain
+    /// let logs = client
+    ///     .server_logs()
+    ///     .take(10)
+    ///     .info()
+    ///     .with_domain("chart")
+    ///     .list()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn server_logs(&self) -> ServerLogListBuilder<&Self> {
+        ServerLogListBuilder::new(self)
+    }
+
+    /// Lists the moderation logs in the instance.
+    ///
+    /// This operation may require moderator privileges.
+    fn moderation_logs(&self) -> PagerStream<BoxPager<Self, ModerationLog>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::admin::show_moderation_logs::Request::default(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Silences the specified user.
+    ///
+    /// This operation may require moderator privileges.
+    fn silence(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::silence_user::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Suspends the specified user.
+    ///
+    /// This operation may require moderator privileges.
+    fn suspend(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::suspend_user::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unsilences the specified user.
+    ///
+    /// This operation may require moderator privileges.
+    fn unsilence(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::unsilence_user::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unsuspends the specified user.
+    ///
+    /// This operation may require moderator privileges.
+    fn unsuspend(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::unsuspend_user::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the instance information.
+    ///
+    /// This method actually returns a builder, namely [`MetaUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`MetaUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require this client to be logged in with an admin account.
+    ///
+    /// [builder_update]: MetaUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// client
+    ///     .update_meta()
+    ///     .set_name("The Instance of Saturn")
+    ///     .max_note_text_length(5000)
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn update_meta(&self) -> MetaUpdateBuilder<&Self> {
+        MetaUpdateBuilder::new(self)
+    }
+
+    /// Creates an announcement with given title and text.
+    ///
+    /// This operation may require moderator privileges.
+    fn create_announcement(
+        &self,
+        title: impl Into<String>,
+        text: impl Into<String>,
+    ) -> BoxFuture<Result<Announcement, Error<Self::Error>>> {
+        let title = title.into();
+        let text = text.into();
+        Box::pin(async move {
+            let announcement = self
+                .request(endpoint::admin::announcements::create::Request {
+                    title,
+                    text,
+                    image_url: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(announcement)
+        })
+    }
+
+    /// Creates an announcement with given title, text, and image URL.
+    ///
+    /// This operation may require moderator privileges.
+    fn create_announcement_with_image(
+        &self,
+        title: impl Into<String>,
+        text: impl Into<String>,
+        image_url: Url,
+    ) -> BoxFuture<Result<Announcement, Error<Self::Error>>> {
+        let title = title.into();
+        let text = text.into();
+        Box::pin(async move {
+            let announcement = self
+                .request(endpoint::admin::announcements::create::Request {
+                    title,
+                    text,
+                    image_url: Some(image_url),
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(announcement)
+        })
+    }
+
+    /// Deletes the specified announcement.
+    ///
+    /// This operation may require moderator privileges.
+    fn delete_announcement(
+        &self,
+        announcement: impl EntityRef<Announcement>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let announcement_id = announcement.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::announcements::delete::Request {
+                id: announcement_id,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the specified announcement.
+    ///
+    /// This method actually returns a builder, namely [`AnnouncementUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`AnnouncementUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_update]: AnnouncementUpdateBuilder::update
+    fn update_announcement(&self, announcement: Announcement) -> AnnouncementUpdateBuilder<&Self> {
+        AnnouncementUpdateBuilder::new(self, announcement)
+    }
+
+    /// Creates a custom emoji from the given file.
+    ///
+    /// This operation may require moderator privileges.
+    fn create_emoji(
+        &self,
+        file: impl EntityRef<DriveFile>,
+    ) -> BoxFuture<Result<Id<Emoji>, Error<Self::Error>>> {
+        let file_id = file.entity_ref();
+        Box::pin(async move {
+            let id = self
+                .request(endpoint::admin::emoji::add::Request { file_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?
+                .id;
+            Ok(id)
+        })
+    }
+
+    /// Deletes the specified emoji.
+    ///
+    /// This operation may require moderator privileges.
+    fn delete_emoji(
+        &self,
+        emoji: impl EntityRef<Emoji>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let emoji_id = emoji.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::emoji::remove::Request { id: emoji_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the specified emoji.
+    ///
+    /// This method actually returns a builder, namely [`EmojiUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`EmojiUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_update]: EmojiUpdateBuilder::update
+    fn update_emoji(&self, emoji: Emoji) -> EmojiUpdateBuilder<&Self> {
+        EmojiUpdateBuilder::new(self, emoji)
+    }
+
+    /// Copies the specified emoji.
+    ///
+    /// This operation may require moderator privileges.
+    fn copy_emoji(
+        &self,
+        emoji: impl EntityRef<Emoji>,
+    ) -> BoxFuture<Result<Id<Emoji>, Error<Self::Error>>> {
+        let emoji_id = emoji.entity_ref();
+        Box::pin(async move {
+            let id = self
+                .request(endpoint::admin::emoji::copy::Request { emoji_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?
+                .id;
+            Ok(id)
+        })
+    }
+
+    /// Lists the emojis in the instance.
+    ///
+    /// This operation may require moderator privileges.
+    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of custom emojis from normal users,
+    fn emojis(&self) -> PagerStream<BoxPager<Self, Emoji>> {
+        let pager = BackwardPager::new(self, endpoint::admin::emoji::list::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Searches the emojis using the given query string.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-48-0")]
+    fn search_emojis(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, Emoji>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::admin::emoji::list::Request {
+                query: Some(query.into()),
                 ..Default::default()
             },
         );

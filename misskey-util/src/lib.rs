@@ -33,6 +33,19 @@ macro_rules! update_builder_option_field {
         }
     };
     (
+        #[doc_name = $doc_name:tt]
+        $(#[$m:meta])*
+        $v:vis $name:ident : $param_type:ty { $field_name:ident };
+        $($tail:tt)*
+    ) => {
+        update_builder_option_field! {
+            #[doc_name = $doc_name]
+            $(#[$m])*
+            $v $name: $param_type { $field_name = ($field_name) };
+        }
+        update_builder_option_field! { $($tail)* }
+    };
+    (
         $(#[$m:meta])*
         $v:vis $name:ident $($tail:tt)*
     ) => {
@@ -72,6 +85,19 @@ macro_rules! update_builder_string_collection_field {
 
 macro_rules! update_builder_string_option_field {
     (
+        #[doc_name = $doc_name:tt]
+        $(#[$m:meta])*
+        $v:vis $name:ident { $field_name:ident };
+        $($tail:tt)*
+    ) => {
+        update_builder_option_field! {
+            #[doc_name = $doc_name]
+            $(#[$m])*
+            $v $name: impl Into<String> { $field_name = $name.into() };
+        }
+        update_builder_string_option_field! { $($tail)* }
+    };
+    (
         $(#[$m:meta])*
         $v:vis $name:ident { $field_name:ident };
         $($tail:tt)*
@@ -79,6 +105,19 @@ macro_rules! update_builder_string_option_field {
         update_builder_option_field! {
             $(#[$m])*
             $v $name: impl Into<String> { $field_name = $name.into() };
+        }
+        update_builder_string_option_field! { $($tail)* }
+    };
+    (
+        #[doc_name = $doc_name:tt]
+        $(#[$m:meta])*
+        $v:vis $name:ident;
+        $($tail:tt)*
+    ) => {
+        update_builder_string_option_field! {
+            #[doc_name = $doc_name]
+            $(#[$m])*
+            $v $name { $name };
         }
         update_builder_string_option_field! { $($tail)* }
     };
