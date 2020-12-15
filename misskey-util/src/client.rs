@@ -1,6 +1,6 @@
 use crate::builder::{
     AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder, ChannelUpdateBuilder, ClipBuilder,
-    ClipUpdateBuilder, MeUpdateBuilder, NoteBuilder, UserListBuilder,
+    ClipUpdateBuilder, MeUpdateBuilder, MessagingMessageBuilder, NoteBuilder, UserListBuilder,
 };
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
@@ -15,6 +15,7 @@ use misskey_api::model::{
     clip::Clip,
     following::FollowRequest,
     id::Id,
+    messaging::MessagingMessage,
     note::{Note, Reaction, Tag},
     notification::Notification,
     query::Query,
@@ -2295,6 +2296,138 @@ pub trait ClientExt: Client + Sync {
                 .build(),
         );
         PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
+    // {{{ Messaging
+    /// Sends a message to the user with the given text.
+    fn create_message(
+        &self,
+        recipient: impl EntityRef<User>,
+        text: impl Into<String>,
+    ) -> BoxFuture<Result<MessagingMessage, Error<Self::Error>>> {
+        let recipient = recipient.entity_ref();
+        let text = text.into();
+        Box::pin(async move {
+            self.build_message()
+                .user(recipient)
+                .text(text)
+                .create()
+                .await
+        })
+    }
+
+    /// Sends a message to the user group with the given text.
+    fn create_group_message(
+        &self,
+        recipient: impl EntityRef<UserGroup>,
+        text: impl Into<String>,
+    ) -> BoxFuture<Result<MessagingMessage, Error<Self::Error>>> {
+        let recipient = recipient.entity_ref();
+        let text = text.into();
+        Box::pin(async move {
+            self.build_message()
+                .group(recipient)
+                .text(text)
+                .create()
+                .await
+        })
+    }
+
+    /// Returns a builder for creating a message.
+    ///
+    /// The returned builder provides methods to customize details of the message and its recipients,
+    /// and you can chain them to create a message incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create and send a message.
+    /// See [`MessagingMessageBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: MessagingMessageBuilder::create
+    fn build_message(&self) -> MessagingMessageBuilder<&Self> {
+        MessagingMessageBuilder::new(self)
+    }
+
+    /// Deletes the specified message.
+    fn delete_message(
+        &self,
+        message: impl EntityRef<MessagingMessage>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let message_id = message.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::messaging::messages::delete::Request { message_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Marks the specified message as read.
+    fn read_message(
+        &self,
+        message: impl EntityRef<MessagingMessage>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let message_id = message.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::messaging::messages::read::Request { message_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the messages with the specified user.
+    fn user_messages(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> PagerStream<BoxPager<Self, MessagingMessage>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::messaging::messages::Request::builder()
+                .mark_as_read(false)
+                .user_id(user.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the messages in the specified user group.
+    fn group_messages(
+        &self,
+        group: impl EntityRef<UserGroup>,
+    ) -> PagerStream<BoxPager<Self, MessagingMessage>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::messaging::messages::Request::builder()
+                .mark_as_read(false)
+                .group_id(group.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Gets message logs for the user who is logged in with this client.
+    fn messaging_history(&self) -> BoxFuture<Result<Vec<MessagingMessage>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let mut messages = self
+                .request(endpoint::messaging::history::Request {
+                    group: Some(false),
+                    limit: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            let group_messages = self
+                .request(endpoint::messaging::history::Request {
+                    group: Some(true),
+                    limit: None,
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            messages.extend(group_messages);
+            Ok(messages)
+        })
     }
     // }}}
 }
