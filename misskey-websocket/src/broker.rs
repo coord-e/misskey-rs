@@ -1,4 +1,5 @@
 use std::fmt::{self, Debug};
+use std::sync::Arc;
 use std::time::Duration;
 
 use crate::channel::{connect_websocket, TrySendError, WebSocketReceiver};
@@ -35,31 +36,76 @@ pub(crate) struct Broker {
 }
 
 /// Specifies the condition for reconnecting.
-#[derive(Clone, Copy)]
-pub enum ReconnectCondition {
-    /// Reconnect regardless of the errors.
-    Always,
-    /// Reconnect when the connection is lost unexpectedly.
-    UnexpectedReset,
-    /// Specify the condition with a function that returns `true` when you want to reconnect.
-    Custom(fn(&Error) -> bool),
+#[derive(Clone)]
+pub struct ReconnectCondition {
+    inner: ReconnectConditionKind,
 }
 
 impl Debug for ReconnectCondition {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_tuple("ReconnectCondition")
+            .field(&self.inner)
+            .finish()
+    }
+}
+
+#[derive(Clone)]
+enum ReconnectConditionKind {
+    Always,
+    Never,
+    UnexpectedReset,
+    // Using `Arc` instead of `Box` not to lose `Clone` for the infrequest use of `Custom` variant.
+    Custom(Arc<dyn Fn(&Error) -> bool + Send + Sync + 'static>),
+}
+
+impl Debug for ReconnectConditionKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ReconnectCondition::Always => f.debug_tuple("Always").finish(),
-            ReconnectCondition::UnexpectedReset => f.debug_tuple("UnexpectedReset").finish(),
-            ReconnectCondition::Custom(_) => f.debug_tuple("Custom").finish(),
+            ReconnectConditionKind::Always => f.debug_tuple("Always").finish(),
+            ReconnectConditionKind::Never => f.debug_tuple("Never").finish(),
+            ReconnectConditionKind::UnexpectedReset => f.debug_tuple("UnexpectedReset").finish(),
+            ReconnectConditionKind::Custom(_) => f.debug_tuple("Custom").finish(),
         }
     }
 }
 
 impl ReconnectCondition {
+    /// Creates a `ReconnectCondition` that reconnects regardless of the errors.
+    pub fn always() -> Self {
+        ReconnectCondition {
+            inner: ReconnectConditionKind::Always,
+        }
+    }
+
+    /// Creates a `ReconnectCondition` that does not reconnect regardless of the errors.
+    pub fn never() -> Self {
+        ReconnectCondition {
+            inner: ReconnectConditionKind::Never,
+        }
+    }
+
+    /// Creates a `ReconnectCondition` that reconnects when the connection is lost unexpectedly.
+    pub fn unexpected_reset() -> Self {
+        ReconnectCondition {
+            inner: ReconnectConditionKind::UnexpectedReset,
+        }
+    }
+
+    /// Creates a custom `ReconnectCondition` using the passed function.
+    pub fn custom<F>(f: F) -> Self
+    where
+        F: Fn(&Error) -> bool + Send + Sync + 'static,
+    {
+        ReconnectCondition {
+            inner: ReconnectConditionKind::Custom(Arc::new(f)),
+        }
+    }
+
     fn should_reconnect(&self, err: &Error) -> bool {
-        match self {
-            ReconnectCondition::Always => true,
-            ReconnectCondition::UnexpectedReset => {
+        match &self.inner {
+            ReconnectConditionKind::Always => true,
+            ReconnectConditionKind::Never => false,
+            ReconnectConditionKind::UnexpectedReset => {
                 let ws = match err {
                     Error::WebSocket(ws) => ws,
                     _ => return false,
@@ -74,15 +120,15 @@ impl ReconnectCondition {
                     _ => false,
                 }
             }
-            ReconnectCondition::Custom(f) => f(err),
+            ReconnectConditionKind::Custom(f) => f(err),
         }
     }
 }
 
 impl Default for ReconnectCondition {
-    /// [`UnexpectedReset`][`ReconnectCondition::UnexpectedReset`] is the default.
+    /// [`unexpected_reset()`][`ReconnectCondition::unexpected_reset`] is used as a default.
     fn default() -> ReconnectCondition {
-        ReconnectCondition::UnexpectedReset
+        ReconnectCondition::unexpected_reset()
     }
 }
 
@@ -95,6 +141,29 @@ pub struct ReconnectConfig {
     pub condition: ReconnectCondition,
     /// Specifies whether to re-send messages that may have failed to be sent when reconnecting.
     pub retry_send: bool,
+}
+
+impl ReconnectConfig {
+    /// Creates a `ReconnectConfig` that disables reconnection.
+    pub fn none() -> ReconnectConfig {
+        ReconnectConfig::with_condition(ReconnectCondition::never())
+    }
+
+    /// Creates a `ReconnectConfig` with the given condition.
+    pub fn with_condition(condition: ReconnectCondition) -> ReconnectConfig {
+        ReconnectConfig {
+            condition,
+            ..Default::default()
+        }
+    }
+
+    /// Creates a `ReconnectConfig` with the given interval.
+    pub fn with_interval(interval: Duration) -> ReconnectConfig {
+        ReconnectConfig {
+            interval,
+            ..Default::default()
+        }
+    }
 }
 
 impl Default for ReconnectConfig {
