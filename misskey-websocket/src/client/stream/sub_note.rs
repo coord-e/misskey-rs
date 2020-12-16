@@ -19,7 +19,7 @@ use log::{info, warn};
 use misskey_core::streaming::SubNoteEvent;
 use serde_json::Value;
 
-/// Stream for the [`subscribe_note`][`crate::WebSocketClient::subscribe_note`] method.
+/// Stream for the [`subnote`][`crate::WebSocketClient::subnote`] method.
 #[must_use = "streams do nothing unless polled"]
 pub struct SubNote<E> {
     id: SubNoteId,
