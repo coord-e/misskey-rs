@@ -77,10 +77,10 @@ macro_rules! impl_timeline_method {
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
-            /// use futures::stream::TryStreamExt;
+            /// use futures::stream::{StreamExt, TryStreamExt};
             ///
-            #[doc = "// `notes` variable here is a `Stream` to enumerate all " $timeline " notes."]
-            #[doc = "let mut notes = client." $timeline "_notes(" $("&" $argname ", ")* "..);"]
+            #[doc = "// `notes` variable here is a `Stream` to enumerate first 100 " $timeline " notes."]
+            #[doc = "let mut notes = client." $timeline "_notes(" $("&" $argname ", ")* "..).take(100);"]
             ///
             /// // Retrieve all notes until there are no more.
             /// while let Some(note) = notes.try_next().await? {
@@ -175,13 +175,13 @@ macro_rules! impl_timeline_method {
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
-            /// use futures::stream::TryStreamExt;
+            /// use futures::stream::{StreamExt, TryStreamExt};
             /// use chrono::Utc;
             ///
             /// let time = Utc::today().and_hms(0, 0, 0);
             ///
-            #[doc = "// `notes_since` is a `Stream` to enumerate the " $timeline " notes since `time` in reverse order."]
-            #[doc = "let mut notes_since = client." $timeline "_notes_since(" $("&" $argname ", ")* "time);"]
+            #[doc = "// `notes_since` is a `Stream` to enumerate first 100 " $timeline " notes since `time` in reverse order."]
+            #[doc = "let mut notes_since = client." $timeline "_notes_since(" $("&" $argname ", ")* "time).take(100);"]
             ///
             /// // Retrieve all notes until there are no more.
             /// while let Some(note) = notes_since.try_next().await? {
@@ -409,14 +409,14 @@ pub trait ClientExt: Client + Sync {
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
     /// # let client = misskey_test::test_client().await?;
-    /// use futures::stream::TryStreamExt;
+    /// use futures::stream::{StreamExt, TryStreamExt};
     ///
     /// // In this example, we will fetch all the followers and follow them.
     /// // First, obtain your information to pass to `.follwers` method.
     /// let me = client.me().await?;
     ///
-    /// // `follwers` variable here is a `Stream` to enumerate all the followers of `me`.
-    /// let mut followers = client.followers(&me);
+    /// // `follwers` variable here is a `Stream` to enumerate first 50 followers of `me`.
+    /// let mut followers = client.followers(&me).take(50);
     ///
     /// // Retrieve all followers until there are no more.
     /// while let Some(user) = followers.try_next().await? {
@@ -589,10 +589,10 @@ pub trait ClientExt: Client + Sync {
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
     /// # let client = misskey_test::test_client().await?;
-    /// use futures::stream::TryStreamExt;
+    /// use futures::stream::{StreamExt, TryStreamExt};
     ///
-    /// // `notifications` here is a `Stream` to enumerate all the notifications.
-    /// let mut notifications = client.notifications();
+    /// // `notifications` here is a `Stream` to enumerate first 10 notifications.
+    /// let mut notifications = client.notifications().take(10);
     /// // Retrieve notifications until there are no more.
     /// while let Some(notification) = notifications.try_next().await? {
     ///     // Print some information about the notification.
