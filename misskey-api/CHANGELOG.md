@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.61.0 ~ v12.61.1
 - Support for Misskey v12.62.0 ~ v12.62.1
 - Support for Misskey v12.62.2
+- `notes/reactions` endpoint
+- `NoteReaction` entity
 
 ### Changed
 
@@ -32,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `Mime` from `mime` crate for file types
 - Use uninhabited type `NoOutgoing` instead of `()` for `ConnectChannelRequest::Outgoing` of channels that do not send out messages
 - Forbid to construct error types outside the module
+- Rename `model::user::UserSort` to `UserSortKey`
 
 ### Removed
 

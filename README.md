@@ -8,7 +8,8 @@
 `misskey-rs` is an asynchronous [Misskey](https://github.com/syuilo/misskey) client library for Rust.
 
 ```rust
-use misskey::{Client, HttpClient};
+use misskey::prelude::*;
+use misskey::HttpClient;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,20 +17,13 @@ async fn main() -> anyhow::Result<()> {
       .token("API_TOKEN".to_string())
       .build()?;
 
-  client
-      .request(
-          misskey::endpoint::notes::create::Request::builder()
-              .text("Hello, Misskey")
-              .build(),
-      )
-      .await?
-      .into_result()?;
+  client.create_note("Hello, Misskey").await?;
 
   Ok(())
 }
 ```
 
-Take a look at the [example](https://github.com/coord-e/misskey-rs/tree/develop/example) directory for more examples and detailed explanations.
+Take a look at the [example](https://github.com/coord-e/misskey-rs/tree/develop/example) directory for more examples.
 
 ## Usage
 

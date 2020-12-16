@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use crate::model::{channel::Channel, drive::DriveFile, id::Id, user::User};
@@ -12,6 +13,16 @@ use url::Url;
 #[serde(transparent)]
 pub struct Tag(pub String);
 
+impl Display for Tag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use std::fmt::Write;
+        if !self.0.starts_with('#') {
+            f.write_char('#')?;
+        }
+        Display::fmt(&self.0, f)
+    }
+}
+
 impl FromStr for Tag {
     type Err = std::convert::Infallible;
     fn from_str(s: &str) -> Result<Tag, Self::Err> {
@@ -19,14 +30,32 @@ impl FromStr for Tag {
     }
 }
 
+impl<S: Into<String>> From<S> for Tag {
+    fn from(s: S) -> Tag {
+        Tag(s.into())
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct Reaction(pub String);
+
+impl Display for Reaction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
 
 impl FromStr for Reaction {
     type Err = std::convert::Infallible;
     fn from_str(s: &str) -> Result<Reaction, Self::Err> {
         Ok(Reaction(s.to_string()))
+    }
+}
+
+impl<S: Into<String>> From<S> for Reaction {
+    fn from(s: S) -> Reaction {
+        Reaction(s.into())
     }
 }
 

@@ -1,8 +1,8 @@
-use std::fs::File;
 use std::path::PathBuf;
 
-use anyhow::{Context, Result};
-use misskey::{Client, HttpClient, UploadFileClient};
+use anyhow::Result;
+use misskey::prelude::*;
+use misskey::HttpClient;
 use structopt::StructOpt;
 use url::Url;
 
@@ -28,41 +28,15 @@ async fn main() -> Result<()> {
     // Note that `HttpClient` can upload files while `WebSocketClient` can't.
     let client = HttpClient::new(opt.url, Some(opt.i))?;
 
-    // Miscellaneous code to compute some necessary values
-    let mime = mime_guess::from_path(&opt.file).first_or_octet_stream();
-    let file_name = opt.file.file_name().unwrap().to_str().unwrap();
-    let file = File::open(&opt.file)?;
-
     // Upload a file to drive
-    let file = client
-        .request_with_file(
-            // We use `HttpClient::request_with_file` to upload a file.
-            misskey::endpoint::drive::files::create::Request {
-                is_sensitive: Some(opt.sensitive),
-                name: opt.name.clone(),
-                // filling uninterested parameters with defaults
-                ..Default::default()
-            },
-            mime,
-            file_name.to_string(),
-            file,
-        )
-        .await
-        .context("Failed to call an API")?
-        .into_result()
-        .context("Misskey API returned an error")?;
+    let mut builder = client.build_file(&opt.file);
+    if let Some(name) = opt.name {
+        builder.name(name);
+    }
+    let file = builder.sensitive(opt.sensitive).upload().await?;
 
     // Create a note with uploaded file
-    client
-        .request(
-            misskey::endpoint::notes::create::Request::builder()
-                .file_ids(vec![file.id])
-                .build(),
-        )
-        .await
-        .context("Failed to call an API")?
-        .into_result()
-        .context("Misskey API returned an error")?;
+    client.build_note().attach_file(&file).create().await?;
 
     Ok(())
 }

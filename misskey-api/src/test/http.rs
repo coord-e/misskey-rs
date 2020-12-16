@@ -1,11 +1,11 @@
 use std::io::Cursor;
 
 use crate::model::drive::DriveFile;
-use crate::test::env;
 
 use mime::Mime;
 use misskey_core::{UploadFileClient, UploadFileRequest};
 use misskey_http::HttpClient;
+use misskey_test::env;
 
 pub struct TestClient {
     pub admin: HttpClient,
@@ -14,19 +14,11 @@ pub struct TestClient {
 
 impl TestClient {
     pub fn new() -> Self {
-        env::init_logger();
+        misskey_test::init_logger();
 
         TestClient {
-            admin: HttpClient::new(
-                env::TEST_API_URL.clone(),
-                Some(env::TEST_ADMIN_TOKEN.clone()),
-            )
-            .unwrap(),
-            user: HttpClient::new(
-                env::TEST_API_URL.clone(),
-                Some(env::TEST_USER_TOKEN.clone()),
-            )
-            .unwrap(),
+            admin: HttpClient::new(env::api_url(), Some(env::admin_token())).unwrap(),
+            user: HttpClient::new(env::api_url(), Some(env::user_token())).unwrap(),
         }
     }
 }

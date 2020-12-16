@@ -1,0 +1,18 @@
+[package]
+name = "misskey-test"
+version = "0.1.0"
+authors = ["coord.e <me@coord-e.com>"]
+edition = "2018"
+repository = "https://github.com/coord-e/misskey-rs.git"
+homepage = "https://github.com/coord-e/misskey-rs"
+description = "Testing utilities for misskey-rs"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+misskey-http = { path = "../misskey-http", features = ["inspect-contents"], optional = true }
+misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"], optional = true }
+tokio = { version = "0.2", default-features = false, features = ["time", "macros"] }
+env_logger = "0.7"
+url = "2.1"
+anyhow = "1.0"

@@ -131,37 +131,37 @@ fn default_false() -> bool {
 impl_entity!(User);
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy)]
-pub enum UserSort {
+pub enum UserSortKey {
     Follower,
     CreatedAt,
     UpdatedAt,
 }
 
-impl Display for UserSort {
+impl Display for UserSortKey {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            UserSort::Follower => f.write_str("follower"),
-            UserSort::CreatedAt => f.write_str("createdAt"),
-            UserSort::UpdatedAt => f.write_str("updatedAt"),
+            UserSortKey::Follower => f.write_str("follower"),
+            UserSortKey::CreatedAt => f.write_str("createdAt"),
+            UserSortKey::UpdatedAt => f.write_str("updatedAt"),
         }
     }
 }
 
 #[derive(Debug, Error, Clone)]
 #[error("invalid sort key")]
-pub struct ParseUserSortError {
+pub struct ParseUserSortKeyError {
     _priv: (),
 }
 
-impl std::str::FromStr for UserSort {
-    type Err = ParseUserSortError;
+impl std::str::FromStr for UserSortKey {
+    type Err = ParseUserSortKeyError;
 
-    fn from_str(s: &str) -> Result<UserSort, Self::Err> {
+    fn from_str(s: &str) -> Result<UserSortKey, Self::Err> {
         match s {
-            "follower" | "Follower" => Ok(UserSort::Follower),
-            "createdAt" | "CreatedAt" => Ok(UserSort::CreatedAt),
-            "updatedAt" | "UpdatedAt" => Ok(UserSort::UpdatedAt),
-            _ => Err(ParseUserSortError { _priv: () }),
+            "follower" | "Follower" => Ok(UserSortKey::Follower),
+            "createdAt" | "CreatedAt" => Ok(UserSortKey::CreatedAt),
+            "updatedAt" | "UpdatedAt" => Ok(UserSortKey::UpdatedAt),
+            _ => Err(ParseUserSortKeyError { _priv: () }),
         }
     }
 }

@@ -10,18 +10,21 @@ use crate::model::{incoming::IncomingMessage, outgoing::OutgoingMessage};
 use async_tungstenite::async_std::{connect_async, ConnectStream};
 #[cfg(all(not(feature = "async-std-runtime"), feature = "tokio-runtime"))]
 use async_tungstenite::tokio::{connect_async, ConnectStream};
-use async_tungstenite::tungstenite::{error::Error as WsError, Message as WsMessage};
+use async_tungstenite::tungstenite::{
+    error::{Error as WsError, Result as WsResult},
+    Message as WsMessage,
+};
 use async_tungstenite::WebSocketStream;
 use futures::{
     sink::{Sink, SinkExt},
-    stream::{SplitSink, SplitStream, Stream, StreamExt},
+    stream::{SplitSink, SplitStream, Stream, StreamExt, TryStreamExt},
 };
 #[cfg(feature = "inspect-contents")]
 use log::debug;
 use url::Url;
 
 /// Receiver channel that communicates with Misskey
-pub struct WebSocketReceiver(SplitStream<WebSocketStream<ConnectStream>>);
+pub struct WebSocketReceiver(SplitStream<PingPongWebSocketStream<WebSocketStream<ConnectStream>>>);
 
 impl fmt::Debug for WebSocketReceiver {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -35,7 +38,7 @@ impl Stream for WebSocketReceiver {
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
         let text = match futures::ready!(self.0.poll_next_unpin(cx)?) {
             Some(WsMessage::Text(t)) => t,
-            Some(WsMessage::Ping(_)) | Some(WsMessage::Pong(_)) => return Poll::Pending,
+            Some(WsMessage::Ping(_)) | Some(WsMessage::Pong(_)) => return self.poll_next(cx),
             None | Some(WsMessage::Close(_)) => return Poll::Ready(None),
             Some(m) => return Poll::Ready(Some(Err(Error::UnexpectedMessage(m)))),
         };
@@ -70,7 +73,9 @@ impl WebSocketReceiver {
 }
 
 /// Sender channel that communicates with Misskey
-pub struct WebSocketSender(SplitSink<WebSocketStream<ConnectStream>, WsMessage>);
+pub struct WebSocketSender(
+    SplitSink<PingPongWebSocketStream<WebSocketStream<ConnectStream>>, WsMessage>,
+);
 
 #[derive(Debug, Clone)]
 pub struct TrySendError {
@@ -122,8 +127,92 @@ impl Sink<&'_ OutgoingMessage> for WebSocketSender {
     }
 }
 
+pub enum SendPongState {
+    WaitSink(Vec<u8>),
+    WaitFlush,
+}
+
+pub struct PingPongWebSocketStream<S> {
+    stream: S,
+    state: Option<SendPongState>,
+}
+
+impl<S> PingPongWebSocketStream<S> {
+    pub fn new(stream: S) -> Self {
+        PingPongWebSocketStream {
+            stream,
+            state: None,
+        }
+    }
+}
+
+impl<S: Unpin> Stream for PingPongWebSocketStream<S>
+where
+    S: Sink<WsMessage, Error = WsError> + Stream<Item = WsResult<WsMessage>>,
+{
+    type Item = WsResult<WsMessage>;
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        match self.state.take() {
+            None => {
+                let data = match futures::ready!(self.stream.try_poll_next_unpin(cx)) {
+                    Some(Ok(WsMessage::Ping(data))) => data,
+                    opt => return Poll::Ready(opt),
+                };
+
+                self.state.replace(SendPongState::WaitSink(data));
+                self.poll_next(cx)
+            }
+            Some(SendPongState::WaitSink(data)) => {
+                match self.stream.poll_ready_unpin(cx) {
+                    Poll::Pending => {
+                        self.state.replace(SendPongState::WaitSink(data));
+                        return Poll::Pending;
+                    }
+                    Poll::Ready(Err(e)) => return Poll::Ready(Some(Err(e))),
+                    Poll::Ready(Ok(())) => {}
+                }
+
+                self.stream.start_send_unpin(WsMessage::Pong(data))?;
+                self.state.replace(SendPongState::WaitFlush);
+                self.poll_next(cx)
+            }
+            Some(SendPongState::WaitFlush) => match self.stream.poll_flush_unpin(cx) {
+                Poll::Pending => {
+                    self.state.replace(SendPongState::WaitFlush);
+                    Poll::Pending
+                }
+                Poll::Ready(Err(e)) => Poll::Ready(Some(Err(e))),
+                Poll::Ready(Ok(())) => self.poll_next(cx),
+            },
+        }
+    }
+}
+
+impl<S: Unpin> Sink<WsMessage> for PingPongWebSocketStream<S>
+where
+    S: Sink<WsMessage, Error = WsError>,
+{
+    type Error = WsError;
+
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<WsResult<()>> {
+        self.stream.poll_ready_unpin(cx)
+    }
+
+    fn start_send(mut self: Pin<&mut Self>, item: WsMessage) -> WsResult<()> {
+        self.stream.start_send_unpin(item)
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<WsResult<()>> {
+        self.stream.poll_flush_unpin(cx)
+    }
+
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<WsResult<()>> {
+        self.stream.poll_close_unpin(cx)
+    }
+}
+
 pub async fn connect_websocket(url: Url) -> Result<(WebSocketSender, WebSocketReceiver)> {
     let (ws, _) = connect_async(url).await?;
-    let (sink, stream) = ws.split();
+    let (sink, stream) = PingPongWebSocketStream::new(ws).split();
     Ok((WebSocketSender(sink), WebSocketReceiver(stream)))
 }

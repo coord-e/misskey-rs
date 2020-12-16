@@ -1,6 +1,6 @@
 use crate::model::{
     sort::SortOrder,
-    user::{User, UserOrigin, UserSort},
+    user::{User, UserOrigin, UserSortKey},
 };
 
 use serde::Serialize;
@@ -57,7 +57,7 @@ pub struct Request {
     pub offset: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub sort: Option<SortOrder<UserSort>>,
+    pub sort: Option<SortOrder<UserSortKey>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub state: Option<UserState>,
@@ -126,7 +126,7 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_sort() {
-        use crate::model::{sort::SortOrder, user::UserSort};
+        use crate::model::{sort::SortOrder, user::UserSortKey};
 
         let client = TestClient::new();
 
@@ -135,7 +135,7 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
-                sort: Some(SortOrder::Ascending(UserSort::Follower)),
+                sort: Some(SortOrder::Ascending(UserSortKey::Follower)),
                 state: None,
                 origin: None,
                 username: None,
@@ -147,7 +147,7 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
-                sort: Some(SortOrder::Ascending(UserSort::CreatedAt)),
+                sort: Some(SortOrder::Ascending(UserSortKey::CreatedAt)),
                 state: None,
                 origin: None,
                 username: None,
@@ -159,7 +159,7 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
-                sort: Some(SortOrder::Descending(UserSort::UpdatedAt)),
+                sort: Some(SortOrder::Descending(UserSortKey::UpdatedAt)),
                 state: None,
                 origin: None,
                 username: None,

@@ -48,7 +48,7 @@ jobs:
         with:
           command: test
   test_api:
-    name: Test misskey-api
+    name: Test misskey-api and misskey-util
     runs-on: ubuntu-18.04
     timeout-minutes: 15
     strategy:
@@ -117,16 +117,23 @@ jobs:
           key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}
           restore-keys: |
             ubuntu-18.04-stable-cargo-misskey-api-
-      - uses: actions-rs/cargo@v1
+      - name: Build misskey-api
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
+      - name: Build misskey-util
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }} --features aid
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
           MISSKEY_VERSION: ${{ matrix.version }}
           MISSKEY_ID: aid
-      - uses: actions-rs/cargo@v1
+      - name: Test misskey-api
+        uses: actions-rs/cargo@v1
         timeout-minutes: 5
         env:
           TEST_API_URL: http://localhost:3000/api/
@@ -136,6 +143,17 @@ jobs:
         with:
           command: test
           args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
+      - name: Test misskey-util
+        uses: actions-rs/cargo@v1
+        timeout-minutes: 5
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }} --features aid
   test_websocket:
     name: Test misskey-websocket
     runs-on: ubuntu-18.04
