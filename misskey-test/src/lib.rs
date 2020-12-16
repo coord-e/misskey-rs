@@ -79,15 +79,15 @@ pub async fn test_admin_client() -> Result<HttpClient> {
 
 /// ```
 /// use std::time::Duration;
-/// use tokio::time::delay_for;
+/// use tokio::time::sleep;
 /// use misskey_test::persist;
 /// use anyhow::{anyhow, Error};
 /// #[tokio::main]
 /// async fn main() {
-///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(5)).await; Ok::<(), Error>(()) }).await.is_err());
-///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(5)).await; Err(anyhow!("whoa")) }).await.is_err());
-///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(15)).await; Ok::<(), Error>(()) }).await.is_ok());
-///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(15)).await; Err(anyhow!("whoa")) }).await.is_ok());
+///     assert!(persist(Duration::from_millis(10), async { sleep(Duration::from_millis(5)).await; Ok::<(), Error>(()) }).await.is_err());
+///     assert!(persist(Duration::from_millis(10), async { sleep(Duration::from_millis(5)).await; Err(anyhow!("whoa")) }).await.is_err());
+///     assert!(persist(Duration::from_millis(10), async { sleep(Duration::from_millis(15)).await; Ok::<(), Error>(()) }).await.is_ok());
+///     assert!(persist(Duration::from_millis(10), async { sleep(Duration::from_millis(15)).await; Err(anyhow!("whoa")) }).await.is_ok());
 /// }
 /// ```
 pub async fn persist<T, E>(duration: Duration, future: T) -> Result<()>

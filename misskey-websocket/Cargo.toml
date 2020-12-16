@@ -27,16 +27,16 @@ chrono = { version = "0.4.12", features = ["serde"] }
 url = "2.2.0"
 futures = "0.3"
 uuid = { version = "0.8", features = ["serde", "v4"] }
-async-tungstenite = { version = "0.8", features = ["async-tls"] }
+async-tungstenite = { version = "0.10", features = ["async-tls"] }
 log = "0.4"
 thiserror = "1.0.2"
 async-rwlock = "1.0"
 
 async-std = { version = "1.6.3", default-features = false, features = ["std"], optional = true }
-tokio = { version = "0.2", default-features = false, features = ["time"], optional = true }
+tokio = { version = "0.3", default-features = false, features = ["time", "rt"], optional = true }
 
 [dev-dependencies]
 misskey-api = { path = "../misskey-api" }
 misskey-test = { path = "../misskey-test" }
 async-std = { version = "1.6.3", features = ["attributes"] }
-tokio = { version = "0.2", features = ["macros", "rt-core"] }
+tokio = { version = "0.3", features = ["macros", "rt"] }

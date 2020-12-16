@@ -9,14 +9,14 @@ use crate::model::outgoing::OutgoingMessage;
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
 use async_std::task;
 #[cfg(all(not(feature = "tokio-runtime"), feature = "async-std-runtime"))]
-use async_std::task::sleep as delay_for;
+use async_std::task::sleep;
 use async_tungstenite::tungstenite::Error as WsError;
 use futures::stream::StreamExt;
 use log::{info, warn};
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
 use tokio::task;
 #[cfg(all(feature = "tokio-runtime", not(feature = "async-std-runtime")))]
-use tokio::time::delay_for;
+use tokio::time::sleep;
 use url::Url;
 
 pub mod channel;
@@ -237,7 +237,7 @@ impl Broker {
                 "broker: attempt to reconnect in {:?}",
                 self.reconnect.interval
             );
-            delay_for(self.reconnect.interval).await;
+            sleep(self.reconnect.interval).await;
         }
     }
 

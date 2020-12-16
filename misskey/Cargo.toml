@@ -61,7 +61,7 @@ misskey-websocket = { path = "../misskey-websocket", version = "0.1.0", default-
 misskey-http = { path = "../misskey-http", version = "0.1.0", default-features = false, optional = true }
 
 [dev-dependencies]
-tokio = { version = "0.2", features = ["macros", "rt-core"] }
+tokio = { version = "0.3", features = ["macros", "rt"] }
 anyhow = "1.0"
 futures = "0.3"
 

@@ -19,3 +19,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve API of `ReconnectCondition` and `ReconnectConfig`
 - Improve API of `WebSocketClient`
 - Improve API of `WebSocketClientBuilder`
+- Use tokio 0.3 and async-tungstenite 0.10

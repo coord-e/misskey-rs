@@ -59,7 +59,7 @@ url = "2.1"
 [dev-dependencies]
 misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
 misskey-test = { path = "../misskey-test", features = ["misskey-http", "misskey-websocket"] }
-tokio = { version = "0.2.22", features = ["macros"] }
+tokio = { version = "0.3", features = ["macros", "rt-multi-thread"] }
 anyhow = "1.0"
 
 [package.metadata.docs.rs]
