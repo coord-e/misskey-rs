@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- High-level API from `misskey-util` crate
+- `misskey::prelude` that provides a set of useful re-exports
+
 ### Changed
 
 - Update the documentation
