@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `UploadFileClient`
   - Take `io::Read` instead of file path in file uploads
 - Stop taking the token as `Option` in the constructor and provide a separate method.
+- Improve API of `HttpClientBuilder`

@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::fmt::{self, Debug};
 
 use crate::error::{Error, Result};
@@ -60,7 +61,11 @@ impl HttpClient {
     /// All configurations are set to default.
     ///
     /// This function is identical to [`HttpClientBuilder::new`].
-    pub fn builder(url: Url) -> HttpClientBuilder {
+    pub fn builder<T>(url: T) -> HttpClientBuilder
+    where
+        T: TryInto<Url>,
+        T::Error: Into<Error>,
+    {
         HttpClientBuilder::new(url)
     }
 

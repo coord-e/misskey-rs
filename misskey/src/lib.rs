@@ -21,8 +21,8 @@
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = HttpClient::builder("https://your.instance.example/api/".parse()?)
-//!     .token("API_TOKEN".to_string())
+//! let client = HttpClient::builder("https://your.instance.example/api/")
+//!     .token("API_TOKEN")
 //!     .build()?;
 //!
 //! client.create_note("Hello, Misskey").await?;
