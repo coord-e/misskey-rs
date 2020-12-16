@@ -51,7 +51,7 @@ pub fn init_logger() {
 #[cfg(feature = "misskey-http")]
 pub fn test_http_client(token: String) -> Result<HttpClient> {
     init_logger();
-    let client = HttpClient::new(env::api_url(), Some(token))?;
+    let client = HttpClient::with_token(env::api_url(), token)?;
     Ok(client)
 }
 
@@ -61,7 +61,6 @@ pub async fn test_websocket_client(token: String) -> Result<WebSocketClient> {
 
     let client = WebSocketClient::builder(env::websocket_url())
         .token(token)
-        .auto_reconnect()
         .connect()
         .await?;
 

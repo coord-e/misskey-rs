@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use thiserror::Error;
 
 /// Possible errors from HTTP client.
@@ -12,6 +14,15 @@ pub enum Error {
     /// JSON encode/decode error.
     #[error("JSON error: {0}")]
     Json(#[from] serde_json::Error),
+    /// Invalid URL.
+    #[error("Invalid URL: {0}")]
+    InvalidUrl(#[from] url::ParseError),
+}
+
+impl From<Infallible> for Error {
+    fn from(x: Infallible) -> Error {
+        match x {}
+    }
 }
 
 /// Specialized Result type for operations on [`HttpClient`][`crate::HttpClient`].

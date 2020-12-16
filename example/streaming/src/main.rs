@@ -19,7 +19,6 @@ async fn main() -> Result<()> {
 
     // Configure and build a client using `WebSocketClientBuilder`.
     let client = WebSocketClient::builder(opt.url)
-        .auto_reconnect()
         .token(opt.i)
         .connect()
         .await?;

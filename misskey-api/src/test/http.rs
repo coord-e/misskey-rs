@@ -17,8 +17,8 @@ impl TestClient {
         misskey_test::init_logger();
 
         TestClient {
-            admin: HttpClient::new(env::api_url(), Some(env::admin_token())).unwrap(),
-            user: HttpClient::new(env::api_url(), Some(env::user_token())).unwrap(),
+            admin: HttpClient::with_token(env::api_url(), env::admin_token()).unwrap(),
+            user: HttpClient::with_token(env::api_url(), env::user_token()).unwrap(),
         }
     }
 }

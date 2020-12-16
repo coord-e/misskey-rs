@@ -1,96 +1,159 @@
+use std::convert::TryInto;
+use std::result::Result as StdResult;
 use std::time::Duration;
 
 use crate::broker::{ReconnectCondition, ReconnectConfig};
 use crate::client::WebSocketClient;
-use crate::error::Result;
+use crate::error::{Error, Result};
 
 use url::Url;
+
+#[derive(Debug, Clone)]
+struct WebSocketClientBuilderInner {
+    url: Url,
+    reconnect: ReconnectConfig,
+}
 
 /// Builder for [`WebSocketClient`].
 #[derive(Debug, Clone)]
 pub struct WebSocketClientBuilder {
-    url: Url,
-    token: Option<String>,
-    reconnect: Option<ReconnectConfig>,
+    inner: Result<WebSocketClientBuilderInner>,
+}
+
+trait ResultExt<T, E> {
+    fn and_then_mut<F>(&mut self, op: F)
+    where
+        F: FnOnce(&mut T) -> StdResult<(), E>;
+}
+
+impl<T, E> ResultExt<T, E> for StdResult<T, E> {
+    fn and_then_mut<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut T) -> StdResult<(), E>,
+    {
+        if let Ok(x) = self {
+            if let Err(e) = f(x) {
+                *self = Err(e);
+            }
+        }
+    }
 }
 
 impl WebSocketClientBuilder {
+    /// Creates a new builder instance with `url`.
+    ///
+    /// All configurations are set to default.
+    pub fn new<T>(url: T) -> Self
+    where
+        T: TryInto<Url>,
+        T::Error: Into<Error>,
+    {
+        let inner = url
+            .try_into()
+            .map_err(Into::into)
+            .map(|url| WebSocketClientBuilderInner {
+                url,
+                reconnect: ReconnectConfig::default(),
+            });
+
+        WebSocketClientBuilder { inner }
+    }
+
+    /// Creates a new builder instance with the given host name `host`.
+    ///
+    /// This method configures the builder with a URL of the form `wss://{host}/streaming`.
+    /// All other configurations are set to default.
+    pub fn with_host<S>(host: S) -> Self
+    where
+        S: AsRef<str>,
+    {
+        let url = format!("wss://{}/streaming", host.as_ref());
+        WebSocketClientBuilder::new(url.as_str())
+    }
+
+    /// Sets an API token.
+    ///
+    /// This method appends the given token as the `i` query parameter to the URL.
+    pub fn token<S>(&mut self, token: S) -> &mut Self
+    where
+        S: AsRef<str>,
+    {
+        self.query("i", token)
+    }
+
     /// Specifies additional query parameters for the URL.
     pub fn query<S1, S2>(&mut self, key: S1, value: S2) -> &mut Self
     where
         S1: AsRef<str>,
         S2: AsRef<str>,
     {
-        self.url
-            .query_pairs_mut()
-            .append_pair(key.as_ref(), value.as_ref());
+        self.inner.and_then_mut(|inner| {
+            inner
+                .url
+                .query_pairs_mut()
+                .append_pair(key.as_ref(), value.as_ref());
+            Ok(())
+        });
         self
     }
 
-    /// Creates a new builder instance with `url`.
-    /// All configurations are set to default.
+    /// Sets whether or not to enable automatic reconnection.
     ///
-    /// This function is identical to [`WebSocketClient::builder`].
-    pub fn new(url: Url) -> Self {
-        WebSocketClientBuilder {
-            url,
-            token: None,
-            reconnect: None,
+    /// Automatic reconnection is enabled by default (as per [`Default`][default] implementation for
+    /// [`ReconnectConfig`]), and you can disable it with `.auto_reconnect(false)`.
+    ///
+    /// [default]: std::default::Default
+    pub fn auto_reconnect(&mut self, enable: bool) -> &mut Self {
+        if enable {
+            self.reconnect_condition(ReconnectCondition::unexpected_reset())
+        } else {
+            self.reconnect_condition(ReconnectCondition::never())
         }
-    }
-
-    /// Sets an API token.
-    pub fn token<S: Into<String>>(&mut self, token: S) -> &mut Self {
-        self.token = Some(token.into());
-        self
-    }
-
-    /// Enables automatic reconnection.
-    pub fn auto_reconnect(&mut self) -> &mut Self {
-        self.reconnect = Some(ReconnectConfig::default());
-        self
     }
 
     /// Sets an interval duration of automatic reconnection in seconds.
     pub fn reconnect_secs(&mut self, secs: u64) -> &mut Self {
-        self.reconnect
-            .get_or_insert_with(ReconnectConfig::default)
-            .interval = Duration::from_secs(secs);
+        self.inner.and_then_mut(|inner| {
+            inner.reconnect.interval = Duration::from_secs(secs);
+            Ok(())
+        });
         self
     }
 
     /// Sets an interval duration of automatic reconnection.
     pub fn reconnect_interval(&mut self, interval: Duration) -> &mut Self {
-        self.reconnect
-            .get_or_insert_with(ReconnectConfig::default)
-            .interval = interval;
+        self.inner.and_then_mut(|inner| {
+            inner.reconnect.interval = interval;
+            Ok(())
+        });
         self
     }
 
     /// Specifies the condition for reconnecting.
     pub fn reconnect_condition(&mut self, condition: ReconnectCondition) -> &mut Self {
-        self.reconnect
-            .get_or_insert_with(ReconnectConfig::default)
-            .condition = condition;
+        self.inner.and_then_mut(|inner| {
+            inner.reconnect.condition = condition;
+            Ok(())
+        });
         self
     }
 
     /// Specifies whether to re-send messages that may have failed to be sent when reconnecting.
     pub fn reconnect_retry_send(&mut self, enable: bool) -> &mut Self {
-        self.reconnect
-            .get_or_insert_with(ReconnectConfig::default)
-            .retry_send = enable;
+        self.inner.and_then_mut(|inner| {
+            inner.reconnect.retry_send = enable;
+            Ok(())
+        });
         self
     }
 
     /// Finish this builder instance and connect to Misskey using this configuration.
     pub async fn connect(&self) -> Result<WebSocketClient> {
-        let mut url = self.url.clone();
+        let WebSocketClientBuilderInner { url, reconnect } = match self.inner.clone() {
+            Err(e) => return Err(e),
+            Ok(inner) => inner,
+        };
 
-        if let Some(token) = &self.token {
-            url.query_pairs_mut().append_pair("i", token);
-        }
-
-        WebSocketClient::connect(url, self.reconnect.clone()).await
+        WebSocketClient::connect_with_config(url, reconnect).await
     }
 }

@@ -1,3 +1,4 @@
+use std::convert::Infallible;
 use std::sync::Arc;
 
 use async_tungstenite::tungstenite;
@@ -15,6 +16,18 @@ pub enum Error {
     /// JSON encode/decode error.
     #[error("JSON error: {0}")]
     Json(#[source] Arc<serde_json::Error>),
+}
+
+impl From<Infallible> for Error {
+    fn from(x: Infallible) -> Error {
+        match x {}
+    }
+}
+
+impl From<url::ParseError> for Error {
+    fn from(_: url::ParseError) -> Error {
+        tungstenite::Error::Url("Failed to parse URL".into()).into()
+    }
 }
 
 impl From<tungstenite::Error> for Error {

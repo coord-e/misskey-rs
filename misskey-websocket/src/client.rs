@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::fmt::{self, Debug};
 
 use crate::broker::{
@@ -56,11 +57,16 @@ impl Debug for WebSocketClient {
 
 impl WebSocketClient {
     /// Connects to Misskey using WebSocket, and returns [`WebSocketClient`].
-    ///
-    /// If `reconnect` contains [`ReconnectConfig`],
-    /// then the returned client will automatically reconnect on disconnection.
-    pub async fn connect(url: Url, reconnect: Option<ReconnectConfig>) -> Result<WebSocketClient> {
-        let (broker_tx, state) = Broker::spawn(url, reconnect).await?;
+    pub async fn connect(url: Url) -> Result<WebSocketClient> {
+        WebSocketClient::connect_with_config(url, ReconnectConfig::default()).await
+    }
+
+    /// Connects to Misskey using WebSocket with a given reconnect configuration, and returns [`WebSocketClient`].
+    pub async fn connect_with_config(
+        url: Url,
+        reconnect_config: ReconnectConfig,
+    ) -> Result<WebSocketClient> {
+        let (broker_tx, state) = Broker::spawn(url, reconnect_config).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 
@@ -68,7 +74,11 @@ impl WebSocketClient {
     /// All configurations are set to default.
     ///
     /// This function is identical to [`WebSocketClientBuilder::new`].
-    pub fn builder(url: Url) -> WebSocketClientBuilder {
+    pub fn builder<T>(url: T) -> WebSocketClientBuilder
+    where
+        T: TryInto<Url>,
+        T::Error: Into<Error>,
+    {
         WebSocketClientBuilder::new(url)
     }
 
@@ -225,7 +235,6 @@ mod tests {
 
         WebSocketClientBuilder::new(env::websocket_url())
             .token(env::token())
-            .auto_reconnect()
             .connect()
             .await
             .unwrap()

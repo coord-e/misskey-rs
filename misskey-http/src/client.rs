@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::fmt::{self, Debug};
 
 use crate::error::{Error, Result};
@@ -21,7 +22,7 @@ use builder::HttpClientBuilder;
 
 /// Asynchronous HTTP-based client for Misskey.
 ///
-/// [`HttpClient`] can be constructed using [`HttpClient::new`] or
+/// [`HttpClient`] can be constructed using [`HttpClient::new`], [`HttpClient::with_token`] or
 /// [`HttpClientBuilder`][`builder::HttpClientBuilder`].
 pub struct HttpClient {
     url: Url,
@@ -38,11 +39,20 @@ impl Debug for HttpClient {
 }
 
 impl HttpClient {
-    /// Creates a new HTTP-based client.
-    pub fn new(url: Url, token: Option<String>) -> Result<Self> {
+    /// Creates a new HTTP-based client without a token.
+    pub fn new(url: Url) -> Result<Self> {
         Ok(HttpClient {
             url,
-            token,
+            token: None,
+            client: isahc::HttpClient::new()?,
+        })
+    }
+
+    /// Creates a new HTTP-based client with a token.
+    pub fn with_token(url: Url, token: impl Into<String>) -> Result<Self> {
+        Ok(HttpClient {
+            url,
+            token: Some(token.into()),
             client: isahc::HttpClient::new()?,
         })
     }
@@ -51,7 +61,11 @@ impl HttpClient {
     /// All configurations are set to default.
     ///
     /// This function is identical to [`HttpClientBuilder::new`].
-    pub fn builder(url: Url) -> HttpClientBuilder {
+    pub fn builder<T>(url: T) -> HttpClientBuilder
+    where
+        T: TryInto<Url>,
+        T::Error: Into<Error>,
+    {
         HttpClientBuilder::new(url)
     }
 
@@ -235,7 +249,7 @@ mod tests {
 
     fn test_client() -> HttpClient {
         misskey_test::init_logger();
-        HttpClient::new(env::api_url(), Some(env::token())).unwrap()
+        HttpClient::with_token(env::api_url(), env::token()).unwrap()
     }
 
     #[test]

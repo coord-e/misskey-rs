@@ -12,13 +12,11 @@ impl TestClient {
 
         let admin = WebSocketClientBuilder::new(env::websocket_url())
             .token(env::admin_token())
-            .auto_reconnect()
             .connect()
             .await
             .unwrap();
         let user = WebSocketClientBuilder::new(env::websocket_url())
             .token(env::user_token())
-            .auto_reconnect()
             .connect()
             .await
             .unwrap();
