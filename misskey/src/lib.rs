@@ -1,6 +1,6 @@
 //! Asynchronous client for [Misskey](https://github.com/syuilo/misskey).
 //!
-//! We provide three components in this crate:
+//! We provide four components in this crate:
 //!
 //! - Clients that handles the connection between Misskey. As Misskey provides HTTP and WebSocket
 //!   interfaces to interact with, we have [`HttpClient`] and [`WebSocketClient`] implementations
@@ -9,13 +9,15 @@
 //!   [channels][`streaming::channel`].
 //! - Abstraction that connects API datatypes and client implementations: [`Request`][`endpoint::Request`],
 //!   [`ConnectChannelRequest`][`streaming::ConnectChannelRequest`], etc.
+//! - High-level API for easier handling of various functionalities: [`ClientExt`] and others.
 //!
 //! # Examples
 //!
 //! Create a note:
 //!
 //! ```no_run
-//! use misskey::{Client, HttpClient};
+//! use misskey::prelude::*;
+//! use misskey::HttpClient;
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
@@ -23,16 +25,7 @@
 //!     .token("API_TOKEN".to_string())
 //!     .build()?;
 //!
-//! client
-//!     .request(
-//!         // Each endpoint implementation has a corresponding `Request` type.
-//!         // We can dispatch an API call by passing `Request` to `Client::request` method.
-//!         misskey::endpoint::notes::create::Request::builder()
-//!             .text("Hello, Misskey")
-//!             .build(),
-//!     )
-//!     .await?
-//!     .into_result()?;
+//! client.create_note("Hello, Misskey").await?;
 //! # Ok(())
 //! # }
 //! ```
@@ -40,9 +33,10 @@
 //! Automatically follow-back:
 //!
 //! ```no_run
-//! use futures::stream::StreamExt;
-//! use misskey::streaming::channel::main::{self, MainStreamEvent};
-//! use misskey::{Client, WebSocketClient};
+//! use futures::stream::TryStreamExt;
+//! use misskey::prelude::*;
+//! use misskey::streaming::channel::main::MainStreamEvent;
+//! use misskey::WebSocketClient;
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
@@ -53,29 +47,29 @@
 //!
 //! // Connect to the main stream.
 //! // The main stream is a channel that streams events about the connected account.
-//! let mut stream = client.channel(main::Request::default()).await?;
+//! let mut stream = client.main_stream().await?;
 //!
-//! loop {
-//!     // Wait for the next event using `next` method from `StreamExt`.
-//!     let event = stream.next().await.unwrap()?;
-//!
+//! // Wait for the next event in the main stream.
+//! while let Some(event) = stream.try_next().await? {
 //!     match event {
+//!         // Check if the event is 'followed' and the user is not a bot
 //!         MainStreamEvent::Followed(user) if !user.is_bot => {
 //!             println!("followed from @{}", user.username);
 //!
-//!             client
-//!                 .request(misskey::endpoint::following::create::Request { user_id: user.id })
-//!                 .await?
-//!                 .into_result()?;
+//!             // Follow back `user` if you haven't already.
+//!             if !client.is_following(&user).await? {
+//!                 client.follow(&user).await?;
+//!             }
 //!         }
+//!         // other events are just ignored here
 //!         _ => {}
-//!     }
+//!    }
 //! }
 //! # Ok(())
 //! # }
 //! ```
 //!
-//! See the [example](https://github.com/coord-e/misskey-rs/tree/develop/example) directory for more examples and detailed explanations.
+//! See the [example](https://github.com/coord-e/misskey-rs/tree/develop/example) directory for more examples.
 //!
 //! # Feature flags
 //!
@@ -146,6 +140,34 @@ pub mod endpoint {
     //! using [`Client::request`][`crate::Client::request`].
     //!
     //! # Example
+    //!
+    //! Create a note using `/api/notes/create`:
+    //!
+    //! ```no_run
+    //! # use misskey::{Client, HttpClient};
+    //! # #[tokio::main]
+    //! # async fn main() -> anyhow::Result<()> {
+    //! # let client = HttpClient::new("http://your.instance.example/api/".parse()?, Some("API_TOKEN".to_string()))?;
+    //! client
+    //!     .request(
+    //!         // Each endpoint implementation has a corresponding `Request` type.
+    //!         // We can dispatch an API call by passing `Request` to `Client::request` method.
+    //!         // Here, we build a `Request` to `notes/create` using a `Request::builder()`.
+    //!         misskey::endpoint::notes::create::Request::builder()
+    //!             .text("Hello, Misskey")
+    //!             .build(),
+    //!     )
+    //!     // Asynchronously wait for the response.
+    //!     // `Client::request` method returns `Result<ApiResult<T>>`.
+    //!     // The returned `Result` may contain an error happened on our side
+    //!     // (e.g. networking failure or deserialization error)
+    //!     .await?
+    //!     // Convert `ApiResult<T>` to `Result<T, ApiError>` using `ApiResult::into_result`.
+    //!     // `ApiError` is an error which is returned from Misskey API.
+    //!     .into_result()?;
+    //! # Ok(())
+    //! # }
+    //! ```
     //!
     //! Get your own information from `/api/i`:
     //!

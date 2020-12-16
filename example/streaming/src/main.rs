@@ -1,6 +1,7 @@
-use anyhow::{Context, Result};
-use futures::stream::StreamExt;
-use misskey::{Client, WebSocketClient};
+use anyhow::Result;
+use futures::stream::TryStreamExt;
+use misskey::prelude::*;
+use misskey::WebSocketClient;
 use structopt::StructOpt;
 use url::Url;
 
@@ -47,47 +48,17 @@ async fn post(client: &WebSocketClient) -> Result<()> {
         }
 
         // Create a note containing `text` as its text
-        client
-            .request(
-                // Each endpoint implementation has a corresponding `Request` type.
-                // We can dispatch an API call by passing `Request` to `Client::request` method.
-                misskey::endpoint::notes::create::Request::builder()
-                    .text(text)
-                    .build(),
-            )
-            .await
-            // `Client::request` method returns `Result<ApiResult<T>>`.
-            // The returned `Result` may contain an error happened on our side
-            // (e.g. networking failure or deserialization error)
-            .context("Failed to call an API")?
-            // Convert `ApiResult<T>` to `Result<T, ApiError>` using `ApiResult::into_result`.
-            // `ApiError` is an error which is returned from Misskey API.
-            .into_result()
-            .context("Misskey API returned an error")?;
+        client.create_note(text).await?;
     }
 }
 
 // Print notes on the local timeline
 async fn timeline(client: &WebSocketClient) -> Result<()> {
-    use misskey::streaming::channel::local_timeline::{self, LocalTimelineEvent};
-
     // Connect to the local timeline.
-    // `WebSocketClient::channel` returns a stream which is an instance of `Stream` and `Sink`.
-    // We can communicate with the connected channel via those instances.
-    let mut stream = client
-        .channel(local_timeline::Request::default())
-        .await
-        .context("Failed to connect to the local timeline")?;
+    let mut stream = client.local_timeline().await?;
 
-    loop {
-        // Wait for the next note using `next` method from `StreamExt`.
-        // We casually call `unwrap` on the returned `Option` here because our stream is infinite.
-        let LocalTimelineEvent::Note(note) = stream
-            .next()
-            .await
-            .unwrap()
-            .context("Failed to obtain the next note")?;
-
+    // Wait for the next note using `try_next` method from `TryStreamExt`.
+    while let Some(note) = stream.try_next().await? {
         // `note` here has a type `misskey::model::note::Note`.
         println!(
             "<@{}> {}",
@@ -95,4 +66,6 @@ async fn timeline(client: &WebSocketClient) -> Result<()> {
             note.text.unwrap_or_default()
         );
     }
+
+    Ok(())
 }

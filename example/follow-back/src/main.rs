@@ -1,7 +1,8 @@
-use anyhow::{Context, Result};
-use futures::stream::StreamExt;
-use misskey::streaming::channel::main::{self, MainStreamEvent};
-use misskey::{Client, WebSocketClient};
+use anyhow::Result;
+use futures::stream::TryStreamExt;
+use misskey::prelude::*;
+use misskey::streaming::channel::main::MainStreamEvent;
+use misskey::WebSocketClient;
 use structopt::StructOpt;
 use url::Url;
 
@@ -25,36 +26,25 @@ async fn main() -> Result<()> {
         .await?;
 
     // Connect to the main stream.
-    // Main is a channel that streams events about the connected account, such as notifications.
-    let mut stream = client
-        .channel(main::Request::default())
-        .await
-        .context("Failed to connect to the main stream")?;
+    // the main stream is a channel that streams events about the connected account, such as notifications.
+    let mut stream = client.main_stream().await?;
 
-    loop {
-        // Wait for the next note using `next` method from `StreamExt`.
-        // We casually call `unwrap` on the returned `Option` here because our stream is infinite.
-        let event = stream
-            .next()
-            .await
-            .unwrap()
-            .context("Failed to obtain the next event")?;
-
+    // Wait for the next event using `try_next` method from `TryStreamExt`.
+    while let Some(event) = stream.try_next().await? {
         match event {
             // Handle `Followed` event and extract inner `User`
             MainStreamEvent::Followed(user) if !user.is_bot => {
                 println!("followed from @{}", user.username);
 
-                // Follow back `user`
-                client
-                    .request(misskey::endpoint::following::create::Request { user_id: user.id })
-                    .await
-                    .context("Failed to call an API")?
-                    .into_result()
-                    .context("Misskey API returned an error")?;
+                // Follow back `user` if you haven't already.
+                if !client.is_following(&user).await? {
+                    client.follow(&user).await?;
+                }
             }
             // other events are just ignored
             _ => {}
         }
     }
+
+    Ok(())
 }

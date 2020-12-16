@@ -1,8 +1,9 @@
-use anyhow::{Context, Result};
-use futures::stream::StreamExt;
+use anyhow::Result;
+use futures::stream::TryStreamExt;
 use misskey::model::note::Note;
-use misskey::streaming::channel::main::{self, MainStreamEvent};
-use misskey::{Client, WebSocketClient};
+use misskey::prelude::*;
+use misskey::streaming::channel::main::MainStreamEvent;
+use misskey::WebSocketClient;
 use structopt::StructOpt;
 use url::Url;
 
@@ -26,22 +27,11 @@ async fn main() -> Result<()> {
         .await?;
 
     // Connect to the main stream.
-    // Main is a channel that streams events about the connected account, such as notifications.
-    let mut stream = client
-        .channel(main::Request::default())
-        .await
-        .context("Failed to connect to the main stream")?;
+    // the main stream is a channel that streams events about the connected account, such as notifications.
+    let mut stream = client.main_stream().await?;
 
-    loop {
-        // Wait for the next note using `next` method from `StreamExt`.
-        // We casually call `unwrap` on the returned `Option` here because our stream is infinite.
-        let event = stream
-            .next()
-            .await
-            .unwrap()
-            .context("Failed to obtain the next event")?;
-
-        println!("{:?}", event);
+    // Wait for the next event using `try_next` method from `TryStreamExt`.
+    while let Some(event) = stream.try_next().await? {
         match event {
             // Handle `Mention` event and extract inner `Note`
             MainStreamEvent::Mention(Note {
@@ -53,22 +43,12 @@ async fn main() -> Result<()> {
                 println!("got ping from @{}", user.username);
 
                 // Create a pong note as a reply to the mention
-                client
-                    .request(
-                        // Build a `Request` to `notes/create` using a builder.
-                        // Here, we specify the note's text and replying note id.
-                        misskey::endpoint::notes::create::Request::builder()
-                            .text("pong")
-                            .reply_id(note_id)
-                            .build(),
-                    )
-                    .await
-                    .context("Failed to call an API")?
-                    .into_result()
-                    .context("Misskey API returned an error")?;
+                client.reply(note_id, "pong").await?;
             }
             // other events are just ignored
             _ => {}
         }
     }
+
+    Ok(())
 }
