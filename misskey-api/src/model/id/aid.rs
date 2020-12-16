@@ -8,9 +8,9 @@ use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Aid {
-    timestamp: i64,
-    // 0 - 1295.
-    random: u16,
+    pub timestamp: i64,
+    /// 0 - 1295
+    pub random: u16,
 }
 
 impl Aid {
