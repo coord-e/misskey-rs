@@ -1,26 +1,36 @@
 use std::path::Path;
 
+#[cfg(feature = "12-9-0")]
+use crate::builder::EmojiUpdateBuilder;
+#[cfg(feature = "12-27-0")]
+use crate::builder::NotificationBuilder;
 use crate::builder::{
-    AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, ChannelBuilder,
-    ChannelUpdateBuilder, ClipBuilder, ClipUpdateBuilder, DriveFileBuilder, DriveFileListBuilder,
-    DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder, EmojiUpdateBuilder,
-    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, NotificationBuilder,
-    ServerLogListBuilder, UserListBuilder,
+    AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
+    DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
+    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, ServerLogListBuilder,
+    UserListBuilder,
 };
+#[cfg(feature = "12-47-0")]
+use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
+#[cfg(feature = "12-57-0")]
+use crate::builder::{ClipBuilder, ClipUpdateBuilder};
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
 use crate::{TimelineCursor, TimelineRange};
 
-use chrono::{DateTime, Utc};
+#[cfg(feature = "12-13-0")]
+use chrono::DateTime;
+use chrono::Utc;
 use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
+#[cfg(feature = "12-47-0")]
+use misskey_api::model::channel::Channel;
 #[cfg(feature = "12-58-0")]
 use misskey_api::model::page::Page;
 use misskey_api::model::{
     abuse_user_report::AbuseUserReport,
     announcement::Announcement,
     antenna::Antenna,
-    channel::Channel,
     clip::Clip,
     drive::{DriveFile, DriveFolder},
     emoji::Emoji,
@@ -64,6 +74,7 @@ macro_rules! impl_timeline_method {
             /// # async fn main() -> anyhow::Result<()> {
             /// # let client = misskey_test::test_client().await?;
             /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
             /// use futures::stream::TryStreamExt;
@@ -89,6 +100,7 @@ macro_rules! impl_timeline_method {
             /// # async fn main() -> anyhow::Result<()> {
             /// # let client = misskey_test::test_client().await?;
             /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
             /// use chrono::Utc;
@@ -160,6 +172,7 @@ macro_rules! impl_timeline_method {
             /// # async fn main() -> anyhow::Result<()> {
             /// # let client = misskey_test::test_client().await?;
             /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
             /// use futures::stream::TryStreamExt;
@@ -2831,6 +2844,8 @@ pub trait ClientExt: Client + Sync {
     /// Promotes the specified note until the time.
     ///
     /// This operation may require moderator privileges.
+    #[cfg(feature = "12-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-13-0")))]
     fn promote_note(
         &self,
         note: impl EntityRef<Note>,
@@ -3114,6 +3129,8 @@ pub trait ClientExt: Client + Sync {
     /// Creates a custom emoji from the given file.
     ///
     /// This operation may require moderator privileges.
+    #[cfg(feature = "12-9-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
     fn create_emoji(
         &self,
         file: impl EntityRef<DriveFile>,
@@ -3157,6 +3174,8 @@ pub trait ClientExt: Client + Sync {
     /// This operation may require moderator privileges.
     ///
     /// [builder_update]: EmojiUpdateBuilder::update
+    #[cfg(feature = "12-9-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
     fn update_emoji(&self, emoji: Emoji) -> EmojiUpdateBuilder<&Self> {
         EmojiUpdateBuilder::new(self, emoji)
     }
@@ -3264,6 +3283,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Creates a notification with the given text.
+    #[cfg(feature = "12-27-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
     fn create_notification(
         &self,
         body: impl Into<String>,
@@ -3280,6 +3301,8 @@ pub trait ClientExt: Client + Sync {
     /// See [`NotificationBuilder`] for the provided methods.
     ///
     /// [builder_create]: NotificationBuilder::create
+    #[cfg(feature = "12-27-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
     fn build_notification(&self) -> NotificationBuilder<&Self> {
         NotificationBuilder::new(self)
     }

@@ -1,15 +1,23 @@
+#[cfg(feature = "12-27-0")]
 use crate::Error;
 
+#[cfg(feature = "12-27-0")]
 use misskey_api::endpoint;
+#[cfg(feature = "12-27-0")]
 use misskey_core::Client;
+#[cfg(feature = "12-27-0")]
 use url::Url;
 
 /// Builder for the [`build_notification`][`crate::ClientExt::build_notification`] method.
+#[cfg(feature = "12-27-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
 pub struct NotificationBuilder<C> {
     client: C,
     request: endpoint::notifications::create::Request,
 }
 
+#[cfg(feature = "12-27-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
 impl<C> NotificationBuilder<C> {
     /// Creates a builder with the client.
     pub fn new(client: C) -> Self {
@@ -45,6 +53,8 @@ impl<C> NotificationBuilder<C> {
     }
 }
 
+#[cfg(feature = "12-27-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
 impl<C: Client> NotificationBuilder<C> {
     /// Creates the notification.
     pub async fn create(&self) -> Result<(), Error<C::Error>> {

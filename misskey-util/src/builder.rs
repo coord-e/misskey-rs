@@ -10,7 +10,6 @@
 
 mod admin;
 mod antenna;
-mod channel;
 mod clip;
 mod drive;
 mod me;
@@ -19,11 +18,13 @@ mod misc;
 mod note;
 mod user;
 
+#[cfg(feature = "12-47-0")]
+mod channel;
+
 pub use admin::{
     AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder, ServerLogListBuilder,
 };
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
-pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
 pub use clip::{ClipBuilder, ClipUpdateBuilder};
 pub use drive::{
     DriveFileBuilder, DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder,
@@ -31,6 +32,13 @@ pub use drive::{
 };
 pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use messaging::MessagingMessageBuilder;
-pub use misc::NotificationBuilder;
 pub use note::NoteBuilder;
 pub use user::UserListBuilder;
+
+#[cfg(feature = "12-47-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
+
+#[cfg(feature = "12-27-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
+pub use misc::NotificationBuilder;

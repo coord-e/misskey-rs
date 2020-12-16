@@ -7,7 +7,9 @@ use crate::Error;
 use futures::stream::TryStreamExt;
 use mime::Mime;
 use misskey_api::model::drive::{DriveFile, DriveFolder};
-use misskey_api::{endpoint, streaming::channel, EntityRef};
+#[cfg(feature = "12-48-0")]
+use misskey_api::streaming::channel;
+use misskey_api::{endpoint, EntityRef};
 #[cfg(feature = "12-48-0")]
 use misskey_core::streaming::StreamingClient;
 use misskey_core::{Client, UploadFileClient};
@@ -122,7 +124,7 @@ impl<C: Client> DriveFileUrlBuilder<C> {
 }
 
 #[cfg(feature = "12-48-0")]
-#[cfg_attr(docsrs, doc(cfg(feature = "1Main stream2-48-0")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
 impl<C: Client> DriveFileUrlBuilder<C>
 where
     C: StreamingClient<Error = <C as Client>::Error>,

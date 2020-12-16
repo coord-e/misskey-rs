@@ -2,9 +2,10 @@ use crate::Error;
 
 #[cfg(feature = "12-62-0")]
 use misskey_api::model::clip::Clip;
+#[cfg(feature = "12-9-0")]
+use misskey_api::model::emoji::Emoji;
 use misskey_api::model::{
     announcement::Announcement,
-    emoji::Emoji,
     log::{Log, LogLevel},
     user::User,
 };
@@ -353,9 +354,13 @@ impl<C> MetaUpdateBuilder<C> {
         /// Sets whether or not the extenal object storage uses SSL.
         pub object_storage_use_ssl;
         /// Sets whether or not the extenal object storage uses the proxy.
+        #[cfg(feature = "12-31-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-31-0")))]
         pub object_storage_use_proxy;
         /// Sets whether or not to set `'public-read'` when uploading to the extenal object
         /// storage.
+        #[cfg(feature = "12-47-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
         pub object_storage_set_public_read;
     }
     update_builder_option_field! {
@@ -467,6 +472,8 @@ pub struct EmojiUpdateBuilder<C> {
 
 impl<C> EmojiUpdateBuilder<C> {
     /// Creates a builder with the client and the emoji you are going to update.
+    #[cfg(feature = "12-9-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
     pub fn new(client: C, emoji: Emoji) -> Self {
         let Emoji {
             id,

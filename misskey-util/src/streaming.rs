@@ -4,9 +4,9 @@ use futures::{
     future::BoxFuture,
     stream::{BoxStream, StreamExt, TryStreamExt},
 };
-use misskey_api::model::{
-    antenna::Antenna, channel::Channel, note::Note, query::Query, user_list::UserList,
-};
+#[cfg(feature = "12-47-0")]
+use misskey_api::model::channel::Channel;
+use misskey_api::model::{antenna::Antenna, note::Note, query::Query, user_list::UserList};
 use misskey_api::{
     streaming::{self, channel},
     EntityRef,
@@ -276,6 +276,8 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     }
 
     /// Returns a stream to receive notes in the timeline of the specified channel.
+    #[cfg(feature = "12-47-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
     fn channel_timeline(
         &self,
         channel: impl EntityRef<Channel>,
