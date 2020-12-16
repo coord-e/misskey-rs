@@ -32,6 +32,8 @@ mod tests {
                 banner_id: None,
                 fields: None,
                 is_locked: Some(true),
+                #[cfg(feature = "12-63-0")]
+                is_explorable: None,
                 careful_bot: None,
                 auto_accept_followed: None,
                 is_bot: None,

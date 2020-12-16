@@ -40,6 +40,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_locked: Option<bool>,
+    #[cfg(feature = "12-63-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-63-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub is_explorable: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub careful_bot: Option<bool>,
@@ -116,6 +121,8 @@ mod tests {
                     Default::default(),
                 ]),
                 is_locked: Some(true),
+                #[cfg(feature = "12-63-0")]
+                is_explorable: Some(false),
                 careful_bot: Some(true),
                 auto_accept_followed: Some(true),
                 is_bot: Some(true),
@@ -149,6 +156,8 @@ mod tests {
                 banner_id: Some(None),
                 fields: None,
                 is_locked: None,
+                #[cfg(feature = "12-63-0")]
+                is_explorable: None,
                 careful_bot: None,
                 auto_accept_followed: None,
                 is_bot: None,

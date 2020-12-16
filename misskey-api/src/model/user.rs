@@ -100,6 +100,10 @@ pub struct User {
     pub is_silenced: Option<bool>,
     #[serde(default)]
     pub is_suspended: Option<bool>,
+    #[cfg(feature = "12-63-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-63-0")))]
+    #[serde(default)]
+    pub is_explorable: Option<bool>,
     #[serde(default)]
     pub has_unread_specified_notes: Option<bool>,
     #[serde(default)]
