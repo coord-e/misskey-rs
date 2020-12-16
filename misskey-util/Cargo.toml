@@ -50,7 +50,7 @@ misskey-api = { path = "../misskey-api", version = "0.1.0", default-features = f
 futures = "0.3"
 chrono = "0.4"
 paste = "1.0"
-mime = "0.3"
+mime = "0.3.4"
 mime_guess = "2.0"
 derivative = "2.1"
 ulid_crate = { package = "ulid", version = "0.4" }
