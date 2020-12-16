@@ -62,7 +62,7 @@ mime = "0.3"
 [dev-dependencies]
 misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
 misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"] }
-misskey-test = { path = "../misskey-test" }
+misskey-test = { path = "../misskey-test", features = ["misskey-http", "misskey-websocket"] }
 tokio = { version = "0.2.22", features = ["macros", "fs", "time"] }
 ulid_crate = { package = "ulid", version = "0.4" }
 rand = "0.7"

@@ -3,8 +3,10 @@ use std::future::Future;
 use std::sync::Once;
 use std::time::Duration;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
+#[cfg(feature = "misskey-http")]
 use misskey_http::HttpClient;
+#[cfg(feature = "misskey-websocket")]
 use misskey_websocket::WebSocketClient;
 
 pub mod env {
@@ -46,27 +48,32 @@ pub fn init_logger() {
     INIT_LOGGER.call_once(env_logger::init);
 }
 
+#[cfg(feature = "misskey-http")]
 pub fn test_http_client(token: String) -> Result<HttpClient> {
     init_logger();
-
-    HttpClient::new(env::api_url(), Some(token)).context("Failed to initialize HttpClient")
+    let client = HttpClient::new(env::api_url(), Some(token))?;
+    Ok(client)
 }
 
+#[cfg(feature = "misskey-websocket")]
 pub async fn test_websocket_client(token: String) -> Result<WebSocketClient> {
     init_logger();
 
-    WebSocketClient::builder(env::websocket_url())
+    let client = WebSocketClient::builder(env::websocket_url())
         .token(token)
         .auto_reconnect()
         .connect()
-        .await
-        .context("Failed to connect with WebSocketClient")
+        .await?;
+
+    Ok(client)
 }
 
+#[cfg(feature = "misskey-http")]
 pub async fn test_client() -> Result<HttpClient> {
     test_http_client(env::token())
 }
 
+#[cfg(feature = "misskey-http")]
 pub async fn test_admin_client() -> Result<HttpClient> {
     test_http_client(env::admin_token())
 }
