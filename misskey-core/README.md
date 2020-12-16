@@ -1,7 +1,7 @@
 # misskey-core
 
-[![crates.io](cores://img.shields.io/crates/v/misskey-core?style=flat-square)](cores://crates.io/crates/misskey-core)
-[![docs.rs](cores://img.shields.io/badge/docs.rs-misskey--core-blue?style=flat-square)](cores://docs.rs/misskey-core)
+[![crates.io](https://img.shields.io/crates/v/misskey-core?style=flat-square)](https://crates.io/crates/misskey-core)
+[![docs.rs](https://img.shields.io/badge/docs.rs-misskey--core-blue?style=flat-square)](https://docs.rs/misskey-core)
 
 Core traits and types in [misskey-rs](https://crates.io/crates/misskey).
 See the [misskey-rs](https://crates.io/crates/misskey) for examples and detailed explanations.
