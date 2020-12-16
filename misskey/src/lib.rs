@@ -277,6 +277,7 @@ pub mod model {
     pub use misskey_core::model::*;
 }
 
+pub use misskey_core::streaming::StreamingClient;
 pub use misskey_core::{Client, UploadFileClient};
 
 #[cfg(feature = "http-client")]
@@ -307,7 +308,7 @@ pub mod websocket {
 pub use websocket::WebSocketClient;
 
 pub use misskey_util::{builder, pager, TimelineCursor, TimelineRange};
-pub use misskey_util::{ClientExt, UploadFileClientExt};
+pub use misskey_util::{ClientExt, StreamingClientExt, UploadFileClientExt};
 
 /// Prelude for crates using `misskey-rs`.
 ///
@@ -321,6 +322,10 @@ pub mod prelude {
     pub use crate::Client;
     #[doc(no_inline)]
     pub use crate::ClientExt as _;
+    pub use crate::StreamingClient;
+    #[doc(no_inline)]
+    pub use crate::StreamingClientExt as _;
+    pub use crate::UploadFileClient;
     #[doc(no_inline)]
     pub use crate::UploadFileClientExt as _;
 }

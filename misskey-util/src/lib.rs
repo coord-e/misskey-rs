@@ -168,6 +168,9 @@ pub use error::Error;
 mod client;
 pub use client::{ClientExt, UploadFileClientExt};
 
+mod streaming;
+pub use streaming::StreamingClientExt;
+
 pub mod builder;
 pub mod pager;
 

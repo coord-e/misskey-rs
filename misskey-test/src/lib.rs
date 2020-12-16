@@ -1,6 +1,9 @@
+use std::fmt::Display;
+use std::future::Future;
 use std::sync::Once;
+use std::time::Duration;
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use misskey_http::HttpClient;
 use misskey_websocket::WebSocketClient;
 
@@ -66,4 +69,29 @@ pub async fn test_client() -> Result<HttpClient> {
 
 pub async fn test_admin_client() -> Result<HttpClient> {
     test_http_client(env::admin_token())
+}
+
+/// ```
+/// use std::time::Duration;
+/// use tokio::time::delay_for;
+/// use misskey_test::persist;
+/// use anyhow::{anyhow, Error};
+/// #[tokio::main]
+/// async fn main() {
+///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(5)).await; Ok::<(), Error>(()) }).await.is_err());
+///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(5)).await; Err(anyhow!("whoa")) }).await.is_err());
+///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(15)).await; Ok::<(), Error>(()) }).await.is_ok());
+///     assert!(persist(Duration::from_millis(10), async { delay_for(Duration::from_millis(15)).await; Err(anyhow!("whoa")) }).await.is_ok());
+/// }
+/// ```
+pub async fn persist<T, E>(duration: Duration, future: T) -> Result<()>
+where
+    T: Future<Output = std::result::Result<(), E>>,
+    E: Display,
+{
+    match tokio::time::timeout(duration, future).await {
+        Err(_) => Ok(()),
+        Ok(Ok(())) => Err(anyhow!("unexpected success")),
+        Ok(Err(e)) => Err(anyhow!("unexpected error: {}", e)),
+    }
 }
