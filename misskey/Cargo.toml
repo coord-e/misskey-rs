@@ -49,6 +49,7 @@ http-client = ["misskey-http"]
 websocket-client = ["misskey-websocket"]
 
 tokio-runtime = ["misskey-websocket/tokio-runtime"]
+tokio02-runtime = ["misskey-websocket/tokio02-runtime"]
 async-std-runtime = ["misskey-websocket/async-std-runtime"]
 
 inspect-contents = ["misskey-http/inspect-contents", "misskey-websocket/inspect-contents"]

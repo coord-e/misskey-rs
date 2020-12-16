@@ -1,7 +1,10 @@
 use std::convert::Infallible;
 use std::sync::Arc;
 
+#[cfg(not(feature = "async-tungstenite09"))]
 use async_tungstenite::tungstenite;
+#[cfg(feature = "async-tungstenite09")]
+use async_tungstenite09::tungstenite;
 use thiserror::Error;
 
 /// Possible errors from WebSocket client.

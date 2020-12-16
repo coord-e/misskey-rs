@@ -16,8 +16,9 @@ categories = ["web-programming::websocket"]
 default = ["tokio-runtime"]
 
 inspect-contents = []
-tokio-runtime = ["tokio", "async-tungstenite/tokio-runtime"]
-async-std-runtime = ["async-std", "async-tungstenite/async-std-runtime"]
+tokio-runtime = ["tokio", "async-tungstenite", "async-tungstenite/tokio-runtime"]
+tokio02-runtime = ["tokio02", "async-tungstenite09", "async-tungstenite09/tokio-runtime"]
+async-std-runtime = ["async-std", "async-tungstenite", "async-tungstenite/async-std-runtime"]
 
 [dependencies]
 misskey-core = { path = "../misskey-core", version = "0.1.0" }
@@ -27,16 +28,19 @@ chrono = { version = "0.4.12", features = ["serde"] }
 url = "2.2.0"
 futures = "0.3"
 uuid = { version = "0.8", features = ["serde", "v4"] }
-async-tungstenite = { version = "0.10", features = ["async-tls"] }
+async-tungstenite = { version = "0.10", features = ["async-tls"], optional = true }
+async-tungstenite09 = { package = "async-tungstenite", version = "0.9", features = ["async-tls"], optional = true }
 log = "0.4"
 thiserror = "1.0.2"
 async-rwlock = "1.0"
 
 async-std = { version = "1.6.3", default-features = false, features = ["std"], optional = true }
 tokio = { version = "0.3", default-features = false, features = ["time", "rt"], optional = true }
+tokio02 = { package = "tokio", version = "0.2", default-features = false, features = ["time"], optional = true }
 
 [dev-dependencies]
 misskey-api = { path = "../misskey-api" }
 misskey-test = { path = "../misskey-test" }
 async-std = { version = "1.6.3", features = ["attributes"] }
 tokio = { version = "0.3", features = ["macros", "rt"] }
+tokio02 = { package = "tokio", version = "0.2", features = ["macros", "rt-core"] }

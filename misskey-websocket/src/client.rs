@@ -230,6 +230,9 @@ mod tests {
     use misskey_core::Client;
     use misskey_test::{self, env};
 
+    #[cfg(feature = "tokio02-runtime")]
+    use tokio02 as tokio;
+
     async fn test_client() -> WebSocketClient {
         misskey_test::init_logger();
 
@@ -253,6 +256,7 @@ mod tests {
     }
 
     #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[cfg_attr(feature = "tokio02-runtime", tokio02::test)]
     #[cfg_attr(feature = "async-std-runtime", async_std::test)]
     async fn request() {
         let client = test_client().await;
@@ -269,6 +273,7 @@ mod tests {
     }
 
     #[cfg_attr(feature = "tokio-runtime", tokio::test)]
+    #[cfg_attr(feature = "tokio02-runtime", tokio02::test)]
     #[cfg_attr(feature = "async-std-runtime", async_std::test)]
     async fn subscribe_note() {
         let client = test_client().await;

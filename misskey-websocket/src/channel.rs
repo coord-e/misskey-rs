@@ -6,9 +6,12 @@ use std::task::{Context, Poll};
 use crate::error::{Error, Result};
 use crate::model::{incoming::IncomingMessage, outgoing::OutgoingMessage};
 
-#[cfg(all(feature = "async-std-runtime", not(feature = "tokio-runtime")))]
+#[cfg(feature = "async-tungstenite09")]
+use async_tungstenite09 as async_tungstenite;
+
+#[cfg(feature = "async-std-runtime")]
 use async_tungstenite::async_std::{connect_async, ConnectStream};
-#[cfg(all(not(feature = "async-std-runtime"), feature = "tokio-runtime"))]
+#[cfg(any(feature = "tokio-runtime", feature = "tokio02-runtime"))]
 use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::{
     error::{Error as WsError, Result as WsResult},
