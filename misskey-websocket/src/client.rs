@@ -1,3 +1,4 @@
+use std::convert::TryInto;
 use std::fmt::{self, Debug};
 
 use crate::broker::{
@@ -73,7 +74,11 @@ impl WebSocketClient {
     /// All configurations are set to default.
     ///
     /// This function is identical to [`WebSocketClientBuilder::new`].
-    pub fn builder(url: Url) -> WebSocketClientBuilder {
+    pub fn builder<T>(url: T) -> WebSocketClientBuilder
+    where
+        T: TryInto<Url>,
+        T::Error: Into<Error>,
+    {
         WebSocketClientBuilder::new(url)
     }
 
@@ -230,7 +235,6 @@ mod tests {
 
         WebSocketClientBuilder::new(env::websocket_url())
             .token(env::token())
-            .auto_reconnect()
             .connect()
             .await
             .unwrap()

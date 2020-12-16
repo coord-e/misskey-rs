@@ -26,7 +26,6 @@ async fn main() -> Result<()> {
 
     // Build a client and connect to Misskey.
     let client = WebSocketClient::builder(opt.url)
-        .auto_reconnect()
         .token(opt.i)
         .connect()
         .await?;

@@ -61,7 +61,6 @@ pub async fn test_websocket_client(token: String) -> Result<WebSocketClient> {
 
     let client = WebSocketClient::builder(env::websocket_url())
         .token(token)
-        .auto_reconnect()
         .connect()
         .await?;
 

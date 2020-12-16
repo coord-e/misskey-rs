@@ -18,3 +18,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `StreamingClient`
 - Improve API of `ReconnectCondition` and `ReconnectConfig`
 - Improve API of `WebSocketClient`
+- Improve API of `WebSocketClientBuilder`
