@@ -31,7 +31,7 @@ use model::SharedBrokerState;
 pub(crate) struct Broker {
     broker_rx: ControlReceiver,
     handler: Handler,
-    reconnect: Option<ReconnectConfig>,
+    reconnect: ReconnectConfig,
     url: Url,
 }
 
@@ -180,7 +180,7 @@ impl Default for ReconnectConfig {
 impl Broker {
     pub async fn spawn(
         url: Url,
-        reconnect: Option<ReconnectConfig>,
+        reconnect: ReconnectConfig,
     ) -> Result<(ControlSender, SharedBrokerState)> {
         let state = SharedBrokerState::working();
         let shared_state = SharedBrokerState::clone(&state);
@@ -224,20 +224,20 @@ impl Broker {
 
             info!("broker: task exited with error: {:?}", err.error);
 
-            let config = match &self.reconnect {
-                Some(config) if config.condition.should_reconnect(&err.error) => config,
-                _ => {
-                    warn!("broker: died with error");
-                    return Some(err.error);
-                }
-            };
+            if !self.reconnect.condition.should_reconnect(&err.error) {
+                warn!("broker: died with error");
+                return Some(err.error);
+            }
 
-            if config.retry_send {
+            if self.reconnect.retry_send {
                 remaining_message = err.remaining_message;
             }
 
-            info!("broker: attempt to reconnect in {:?}", config.interval);
-            delay_for(config.interval).await;
+            info!(
+                "broker: attempt to reconnect in {:?}",
+                self.reconnect.interval
+            );
+            delay_for(self.reconnect.interval).await;
         }
     }
 

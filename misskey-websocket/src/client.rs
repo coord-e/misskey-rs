@@ -56,11 +56,16 @@ impl Debug for WebSocketClient {
 
 impl WebSocketClient {
     /// Connects to Misskey using WebSocket, and returns [`WebSocketClient`].
-    ///
-    /// If `reconnect` contains [`ReconnectConfig`],
-    /// then the returned client will automatically reconnect on disconnection.
-    pub async fn connect(url: Url, reconnect: Option<ReconnectConfig>) -> Result<WebSocketClient> {
-        let (broker_tx, state) = Broker::spawn(url, reconnect).await?;
+    pub async fn connect(url: Url) -> Result<WebSocketClient> {
+        WebSocketClient::connect_with_config(url, ReconnectConfig::default()).await
+    }
+
+    /// Connects to Misskey using WebSocket with a given reconnect configuration, and returns [`WebSocketClient`].
+    pub async fn connect_with_config(
+        url: Url,
+        reconnect_config: ReconnectConfig,
+    ) -> Result<WebSocketClient> {
+        let (broker_tx, state) = Broker::spawn(url, reconnect_config).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 

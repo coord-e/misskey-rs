@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Adjust lifetime specification of request methods
 - Implement `StreamingClient`
 - Improve API of `ReconnectCondition` and `ReconnectConfig`
+- Improve API of `WebSocketClient`

@@ -91,6 +91,10 @@ impl WebSocketClientBuilder {
             url.query_pairs_mut().append_pair("i", token);
         }
 
-        WebSocketClient::connect(url, self.reconnect.clone()).await
+        if let Some(config) = &self.reconnect {
+            WebSocketClient::connect_with_config(url, config.clone()).await
+        } else {
+            WebSocketClient::connect(url).await
+        }
     }
 }
