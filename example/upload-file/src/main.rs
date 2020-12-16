@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
 
     // Create `HttpClient`.
     // Note that `HttpClient` can upload files while `WebSocketClient` can't.
-    let client = HttpClient::new(opt.url, Some(opt.i))?;
+    let client = HttpClient::with_token(opt.url, opt.i)?;
 
     // Upload a file to drive
     let mut builder = client.build_file(&opt.file);

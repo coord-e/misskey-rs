@@ -147,7 +147,7 @@ pub mod endpoint {
     //! # use misskey::{Client, HttpClient};
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = HttpClient::new("http://your.instance.example/api/".parse()?, Some("API_TOKEN".to_string()))?;
+    //! # let client = HttpClient::with_token("http://your.instance.example/api/".parse()?, "API_TOKEN")?;
     //! client
     //!     .request(
     //!         // Each endpoint implementation has a corresponding `Request` type.
@@ -175,7 +175,7 @@ pub mod endpoint {
     //! # use misskey::{Client, HttpClient};
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {
-    //! # let client = HttpClient::new("http://your.instance.example/api/".parse()?, Some("API_TOKEN".to_string()))?;
+    //! # let client = HttpClient::with_token("http://your.instance.example/api/".parse()?, "API_TOKEN")?;
     //!     let me = client
     //!         .request(misskey::endpoint::i::Request::default())
     //!         .await?

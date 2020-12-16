@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     let opt = Opt::from_args();
 
     // Create `HttpClient` with token `opt.i`
-    let client = HttpClient::new(opt.url, Some(opt.i))?;
+    let client = HttpClient::with_token(opt.url, opt.i)?;
 
     // Create a note containing `opt.text` as a text
     client.create_note(opt.text).await?;

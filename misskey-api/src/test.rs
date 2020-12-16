@@ -52,7 +52,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
 
         (
             res.user,
-            HttpClient::new(env::api_url(), Some(res.token)).unwrap(),
+            HttpClient::with_token(env::api_url(), res.token).unwrap(),
         )
     }
 
