@@ -6,7 +6,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-18.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +50,7 @@ jobs:
   test_api:
     name: Test misskey-api and misskey-util
     runs-on: ubuntu-18.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       matrix:
         include:
