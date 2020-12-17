@@ -49,6 +49,7 @@ http-client = ["misskey-http"]
 websocket-client = ["misskey-websocket"]
 
 tokio-runtime = ["misskey-websocket/tokio-runtime"]
+tokio02-runtime = ["misskey-websocket/tokio02-runtime"]
 async-std-runtime = ["misskey-websocket/async-std-runtime"]
 
 inspect-contents = ["misskey-http/inspect-contents", "misskey-websocket/inspect-contents"]
@@ -61,7 +62,7 @@ misskey-websocket = { path = "../misskey-websocket", version = "0.1.0", default-
 misskey-http = { path = "../misskey-http", version = "0.1.0", default-features = false, optional = true }
 
 [dev-dependencies]
-tokio = { version = "0.2", features = ["macros", "rt-core"] }
+tokio = { version = "0.3", features = ["macros", "rt"] }
 anyhow = "1.0"
 futures = "0.3"
 

@@ -64,12 +64,17 @@ mod tests {
 
     #[tokio::test]
     async fn request_image() {
+        use futures::io::AsyncReadExt;
+
         let client = TestClient::new();
         let image_url = client.avatar_url().await;
-        let image_data = reqwest::get(image_url)
+        let mut image_data = Vec::new();
+        // TODO: uncomfortable conversion from `Url` to `Uri`
+        isahc::get_async(image_url.to_string())
             .await
             .unwrap()
-            .bytes()
+            .body_mut()
+            .read_to_end(&mut image_data)
             .await
             .unwrap();
 
