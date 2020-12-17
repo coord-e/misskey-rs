@@ -22,6 +22,8 @@ use misskey_api::{OffsetPaginationRequest, PaginationItem, PaginationRequest};
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request};
 
+const DEFAULT_PAGE_SIZE: u8 = 30;
+
 enum PagerState<'a, C: Client + ?Sized, R: Request> {
     Pending {
         request: R,
@@ -42,8 +44,9 @@ impl<'a, C: Client + ?Sized, R: PaginationRequest> BackwardPager<'a, C, R> {
     pub(crate) fn with_since_id(
         client: &'a C,
         since_id: Option<<R::Item as PaginationItem>::Id>,
-        request: R,
+        mut request: R,
     ) -> Self {
+        request.set_limit(DEFAULT_PAGE_SIZE);
         BackwardPager {
             client,
             since_id,
@@ -54,13 +57,7 @@ impl<'a, C: Client + ?Sized, R: PaginationRequest> BackwardPager<'a, C, R> {
     }
 
     pub(crate) fn new(client: &'a C, request: R) -> Self {
-        BackwardPager {
-            client,
-            since_id: None,
-            state: Some(PagerState::Ready {
-                next_request: request,
-            }),
-        }
+        BackwardPager::with_since_id(client, None, request)
     }
 }
 
@@ -153,7 +150,8 @@ pub(crate) struct ForwardPager<'a, C: Client + ?Sized, R: Request> {
 }
 
 impl<'a, C: Client + ?Sized, R: PaginationRequest> ForwardPager<'a, C, R> {
-    pub(crate) fn new(client: &'a C, request: R) -> Self {
+    pub(crate) fn new(client: &'a C, mut request: R) -> Self {
+        request.set_limit(DEFAULT_PAGE_SIZE);
         ForwardPager {
             client,
             state: Some(PagerState::Ready {
@@ -246,7 +244,8 @@ pub(crate) struct OffsetPager<'a, C: Client + ?Sized, R: Request> {
 }
 
 impl<'a, C: Client + ?Sized, R: OffsetPaginationRequest> OffsetPager<'a, C, R> {
-    pub(crate) fn new(client: &'a C, request: R) -> Self {
+    pub(crate) fn new(client: &'a C, mut request: R) -> Self {
+        request.set_limit(DEFAULT_PAGE_SIZE);
         OffsetPager {
             client,
             state: Some(PagerState::Ready {
