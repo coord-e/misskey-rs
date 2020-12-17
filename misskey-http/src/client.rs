@@ -96,16 +96,26 @@ impl HttpClient {
             Ok(ValueOrRequest::Request(request))
         }
     }
+
+    fn make_url<R: Request>(&self) -> Result<Url> {
+        let mut url = self.url.clone();
+        if let Ok(mut segments) = url.path_segments_mut() {
+            segments.pop_if_empty();
+            for segment in R::ENDPOINT.split('/') {
+                segments.push(segment);
+            }
+        } else {
+            return self.url.join(R::ENDPOINT).map_err(Into::into);
+        }
+        Ok(url)
+    }
 }
 
 impl Client for HttpClient {
     type Error = Error;
 
     fn request<R: Request>(&self, request: R) -> BoxFuture<Result<ApiResult<R::Response>>> {
-        let url = self
-            .url
-            .join(R::ENDPOINT)
-            .expect("Request::ENDPOINT must be a fragment of valid URL");
+        let url = self.make_url::<R>();
 
         // limit the use of `R` value to the outside of `async`
         // in order not to require `Send` on `R`
@@ -114,6 +124,7 @@ impl Client for HttpClient {
             .and_then(|b| serde_json::to_vec(&b));
 
         Box::pin(async move {
+            let url = url?;
             let body = body?;
 
             #[cfg(feature = "inspect-contents")]
@@ -152,16 +163,14 @@ impl UploadFileClient for HttpClient {
         R: UploadFileRequest,
         T: std::io::Read + Send + Sync + 'static,
     {
-        let url = self
-            .url
-            .join(R::ENDPOINT)
-            .expect("Request::ENDPOINT must be a fragment of valid URL");
+        let url = self.make_url::<R>();
 
         // limit the use of `R` value to the outside of `async`
         // in order not to require `Send` on `R`
         let value = self.set_api_key(request).and_then(value::to_value);
 
         Box::pin(async move {
+            let url = url?;
             let value = value?;
 
             #[cfg(feature = "inspect-contents")]
@@ -262,6 +271,22 @@ mod tests {
     fn test_sync() {
         fn assert_send<T: Sync>() {}
         assert_send::<HttpClient>();
+    }
+
+    #[tokio::test]
+    async fn test_url_without_trailing_slash() {
+        let mut url = env::api_url().to_string();
+        assert_eq!(url.pop(), Some('/'));
+        let client = HttpClient::with_token(url.parse().unwrap(), env::token()).unwrap();
+        client
+            .request(
+                misskey_api::endpoint::notes::create::Request::builder()
+                    .text("hi")
+                    .build(),
+            )
+            .await
+            .unwrap()
+            .unwrap();
     }
 
     #[tokio::test]

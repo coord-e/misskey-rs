@@ -99,7 +99,7 @@
 //!
 //! ```toml
 //! [dependencies.misskey]
-//! version = "0.1"
+//! version = "0.2"
 //! default-features = false
 //! features = ["12-31-0", "websocket-client", "async-std-runtime", "aid"]
 //! ```
@@ -196,6 +196,7 @@ pub mod endpoint {
     // by specifying `no_inline` as a workaround.
     #[doc(no_inline)]
     pub use misskey_api::endpoint::*;
+    pub use misskey_api::{OffsetPaginationRequest, PaginationRequest};
     pub use misskey_core::{Request, UploadFileRequest};
 }
 
@@ -303,6 +304,7 @@ pub mod model {
     //! Object types used in API.
 
     pub use misskey_api::model::*;
+    pub use misskey_api::{Entity, EntityRef, PaginationItem};
     pub use misskey_core::model::*;
 }
 
@@ -336,7 +338,7 @@ pub mod websocket {
 #[cfg_attr(docsrs, doc(cfg(feature = "websocket-client")))]
 pub use websocket::WebSocketClient;
 
-pub use misskey_util::{builder, pager, TimelineCursor, TimelineRange};
+pub use misskey_util::{builder, pager, Error, TimelineCursor, TimelineRange};
 pub use misskey_util::{ClientExt, StreamingClientExt, UploadFileClientExt};
 
 /// Prelude for crates using `misskey-rs`.

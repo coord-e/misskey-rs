@@ -1,12 +1,12 @@
 [package]
 name = "misskey-core"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
 repository = "https://github.com/coord-e/misskey-rs.git"
 homepage = "https://github.com/coord-e/misskey-rs"
 description = "Core traits and types in misskey-rs"
-documentation = "https://docs.rs/misskey-core/0.1.0"
+documentation = "https://docs.rs/misskey-core/0.2.0"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["async", "client", "misskey"]

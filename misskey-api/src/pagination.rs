@@ -1,5 +1,8 @@
+/// Paginated item type in [`PaginationRequest`].
 pub trait PaginationItem {
+    /// The ID type.
     type Id: Ord;
+    /// Extracts an ID from the item.
     fn item_id(&self) -> Self::Id;
 }
 

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [0.2.0] - 2020-12-17
+
 ### Changed
 
 - Follow changes of `Client` in `misskey-core`
@@ -15,3 +24,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Take `io::Read` instead of file path in file uploads
 - Stop taking the token as `Option` in the constructor and provide a separate method.
 - Improve API of `HttpClientBuilder`
+- Accept URL without trailing `/`
