@@ -6,7 +6,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-18.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
