@@ -50,6 +50,10 @@ impl crate::PaginationRequest for RequestWithUserId {
     fn set_until_id(&mut self, id: Id<User>) {
         self.until_id.replace(id);
     }
+
+    fn set_limit(&mut self, limit: u8) {
+        self.limit.replace(limit);
+    }
 }
 
 #[derive(Serialize, Debug, Clone, TypedBuilder)]
@@ -86,6 +90,10 @@ impl crate::PaginationRequest for RequestWithUsername {
 
     fn set_until_id(&mut self, id: Id<User>) {
         self.until_id.replace(id);
+    }
+
+    fn set_limit(&mut self, limit: u8) {
+        self.limit.replace(limit);
     }
 }
 

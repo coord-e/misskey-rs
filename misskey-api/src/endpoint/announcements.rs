@@ -54,6 +54,10 @@ impl crate::PaginationRequest for Request {
     fn set_until_id(&mut self, id: Id<Announcement>) {
         self.until_id.replace(id);
     }
+
+    fn set_limit(&mut self, limit: u8) {
+        self.limit.replace(limit);
+    }
 }
 
 #[cfg(test)]
