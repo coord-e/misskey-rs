@@ -19,6 +19,9 @@ macro_rules! impl_pagination {
             fn set_until_id(&mut self, until_id: <$item as crate::PaginationItem>::Id) {
                 self.until_id.replace(until_id);
             }
+            fn set_limit(&mut self, limit: u8) {
+                self.limit.replace(limit);
+            }
         }
     };
 }
@@ -29,6 +32,9 @@ macro_rules! impl_offset_pagination {
             type Item = $item;
             fn set_offset(&mut self, offset: u64) {
                 self.offset.replace(offset);
+            }
+            fn set_limit(&mut self, limit: u8) {
+                self.limit.replace(limit);
             }
         }
     };

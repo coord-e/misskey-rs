@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.62.2
 - `notes/reactions` endpoint
 - `NoteReaction` entity
+- `PaginationRequest::set_limit` and `OffsetPaginationRequest::set_limit` to give access to the `limit` field
 
 ### Changed
 

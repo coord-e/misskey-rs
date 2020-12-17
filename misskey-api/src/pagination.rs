@@ -12,6 +12,8 @@ pub trait PaginationRequest: misskey_core::Request {
     fn set_since_id(&mut self, since_id: <Self::Item as PaginationItem>::Id);
     /// Sets the `until_id` field of the request.
     fn set_until_id(&mut self, until_id: <Self::Item as PaginationItem>::Id);
+    /// Sets the `limit` field of the request.
+    fn set_limit(&mut self, limit: u8);
 }
 
 impl<R: ?Sized> PaginationRequest for &'_ mut R
@@ -25,6 +27,9 @@ where
     }
     fn set_until_id(&mut self, until_id: <Self::Item as PaginationItem>::Id) {
         R::set_until_id(self, until_id)
+    }
+    fn set_limit(&mut self, limit: u8) {
+        R::set_limit(self, limit)
     }
 }
 
@@ -40,6 +45,9 @@ where
     fn set_until_id(&mut self, until_id: <Self::Item as PaginationItem>::Id) {
         R::set_until_id(self, until_id)
     }
+    fn set_limit(&mut self, limit: u8) {
+        R::set_limit(self, limit)
+    }
 }
 
 /// [`Request`][`misskey_core::Request`] that can be paginated via `offset`.
@@ -49,6 +57,8 @@ pub trait OffsetPaginationRequest: misskey_core::Request {
 
     /// Sets the `offset` field of the request.
     fn set_offset(&mut self, offset: u64);
+    /// Sets the `limit` field of the request.
+    fn set_limit(&mut self, limit: u8);
 }
 
 impl<R: ?Sized> OffsetPaginationRequest for &'_ mut R
@@ -60,6 +70,9 @@ where
     fn set_offset(&mut self, offset: u64) {
         R::set_offset(self, offset)
     }
+    fn set_limit(&mut self, limit: u8) {
+        R::set_limit(self, limit)
+    }
 }
 
 impl<R: ?Sized> OffsetPaginationRequest for Box<R>
@@ -70,5 +83,8 @@ where
 
     fn set_offset(&mut self, offset: u64) {
         R::set_offset(self, offset)
+    }
+    fn set_limit(&mut self, limit: u8) {
+        R::set_limit(self, limit)
     }
 }
