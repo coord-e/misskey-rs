@@ -8,12 +8,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use thiserror::Error;
 
-#[cfg(any(test, feature = "aid"))]
-mod aid;
-#[cfg(any(test, feature = "meid"))]
-mod meid;
-#[cfg(any(test, feature = "objectid"))]
-mod object_id;
+pub mod aid;
+pub mod meid;
+pub mod object_id;
 
 #[cfg(feature = "aid")]
 type IdImpl = aid::Aid;
@@ -27,6 +24,60 @@ type IdImpl = object_id::ObjectId;
 pub struct Id<T: ?Sized> {
     inner: IdImpl,
     _marker: PhantomData<fn() -> T>,
+}
+
+impl<T: ?Sized> Id<T> {
+    #[cfg(any(docsrs, feature = "aid"))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "aid")))]
+    pub fn as_aid(&self) -> &aid::Aid {
+        &self.inner
+    }
+
+    #[cfg(any(docsrs, feature = "meid"))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "meid")))]
+    pub fn as_meid(&self) -> &meid::Meid {
+        &self.inner
+    }
+
+    #[cfg(any(docsrs, feature = "ulid"))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "ulid")))]
+    pub fn as_ulid(&self) -> &ulid_crate::Ulid {
+        &self.inner
+    }
+
+    #[cfg(any(docsrs, feature = "objectid"))]
+    #[cfg_attr(docsrs, doc(cfg(feature = "objectid")))]
+    pub fn as_object_id(&self) -> &object_id::ObjectId {
+        &self.inner
+    }
+}
+
+#[cfg(feature = "aid")]
+impl<T: ?Sized> From<Id<T>> for aid::Aid {
+    fn from(id: Id<T>) -> aid::Aid {
+        *id.as_aid()
+    }
+}
+
+#[cfg(feature = "meid")]
+impl<T: ?Sized> From<Id<T>> for meid::Meid {
+    fn from(id: Id<T>) -> meid::Meid {
+        *id.as_meid()
+    }
+}
+
+#[cfg(feature = "ulid")]
+impl<T: ?Sized> From<Id<T>> for ulid_crate::Ulid {
+    fn from(id: Id<T>) -> ulid_crate::Ulid {
+        *id.as_ulid()
+    }
+}
+
+#[cfg(feature = "objectid")]
+impl<T: ?Sized> From<Id<T>> for object_id::ObjectId {
+    fn from(id: Id<T>) -> object_id::ObjectId {
+        *id.as_object_id()
+    }
 }
 
 // `derive` fails to infer correct trait bounds on phantom type parameter,

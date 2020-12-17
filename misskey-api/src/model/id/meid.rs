@@ -7,9 +7,9 @@ use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Meid {
-    timestamp: i64,
-    // 0 - 2^48
-    random: u64,
+    pub timestamp: i64,
+    /// 0 - 2^48
+    pub random: u64,
 }
 
 impl Meid {

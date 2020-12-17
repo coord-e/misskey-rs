@@ -7,8 +7,8 @@ use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ObjectId {
-    timestamp: u32,
-    random: u64,
+    pub timestamp: u32,
+    pub random: u64,
 }
 
 impl ObjectId {
