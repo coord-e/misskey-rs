@@ -32,7 +32,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-misskey = "0.1"
+misskey = "0.2"
 ```
 
 See the [API documentation](https://docs.rs/misskey) for further details.

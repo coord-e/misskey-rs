@@ -1,12 +1,12 @@
 [package]
 name = "misskey"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["coord.e <me@coord-e.com>"]
 edition = "2018"
 repository = "https://github.com/coord-e/misskey-rs.git"
 homepage = "https://github.com/coord-e/misskey-rs"
 description = "Asynchronous client for Misskey"
-documentation = "https://docs.rs/misskey/0.1.0"
+documentation = "https://docs.rs/misskey/0.2.0"
 readme = "../README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["async", "http", "websocket", "client", "misskey"]
@@ -56,11 +56,11 @@ async-std-runtime = ["misskey-websocket/async-std-runtime"]
 inspect-contents = ["misskey-http/inspect-contents", "misskey-websocket/inspect-contents"]
 
 [dependencies]
-misskey-core = { path = "../misskey-core", version = "0.1.0" }
+misskey-core = { path = "../misskey-core", version = "0.2.0" }
 misskey-util = { path = "../misskey-util", version = "0.1.0", default-features = false }
-misskey-api = { path = "../misskey-api", version = "0.1.0", default-features = false }
-misskey-websocket = { path = "../misskey-websocket", version = "0.1.0", default-features = false, optional = true }
-misskey-http = { path = "../misskey-http", version = "0.1.0", default-features = false, optional = true }
+misskey-api = { path = "../misskey-api", version = "0.2.0", default-features = false }
+misskey-websocket = { path = "../misskey-websocket", version = "0.2.0", default-features = false, optional = true }
+misskey-http = { path = "../misskey-http", version = "0.2.0", default-features = false, optional = true }
 
 [dev-dependencies]
 tokio = { version = "0.3", features = ["macros", "rt"] }
