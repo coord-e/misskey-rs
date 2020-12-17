@@ -10,7 +10,7 @@ services:
     build:
       context: web
       args:
-        MISSKEY_VERSION: ${MISSKEY_VERSION:?}
+        MISSKEY_IMAGE: ${MISSKEY_IMAGE:?}
         MISSKEY_ID: ${MISSKEY_ID:?}
     depends_on:
       - db
