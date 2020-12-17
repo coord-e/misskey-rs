@@ -11,8 +11,8 @@ use crate::model::{ApiRequestId, SubNoteId};
 
 use futures::{
     future::{BoxFuture, FutureExt, TryFutureExt},
-    sink::SinkExt,
-    stream::{BoxStream, StreamExt},
+    sink::{Sink, SinkExt},
+    stream::{BoxStream, Stream, StreamExt},
 };
 use misskey_core::model::ApiResult;
 use misskey_core::{
@@ -84,8 +84,10 @@ impl WebSocketClient {
 
     /// Captures the note specified by `id`.
     ///
-    /// The returned [`SubNote`] implements [`Stream`][`futures::Stream`]
+    /// The returned [`SubNote`] implements [`Stream`][stream]
     /// so that note events can be retrieved asynchronously via it.
+    ///
+    /// [stream]: futures::stream::Stream
     pub fn subnote<E, Id>(&self, note_id: Id) -> BoxFuture<'static, Result<SubNote<E>>>
     where
         E: misskey_core::streaming::SubNoteEvent,
@@ -101,8 +103,11 @@ impl WebSocketClient {
 
     /// Connects to the channel using `request`.
     ///
-    /// The returned [`Channel`] implements [`Stream`][`futures::Stream`] and [`Sink`][`futures::Sink`]
+    /// The returned [`Channel`] implements [`Stream`][stream] and [`Sink`][sink]
     /// so that you can exchange messages with channels on it.
+    ///
+    /// [stream]: futures::stream::Stream
+    /// [sink]: futures::sink::Sink
     pub fn channel<R>(
         &self,
         request: R,
@@ -119,8 +124,10 @@ impl WebSocketClient {
 
     /// Receive messages from the broadcast stream.
     ///
-    /// The returned [`Broadcast`] implements [`Stream`][`futures::Stream`]
+    /// The returned [`Broadcast`] implements [`Stream`][stream]
     /// so that broadcast events can be retrieved asynchronously via it.
+    ///
+    /// [stream]: futures::stream::Stream
     pub fn broadcast<E>(&self) -> BoxFuture<'static, Result<Broadcast<E>>>
     where
         E: misskey_core::streaming::BroadcastEvent,
@@ -168,7 +175,7 @@ impl Client for WebSocketClient {
 
 fn boxed_stream_sink<'a, I, O, E, S>(s: S) -> BoxStreamSink<'a, I, O, E>
 where
-    S: futures::Stream<Item = std::result::Result<I, E>> + futures::Sink<O, Error = E> + Send + 'a,
+    S: Stream<Item = std::result::Result<I, E>> + Sink<O, Error = E> + Send + 'a,
 {
     Box::pin(s)
 }
