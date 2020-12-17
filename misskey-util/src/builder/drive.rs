@@ -138,12 +138,11 @@ where
     ///
     /// # Note on the use of main stream
     ///
-    /// This method is implemented by discarding all other events until the main stream
-    /// notifies us of completion. And the main stream is shared on the server side, if the main
-    /// stream is used outside of this method, events that were intended to be read by the main
-    /// stream would be unintentionally consumed by this method. For this reason, we recommend using
-    /// this method only in simple use cases where the main stream is not being used elsewhere at
-    /// this time.
+    /// This method is implemented by waiting for the upload completion event in the main stream.
+    /// However, it is currently not possible to have multiple connections to the main stream from
+    /// the same client. Therefore, when you use this method, you must not not be connected to the
+    /// main stream elsewhere. Likewise, you will not be able to connect to the main stream until
+    /// this method is completed.
     pub async fn upload_and_wait(&self) -> Result<DriveFile, Error<<C as Client>::Error>> {
         let expected_marker = self.marker.clone();
         self.client

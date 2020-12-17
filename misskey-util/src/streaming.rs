@@ -84,6 +84,9 @@ pub trait StreamingClientExt: StreamingClient + Sync {
 
     /// Returns a stream to receive the events from the main stream.
     ///
+    /// Note that currently it is not possible to have multiple connections to the main stream from
+    /// the same client. If you try to do so, the `Future` returned by this method will not complete.
+    ///
     /// # Examples
     ///
     /// ```
@@ -139,6 +142,9 @@ pub trait StreamingClientExt: StreamingClient + Sync {
 
     /// Returns a stream to receive the notes in the home timeline.
     ///
+    /// Note that currently it is not possible to have multiple connections to the home timeline from
+    /// the same client. If you try to do so, the `Future` returned by this method will not complete.
+    ///
     /// # Examples
     ///
     /// ```
@@ -187,6 +193,9 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     }
 
     /// Returns a stream to receive the notes in the local timeline.
+    ///
+    /// Note that currently it is not possible to have multiple connections to the local timeline from
+    /// the same client. If you try to do so, the `Future` returned by this method will not complete.
     fn local_timeline(
         &self,
     ) -> BoxFuture<Result<BoxStream<Result<Note, Error<Self::Error>>>, Error<Self::Error>>> {
@@ -204,6 +213,9 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     }
 
     /// Returns a stream to receive the notes in the social timeline.
+    ///
+    /// Note that currently it is not possible to have multiple connections to the social timeline from
+    /// the same client. If you try to do so, the `Future` returned by this method will not complete.
     fn social_timeline(
         &self,
     ) -> BoxFuture<Result<BoxStream<Result<Note, Error<Self::Error>>>, Error<Self::Error>>> {
@@ -221,6 +233,9 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     }
 
     /// Returns a stream to receive the notes in the global timeline.
+    ///
+    /// Note that currently it is not possible to have multiple connections to the global timeline from
+    /// the same client. If you try to do so, the `Future` returned by this method will not complete.
     fn global_timeline(
         &self,
     ) -> BoxFuture<Result<BoxStream<Result<Note, Error<Self::Error>>>, Error<Self::Error>>> {
