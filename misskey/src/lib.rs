@@ -85,7 +85,7 @@
 //!   Enabled by default.
 //! - `meid`: Assume that the `meid` ID generation method is used in the targeted Misskey instance.
 //! - `ulid`: Assume that the `ulid` ID generation method is used in the targeted Misskey instance.
-//! - `objectid`: Assume that the `ulid` ID generation method is used in the targeted Misskey instance.
+//! - `objectid`: Assume that the `objectid` ID generation method is used in the targeted Misskey instance.
 //! - and version flags, as described in [version flags section](#specifying-misskey-version).
 //!
 //! ## Specifying Misskey version
