@@ -36,7 +36,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_VERSION: '12.62.2'
+          MISSKEY_IMAGE: 'misskey/misskey@sha256:9c13b1d240cef6f96aa19d133f0ddc5a927d7b8206b8656b940f3dc645ca0dbe'
           MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 5
@@ -54,53 +54,55 @@ jobs:
     strategy:
       matrix:
         include:
-          - version: '12.62.2'
+          - image: 'misskey/misskey@sha256:9c13b1d240cef6f96aa19d133f0ddc5a927d7b8206b8656b940f3dc645ca0dbe'
+            flags: --no-default-features --features 12-63-0
+          - image: 'misskey/misskey:12.62.2'
             flags: --no-default-features --features 12-62-2
-          - version: '12.62.0'
+          - image: 'misskey/misskey:12.62.0'
             flags: --no-default-features --features 12-62-0
-          - version: '12.61.0'
+          - image: 'misskey/misskey:12.61.0'
             flags: --no-default-features --features 12-61-0
-          - version: '12.60.0'
+          - image: 'misskey/misskey:12.60.0'
             flags: --no-default-features --features 12-60-0
-          - version: '12.58.0'
+          - image: 'misskey/misskey:12.58.0'
             flags: --no-default-features --features 12-58-0
-          - version: '12.57.1'
+          - image: 'misskey/misskey:12.57.1'
             flags: --no-default-features --features 12-57-0
-          - version: '12.55.0'
+          - image: 'misskey/misskey:12.55.0'
             flags: --no-default-features --features 12-55-0
-          - version: '12.51.0'
+          - image: 'misskey/misskey:12.51.0'
             flags: --no-default-features --features 12-51-0
-          - version: '12.49.0'
+          - image: 'misskey/misskey:12.49.0'
             flags: --no-default-features --features 12-49-0
-          - version: '12.48.0'
+          - image: 'misskey/misskey:12.48.0'
             flags: --no-default-features --features 12-48-0
-          - version: '12.47.1'
+          - image: 'misskey/misskey:12.47.1'
             flags: --no-default-features --features 12-47-0
-          - version: '12.42.0'
+          - image: 'misskey/misskey:12.42.0'
             flags: --no-default-features --features 12-42-0
-          - version: '12.39.0'
+          - image: 'misskey/misskey:12.39.0'
             flags: --no-default-features --features 12-39-0
-          - version: '12.37.0'
+          - image: 'misskey/misskey:12.37.0'
             flags: --no-default-features --features 12-37-0
-          - version: '12.31.0'
+          - image: 'misskey/misskey:12.31.0'
             flags: --no-default-features --features 12-31-0
-          - version: '12.29.0'
+          - image: 'misskey/misskey:12.29.0'
             flags: --no-default-features --features 12-29-0
-          - version: '12.28.0'
+          - image: 'misskey/misskey:12.28.0'
             flags: --no-default-features --features 12-27-0
-          - version: '12.20.0'
+          - image: 'misskey/misskey:12.20.0'
             flags: --no-default-features --features 12-19-0
-          - version: '12.13.0'
+          - image: 'misskey/misskey:12.13.0'
             flags: --no-default-features --features 12-13-0
-          - version: '12.10.0'
+          - image: 'misskey/misskey:12.10.0'
             flags: --no-default-features --features 12-10-0
-          - version: '12.9.0'
+          - image: 'misskey/misskey:12.9.0'
             flags: --no-default-features --features 12-9-0
-          - version: '12.8.0'
+          - image: 'misskey/misskey:12.8.0'
             flags: --no-default-features --features 12-8-0
-          - version: '12.5.0'
+          - image: 'misskey/misskey:12.5.0'
             flags: --no-default-features --features 12-5-0
-          - version: '12.0.0'
+          - image: 'misskey/misskey:12.0.0'
             flags: --no-default-features
     steps:
       - uses: actions/checkout@master
@@ -130,7 +132,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_VERSION: ${{ matrix.version }}
+          MISSKEY_IMAGE: ${{ matrix.image }}
           MISSKEY_ID: aid
       - name: Test misskey-api
         uses: actions-rs/cargo@v1
@@ -186,7 +188,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_VERSION: 12.0.0
+          MISSKEY_IMAGE: 'misskey/misskey:12.0.0'
           MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 3
@@ -228,7 +230,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_VERSION: 12.47.1
+          MISSKEY_IMAGE: 'misskey/misskey:12.47.1'
           MISSKEY_ID: ${{ matrix.method }}
       - uses: actions-rs/cargo@v1
         timeout-minutes: 5

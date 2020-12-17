@@ -140,6 +140,11 @@ impl<C> MeUpdateBuilder<C> {
         /// Sets whether this user is locked or not.
         pub locked { is_locked };
 
+        /// Sets whether this user is visible in "Explore" section of the instance.
+        #[cfg(feature = "12-63-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-63-0")))]
+        pub explorable { is_explorable };
+
         /// Sets whether this user requires a follow request from bots.
         pub require_follow_request_for_bot { careful_bot };
 
