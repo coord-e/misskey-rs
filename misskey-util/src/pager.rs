@@ -11,6 +11,7 @@ use std::collections::VecDeque;
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use std::time::{Duration, Instant};
 
 use crate::Error;
 
@@ -18,6 +19,7 @@ use futures::{
     future::{BoxFuture, FutureExt},
     stream::{FusedStream, Stream, StreamExt},
 };
+use futures_timer::Delay;
 use misskey_api::{OffsetPaginationRequest, PaginationItem, PaginationRequest};
 use misskey_core::model::ApiResult;
 use misskey_core::{Client, Request};
@@ -401,17 +403,29 @@ pub type BoxPager<'a, C, T> = Pin<
     >,
 >;
 
+enum PagerStreamState<P: Pager> {
+    Ready {
+        item: P::Content,
+        buffer: VecDeque<P::Content>,
+        last_fetch: Instant,
+    },
+    Fetch,
+    Wait(Delay),
+}
+
 /// A stream of elements in [`Pager`].
 pub struct PagerStream<P: Pager> {
     pager: P,
-    buffer: VecDeque<P::Content>,
+    minimum_interval: Duration,
+    state: Option<PagerStreamState<P>>,
 }
 
 impl<P: Pager> PagerStream<P> {
     pub(crate) fn new(pager: P) -> Self {
         PagerStream {
             pager,
-            buffer: VecDeque::new(),
+            minimum_interval: Duration::new(0, 0),
+            state: Some(PagerStreamState::Fetch),
         }
     }
 
@@ -421,6 +435,14 @@ impl<P: Pager> PagerStream<P> {
         P: Unpin,
     {
         Pin::new(&mut self.pager).set_page_size(size);
+    }
+
+    /// Sets the minimum time interval between pagination.
+    ///
+    /// It is recommended to set this to reduce the load on the
+    /// server if you expect a lot of pagination.
+    pub fn set_interval(&mut self, minimum_interval: Duration) {
+        self.minimum_interval = minimum_interval;
     }
 
     /// Returns the inner pager.
@@ -437,13 +459,61 @@ where
     type Item = Result<P::Content, Error<<P::Client as Client>::Error>>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        if let Some(item) = self.buffer.pop_front() {
-            Poll::Ready(Some(Ok(item)))
-        } else if let Some(page) = futures::ready!(self.pager.poll_next_unpin(cx)) {
-            self.buffer.extend(page?);
-            Poll::Ready(self.buffer.pop_front().map(Ok))
-        } else {
-            Poll::Ready(None)
+        let state = self.state.take();
+        match state {
+            Some(PagerStreamState::Ready {
+                item,
+                mut buffer,
+                last_fetch,
+            }) => {
+                if let Some(next) = buffer.pop_front() {
+                    self.state = Some(PagerStreamState::Ready {
+                        item: next,
+                        buffer,
+                        last_fetch,
+                    });
+                } else {
+                    let until = last_fetch + self.minimum_interval;
+                    if let Some(duration) = until.checked_duration_since(Instant::now()) {
+                        self.state = Some(PagerStreamState::Wait(Delay::new(duration)));
+                    } else {
+                        self.state = Some(PagerStreamState::Fetch);
+                    }
+                }
+                Poll::Ready(Some(Ok(item)))
+            }
+            Some(PagerStreamState::Fetch) => match self.pager.poll_next_unpin(cx) {
+                Poll::Pending => {
+                    self.state = Some(PagerStreamState::Fetch);
+                    Poll::Pending
+                }
+                Poll::Ready(None) => Poll::Ready(None),
+                Poll::Ready(Some(Err(err))) => Poll::Ready(Some(Err(err))),
+                Poll::Ready(Some(Ok(page))) => {
+                    let mut buffer: VecDeque<_> = page.into();
+                    if let Some(item) = buffer.pop_front() {
+                        self.state = Some(PagerStreamState::Ready {
+                            item,
+                            buffer,
+                            last_fetch: Instant::now(),
+                        });
+                        self.poll_next(cx)
+                    } else {
+                        Poll::Ready(None)
+                    }
+                }
+            },
+            Some(PagerStreamState::Wait(mut delay)) => match delay.poll_unpin(cx) {
+                Poll::Pending => {
+                    self.state = Some(PagerStreamState::Wait(delay));
+                    Poll::Pending
+                }
+                Poll::Ready(()) => {
+                    self.state = Some(PagerStreamState::Fetch);
+                    self.poll_next(cx)
+                }
+            },
+            None => Poll::Ready(None),
         }
     }
 }
@@ -454,6 +524,6 @@ where
     P::Content: Unpin + std::fmt::Debug,
 {
     fn is_terminated(&self) -> bool {
-        self.buffer.is_empty() && self.pager.is_terminated()
+        self.state.is_none()
     }
 }
