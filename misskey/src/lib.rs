@@ -77,15 +77,21 @@
 //!   Enabled by default.
 //! - `websocket-client`: Enables the WebSocket client which is capable for streaming.
 //!   Enabled by default.
-//! - `tokio-runtime`: Use the [tokio](https://tokio.rs) runtime in the WebSocket client.
+//! - `tokio-runtime`: Use the [tokio](https://tokio.rs) v0.3 runtime in the WebSocket client.
 //!   Enabled by default.
+//! - `tokio02-runtime`: Use the [tokio](https://tokio.rs) v0.2 runtime in the WebSocket client.
 //! - `async-std-runtime`: Use the [async-std](https://async.rs) runtime in the WebSocket client.
+//! - `aid`: Assume that the `aid` ID generation method is used in the targeted Misskey instance.
+//!   Enabled by default.
+//! - `meid`: Assume that the `meid` ID generation method is used in the targeted Misskey instance.
+//! - `ulid`: Assume that the `ulid` ID generation method is used in the targeted Misskey instance.
+//! - `objectid`: Assume that the `ulid` ID generation method is used in the targeted Misskey instance.
 //! - and version flags, as described in [version flags section](#specifying-misskey-version).
 //!
 //! ## Specifying Misskey version
 //!
 //! We have a set of feature flags to specify the targeted Misskey version.
-//! The latest one (`12-47-0`) is enabled as a default. You can opt-in to compile for prior
+//! The latest one (`12-62-2`) is enabled as a default. You can opt-in to compile for prior
 //! Misskey version by using `default-features = false` and the corresponding feature flag.
 //!
 //! For example, to compile for Misskey v12.33.0 with WebSocket client on async-std runtime, add
@@ -95,7 +101,7 @@
 //! [dependencies.misskey]
 //! version = "0.1"
 //! default-features = false
-//! features = ["12-31-0", "websocket-client", "async-std-runtime"]
+//! features = ["12-31-0", "websocket-client", "async-std-runtime", "aid"]
 //! ```
 //!
 //! | Feature                    | Supported Misskey versions (inclusive) | Tested Misskey version |
