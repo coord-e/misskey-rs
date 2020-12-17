@@ -13,4 +13,5 @@ members = [
   "example/create-note",
   "example/word-reply",
   "example/follow-back",
+  "example/collect-notes",
 ]
