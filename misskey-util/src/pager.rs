@@ -137,6 +137,14 @@ where
 {
     type Content = R::Item;
     type Client = C;
+
+    fn set_page_size(mut self: Pin<&mut Self>, size: u8) {
+        match self.state.as_mut() {
+            Some(PagerState::Ready { next_request, .. }) => next_request.set_limit(size),
+            Some(PagerState::Pending { request, .. }) => request.set_limit(size),
+            None => {}
+        }
+    }
 }
 
 pub(crate) struct ForwardPager<'a, C: Client + ?Sized, R: Request> {
@@ -221,6 +229,14 @@ where
 {
     type Content = R::Item;
     type Client = C;
+
+    fn set_page_size(mut self: Pin<&mut Self>, size: u8) {
+        match self.state.as_mut() {
+            Some(PagerState::Ready { next_request, .. }) => next_request.set_limit(size),
+            Some(PagerState::Pending { request, .. }) => request.set_limit(size),
+            None => {}
+        }
+    }
 }
 
 pub(crate) struct OffsetPager<'a, C: Client + ?Sized, R: Request> {
@@ -308,6 +324,14 @@ where
 {
     type Content = R::Item;
     type Client = C;
+
+    fn set_page_size(mut self: Pin<&mut Self>, size: u8) {
+        match self.state.as_mut() {
+            Some(PagerState::Ready { next_request, .. }) => next_request.set_limit(size),
+            Some(PagerState::Pending { request, .. }) => request.set_limit(size),
+            None => {}
+        }
+    }
 }
 
 /// A stream of pages..
@@ -320,16 +344,27 @@ pub trait Pager:
     type Content;
     /// [`Client`][`misskey_core::Client`] type used in the pager.
     type Client: Client + ?Sized;
+
+    /// Sets the number of items to be fetched at once.
+    fn set_page_size(self: Pin<&mut Self>, size: u8);
 }
 
 impl<P: Pager + Unpin + ?Sized> Pager for &mut P {
     type Content = P::Content;
     type Client = P::Client;
+
+    fn set_page_size(mut self: Pin<&mut Self>, size: u8) {
+        P::set_page_size(Pin::new(&mut **self), size)
+    }
 }
 
 impl<P: Pager + Unpin + ?Sized> Pager for Box<P> {
     type Content = P::Content;
     type Client = P::Client;
+
+    fn set_page_size(mut self: Pin<&mut Self>, size: u8) {
+        P::set_page_size(Pin::new(&mut **self), size)
+    }
 }
 
 impl<P> Pager for Pin<P>
@@ -339,15 +374,23 @@ where
 {
     type Content = <<P as Deref>::Target as Pager>::Content;
     type Client = <<P as Deref>::Target as Pager>::Client;
+
+    fn set_page_size(self: Pin<&mut Self>, size: u8) {
+        <<P as Deref>::Target as Pager>::set_page_size(self.get_mut().as_mut(), size)
+    }
 }
 
 impl<S, F, T> Pager for futures::stream::MapOk<S, F>
 where
-    S: Pager,
+    S: Pager + Unpin,
     F: FnMut(Vec<<S as Pager>::Content>) -> Vec<T>,
 {
     type Content = T;
     type Client = <S as Pager>::Client;
+
+    fn set_page_size(mut self: Pin<&mut Self>, size: u8) {
+        <S as Pager>::set_page_size(Pin::new(&mut *(*self).get_mut()), size)
+    }
 }
 
 /// An owned dynamically typed [`Pager`].
@@ -371,6 +414,14 @@ impl<P: Pager> PagerStream<P> {
             pager,
             buffer: VecDeque::new(),
         }
+    }
+
+    /// Sets the number of items to be fetched at once by the inner pager.
+    pub fn set_page_size(&mut self, size: u8)
+    where
+        P: Unpin,
+    {
+        Pin::new(&mut self.pager).set_page_size(size);
     }
 
     /// Returns the inner pager.
