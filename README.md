@@ -34,6 +34,13 @@ Add the following to your `Cargo.toml`:
 misskey = "0.2"
 ```
 
+To run the example above, you will need to add the following dependencies:
+
+```toml
+tokio = { version = "0.3", features = ["full"] }
+anyhow = "1.0"
+```
+
 See the [API documentation](https://docs.rs/misskey) for further details.
 
 ## License
