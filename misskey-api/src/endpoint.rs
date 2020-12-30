@@ -66,3 +66,7 @@ pub mod users;
 #[cfg(feature = "12-47-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
 pub mod channels;
+
+#[cfg(feature = "12-65-4")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-65-4")))]
+pub mod get_online_users_count;
