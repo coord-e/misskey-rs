@@ -39,7 +39,7 @@ jobs:
           MISSKEY_IMAGE: 'misskey/misskey:12.65.4'
           MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
-        timeout-minutes: 5
+        timeout-minutes: 15
         env:
           TEST_API_URL: http://localhost:3000/api/
           TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
