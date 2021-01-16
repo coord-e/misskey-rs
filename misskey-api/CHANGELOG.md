@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for Misskey v12.65.4
+- Support for Misskey v12.65.4 ~ v12.65.7
+   - endpoint `get-online-users-count`
+- Support for Misskey v12.66.0
+   - endpoint `server-info`
 
 ### Changed
 ### Deprecated
