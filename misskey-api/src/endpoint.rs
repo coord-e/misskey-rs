@@ -74,3 +74,7 @@ pub mod get_online_users_count;
 #[cfg(feature = "12-66-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-66-0")))]
 pub mod server_info;
+
+#[cfg(feature = "12-67-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+pub mod ping;
