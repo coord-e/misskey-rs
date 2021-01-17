@@ -69,8 +69,7 @@ impl Display for Radix36 {
             .rev()
             .map(|i| self.0 / 36_u64.pow(i.try_into().unwrap()) % 36)
             .map(|d| std::char::from_digit(d.try_into().unwrap(), 36).unwrap())
-            .map(|c| f.write_char(c))
-            .collect()
+            .try_for_each(|c| f.write_char(c))
     }
 }
 
