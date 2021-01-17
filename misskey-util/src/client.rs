@@ -1,3 +1,5 @@
+#[cfg(feature = "12-67-0")]
+use std::collections::HashMap;
 use std::path::Path;
 
 #[cfg(feature = "12-9-0")]
@@ -27,6 +29,8 @@ use mime::Mime;
 use misskey_api::model::channel::Channel;
 #[cfg(feature = "12-58-0")]
 use misskey_api::model::page::Page;
+#[cfg(feature = "12-67-0")]
+use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
 use misskey_api::model::{
     abuse_user_report::AbuseUserReport,
     announcement::Announcement,
@@ -2803,6 +2807,231 @@ pub trait ClientExt: Client + Sync {
             },
         );
         PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
+    // {{{ Registry
+    // Note on naming conventions:
+    //
+    // The general (but loose) naming convention of `ClientExt` that uses verbs as a prefix cannot
+    // be applied to the registry API.
+    // This is because most other Misskey APIs deal with models (or are REST-like), while the
+    // registry API is just an operation (or RPC-like).
+    //
+    // We choose not to unify the naming conventions in order to have both:
+    // - natural API
+    //   - e.g. `user_create` seems unnatural compared to `create_user`
+    // - clear naming
+    //   - e.g. `get_registry` seems misleading
+    /// Gets the value corresponding to the specified key in the registry scope.
+    ///
+    /// Returns `None` if the key is not present in the registry.
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_get(
+        &self,
+        scope: RegistryScope,
+        key: impl Into<RegistryKey>,
+    ) -> BoxFuture<Result<Option<RegistryValue>, Error<Self::Error>>> {
+        let key = key.into();
+        Box::pin(async move {
+            use misskey_core::model::{ApiErrorId, ApiResult};
+            let result = self
+                .request(endpoint::i::registry::get::Request {
+                    scope: Some(scope),
+                    key,
+                })
+                .await
+                .map_err(Error::Client)?;
+            // https://github.com/syuilo/misskey/blob/develop/src/server/api/endpoints/i/registry/get.ts#L26
+            let get_no_such_key_id = ApiErrorId("ac3ed68a-62f0-422b-a7bc-d5e09e8f6a6a".to_string());
+            if let ApiResult::Err { error } = &result {
+                if error.id == get_no_such_key_id {
+                    return Ok(None);
+                }
+            }
+            let value = result.into_result()?;
+            Ok(Some(value))
+        })
+    }
+
+    /// Sets the corresponding value to the key in the registry scope.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::registry::RegistryScope;
+    /// let scope = RegistryScope::from_segments(vec!["my", "app"]).unwrap();
+    ///
+    /// client.registry_set(scope.clone(), "counter", 42).await?;
+    /// let count = client.registry_get(scope.clone(), "counter").await?;
+    ///
+    /// assert_eq!(count.unwrap(), 42);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_set(
+        &self,
+        scope: RegistryScope,
+        key: impl Into<RegistryKey>,
+        value: impl Into<RegistryValue>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let key = key.into();
+        let value = value.into();
+        Box::pin(async move {
+            self.request(endpoint::i::registry::set::Request {
+                scope: Some(scope),
+                key,
+                value,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Deletes the corresponding value to the key in the registry scope.
+    ///
+    /// This differs from [`registry_clear`][clear] in that this returns an error
+    /// if the specified key does not present.
+    ///
+    /// [clear]: `ClientExt::registry_clear`
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_delete(
+        &self,
+        scope: RegistryScope,
+        key: impl Into<RegistryKey>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let key = key.into();
+        Box::pin(async move {
+            self.request(endpoint::i::registry::remove::Request {
+                scope: Some(scope),
+                key,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Clears the specified key in the registry scope.
+    ///
+    /// This differs from [`registry_delete`][delete] in that this returns `false` instead of
+    /// returning an error if the specified key does not present.
+    ///
+    /// [delete]: `ClientExt::registry_delete`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// # use tokio::time::{sleep, Duration};
+    /// use misskey::model::registry::RegistryScope;
+    /// let scope = RegistryScope::from_segments(vec!["my", "app"]).unwrap();
+    ///
+    /// client.registry_set(scope.clone(), "key", "test").await?;
+    ///
+    /// // this deletes "key"
+    /// assert_eq!(client.registry_clear(scope.clone(), "key").await?, true);
+    /// # // workaround for syuilo/misskey#7101
+    /// # sleep(Duration::from_millis(200)).await;
+    /// assert_eq!(client.registry_get(scope.clone(), "key").await?, None);
+    /// // this won't fail even if "key" does not present
+    /// assert_eq!(client.registry_clear(scope.clone(), "key").await?, false);
+    /// assert_eq!(client.registry_get(scope.clone(), "key").await?, None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_clear(
+        &self,
+        scope: RegistryScope,
+        key: impl Into<RegistryKey>,
+    ) -> BoxFuture<Result<bool, Error<Self::Error>>> {
+        let key = key.into();
+        Box::pin(async move {
+            use misskey_core::model::{ApiErrorId, ApiResult};
+            let result = self
+                .request(endpoint::i::registry::remove::Request {
+                    scope: Some(scope),
+                    key,
+                })
+                .await
+                .map_err(Error::Client)?;
+            // https://github.com/syuilo/misskey/blob/develop/src/server/api/endpoints/i/registry/remove.ts#L26
+            let remove_no_such_key_id =
+                ApiErrorId("1fac4e8a-a6cd-4e39-a4a5-3a7e11f1b019".to_string());
+            if let ApiResult::Err { error } = &result {
+                if error.id == remove_no_such_key_id {
+                    return Ok(false);
+                }
+            }
+            result.into_result()?;
+            Ok(true)
+        })
+    }
+
+    /// Lists all the key-value pairs in the registry scope.
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_get_all(
+        &self,
+        scope: RegistryScope,
+    ) -> BoxFuture<Result<HashMap<RegistryKey, RegistryValue>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let values = self
+                .request(endpoint::i::registry::get_all::Request { scope: Some(scope) })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(values)
+        })
+    }
+
+    /// Lists all keys in the registry scope.
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_keys(
+        &self,
+        scope: RegistryScope,
+    ) -> BoxFuture<Result<Vec<RegistryKey>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let keys = self
+                .request(endpoint::i::registry::keys::Request { scope: Some(scope) })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(keys)
+        })
+    }
+
+    /// Lists the registry scopes found in all registry entries.
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    fn registry_scopes(&self) -> BoxFuture<Result<Vec<RegistryScope>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let scopes = self
+                .request(endpoint::i::registry::scopes::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(scopes)
+        })
     }
     // }}}
 
