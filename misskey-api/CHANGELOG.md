@@ -9,11 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for Misskey v12.65.4
+- Support for Misskey v12.65.4 ~ v12.65.7
+   - endpoint `get-online-users-count`
+- Support for Misskey v12.66.0
+   - endpoint `server-info`
+- Support for Misskey v12.67.0 ~ v12.67.1
+   - endpoint `ping`
+   - endpoint `i/registry/*`
+   - registry-related model types, such as `RegistryKey`, `RegistryValueType`, and `RegistryScope`
+   - `RegistryUpdated` variant to `MainStreamEvent`
 
 ### Changed
 ### Deprecated
 ### Removed
+
+- Support for Misskey v12.67.0 ~ v12.67.1
+   - `ClientSettingUpdated` variant from `MainStreamEvent`
+
 ### Fixed
 ### Security
 

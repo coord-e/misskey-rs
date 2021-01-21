@@ -91,7 +91,7 @@
 //! ## Specifying Misskey version
 //!
 //! We have a set of feature flags to specify the targeted Misskey version.
-//! The latest one (`12-65-4`) is enabled as a default. You can opt-in to compile for prior
+//! The latest one (`12-67-0`) is enabled as a default. You can opt-in to compile for prior
 //! Misskey version by using `default-features = false` and the corresponding feature flag.
 //!
 //! For example, to compile for Misskey v12.33.0 with WebSocket client on async-std runtime, add
@@ -106,7 +106,9 @@
 //!
 //! | Feature                    | Supported Misskey versions (inclusive) | Tested Misskey version |
 //! | -------------------------- | -------------------------------------- | ---------------------- |
-//! | `12-65-4`                  | v12.65.4                               | v12.65.4               |
+//! | `12-67-0`                  | v12.67.0 ~ v12.67.1                    | v12.67.0               |
+//! | `12-66-0`                  | v12.66.0                               | v12.66.0               |
+//! | `12-65-4`                  | v12.65.4 ~ v12.65.7                    | v12.65.4               |
 //! | `12-63-0`                  | v12.63.0 ~ v12.65.3                    | v12.63.0               |
 //! | `12-62-2`                  | v12.62.2                               | v12.62.2               |
 //! | `12-62-0`                  | v12.62.0 ~ v12.62.1                    | v12.62.0               |

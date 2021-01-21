@@ -12,6 +12,10 @@ pub mod unpin;
 pub mod update;
 pub mod user_group_invites;
 
+#[cfg(feature = "12-67-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+pub mod registry;
+
 #[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {}

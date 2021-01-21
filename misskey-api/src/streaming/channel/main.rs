@@ -1,3 +1,5 @@
+#[cfg(feature = "12-67-0")]
+use crate::model::registry::{RegistryKey, RegistryScope, RegistryValue};
 use crate::model::{
     antenna::Antenna, drive::DriveFile, id::Id, messaging::MessagingMessage, note::Note,
     notification::Notification, signin::Signin, user::User,
@@ -5,14 +7,24 @@ use crate::model::{
 use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
+#[cfg(not(feature = "12-67-0"))]
 use serde_json::Value;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MainStreamEvent {
+    #[cfg(not(feature = "12-67-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-67-0"))))]
     ClientSettingUpdated {
         key: String,
         value: Value,
+    },
+    #[cfg(feature = "12-67-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
+    RegistryUpdated {
+        scope: RegistryScope,
+        key: RegistryKey,
+        value: RegistryValue,
     },
     ReceiveFollowRequest(User),
     Notification(Notification),
@@ -168,6 +180,35 @@ mod tests {
                                     ..
                                 },
                         } if marker == expected_marker && comment == expected_comment => break,
+                        _ => continue,
+                    }
+                }
+            },
+        )
+        .await;
+    }
+
+    #[cfg(feature = "12-67-0")]
+    #[tokio::test]
+    async fn registry_updated() {
+        use serde_json::json;
+
+        let test_client = TestClient::new().await;
+        // ditto
+        let (_, client) = test_client.admin.create_streaming_user().await;
+
+        let mut stream = client.channel(Request::default()).await.unwrap();
+
+        future::join(
+            client.test(crate::endpoint::i::registry::set::Request {
+                key: "stream_test".into(),
+                value: json!({ "test": [] }),
+                scope: None,
+            }),
+            async {
+                loop {
+                    match stream.next().await.unwrap().unwrap() {
+                        MainStreamEvent::RegistryUpdated { .. } => break,
                         _ => continue,
                     }
                 }
