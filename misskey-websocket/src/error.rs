@@ -1,10 +1,7 @@
 use std::convert::Infallible;
 use std::sync::Arc;
 
-#[cfg(not(feature = "async-tungstenite09"))]
 use async_tungstenite::tungstenite;
-#[cfg(feature = "async-tungstenite09")]
-use async_tungstenite09::tungstenite;
 use thiserror::Error;
 
 /// Possible errors from WebSocket client.
@@ -16,6 +13,9 @@ pub enum Error {
     /// Received unexpected message from server.
     #[error("websocket unexpected message: {0}")]
     UnexpectedMessage(tungstenite::Message),
+    /// Invalid URL.
+    #[error("Invalid URL: {0}")]
+    Url(#[from] url::ParseError),
     /// JSON encode/decode error.
     #[error("JSON error: {0}")]
     Json(#[source] Arc<serde_json::Error>),
@@ -24,12 +24,6 @@ pub enum Error {
 impl From<Infallible> for Error {
     fn from(x: Infallible) -> Error {
         match x {}
-    }
-}
-
-impl From<url::ParseError> for Error {
-    fn from(_: url::ParseError) -> Error {
-        tungstenite::Error::Url("Failed to parse URL".into()).into()
     }
 }
 
