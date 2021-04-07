@@ -170,7 +170,6 @@ jobs:
       matrix:
         features:
           - tokio-runtime
-          - tokio02-runtime
           - async-std-runtime
     steps:
       - uses: actions/checkout@master

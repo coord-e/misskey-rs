@@ -34,5 +34,5 @@ log = { version = "0.4", optional = true }
 misskey-api = { path = "../misskey-api" }
 misskey-test = { path = "../misskey-test" }
 uuid = { version = "0.8.1", features = ["v4"] }
-tokio = { version = "0.3", features = ["macros", "rt"] }
+tokio = { version = "1.0", features = ["macros", "rt"] }
 async-std = { version = "1.6", features = ["attributes"] }

@@ -87,10 +87,10 @@ pub enum ApiResult<T> {
     Ok(T),
 }
 
-impl<T> Into<Result<T, ApiError>> for ApiResult<T> {
+impl<T> From<ApiResult<T>> for Result<T, ApiError> {
     /// Converts [`ApiResult`] to [`Result`] for convenient handling.
-    fn into(self) -> Result<T, ApiError> {
-        self.into_result()
+    fn from(result: ApiResult<T>) -> Self {
+        result.into_result()
     }
 }
 

@@ -6,9 +6,6 @@ use crate::channel::{connect_websocket, TrySendError, WebSocketReceiver};
 use crate::error::{Error, Result};
 use crate::model::outgoing::OutgoingMessage;
 
-#[cfg(feature = "async-tungstenite09")]
-use async_tungstenite09 as async_tungstenite;
-
 #[cfg(feature = "async-std-runtime")]
 use async_std::task;
 #[cfg(feature = "async-std-runtime")]
@@ -20,10 +17,6 @@ use log::{info, warn};
 use tokio::task;
 #[cfg(feature = "tokio-runtime")]
 use tokio::time::sleep;
-#[cfg(feature = "tokio02-runtime")]
-use tokio02::task;
-#[cfg(feature = "tokio02-runtime")]
-use tokio02::time::delay_for as sleep;
 use url::Url;
 
 pub mod channel;

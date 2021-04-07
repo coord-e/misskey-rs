@@ -12,7 +12,7 @@ publish = false
 [dependencies]
 misskey-http = { path = "../misskey-http", features = ["inspect-contents"], optional = true }
 misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"], optional = true }
-tokio = { version = "0.3", default-features = false, features = ["time", "macros"] }
+tokio = { version = "1.0", default-features = false, features = ["time", "macros"] }
 env_logger = "0.7"
 url = "2.1"
 anyhow = "1.0"
