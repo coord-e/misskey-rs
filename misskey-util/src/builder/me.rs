@@ -173,6 +173,11 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg(feature = "12-60-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
         pub no_crawle;
+
+        /// Sets whether to receive announcement emails.
+        #[cfg(feature = "12-69-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
+        pub receive_announcement_email;
     }
 
     /// Sets the muted words for this user.

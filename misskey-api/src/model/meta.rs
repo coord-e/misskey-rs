@@ -131,6 +131,9 @@ pub struct AdminMeta {
     #[cfg(feature = "12-47-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
     pub object_storage_set_public_read: bool,
+    #[cfg(feature = "12-69-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
+    pub object_storage_s3_force_path_style: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

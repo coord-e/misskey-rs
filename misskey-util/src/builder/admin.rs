@@ -362,6 +362,11 @@ impl<C> MetaUpdateBuilder<C> {
         #[cfg(feature = "12-47-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
         pub object_storage_set_public_read;
+        /// Sets whether or not to set `s3ForcePathStyle` option for the `aws-sdk` when using the
+        /// external object storage.
+        #[cfg(feature = "12-69-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
+        pub object_storage_s3_force_path_style;
     }
     update_builder_option_field! {
         #[doc_name = "base URL of the extenal object storage"]
