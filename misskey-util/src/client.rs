@@ -2940,7 +2940,6 @@ pub trait ClientExt: Client + Sync {
     /// # async fn main() -> anyhow::Result<()> {
     /// # let client = misskey_test::test_client().await?;
     /// # use misskey_api as misskey;
-    /// # use tokio::time::{sleep, Duration};
     /// use misskey::model::registry::RegistryScope;
     /// let scope = RegistryScope::from_segments(vec!["my", "app"]).unwrap();
     ///
@@ -2948,8 +2947,6 @@ pub trait ClientExt: Client + Sync {
     ///
     /// // this deletes "key"
     /// assert_eq!(client.registry_clear(scope.clone(), "key").await?, true);
-    /// # // workaround for syuilo/misskey#7101
-    /// # sleep(Duration::from_millis(200)).await;
     /// assert_eq!(client.registry_get(scope.clone(), "key").await?, None);
     /// // this won't fail even if "key" does not present
     /// assert_eq!(client.registry_clear(scope.clone(), "key").await?, false);

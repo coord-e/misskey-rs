@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - image: 'misskey/misskey:12.67.0'
+          - image: 'misskey/misskey:12.68.0'
             flags: --no-default-features --features 12-67-0
           - image: 'misskey/misskey:12.66.0'
             flags: --no-default-features --features 12-66-0
