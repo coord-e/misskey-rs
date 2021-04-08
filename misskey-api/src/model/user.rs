@@ -116,6 +116,10 @@ pub struct User {
     pub description: Option<String>,
     #[serde(default)]
     pub birthday: Option<String>,
+    #[cfg(feature = "12-70-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
+    #[serde(default)]
+    pub lang: Option<String>,
     #[serde(default)]
     pub created_at: Option<DateTime<Utc>>,
     #[serde(default)]
@@ -180,6 +184,10 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
     #[serde(default)]
     pub muting_notification_types: Option<HashSet<NotificationType>>,
+    #[cfg(feature = "12-70-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
+    #[serde(default)]
+    pub email_notification_types: Option<HashSet<UserEmailNotificationType>>,
 }
 
 fn default_false() -> bool {
