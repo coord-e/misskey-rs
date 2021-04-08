@@ -1,5 +1,9 @@
+use std::collections::HashSet;
+
 use crate::Error;
 
+#[cfg(feature = "12-48-0")]
+use misskey_api::model::notification::NotificationType;
 use misskey_api::model::{
     drive::DriveFile,
     page::Page,
@@ -178,6 +182,57 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg(feature = "12-69-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
         pub receive_announcement_email;
+    }
+
+    /// Sets the muted notification type for this user.
+    ///
+    /// Note that you can subsequently use this method to add more muted notification types to be used for updates.
+    ///
+    /// # Examples
+    ///
+    /// The example below updates the user setting to mute `'follow'` and `'reaction'` notifications.
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::notification::NotificationType;
+    ///
+    /// client
+    ///     .update_me()
+    ///     .muted_notification_type(NotificationType::Follow)
+    ///     .muted_notification_type(NotificationType::Reaction)
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    pub fn muted_notification_type(&mut self, notification_type: NotificationType) -> &mut Self {
+        self.request
+            .muting_notification_types
+            .get_or_insert_with(HashSet::new)
+            .insert(notification_type);
+        self
+    }
+
+    /// Sets the muted notification types for this user.
+    ///
+    /// Note that you can subsequently use this method to add more muted notification types to be used for updates.
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    pub fn muted_notification_types(
+        &mut self,
+        notification_types: impl IntoIterator<Item = NotificationType>,
+    ) -> &mut Self {
+        self.request
+            .muting_notification_types
+            .get_or_insert_with(HashSet::new)
+            .extend(notification_types);
+        self
     }
 
     /// Sets the muted words for this user.

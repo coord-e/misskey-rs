@@ -1,6 +1,7 @@
+use std::collections::HashSet;
 use std::fmt::{self, Display};
 
-use crate::model::{id::Id, note::Note, page::Page};
+use crate::model::{id::Id, note::Note, notification::NotificationType, page::Page};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -34,6 +35,54 @@ pub struct UserInstance {
     pub icon_url: Option<String>,
     pub favicon_url: Option<String>,
     pub theme_color: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy, Hash)]
+#[serde(rename_all = "camelCase")]
+pub enum UserEmailNotificationType {
+    Follow,
+    ReceiveFollowRequest,
+    Mention,
+    Reply,
+    Quote,
+    GroupInvited,
+}
+
+impl Display for UserEmailNotificationType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            UserEmailNotificationType::Follow => f.write_str("follow"),
+            UserEmailNotificationType::ReceiveFollowRequest => f.write_str("receiveFollowRequest"),
+            UserEmailNotificationType::Mention => f.write_str("mention"),
+            UserEmailNotificationType::Reply => f.write_str("reply"),
+            UserEmailNotificationType::Quote => f.write_str("quote"),
+            UserEmailNotificationType::GroupInvited => f.write_str("groupInvited"),
+        }
+    }
+}
+
+#[derive(Debug, Error, Clone)]
+#[error("invalid email notification type")]
+pub struct ParseUserEmailNotificationType {
+    _priv: (),
+}
+
+impl std::str::FromStr for UserEmailNotificationType {
+    type Err = ParseUserEmailNotificationType;
+
+    fn from_str(s: &str) -> Result<UserEmailNotificationType, Self::Err> {
+        match s {
+            "follow" | "Follow" => Ok(UserEmailNotificationType::Follow),
+            "receiveFollowRequest" | "ReceiveFollowRequest" => {
+                Ok(UserEmailNotificationType::ReceiveFollowRequest)
+            }
+            "mention" | "Mention" => Ok(UserEmailNotificationType::Mention),
+            "reply" | "Reply" => Ok(UserEmailNotificationType::Reply),
+            "quote" | "Quote" => Ok(UserEmailNotificationType::Quote),
+            "groupInvited" | "GroupInvited" => Ok(UserEmailNotificationType::GroupInvited),
+            _ => Err(ParseUserEmailNotificationType { _priv: () }),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -127,6 +176,10 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
     #[serde(default)]
     pub no_crawle: Option<bool>,
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    #[serde(default)]
+    pub muting_notification_types: Option<HashSet<NotificationType>>,
 }
 
 fn default_false() -> bool {

@@ -48,6 +48,8 @@ mod tests {
                 no_crawle: None,
                 #[cfg(feature = "12-69-0")]
                 receive_announcement_email: None,
+                #[cfg(feature = "12-48-0")]
+                muting_notification_types: None,
             })
             .await;
         client
