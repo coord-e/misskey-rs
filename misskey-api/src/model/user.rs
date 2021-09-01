@@ -21,6 +21,7 @@ pub struct UserEmoji {
     pub name: String,
     pub url: Url,
     pub host: Option<String>,
+    #[serde(default)]
     pub aliases: Vec<String>,
 }
 
