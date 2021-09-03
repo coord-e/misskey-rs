@@ -8,10 +8,10 @@ env:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
@@ -22,9 +22,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
+          key: "ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
           restore-keys: |
-            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-
+            ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -45,9 +45,9 @@ jobs:
           command: test
   fmt:
     name: Rustfmt
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
@@ -59,15 +59,15 @@ jobs:
           args: --all -- --check
   clippy:
     name: Clippy
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
           components: clippy
-      - uses: actions-rs/cargo@v1
+      - uses: actions-rs/clippy-check@v1
         with:
-          command: clippy
+          token: '${{ secrets.GITHUB_TOKEN }}'
           args: -- -D warnings
