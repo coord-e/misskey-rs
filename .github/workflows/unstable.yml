@@ -1,0 +1,276 @@
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+name: Unstable CI
+
+env:
+  RUST_TOOLCHAIN: '1.54.0'
+
+jobs:
+  test:
+    name: Test with different channels
+    runs-on: ubuntu-18.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain:
+          - nightly
+          - beta
+          - stable
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: '${{ matrix.toolchain }}'
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: "ubuntu-18.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
+          restore-keys: |
+            ubuntu-18.04-${{ matrix.toolchain }}-cargo-all-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_IMAGE: 'misskey/misskey:12.67.0'
+          MISSKEY_ID: aid
+      - uses: actions-rs/cargo@v1
+        timeout-minutes: 15
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+  test_api:
+    name: Test misskey-api and misskey-util
+    runs-on: ubuntu-18.04
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        include:
+          - image: 'misskey/misskey:12.67.0'
+            flags: --no-default-features --features 12-67-0
+          - image: 'misskey/misskey:12.66.0'
+            flags: --no-default-features --features 12-66-0
+          - image: 'misskey/misskey:12.65.4'
+            flags: --no-default-features --features 12-65-4
+          - image: 'misskey/misskey@sha256:9c13b1d240cef6f96aa19d133f0ddc5a927d7b8206b8656b940f3dc645ca0dbe'
+            flags: --no-default-features --features 12-63-0
+          - image: 'misskey/misskey:12.62.2'
+            flags: --no-default-features --features 12-62-2
+          - image: 'misskey/misskey:12.62.0'
+            flags: --no-default-features --features 12-62-0
+          - image: 'misskey/misskey:12.61.0'
+            flags: --no-default-features --features 12-61-0
+          - image: 'misskey/misskey:12.60.0'
+            flags: --no-default-features --features 12-60-0
+          - image: 'misskey/misskey:12.58.0'
+            flags: --no-default-features --features 12-58-0
+          - image: 'misskey/misskey:12.57.1'
+            flags: --no-default-features --features 12-57-0
+          - image: 'misskey/misskey:12.55.0'
+            flags: --no-default-features --features 12-55-0
+          - image: 'misskey/misskey:12.51.0'
+            flags: --no-default-features --features 12-51-0
+          - image: 'misskey/misskey:12.49.0'
+            flags: --no-default-features --features 12-49-0
+          - image: 'misskey/misskey:12.48.0'
+            flags: --no-default-features --features 12-48-0
+          - image: 'misskey/misskey:12.47.1'
+            flags: --no-default-features --features 12-47-0
+          - image: 'misskey/misskey:12.42.0'
+            flags: --no-default-features --features 12-42-0
+          - image: 'misskey/misskey:12.39.0'
+            flags: --no-default-features --features 12-39-0
+          - image: 'misskey/misskey:12.37.0'
+            flags: --no-default-features --features 12-37-0
+          - image: 'misskey/misskey:12.31.0'
+            flags: --no-default-features --features 12-31-0
+          - image: 'misskey/misskey:12.29.0'
+            flags: --no-default-features --features 12-29-0
+          - image: 'misskey/misskey:12.28.0'
+            flags: --no-default-features --features 12-27-0
+          - image: 'misskey/misskey:12.20.0'
+            flags: --no-default-features --features 12-19-0
+          - image: 'misskey/misskey:12.13.0'
+            flags: --no-default-features --features 12-13-0
+          - image: 'misskey/misskey:12.10.0'
+            flags: --no-default-features --features 12-10-0
+          - image: 'misskey/misskey:12.9.0'
+            flags: --no-default-features --features 12-9-0
+          - image: 'misskey/misskey:12.8.0'
+            flags: --no-default-features --features 12-8-0
+          - image: 'misskey/misskey:12.5.0'
+            flags: --no-default-features --features 12-5-0
+          - image: 'misskey/misskey:12.0.0'
+            flags: --no-default-features
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
+          restore-keys: |
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-
+      - name: Build misskey-api
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
+      - name: Build misskey-util
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }} --features aid
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_IMAGE: ${{ matrix.image }}
+          MISSKEY_ID: aid
+      - name: Test misskey-api
+        uses: actions-rs/cargo@v1
+        timeout-minutes: 5
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
+      - name: Test misskey-util
+        uses: actions-rs/cargo@v1
+        timeout-minutes: 5
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }} --features aid
+  test_id:
+    name: Test misskey-api with different ID generation methods
+    runs-on: ubuntu-18.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        include:
+          - method: meid
+          - method: objectid
+          - method: ulid
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
+          restore-keys: |
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_IMAGE: 'misskey/misskey:12.47.1'
+          MISSKEY_ID: ${{ matrix.method }}
+      - uses: actions-rs/cargo@v1
+        timeout-minutes: 5
+        env:
+          TEST_API_URL: http://localhost:3000/api/
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
+  test_websocket:
+    name: Test misskey-websocket with different runtime
+    runs-on: ubuntu-18.04
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        features:
+          - tokio-runtime
+          - async-std-runtime
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-websocket-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-http/Cargo.toml') }}"
+          restore-keys: |
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-websocket-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --tests --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
+      - id: setup_env
+        run: ./ci/testenv/setup.sh
+        env:
+          MISSKEY_IMAGE: 'misskey/misskey:12.0.0'
+          MISSKEY_ID: aid
+      - uses: actions-rs/cargo@v1
+        timeout-minutes: 3
+        env:
+          TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
+          TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
+        with:
+          command: test
+          args: --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
+  minimal_version:
+    name: Minimal versions build
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ubuntu-18.04-nightly-cargo-minimal-all-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ubuntu-18.04-nightly-cargo-minimal-all-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: -Z minimal-versions
