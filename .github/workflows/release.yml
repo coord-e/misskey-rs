@@ -11,7 +11,7 @@ jobs:
     env:
       CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: Publish misskey-core
         uses: actions-rs/cargo@v1
         with:
