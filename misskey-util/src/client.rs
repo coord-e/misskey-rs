@@ -1061,6 +1061,7 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[allow(clippy::needless_collect)]
     fn poll(
         &self,
         text: impl Into<String>,
@@ -2163,7 +2164,7 @@ pub trait ClientExt: Client + Sync {
     #[cfg(feature = "12-57-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-57-0")))]
     fn build_clip(&self) -> ClipBuilder<&Self> {
-        ClipBuilder::new(&self)
+        ClipBuilder::new(self)
     }
 
     /// Deletes the specified clip.

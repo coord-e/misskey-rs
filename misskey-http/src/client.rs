@@ -206,7 +206,7 @@ impl UploadFileClient for HttpClient {
                 .client
                 .send_async(
                     // TODO: uncomfortable conversion from `Url` to `Uri`
-                    http::Request::post(url.into_string())
+                    http::Request::post(String::from(url))
                         .header(CONTENT_TYPE, content_type)
                         .body(body)
                         .unwrap(),
