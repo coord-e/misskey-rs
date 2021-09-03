@@ -67,7 +67,7 @@ jobs:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
           components: clippy
-      - uses: actions-rs/cargo@v1
+      - uses: actions-rs/clippy-check@v1
         with:
-          command: clippy
+          token: '${{ secrets.GITHUB_TOKEN }}'
           args: -- -D warnings
