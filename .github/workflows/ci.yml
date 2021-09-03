@@ -2,23 +2,19 @@ on: [push, pull_request]
 
 name: CI
 
+env:
+  RUST_TOOLCHAIN: '1.54.0'
+
 jobs:
   test:
     name: Test
     runs-on: ubuntu-18.04
     timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        toolchain:
-          - nightly
-          - beta
-          - stable
     steps:
       - uses: actions/checkout@master
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
       - uses: actions/cache@v2
         with:
@@ -26,9 +22,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
           restore-keys: |
-            ubuntu-18.04-${{ matrix.toolchain }}-cargo-all-
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -114,7 +110,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
       - uses: actions/cache@v2
         with:
@@ -122,9 +118,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
           restore-keys: |
-            ubuntu-18.04-stable-cargo-misskey-api-
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-
       - name: Build misskey-api
         uses: actions-rs/cargo@v1
         with:
@@ -175,7 +171,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
       - uses: actions/cache@v2
         with:
@@ -183,9 +179,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-misskey-websocket-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-http/Cargo.toml') }}
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-websocket-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-http/Cargo.toml') }}"
           restore-keys: |
-            ubuntu-18.04-stable-cargo-misskey-websocket-
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-websocket-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -217,7 +213,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
       - uses: actions/cache@v2
         with:
@@ -225,9 +221,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ubuntu-18.04-stable-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}
+          key: "ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
           restore-keys: |
-            ubuntu-18.04-stable-cargo-misskey-api-
+            ubuntu-18.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-
       - uses: actions-rs/cargo@v1
         with:
           command: build
