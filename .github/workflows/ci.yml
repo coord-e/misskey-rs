@@ -270,7 +270,11 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - run: rustup component add rustfmt
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
+          override: true
+          components: rustfmt
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
@@ -280,7 +284,11 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - run: rustup component add clippy
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: '${{ env.RUST_TOOLCHAIN }}'
+          override: true
+          components: clippy
       - uses: actions-rs/cargo@v1
         with:
           command: clippy

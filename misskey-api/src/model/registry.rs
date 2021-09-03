@@ -228,13 +228,13 @@ impl From<RegistryValueType> for Discriminant<RegistryValue> {
 
 impl PartialEq<Discriminant<RegistryValue>> for RegistryValueType {
     fn eq(&self, other: &Discriminant<RegistryValue>) -> bool {
-        Discriminant::<RegistryValue>::from(*self) == *other
+        &Discriminant::<RegistryValue>::from(*self) == other
     }
 }
 
 impl PartialEq<RegistryValueType> for Discriminant<RegistryValue> {
     fn eq(&self, other: &RegistryValueType) -> bool {
-        *self == Discriminant::<RegistryValue>::from(*other)
+        self == &Discriminant::<RegistryValue>::from(*other)
     }
 }
 
