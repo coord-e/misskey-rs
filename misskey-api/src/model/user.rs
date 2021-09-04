@@ -21,8 +21,11 @@ pub struct UserField {
 pub struct UserEmoji {
     pub name: String,
     pub url: Url,
+    #[cfg(not(feature = "12-75-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-75-0"))))]
     pub host: Option<String>,
-    #[serde(default)]
+    #[cfg(not(feature = "12-75-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-75-0"))))]
     pub aliases: Vec<String>,
 }
 

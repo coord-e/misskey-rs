@@ -41,7 +41,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_IMAGE: 'misskey/misskey:12.67.0'
+          MISSKEY_IMAGE: 'misskey/misskey:12.75.1'
           MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 15
@@ -59,6 +59,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - image: 'misskey/misskey:12.75.0'
+            flags: --no-default-features --features 12-75-0
           - image: 'misskey/misskey:12.71.0'
             flags: --no-default-features --features 12-71-0
           - image: 'misskey/misskey:12.70.0'

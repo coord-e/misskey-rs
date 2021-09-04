@@ -54,13 +54,23 @@ pub struct FederationChart {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ActiveUsersChart {
+    #[cfg(not(feature = "12-75-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-75-0"))))]
     pub count: Vec<u64>,
+    #[cfg(feature = "12-75-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
+    pub users: Vec<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HashtagChart {
+    #[cfg(not(feature = "12-75-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-75-0"))))]
     pub count: Vec<u64>,
+    #[cfg(feature = "12-75-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
+    pub users: Vec<u64>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
