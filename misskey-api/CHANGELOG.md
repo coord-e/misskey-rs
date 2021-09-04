@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.67.0 ~ v12.68.0
 
 ### Fixed
+
+- Fix `admin/show-user` response
+
 ### Security
 
 ## [0.2.0] - 2020-12-17
