@@ -7,6 +7,24 @@ use url::Url;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct DriveFileProperties {
+    #[cfg(feature = "12-75-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
+    pub width: Option<u64>,
+    #[cfg(feature = "12-75-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
+    pub height: Option<u64>,
+    #[cfg(feature = "12-75-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
+    pub avg_color: Option<String>,
+    #[cfg(not(feature = "12-75-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-75-0"))))]
+    #[serde(flatten)]
+    pub properties: serde_json::Map<String, serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct DriveFile {
     pub id: Id<DriveFile>,
     pub created_at: DateTime<Utc>,
@@ -27,6 +45,7 @@ pub struct DriveFile {
     #[serde(default)]
     pub folder: Option<DriveFolder>,
     pub is_sensitive: bool,
+    pub properties: DriveFileProperties,
 }
 
 impl_entity!(DriveFile);

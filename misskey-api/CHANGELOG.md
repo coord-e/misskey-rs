@@ -13,20 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `get-online-users-count`
 - Support for Misskey v12.66.0
    - endpoint `server-info`
-- Support for Misskey v12.67.0 ~ v12.67.1
+- Support for Misskey v12.67.0 ~ v12.68.0
    - endpoint `ping`
    - endpoint `i/registry/*`
    - registry-related model types, such as `RegistryKey`, `RegistryValueType`, and `RegistryScope`
    - `RegistryUpdated` variant to `MainStreamEvent`
+- Support for Misskey v12.69.0
+- Support for Misskey v12.70.0
+- Support for Misskey v12.71.0 ~ v12.74.1
+- Support for Misskey v12.75.0 ~ v12.75.1
+- `muted_notification_types` user setting which is available since v12.48.0
 
 ### Changed
 ### Deprecated
 ### Removed
 
-- Support for Misskey v12.67.0 ~ v12.67.1
-   - `ClientSettingUpdated` variant from `MainStreamEvent`
+- `ClientSettingUpdated` variant from `MainStreamEvent`
+   - For Misskey v12.67.0 ~ v12.68.0
 
 ### Fixed
+
+- Fix `admin/show-user` response
+
 ### Security
 
 ## [0.2.0] - 2020-12-17

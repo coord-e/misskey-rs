@@ -32,7 +32,7 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_IMAGE: 'misskey/misskey:12.67.0'
+          MISSKEY_IMAGE: 'misskey/misskey:12.75.1'
           MISSKEY_ID: aid
       - uses: actions-rs/cargo@v1
         timeout-minutes: 15

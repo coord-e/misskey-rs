@@ -70,6 +70,8 @@ mod tests {
             .await;
     }
 
+    // misskey-dev/misskey#7531
+    #[cfg(not(feature = "12-69-0"))]
     #[tokio::test]
     async fn request_with_query() {
         use crate::model::{note::Tag, query::Query};

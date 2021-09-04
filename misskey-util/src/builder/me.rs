@@ -1,5 +1,11 @@
+use std::collections::HashSet;
+
 use crate::Error;
 
+#[cfg(feature = "12-48-0")]
+use misskey_api::model::notification::NotificationType;
+#[cfg(feature = "12-70-0")]
+use misskey_api::model::user::UserEmailNotificationType;
 use misskey_api::model::{
     drive::DriveFile,
     page::Page,
@@ -173,6 +179,116 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg(feature = "12-60-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
         pub no_crawle;
+
+        /// Sets whether to receive announcement emails.
+        #[cfg(feature = "12-69-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
+        pub receive_announcement_email;
+    }
+
+    /// Sets the muted notification type for this user.
+    ///
+    /// Note that you can subsequently use this method to add more muted notification types to be used for updates.
+    ///
+    /// # Examples
+    ///
+    /// The example below updates the user setting to mute `'follow'` and `'reaction'` notifications.
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::notification::NotificationType;
+    ///
+    /// client
+    ///     .update_me()
+    ///     .muted_notification_type(NotificationType::Follow)
+    ///     .muted_notification_type(NotificationType::Reaction)
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    pub fn muted_notification_type(&mut self, notification_type: NotificationType) -> &mut Self {
+        self.request
+            .muting_notification_types
+            .get_or_insert_with(HashSet::new)
+            .insert(notification_type);
+        self
+    }
+
+    /// Sets the muted notification types for this user.
+    ///
+    /// Note that you can subsequently use this method to add more muted notification types to be used for updates.
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    pub fn muted_notification_types(
+        &mut self,
+        notification_types: impl IntoIterator<Item = NotificationType>,
+    ) -> &mut Self {
+        self.request
+            .muting_notification_types
+            .get_or_insert_with(HashSet::new)
+            .extend(notification_types);
+        self
+    }
+
+    /// Sets the email notification type for this user.
+    ///
+    /// Note that you can subsequently use this method to add more email notification types to be used for updates.
+    ///
+    /// # Examples
+    ///
+    /// The example below updates the user setting to email `'follow'` and `'groupInvited'` notifications.
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::user::UserEmailNotificationType;
+    ///
+    /// client
+    ///     .update_me()
+    ///     .email_notification_type(UserEmailNotificationType::Follow)
+    ///     .email_notification_type(UserEmailNotificationType::GroupInvited)
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-70-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
+    pub fn email_notification_type(
+        &mut self,
+        notification_type: UserEmailNotificationType,
+    ) -> &mut Self {
+        self.request
+            .email_notification_types
+            .get_or_insert_with(HashSet::new)
+            .insert(notification_type);
+        self
+    }
+
+    /// Sets the email notification types for this user.
+    ///
+    /// Note that you can subsequently use this method to add more email notification types to be used for updates.
+    #[cfg(feature = "12-70-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
+    pub fn email_notification_types(
+        &mut self,
+        notification_types: impl IntoIterator<Item = UserEmailNotificationType>,
+    ) -> &mut Self {
+        self.request
+            .email_notification_types
+            .get_or_insert_with(HashSet::new)
+            .extend(notification_types);
+        self
     }
 
     /// Sets the muted words for this user.

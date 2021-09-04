@@ -306,7 +306,13 @@ pub trait StreamingClientExt: StreamingClient + Sync {
                 .await
                 .map_err(Error::Client)?
                 .map_err(Error::Client)
-                .map_ok(|ChannelEvent::Note(note)| note)
+                .try_filter_map(|event| async move {
+                    if let ChannelEvent::Note(note) = event {
+                        Ok(Some(note))
+                    } else {
+                        Ok(None)
+                    }
+                })
                 .boxed())
         })
     }

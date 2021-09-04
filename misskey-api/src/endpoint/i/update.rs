@@ -1,3 +1,9 @@
+use std::collections::HashSet;
+
+#[cfg(feature = "12-48-0")]
+use crate::model::notification::NotificationType;
+#[cfg(feature = "12-70-0")]
+use crate::model::user::UserEmailNotificationType;
 use crate::model::{drive::DriveFile, id::Id, page::Page, query::Query, user::User};
 
 use serde::Serialize;
@@ -79,6 +85,21 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub no_crawle: Option<bool>,
+    #[cfg(feature = "12-69-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub receive_announcement_email: Option<bool>,
+    #[cfg(feature = "12-48-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub muting_notification_types: Option<HashSet<NotificationType>>,
+    #[cfg(feature = "12-70-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub email_notification_types: Option<HashSet<UserEmailNotificationType>>,
 }
 
 impl misskey_core::Request for Request {
@@ -99,7 +120,11 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
+        #[cfg(feature = "12-48-0")]
+        use crate::model::notification::NotificationType;
         use crate::model::query::Query;
+        #[cfg(feature = "12-70-0")]
+        use crate::model::user::UserEmailNotificationType;
 
         let client = TestClient::new();
         client
@@ -138,6 +163,23 @@ mod tests {
                 ])),
                 #[cfg(feature = "12-60-0")]
                 no_crawle: Some(true),
+                #[cfg(feature = "12-69-0")]
+                receive_announcement_email: Some(true),
+                #[cfg(feature = "12-48-0")]
+                muting_notification_types: Some(
+                    vec![NotificationType::Follow, NotificationType::Mention]
+                        .into_iter()
+                        .collect(),
+                ),
+                #[cfg(feature = "12-70-0")]
+                email_notification_types: Some(
+                    vec![
+                        UserEmailNotificationType::Follow,
+                        UserEmailNotificationType::Mention,
+                    ]
+                    .into_iter()
+                    .collect(),
+                ),
             })
             .await;
     }
@@ -170,6 +212,12 @@ mod tests {
                 muted_words: None,
                 #[cfg(feature = "12-60-0")]
                 no_crawle: None,
+                #[cfg(feature = "12-69-0")]
+                receive_announcement_email: None,
+                #[cfg(feature = "12-48-0")]
+                muting_notification_types: None,
+                #[cfg(feature = "12-70-0")]
+                email_notification_types: None,
             })
             .await;
     }

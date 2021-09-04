@@ -225,6 +225,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub object_storage_set_public_read: Option<bool>,
+    #[cfg(feature = "12-69-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub object_storage_s3_force_path_style: Option<bool>,
 }
 
 impl misskey_core::Request for Request {
@@ -335,6 +340,8 @@ mod tests {
                 object_storage_use_proxy: Some(false),
                 #[cfg(feature = "12-47-0")]
                 object_storage_set_public_read: Some(false),
+                #[cfg(feature = "12-69-0")]
+                object_storage_s3_force_path_style: Some(false),
             })
             .await;
     }

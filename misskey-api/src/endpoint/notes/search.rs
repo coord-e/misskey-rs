@@ -1,4 +1,4 @@
-use crate::model::{id::Id, note::Note, user::User};
+use crate::model::{channel::Channel, id::Id, note::Note, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -11,6 +11,8 @@ pub struct Request {
     pub query: String,
     #[builder(default, setter(strip_option))]
     pub user_id: Option<Id<User>>,
+    #[builder(default, setter(strip_option))]
+    pub channel_id: Option<Id<Channel>>,
     #[builder(default, setter(strip_option, into))]
     pub host: Option<String>,
     /// 1 .. 100
@@ -44,6 +46,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: None,
+                channel_id: None,
                 host: None,
                 limit: None,
                 since_id: None,
@@ -60,6 +63,31 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: Some(user.id),
+                channel_id: None,
+                host: None,
+                limit: None,
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+    }
+
+    #[tokio::test]
+    async fn request_with_channel_id() {
+        let client = TestClient::new();
+        let channel = client
+            .test(crate::endpoint::channels::create::Request {
+                name: "test channel".to_string(),
+                description: None,
+                banner_id: None,
+            })
+            .await;
+
+        client
+            .test(Request {
+                query: "query".to_string(),
+                user_id: None,
+                channel_id: Some(channel.id),
                 host: None,
                 limit: None,
                 since_id: None,
@@ -75,6 +103,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: None,
+                channel_id: None,
                 // TODO: proper host name
                 host: Some("dummy".to_string()),
                 limit: None,
@@ -91,6 +120,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: None,
+                channel_id: None,
                 host: None,
                 limit: Some(100),
                 since_id: None,
@@ -108,6 +138,7 @@ mod tests {
             .test(Request {
                 query: "test".to_string(),
                 user_id: None,
+                channel_id: None,
                 host: None,
                 limit: None,
                 since_id: Some(note.id.clone()),
