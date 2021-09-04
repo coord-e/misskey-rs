@@ -1,4 +1,4 @@
-use crate::model::{channel::Channel, id::Id, note::Note};
+use crate::model::{channel::Channel, id::Id, note::Note, user::User};
 use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
@@ -7,6 +7,9 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum ChannelEvent {
     Note(Note),
+    #[cfg(feature = "12-71-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-71-0")))]
+    Typers(Vec<User>),
 }
 
 #[derive(Serialize, Debug, Clone)]

@@ -13,8 +13,9 @@ keywords = ["async", "http", "websocket", "client", "misskey"]
 categories = ["api-bindings", "web-programming::http-client", "web-programming::websocket"]
 
 [features]
-default = ["12-70-0", "http-client", "websocket-client", "tokio-runtime", "aid"]
+default = ["12-71-0", "http-client", "websocket-client", "tokio-runtime", "aid"]
 
+12-71-0 = ["misskey-api/12-71-0", "misskey-util/12-71-0"]
 12-70-0 = ["misskey-api/12-70-0", "misskey-util/12-70-0"]
 12-69-0 = ["misskey-api/12-69-0", "misskey-util/12-69-0"]
 12-67-0 = ["misskey-api/12-67-0", "misskey-util/12-67-0"]

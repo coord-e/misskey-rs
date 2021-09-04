@@ -8,6 +8,9 @@ pub enum MessagingStreamEvent {
     Message(MessagingMessage),
     Deleted(Id<MessagingMessage>),
     Read(Vec<Id<MessagingMessage>>),
+    #[cfg(feature = "12-71-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-71-0")))]
+    Typers(Vec<User>),
 }
 
 #[derive(Serialize, Debug, Clone)]

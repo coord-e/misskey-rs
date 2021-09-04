@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - `RegistryUpdated` variant to `MainStreamEvent`
 - Support for Misskey v12.69.0
 - Support for Misskey v12.70.0
+- Support for Misskey v12.71.0 ~ v12.74.1
 - `muted_notification_types` user setting which is available since v12.48.0
 
 ### Changed
