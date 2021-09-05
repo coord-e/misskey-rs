@@ -1,7 +1,10 @@
+#[cfg(feature = "12-48-0")]
 use std::collections::HashSet;
 use std::fmt::{self, Display};
 
-use crate::model::{id::Id, note::Note, notification::NotificationType, page::Page};
+#[cfg(feature = "12-48-0")]
+use crate::model::notification::NotificationType;
+use crate::model::{id::Id, note::Note, page::Page};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
