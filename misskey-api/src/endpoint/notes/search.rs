@@ -1,4 +1,6 @@
-use crate::model::{channel::Channel, id::Id, note::Note, user::User};
+#[cfg(feature = "12-70-0")]
+use crate::model::channel::Channel;
+use crate::model::{id::Id, note::Note, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -11,6 +13,8 @@ pub struct Request {
     pub query: String,
     #[builder(default, setter(strip_option))]
     pub user_id: Option<Id<User>>,
+    #[cfg(feature = "12-70-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
     #[builder(default, setter(strip_option))]
     pub channel_id: Option<Id<Channel>>,
     #[builder(default, setter(strip_option, into))]
@@ -46,6 +50,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: None,
+                #[cfg(feature = "12-70-0")]
                 channel_id: None,
                 host: None,
                 limit: None,
@@ -63,6 +68,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: Some(user.id),
+                #[cfg(feature = "12-70-0")]
                 channel_id: None,
                 host: None,
                 limit: None,
@@ -72,6 +78,7 @@ mod tests {
             .await;
     }
 
+    #[cfg(feature = "12-70-0")]
     #[tokio::test]
     async fn request_with_channel_id() {
         let client = TestClient::new();
@@ -103,6 +110,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: None,
+                #[cfg(feature = "12-70-0")]
                 channel_id: None,
                 // TODO: proper host name
                 host: Some("dummy".to_string()),
@@ -120,6 +128,7 @@ mod tests {
             .test(Request {
                 query: "query".to_string(),
                 user_id: None,
+                #[cfg(feature = "12-70-0")]
                 channel_id: None,
                 host: None,
                 limit: Some(100),
@@ -138,6 +147,7 @@ mod tests {
             .test(Request {
                 query: "test".to_string(),
                 user_id: None,
+                #[cfg(feature = "12-70-0")]
                 channel_id: None,
                 host: None,
                 limit: None,
