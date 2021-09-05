@@ -1,3 +1,4 @@
+#[cfg(feature = "12-48-0")]
 use std::collections::HashSet;
 
 #[cfg(feature = "12-48-0")]

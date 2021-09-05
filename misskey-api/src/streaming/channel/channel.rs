@@ -1,4 +1,6 @@
-use crate::model::{channel::Channel, id::Id, note::Note, user::User};
+#[cfg(feature = "12-71-0")]
+use crate::model::user::User;
+use crate::model::{channel::Channel, id::Id, note::Note};
 use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
