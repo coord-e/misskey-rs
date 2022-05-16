@@ -61,7 +61,7 @@ paste = "1.0"
 mime = "0.3.4"
 mime_guess = "2.0"
 derivative = "2.1"
-ulid_crate = { package = "ulid", version = "0.4" }
+ulid_crate = { package = "ulid", version = "0.5" }
 url = "2.1"
 futures-timer = "3.0"
 
