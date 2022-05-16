@@ -20,20 +20,19 @@ jobs:
           - beta
           - stable
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ matrix.toolchain }}'
           override: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
           key: "ubuntu-20.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
-          restore-keys: |
-            ubuntu-20.04-${{ matrix.toolchain }}-cargo-all-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -124,20 +123,19 @@ jobs:
           - image: 'misskey/misskey:12.0.0'
             flags: --no-default-features
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
           key: "ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
-          restore-keys: |
-            ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-
       - name: Build misskey-api
         uses: actions-rs/cargo@v1
         with:
@@ -186,20 +184,19 @@ jobs:
           - method: objectid
           - method: ulid
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
           key: "ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
-          restore-keys: |
-            ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-api-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -229,20 +226,19 @@ jobs:
           - tokio-runtime
           - async-std-runtime
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
           key: "ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-websocket-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-http/Cargo.toml') }}"
-          restore-keys: |
-            ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-misskey-websocket-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -264,20 +260,19 @@ jobs:
     name: Minimal versions build
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
           override: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
-          key: ubuntu-20.04-nightly-cargo-minimal-all-${{ hashFiles('**/Cargo.toml') }}
-          restore-keys: |
-            ubuntu-20.04-nightly-cargo-minimal-all-
+          key: "ubuntu-20.04-nightly-cargo-minimal-all-${{ hashFiles('**/Cargo.toml') }}"
       - uses: actions-rs/cargo@v1
         with:
           command: check

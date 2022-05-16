@@ -11,20 +11,19 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
           override: true
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
           key: "ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
-          restore-keys: |
-            ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-
       - uses: actions-rs/cargo@v1
         with:
           command: build
@@ -47,7 +46,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
@@ -61,7 +60,7 @@ jobs:
     name: Clippy
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: '${{ env.RUST_TOOLCHAIN }}'
