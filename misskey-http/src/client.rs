@@ -3,7 +3,7 @@ use std::fmt::{self, Debug};
 
 use crate::error::{Error, Result};
 
-use common_multipart_rfc7578::client::{multipart, Error as MultipartError};
+use common_multipart_rfc7578::client::multipart;
 use futures::future::BoxFuture;
 use futures::io::AsyncReadExt;
 use isahc::http;
@@ -181,7 +181,7 @@ impl UploadFileClient for HttpClient {
 
             let mut form = multipart::Form::default();
 
-            form.add_reader_file_with_mime("file", read, file_name, type_);
+            form.add_reader_file_with_mime("file", Box::new(read), file_name, type_);
 
             let obj = value.as_object().expect("Request must be an object");
             for (k, v) in obj {
@@ -194,12 +194,9 @@ impl UploadFileClient for HttpClient {
             let content_type = form.content_type();
 
             use futures::stream::TryStreamExt;
-            let stream = multipart::Body::from(form).map_err(|e| match e {
-                MultipartError::HeaderWrite(e) => e,
-                MultipartError::BoundaryWrite(e) => e,
-                MultipartError::ContentRead(e) => e,
-            });
-            let body = isahc::Body::from_reader(async_dup::Mutex::new(stream.into_async_read()));
+            let stream = multipart::Body::from(form).map_err(Into::into);
+            let body =
+                isahc::AsyncBody::from_reader(async_dup::Mutex::new(stream.into_async_read()));
 
             use isahc::http::header::CONTENT_TYPE;
             let response = self
@@ -219,7 +216,7 @@ impl UploadFileClient for HttpClient {
 }
 
 async fn response_to_result<R: Request>(
-    response: http::Response<isahc::Body>,
+    response: http::Response<isahc::AsyncBody>,
 ) -> Result<ApiResult<R::Response>> {
     let status = response.status();
     let mut bytes = Vec::new();
