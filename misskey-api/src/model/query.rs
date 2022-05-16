@@ -30,7 +30,7 @@ impl<T> Query<T> {
     /// Disjunction of two queries.
     pub fn or(mut self, rhs: impl Into<Self>) -> Self {
         let mut rhs = rhs.into();
-        self.0.extend(rhs.0.drain(..));
+        self.0.append(&mut rhs.0);
         self
     }
 
