@@ -31,7 +31,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-misskey = "0.2"
+misskey = { version = "0.2", features = ["12-75-0"] }
 ```
 
 To run the example above, you will need to add the following dependencies:

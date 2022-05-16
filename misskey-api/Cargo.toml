@@ -13,7 +13,7 @@ keywords = ["async", "misskey"]
 categories = ["api-bindings"]
 
 [features]
-default = ["12-75-0", "aid"]
+default = ["aid"]
 
 12-75-0 = ["12-71-0"]
 12-71-0 = ["12-70-0"]
