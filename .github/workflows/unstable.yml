@@ -35,7 +35,7 @@ jobs:
         env:
           MISSKEY_IMAGE: 'misskey/misskey:12.75.1'
           MISSKEY_ID: aid
-      - run: cargo test
+      - run: cargo test --features 12-75-0
         timeout-minutes: 15
         env:
           TEST_API_URL: http://localhost:3000/api/
@@ -50,69 +50,69 @@ jobs:
       matrix:
         include:
           - image: 'misskey/misskey:12.75.0'
-            flags: --no-default-features --features 12-75-0
+            flags: --features 12-75-0
           - image: 'misskey/misskey:12.71.0'
-            flags: --no-default-features --features 12-71-0
+            flags: --features 12-71-0
           - image: 'misskey/misskey:12.70.0'
-            flags: --no-default-features --features 12-70-0
+            flags: --features 12-70-0
           - image: 'misskey/misskey:12.69.0'
-            flags: --no-default-features --features 12-69-0
+            flags: --features 12-69-0
           - image: 'misskey/misskey:12.68.0'
-            flags: --no-default-features --features 12-67-0
+            flags: --features 12-67-0
           - image: 'misskey/misskey:12.66.0'
-            flags: --no-default-features --features 12-66-0
+            flags: --features 12-66-0
           - image: 'misskey/misskey:12.65.4'
-            flags: --no-default-features --features 12-65-4
+            flags: --features 12-65-4
           - image: 'misskey/misskey@sha256:9c13b1d240cef6f96aa19d133f0ddc5a927d7b8206b8656b940f3dc645ca0dbe'
-            flags: --no-default-features --features 12-63-0
+            flags: --features 12-63-0
           - image: 'misskey/misskey:12.62.2'
-            flags: --no-default-features --features 12-62-2
+            flags: --features 12-62-2
           - image: 'misskey/misskey:12.62.0'
-            flags: --no-default-features --features 12-62-0
+            flags: --features 12-62-0
           - image: 'misskey/misskey:12.61.0'
-            flags: --no-default-features --features 12-61-0
+            flags: --features 12-61-0
           - image: 'misskey/misskey:12.60.0'
-            flags: --no-default-features --features 12-60-0
+            flags: --features 12-60-0
           - image: 'misskey/misskey:12.58.0'
-            flags: --no-default-features --features 12-58-0
+            flags: --features 12-58-0
           - image: 'misskey/misskey:12.57.1'
-            flags: --no-default-features --features 12-57-0
+            flags: --features 12-57-0
           - image: 'misskey/misskey:12.55.0'
-            flags: --no-default-features --features 12-55-0
+            flags: --features 12-55-0
           - image: 'misskey/misskey:12.51.0'
-            flags: --no-default-features --features 12-51-0
+            flags: --features 12-51-0
           - image: 'misskey/misskey:12.49.0'
-            flags: --no-default-features --features 12-49-0
+            flags: --features 12-49-0
           - image: 'misskey/misskey:12.48.0'
-            flags: --no-default-features --features 12-48-0
+            flags: --features 12-48-0
           - image: 'misskey/misskey:12.47.1'
-            flags: --no-default-features --features 12-47-0
+            flags: --features 12-47-0
           - image: 'misskey/misskey:12.42.0'
-            flags: --no-default-features --features 12-42-0
+            flags: --features 12-42-0
           - image: 'misskey/misskey:12.39.0'
-            flags: --no-default-features --features 12-39-0
+            flags: --features 12-39-0
           - image: 'misskey/misskey:12.37.0'
-            flags: --no-default-features --features 12-37-0
+            flags: --features 12-37-0
           - image: 'misskey/misskey:12.31.0'
-            flags: --no-default-features --features 12-31-0
+            flags: --features 12-31-0
           - image: 'misskey/misskey:12.29.0'
-            flags: --no-default-features --features 12-29-0
+            flags: --features 12-29-0
           - image: 'misskey/misskey:12.28.0'
-            flags: --no-default-features --features 12-27-0
+            flags: --features 12-27-0
           - image: 'misskey/misskey:12.20.0'
-            flags: --no-default-features --features 12-19-0
+            flags: --features 12-19-0
           - image: 'misskey/misskey:12.13.0'
-            flags: --no-default-features --features 12-13-0
+            flags: --features 12-13-0
           - image: 'misskey/misskey:12.10.0'
-            flags: --no-default-features --features 12-10-0
+            flags: --features 12-10-0
           - image: 'misskey/misskey:12.9.0'
-            flags: --no-default-features --features 12-9-0
+            flags: --features 12-9-0
           - image: 'misskey/misskey:12.8.0'
-            flags: --no-default-features --features 12-8-0
+            flags: --features 12-8-0
           - image: 'misskey/misskey:12.5.0'
-            flags: --no-default-features --features 12-5-0
+            flags: --features 12-5-0
           - image: 'misskey/misskey:12.0.0'
-            flags: --no-default-features
+            flags: ''
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -124,16 +124,16 @@ jobs:
             target
           key: "ubuntu-20.04-default-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
       - name: Build misskey-api
-        run: cargo build --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
+        run: cargo build --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
       - name: Build misskey-util
-        run: cargo build --tests --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }} --features aid
+        run: cargo build --tests --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }}
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
           MISSKEY_IMAGE: ${{ matrix.image }}
           MISSKEY_ID: aid
       - name: Test misskey-api
-        run: cargo test --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }} --features aid
+        run: cargo test --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
         timeout-minutes: 5
         env:
           TEST_API_URL: http://localhost:3000/api/
@@ -141,7 +141,7 @@ jobs:
           TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
           TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
       - name: Test misskey-util
-        run: cargo test --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }} --features aid
+        run: cargo test --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }}
         timeout-minutes: 5
         env:
           TEST_API_URL: http://localhost:3000/api/
