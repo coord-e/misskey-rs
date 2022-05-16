@@ -9,14 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
-
-- Use tokio 1.0 and async-tungstenite 0.13
-  - Drop feature flags for tokio 0.2 and async-tungstenite 0.9
-
 ### Deprecated
 ### Removed
 ### Fixed
 ### Security
+
+## [0.3.0-rc.1] - 2022-05-17
+
+### Changed
+
+- Use tokio 1.0 and async-tungstenite 0.13
+  - Drop feature flags for tokio 0.2 and async-tungstenite 0.9
 
 ## [0.2.0] - 2020-12-17
 

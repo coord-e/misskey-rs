@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [0.3.0-rc.1] - 2022-05-17
+
+### Added
 
 - Support for Misskey v12.65.4 ~ v12.65.7
    - endpoint `get-online-users-count`
@@ -24,8 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.75.0 ~ v12.75.1
 - `muted_notification_types` user setting which is available since v12.48.0
 
-### Changed
-### Deprecated
 ### Removed
 
 - `ClientSettingUpdated` variant from `MainStreamEvent`
@@ -35,8 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix `admin/show-user` response
-
-### Security
 
 ## [0.2.0] - 2020-12-17
 

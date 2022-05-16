@@ -96,7 +96,7 @@
 //!
 //! ```toml
 //! [dependencies.misskey]
-//! version = "0.2"
+//! version = "0.3.0-rc.1"
 //! default-features = false
 //! features = ["12-31-0", "websocket-client", "async-std-runtime", "aid"]
 //! ```

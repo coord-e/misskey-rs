@@ -1,6 +1,6 @@
 [package]
 name = "misskey-util"
-version = "0.1.0"
+version = "0.2.0-rc.1"
 authors = ["coord_e <me@coord-e.com>"]
 edition = "2021"
 repository = "https://github.com/coord-e/misskey-rs.git"
@@ -53,8 +53,8 @@ ulid = ["misskey-api/ulid"]
 objectid = ["misskey-api/objectid"]
 
 [dependencies]
-misskey-core = { path = "../misskey-core", version = "0.2.0" }
-misskey-api = { path = "../misskey-api", version = "0.2.0", default-features = false }
+misskey-core = { path = "../misskey-core", version = "0.3.0-rc.1" }
+misskey-api = { path = "../misskey-api", version = "0.3.0-rc.1", default-features = false }
 futures = "0.3"
 chrono = "0.4"
 paste = "1.0"
