@@ -27,7 +27,7 @@ rustc_version = "0.2.2"
 mime = "0.3"
 common-multipart-rfc7578 = "0.6.0"
 async-dup = "1.0"
-futures = { version = "0.3", default-features = false }
+futures = { version = "0.3", default-features = false, features = ["std"] }
 log = { version = "0.4", optional = true }
 
 [dev-dependencies]
