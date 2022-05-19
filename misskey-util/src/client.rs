@@ -2844,7 +2844,7 @@ pub trait ClientExt: Client + Sync {
                 })
                 .await
                 .map_err(Error::Client)?;
-            // https://github.com/syuilo/misskey/blob/develop/src/server/api/endpoints/i/registry/get.ts#L26
+            // https://github.com/misskey-dev/misskey/blob/develop/src/server/api/endpoints/i/registry/get.ts#L26
             let get_no_such_key_id = ApiErrorId("ac3ed68a-62f0-422b-a7bc-d5e09e8f6a6a".to_string());
             if let ApiResult::Err { error } = &result {
                 if error.id == get_no_such_key_id {
@@ -2971,7 +2971,7 @@ pub trait ClientExt: Client + Sync {
                 })
                 .await
                 .map_err(Error::Client)?;
-            // https://github.com/syuilo/misskey/blob/develop/src/server/api/endpoints/i/registry/remove.ts#L26
+            // https://github.com/misskey-dev/misskey/blob/develop/src/server/api/endpoints/i/registry/remove.ts#L26
             let remove_no_such_key_id =
                 ApiErrorId("1fac4e8a-a6cd-4e39-a4a5-3a7e11f1b019".to_string());
             if let ApiResult::Err { error } = &result {

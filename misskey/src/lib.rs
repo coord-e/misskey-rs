@@ -1,4 +1,4 @@
-//! Asynchronous client for [Misskey](https://github.com/syuilo/misskey).
+//! Asynchronous client for [Misskey](https://github.com/misskey-dev/misskey).
 //!
 //! We provide four components in this crate:
 //!

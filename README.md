@@ -5,7 +5,7 @@
 [![Actions Status](https://img.shields.io/github/workflow/status/coord-e/misskey-rs/CI?style=flat-square)](https://github.com/coord-e/misskey-rs/actions?workflow=CI)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-`misskey-rs` is an asynchronous [Misskey](https://github.com/syuilo/misskey) client library for Rust.
+`misskey-rs` is an asynchronous [Misskey](https://github.com/misskey-dev/misskey) client library for Rust.
 
 ```rust
 use misskey::prelude::*;
