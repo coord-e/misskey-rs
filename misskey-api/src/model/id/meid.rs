@@ -18,7 +18,7 @@ impl Meid {
     }
 }
 
-// https://github.com/misskey-dev/misskey/blob/develop/src/misc/id/meid.ts#L9
+// https://github.com/misskey-dev/misskey/blob/12.75.1/src/misc/id/meid.ts#L9
 const TIME_OFFSET: i64 = 0x800000000000;
 
 #[derive(Debug, Error, Clone)]

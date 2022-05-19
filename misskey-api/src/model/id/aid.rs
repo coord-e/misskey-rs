@@ -19,7 +19,7 @@ impl Aid {
     }
 }
 
-// https://github.com/misskey-dev/misskey/blob/develop/src/misc/id/aid.ts#L6
+// https://github.com/misskey-dev/misskey/blob/12.75.1/src/misc/id/aid.ts#L6
 const TIME2000: i64 = 946684800000;
 
 #[derive(Debug, Error, Clone)]
