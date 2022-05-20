@@ -2,72 +2,43 @@ on: [push, pull_request]
 
 name: CI
 
-env:
-  RUST_TOOLCHAIN: '1.54.0'
-
 jobs:
   test:
     name: Test
     runs-on: ubuntu-20.04
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: '${{ env.RUST_TOOLCHAIN }}'
-          override: true
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo/registry
-            ~/.cargo/git
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
             target
-          key: "ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
-          restore-keys: |
-            ubuntu-20.04-${{ env.RUST_TOOLCHAIN }}-cargo-all-
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --tests
+          key: "ubuntu-20.04-default-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
+      - run: cargo build --tests
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
           MISSKEY_IMAGE: 'misskey/misskey:12.75.1'
           MISSKEY_ID: aid
-      - uses: actions-rs/cargo@v1
+      - run: cargo test --features 12-75-0
         timeout-minutes: 15
         env:
           TEST_API_URL: http://localhost:3000/api/
           TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
           TEST_ADMIN_TOKEN: ${{ steps.setup_env.outputs.admin_token }}
           TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
-        with:
-          command: test
   fmt:
     name: Rustfmt
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: '${{ env.RUST_TOOLCHAIN }}'
-          override: true
-          components: rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - uses: actions/checkout@v3
+      - run: cargo fmt --all -- --check
   clippy:
     name: Clippy
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: '${{ env.RUST_TOOLCHAIN }}'
-          override: true
-          components: clippy
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
-          args: -- -D warnings
+      - uses: actions/checkout@v3
+      - run: cargo clippy -- -D warnings
