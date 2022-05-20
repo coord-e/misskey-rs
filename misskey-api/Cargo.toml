@@ -1,8 +1,8 @@
 [package]
 name = "misskey-api"
 version = "0.2.0"
-authors = ["coord.e <me@coord-e.com>"]
-edition = "2018"
+authors = ["coord_e <me@coord-e.com>"]
+edition = "2021"
 repository = "https://github.com/coord-e/misskey-rs.git"
 homepage = "https://github.com/coord-e/misskey-rs"
 description = "API bindings of Misskey, including requests/responses of endpoints and messages on channels"
@@ -58,7 +58,7 @@ misskey-core = { path = "../misskey-core", version = "0.2.0" }
 serde = { version = "1.0.103", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-ulid_crate = { package = "ulid", version = "0.4", features = ["serde"] }
+ulid_crate = { package = "ulid", version = "0.5", features = ["serde"] }
 # rand_core <= 0.2.1 fails to build rand_isaac in the dependency tree
 rand_core = "0.2.2"
 url = { version = "2.1", features = ["serde"] }
@@ -73,10 +73,10 @@ misskey-http = { path = "../misskey-http", features = ["inspect-contents"] }
 misskey-websocket = { path = "../misskey-websocket", features = ["inspect-contents"] }
 misskey-test = { path = "../misskey-test", features = ["misskey-http", "misskey-websocket"] }
 tokio = { version = "1.0", features = ["macros", "fs", "time", "rt-multi-thread"] }
-ulid_crate = { package = "ulid", version = "0.4" }
-rand = "0.7"
+ulid_crate = { package = "ulid", version = "0.5" }
+rand = "0.8"
 futures = "0.3"
-isahc = "0.9.2"
+isahc = "1.0"
 async-trait = "0.1.35"
 
 [package.metadata.docs.rs]

@@ -99,7 +99,7 @@ impl HttpClientBuilder {
                     inner.additional_headers.insert(key, value);
                     Ok(())
                 }
-                Err(e) => Err(Error::Network(isahc::Error::InvalidHttpFormat(e))),
+                Err(e) => Err(Error::Network(e.into())),
             }
         });
         self

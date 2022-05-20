@@ -1,4 +1,3 @@
-use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::str::FromStr;
 
@@ -19,7 +18,7 @@ impl Aid {
     }
 }
 
-// https://github.com/syuilo/misskey/blob/develop/src/misc/id/aid.ts#L6
+// https://github.com/misskey-dev/misskey/blob/12.75.1/src/misc/id/aid.ts#L6
 const TIME2000: i64 = 946684800000;
 
 #[derive(Debug, Error, Clone)]
@@ -58,7 +57,6 @@ impl Radix36 {
 
 impl Display for Radix36 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use std::convert::TryInto;
         use std::fmt::Write;
 
         let width = f

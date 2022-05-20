@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/misskey-websocket?style=flat-square)](https://crates.io/crates/misskey-websocket)
 [![docs.rs](https://img.shields.io/badge/docs.rs-misskey--websocket-blue?style=flat-square)](https://docs.rs/misskey-websocket)
 
-Asynchronous WebSocket-based client implementation for [Misskey](https://github.com/syuilo/misskey).
+Asynchronous WebSocket-based client implementation for [Misskey](https://github.com/misskey-dev/misskey).
 Implemented as a part of [misskey-rs](https://crates.io/crates/misskey).
 
 See the [misskey-rs](https://crates.io/crates/misskey) for examples and detailed explanations.

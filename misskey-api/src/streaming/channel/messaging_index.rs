@@ -3,6 +3,7 @@ use crate::streaming::channel::NoOutgoing;
 
 use serde::{Deserialize, Serialize};
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum MessagingIndexStreamEvent {
