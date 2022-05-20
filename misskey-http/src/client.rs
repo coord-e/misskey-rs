@@ -1,4 +1,3 @@
-use std::convert::TryInto;
 use std::fmt::{self, Debug};
 
 use crate::error::{Error, Result};

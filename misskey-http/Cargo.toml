@@ -2,7 +2,7 @@
 name = "misskey-http"
 version = "0.2.0"
 authors = ["coord_e <me@coord-e.com>"]
-edition = "2018"
+edition = "2021"
 repository = "https://github.com/coord-e/misskey-rs.git"
 homepage = "https://github.com/coord-e/misskey-rs"
 description = "Asynchronous HTTP-based client implementation for Misskey"
