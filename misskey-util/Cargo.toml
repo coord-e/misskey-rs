@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["async", "client", "misskey"]
 
 [features]
-default = ["12-75-0", "aid"]
+default = ["aid"]
 
 12-75-0 = ["misskey-api/12-75-0", "12-71-0"]
 12-71-0 = ["misskey-api/12-71-0", "12-70-0"]

@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ClientSettingUpdated` variant from `MainStreamEvent`
    - For Misskey v12.67.0 ~ v12.68.0
+- Latest version flag from being enabled as default
 
 ### Fixed
 

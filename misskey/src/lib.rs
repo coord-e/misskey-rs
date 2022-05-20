@@ -91,9 +91,6 @@
 //! ## Specifying Misskey version
 //!
 //! We have a set of feature flags to specify the targeted Misskey version.
-//! The latest one (`12-67-0`) is enabled as a default. You can opt-in to compile for prior
-//! Misskey version by using `default-features = false` and the corresponding feature flag.
-//!
 //! For example, to compile for Misskey v12.33.0 with WebSocket client on async-std runtime, add
 //! the following to your `Cargo.toml` file:
 //!
