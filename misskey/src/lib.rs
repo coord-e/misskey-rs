@@ -77,9 +77,8 @@
 //!   Enabled by default.
 //! - `websocket-client`: Enables the WebSocket client which is capable for streaming.
 //!   Enabled by default.
-//! - `tokio-runtime`: Use the [tokio](https://tokio.rs) v0.3 runtime in the WebSocket client.
+//! - `tokio-runtime`: Use the [tokio](https://tokio.rs) v1.0 runtime in the WebSocket client.
 //!   Enabled by default.
-//! - `tokio02-runtime`: Use the [tokio](https://tokio.rs) v0.2 runtime in the WebSocket client.
 //! - `async-std-runtime`: Use the [async-std](https://async.rs) runtime in the WebSocket client.
 //! - `aid`: Assume that the `aid` ID generation method is used in the targeted Misskey instance.
 //!   Enabled by default.
