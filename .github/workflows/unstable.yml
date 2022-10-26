@@ -211,24 +211,3 @@ jobs:
         env:
           TEST_WEBSOCKET_URL: ws://localhost:3000/streaming
           TEST_USER_TOKEN: ${{ steps.setup_env.outputs.user_token }}
-  minimal_version:
-    name: Minimal versions build
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - run: rustup override set nightly
-      - uses: taiki-e/install-action@v1
-        with:
-          tool: cargo-hack@0.5
-      - uses: taiki-e/install-action@v1
-        with:
-          tool: cargo-minimal-versions@0.1
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target
-          key: "ubuntu-20.04-nightly-cargo-minimal-all-${{ hashFiles('**/Cargo.toml') }}"
-      - run: cargo minimal-versions check --workspace --ignore-private
