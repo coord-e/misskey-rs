@@ -41,7 +41,7 @@ impl<'de> Deserialize<'de> for IncomingMessageType {
                 }
 
                 if let Some(id) = value.strip_prefix("api:") {
-                    let uuid = Uuid::parse_str(id)
+                    let uuid = Uuid::try_parse(id)
                         .map_err(|e| e.to_string())
                         .map_err(de::Error::custom)?;
                     Ok(IncomingMessageType::Api(ApiRequestId(uuid)))

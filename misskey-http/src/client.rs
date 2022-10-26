@@ -314,7 +314,7 @@ mod tests {
     }
 
     fn write_to_temp_file(data: impl AsRef<[u8]>) -> std::path::PathBuf {
-        let tmp_name = Uuid::new_v4().to_simple().to_string();
+        let tmp_name = Uuid::new_v4().simple().to_string();
         let path = std::env::temp_dir().join(tmp_name);
         {
             use std::{fs::File, io::Write};
