@@ -4,9 +4,9 @@ use std::task::{Context, Poll};
 use crate::broker::model::{BrokerControl, SharedBrokerState};
 use crate::error::{Error, Result};
 
-use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use futures::sink::{Sink, SinkExt};
-use futures::stream::{FusedStream, Stream, StreamExt};
+use futures_channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
+use futures_util::sink::{Sink, SinkExt};
+use futures_util::stream::{FusedStream, Stream, StreamExt};
 
 /// Sender channel that the client uses to communicate with broker
 #[derive(Debug, Clone)]

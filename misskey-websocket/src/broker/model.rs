@@ -8,7 +8,7 @@ use crate::error::Error;
 use crate::model::{ApiRequestId, ChannelId, SubNoteId};
 
 use async_rwlock::RwLock;
-use futures::future::{BoxFuture, Future, FutureExt};
+use futures_util::future::{BoxFuture, Future, FutureExt};
 use misskey_core::model::ApiResult;
 use serde_json::Value;
 use uuid::Uuid;

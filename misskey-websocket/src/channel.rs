@@ -15,7 +15,7 @@ use async_tungstenite::tungstenite::{
     Message as WsMessage,
 };
 use async_tungstenite::WebSocketStream;
-use futures::{
+use futures_util::{
     sink::{Sink, SinkExt},
     stream::{SplitSink, SplitStream, Stream, StreamExt, TryStreamExt},
 };
@@ -36,7 +36,7 @@ impl Stream for WebSocketReceiver {
     type Item = Result<IncomingMessage>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let text = match futures::ready!(self.0.poll_next_unpin(cx)?) {
+        let text = match futures_util::ready!(self.0.poll_next_unpin(cx)?) {
             Some(WsMessage::Text(t)) => t,
             Some(WsMessage::Ping(_)) | Some(WsMessage::Pong(_)) => return self.poll_next(cx),
             None | Some(WsMessage::Close(_)) => return Poll::Ready(None),
@@ -154,7 +154,7 @@ where
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
         match self.state.take() {
             None => {
-                let data = match futures::ready!(self.stream.try_poll_next_unpin(cx)) {
+                let data = match futures_util::ready!(self.stream.try_poll_next_unpin(cx)) {
                     Some(Ok(WsMessage::Ping(data))) => data,
                     opt => return Poll::Ready(opt),
                 };

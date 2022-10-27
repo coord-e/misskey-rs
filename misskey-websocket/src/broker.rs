@@ -11,7 +11,7 @@ use async_std::task;
 #[cfg(feature = "async-std-runtime")]
 use async_std::task::sleep;
 use async_tungstenite::tungstenite::Error as WsError;
-use futures::stream::StreamExt;
+use futures_util::stream::StreamExt;
 use log::{info, warn};
 #[cfg(feature = "tokio-runtime")]
 use tokio::task;
@@ -259,7 +259,7 @@ impl Broker {
         &mut self,
         remaining_message: Option<OutgoingMessage>,
     ) -> std::result::Result<(), TaskError> {
-        use futures::future::{self, Either};
+        use futures_util::future::{self, Either};
 
         let (mut websocket_tx, mut websocket_rx) = match connect_websocket(self.url.clone()).await {
             Ok(x) => x,
@@ -286,7 +286,7 @@ impl Broker {
             let t1 = websocket_rx.recv();
             let t2 = self.broker_rx.next();
 
-            futures::pin_mut!(t1, t2);
+            futures_util::pin_mut!(t1, t2);
 
             match future::select(t1, t2).await {
                 Either::Left((msg, _)) => {

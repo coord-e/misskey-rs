@@ -12,7 +12,7 @@ use crate::model::SubNoteId;
 
 #[cfg(feature = "async-std-runtime")]
 use async_std::task;
-use futures::{
+use futures_util::{
     sink::SinkExt,
     stream::{FusedStream, Stream, StreamExt},
 };
@@ -156,7 +156,7 @@ where
     type Item = Result<E>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Result<E>>> {
-        let result = futures::ready!(self.inner.poll_next_unpin(cx))
+        let result = futures_util::ready!(self.inner.poll_next_unpin(cx))
             .map(|res| res.and_then(|v| serde_json::from_value(v).map_err(Into::into)));
         Poll::Ready(result)
     }
