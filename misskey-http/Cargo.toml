@@ -1,12 +1,12 @@
 [package]
 name = "misskey-http"
-version = "0.2.0"
+version = "0.3.0-rc.1"
 authors = ["coord_e <me@coord-e.com>"]
 edition = "2021"
 repository = "https://github.com/coord-e/misskey-rs.git"
 homepage = "https://github.com/coord-e/misskey-rs"
 description = "Asynchronous HTTP-based client implementation for Misskey"
-documentation = "https://docs.rs/misskey-http/0.2.0"
+documentation = "https://docs.rs/misskey-http/0.3.0-rc.1"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["async", "http", "client", "misskey"]
@@ -16,7 +16,7 @@ categories = ["web-programming::http-client"]
 inspect-contents = ["log"]
 
 [dependencies]
-misskey-core = { path = "../misskey-core", version = "0.2.0" }
+misskey-core = { path = "../misskey-core", version = "0.3.0-rc.1" }
 serde = "1.0"
 serde_json = "1.0"
 thiserror = "1.0.2"

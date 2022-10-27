@@ -1,12 +1,12 @@
 [package]
 name = "misskey-api"
-version = "0.2.0"
+version = "0.3.0-rc.1"
 authors = ["coord_e <me@coord-e.com>"]
 edition = "2021"
 repository = "https://github.com/coord-e/misskey-rs.git"
 homepage = "https://github.com/coord-e/misskey-rs"
 description = "API bindings of Misskey, including requests/responses of endpoints and messages on channels"
-documentation = "https://docs.rs/misskey-api/0.2.0"
+documentation = "https://docs.rs/misskey-api/0.3.0-rc.1"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["async", "misskey"]
@@ -54,7 +54,7 @@ ulid = []
 objectid = []
 
 [dependencies]
-misskey-core = { path = "../misskey-core", version = "0.2.0" }
+misskey-core = { path = "../misskey-core", version = "0.3.0-rc.1" }
 serde = { version = "1.0.103", features = ["derive"] }
 serde_json = "1.0"
 chrono = { version = "0.4", features = ["serde"] }

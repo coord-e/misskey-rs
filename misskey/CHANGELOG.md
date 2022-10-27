@@ -11,11 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 ### Deprecated
 ### Removed
-
-- Latest version flag from being enabled as default
-
 ### Fixed
 ### Security
+
+## [0.3.0-rc.1] - 2022-05-17
+
+### Removed
+
+- Latest version flag from being enabled as default
 
 ## [0.2.0] - 2020-12-17
 
