@@ -5,9 +5,9 @@ use std::task::{Context, Poll};
 use crate::broker::model::{ReadBrokerState, SharedBrokerState};
 use crate::error::Result;
 
-use futures::channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use futures::future::FutureExt;
-use futures::stream::{FusedStream, Stream, StreamExt};
+use futures_channel::mpsc::{self, UnboundedReceiver, UnboundedSender};
+use futures_util::future::FutureExt;
+use futures_util::stream::{FusedStream, Stream, StreamExt};
 
 /// Sender channel that broker uses to respond to the client
 #[derive(Debug, Clone)]
@@ -46,7 +46,7 @@ impl<T> Stream for ResponseStreamReceiver<T> {
         }
 
         if self.state_read_fut.is_none() {
-            if let Some(x) = futures::ready!(self.inner.poll_next_unpin(cx)) {
+            if let Some(x) = futures_util::ready!(self.inner.poll_next_unpin(cx)) {
                 return Poll::Ready(Some(Ok(x)));
             }
         }
@@ -61,7 +61,7 @@ impl<T> Stream for ResponseStreamReceiver<T> {
             state_read_fut.get_or_insert_with(|| state.read())
         };
 
-        let state = futures::ready!(fut.poll_unpin(cx));
+        let state = futures_util::ready!(fut.poll_unpin(cx));
         let err = state
             .dead()
             .expect("broker must be dead after poll_next returned None (ResponseStreamReceiver)");

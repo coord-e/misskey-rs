@@ -3,8 +3,8 @@ use std::fmt::{self, Debug};
 use crate::error::{Error, Result};
 
 use common_multipart_rfc7578::client::multipart;
-use futures::future::BoxFuture;
-use futures::io::AsyncReadExt;
+use futures_util::future::BoxFuture;
+use futures_util::io::AsyncReadExt;
 use isahc::http;
 #[cfg(feature = "inspect-contents")]
 use log::debug;
@@ -192,7 +192,7 @@ impl UploadFileClient for HttpClient {
 
             let content_type = form.content_type();
 
-            use futures::stream::TryStreamExt;
+            use futures_util::stream::TryStreamExt;
             let stream = multipart::Body::from(form).map_err(Into::into);
             let body =
                 isahc::AsyncBody::from_reader(async_dup::Mutex::new(stream.into_async_read()));

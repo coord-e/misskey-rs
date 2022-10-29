@@ -27,7 +27,7 @@ openssl-sys = "0.9.45"
 mime = "0.3"
 common-multipart-rfc7578 = "0.6.0"
 async-dup = "1.0"
-futures = { version = "0.3", default-features = false, features = ["std"] }
+futures-util = "0.3"
 log = { version = "0.4", optional = true }
 
 [dev-dependencies]

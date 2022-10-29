@@ -1,7 +1,7 @@
 use crate::broker::model::SharedBrokerState;
 use crate::error::Result;
 
-use futures::channel::oneshot::{self, Receiver, Sender};
+use futures_channel::oneshot::{self, Receiver, Sender};
 
 #[derive(Debug)]
 pub(crate) struct ResponseSender<T>(Sender<T>);

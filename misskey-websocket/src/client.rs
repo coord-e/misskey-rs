@@ -8,7 +8,7 @@ use crate::broker::{
 use crate::error::{Error, Result};
 use crate::model::{ApiRequestId, SubNoteId};
 
-use futures::{
+use futures_util::{
     future::{BoxFuture, FutureExt, TryFutureExt},
     sink::{Sink, SinkExt},
     stream::{BoxStream, Stream, StreamExt},
@@ -86,7 +86,7 @@ impl WebSocketClient {
     /// The returned [`SubNote`] implements [`Stream`][stream]
     /// so that note events can be retrieved asynchronously via it.
     ///
-    /// [stream]: futures::stream::Stream
+    /// [stream]: futures_util::stream::Stream
     pub fn subnote<E, Id>(&self, note_id: Id) -> BoxFuture<'static, Result<SubNote<E>>>
     where
         E: misskey_core::streaming::SubNoteEvent,
@@ -105,8 +105,8 @@ impl WebSocketClient {
     /// The returned [`Channel`] implements [`Stream`][stream] and [`Sink`][sink]
     /// so that you can exchange messages with channels on it.
     ///
-    /// [stream]: futures::stream::Stream
-    /// [sink]: futures::sink::Sink
+    /// [stream]: futures_util::stream::Stream
+    /// [sink]: futures_util::sink::Sink
     pub fn channel<R>(
         &self,
         request: R,
@@ -126,7 +126,7 @@ impl WebSocketClient {
     /// The returned [`Broadcast`] implements [`Stream`][stream]
     /// so that broadcast events can be retrieved asynchronously via it.
     ///
-    /// [stream]: futures::stream::Stream
+    /// [stream]: futures_util::stream::Stream
     pub fn broadcast<E>(&self) -> BoxFuture<'static, Result<Broadcast<E>>>
     where
         E: misskey_core::streaming::BroadcastEvent,
@@ -232,7 +232,7 @@ impl StreamingClient for WebSocketClient {
 mod tests {
     use super::{builder::WebSocketClientBuilder, WebSocketClient};
 
-    use futures::stream::StreamExt;
+    use futures_util::stream::StreamExt;
     use misskey_core::Client;
     use misskey_test::{self, env};
 
@@ -299,7 +299,7 @@ mod tests {
             .await
             .unwrap();
 
-        futures::future::join(
+        futures_util::future::join(
             async {
                 client
                     .request(misskey_api::endpoint::notes::delete::Request { note_id: note.id })
