@@ -78,7 +78,7 @@ jobs:
             flags: ''
     steps:
       - uses: actions/checkout@v3
-      - run: cp ci/Cargo.lock Cargo.lock
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - uses: actions/cache@v3
         with:
           path: |
@@ -124,7 +124,7 @@ jobs:
           - method: ulid
     steps:
       - uses: actions/checkout@v3
-      - run: cp ci/Cargo.lock Cargo.lock
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - uses: actions/cache@v3
         with:
           path: |
@@ -157,7 +157,7 @@ jobs:
           - async-std-runtime
     steps:
       - uses: actions/checkout@v3
-      - run: cp ci/Cargo.lock Cargo.lock
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - uses: actions/cache@v3
         with:
           path: |

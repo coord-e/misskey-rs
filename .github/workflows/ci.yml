@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
-      - run: cp ci/Cargo.lock Cargo.lock
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - uses: actions/cache@v3
         with:
           path: |
@@ -36,11 +36,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - run: cargo fmt --all -- --check
   clippy:
     name: Clippy
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - run: cp ci/Cargo.lock Cargo.lock
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - run: cargo clippy -- -D warnings
