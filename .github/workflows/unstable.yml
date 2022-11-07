@@ -23,14 +23,7 @@ jobs:
       - run: rustup override set "$TOOLCHAIN"
         env:
           TOOLCHAIN: ${{ matrix.toolchain }}
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target
-          key: "ubuntu-20.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('Cargo.lock') }}"
+      - uses: Swatinem/rust-cache@v2
       - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
@@ -56,12 +49,5 @@ jobs:
       - uses: taiki-e/install-action@v1
         with:
           tool: cargo-minimal-versions@0.1.7
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target
-          key: "ubuntu-20.04-nightly-cargo-minimal-all-${{ hashFiles('**/Cargo.toml') }}"
+      - uses: Swatinem/rust-cache@v2
       - run: cargo minimal-versions check --workspace --ignore-private

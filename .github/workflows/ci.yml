@@ -10,14 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target
-          key: "ubuntu-20.04-default-cargo-all-${{ hashFiles('Cargo.lock') }}"
+      - uses: Swatinem/rust-cache@v2
       - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
@@ -44,4 +37,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
+      - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -- -D warnings
