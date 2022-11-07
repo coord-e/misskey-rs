@@ -9,6 +9,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock Cargo.lock
       - uses: actions/cache@v3
         with:
           path: |
@@ -16,8 +17,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target
-          key: "ubuntu-20.04-default-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
-      - run: cargo build --tests
+          key: "ubuntu-20.04-default-cargo-all-${{ hashFiles('Cargo.lock') }}"
+      - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
@@ -41,4 +42,5 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock Cargo.lock
       - run: cargo clippy -- -D warnings

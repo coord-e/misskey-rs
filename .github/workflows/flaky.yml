@@ -78,6 +78,7 @@ jobs:
             flags: ''
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock Cargo.lock
       - uses: actions/cache@v3
         with:
           path: |
@@ -85,11 +86,11 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target
-          key: "ubuntu-20.04-default-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
+          key: "ubuntu-20.04-default-cargo-misskey-api-${{ hashFiles('Cargo.lock') }}"
       - name: Build misskey-api
-        run: cargo build --tests --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
+        run: cargo build --tests --locked --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
       - name: Build misskey-util
-        run: cargo build --tests --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }}
+        run: cargo build --tests --locked --manifest-path misskey-util/Cargo.toml ${{ matrix.flags }}
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
@@ -123,6 +124,7 @@ jobs:
           - method: ulid
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock Cargo.lock
       - uses: actions/cache@v3
         with:
           path: |
@@ -130,8 +132,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target
-          key: "ubuntu-20.04-default-cargo-misskey-api-${{ hashFiles('misskey-*/Cargo.toml') }}"
-      - run: cargo build --tests --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
+          key: "ubuntu-20.04-default-cargo-misskey-api-${{ hashFiles('Cargo.lock') }}"
+      - run: cargo build --tests --locked --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
@@ -155,6 +157,7 @@ jobs:
           - async-std-runtime
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock Cargo.lock
       - uses: actions/cache@v3
         with:
           path: |
@@ -162,8 +165,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target
-          key: "ubuntu-20.04-default-cargo-misskey-websocket-${{ hashFiles('misskey-*/Cargo.toml', '!misskey-http/Cargo.toml') }}"
-      - run: cargo build --tests --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
+          key: "ubuntu-20.04-default-cargo-misskey-websocket-${{ hashFiles('Cargo.lock') }}"
+      - run: cargo build --locked --tests --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:

@@ -19,6 +19,7 @@ jobs:
           - beta
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock .
       - run: rustup override set "$TOOLCHAIN"
         env:
           TOOLCHAIN: ${{ matrix.toolchain }}
@@ -29,8 +30,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target
-          key: "ubuntu-20.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
-      - run: cargo build --tests
+          key: "ubuntu-20.04-${{ matrix.toolchain }}-cargo-all-${{ hashFiles('Cargo.lock') }}"
+      - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
