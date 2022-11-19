@@ -1016,6 +1016,20 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Gets the corresponding note from the ID.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let note_id = "2f2vxw5kzh";
+    /// let note = client.get_note(note_id.parse()?).await?;
+    /// println!("@{}: {}", note.user.username, note.text.unwrap_or_default());
+    /// # Ok(())
+    /// # }
+    /// ```
     fn get_note(&self, id: Id<Note>) -> BoxFuture<Result<Note, Error<Self::Error>>> {
         Box::pin(async move {
             let note = self
