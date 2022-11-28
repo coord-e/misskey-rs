@@ -18,12 +18,13 @@
   ],
   "packageRules": [
     {
-      "matchDepTypes": [
-        "action"
-      ],
-      "excludePackagePrefixes": [
-        "actions/"
-      ],
+      "matchManagers": ["cargo"],
+      "matchPaths": ["+(!example/**/*)"],
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "excludePackagePrefixes": ["actions/"],
       "pinDigests": true
     }
   ]
