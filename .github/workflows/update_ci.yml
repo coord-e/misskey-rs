@@ -1,0 +1,103 @@
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+
+name: Update CI
+
+env:
+  HEAD_BRANCH: workflows/update_ci
+
+jobs:
+  generate:
+    runs-on: ubuntu-22.04
+    outputs:
+      has_changes: ${{ steps.check_changes.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/github-script@v6
+        id: get_latest_release
+        with:
+          result-encoding: string
+          script: |
+            const { data: release } = await github.rest.repos.getLatestRelease({
+              owner: "rust-lang",
+              repo: "rust",
+            });
+            return release.tag_name;
+      - run: |
+          cat << EOF > rust-toolchain.toml
+          [toolchain]
+          channel = "$TOOLCHAIN"
+          components = [ "rustfmt", "clippy" ]
+          EOF
+        env:
+          TOOLCHAIN: ${{ steps.get_latest_release.outputs.result }}
+      - run: cargo generate-lockfile
+      - run: mv Cargo.lock rust-toolchain.toml ci/
+      - id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+      - uses: actions/upload-artifact@v3
+        if: steps.check_changes.outputs.has_changes
+        with:
+          name: locks
+          path: |
+            ci/Cargo.lock
+            ci/rust-toolchain.toml
+  check_existing_pulls:
+    runs-on: ubuntu-22.04
+    outputs:
+      existing_pulls: ${{ steps.get_number_of_open_pulls.outputs.result }}
+    steps:
+      - uses: actions/github-script@v6
+        id: get_number_of_open_pulls
+        with:
+          script: |
+            const { data: pulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${process.env.HEAD_BRANCH}`,
+              state: "open",
+            });
+            return pulls.length;
+  create_pull:
+    needs:
+      - check_existing_pulls
+      - generate
+    if: 'needs.check_existing_pulls.outputs.existing_pulls == 0 && needs.generate.outputs.has_changes'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # TODO: replace deploy key with more short-lived and scoped token
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+      - run: git checkout -b "$HEAD_BRANCH"
+      - uses: actions/download-artifact@v3
+        with:
+          name: locks
+          path: ci/
+      - run: |
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'github-actions[bot]'
+          git add ci/
+          git commit -m "chore: update CI environment"
+          git push origin "$HEAD_BRANCH"
+      - uses: actions/github-script@v6
+        env:
+          BASE_BRANCH: ${{ github.ref_name }}
+        with:
+          script: |
+            await github.rest.pulls.create({
+              title: "chore: update CI environment",
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: process.env.HEAD_BRANCH,
+              base: process.env.BASE_BRANCH,
+            });

@@ -9,15 +9,9 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target
-          key: "ubuntu-20.04-default-cargo-all-${{ hashFiles('**/Cargo.toml') }}"
-      - run: cargo build --tests
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
@@ -35,31 +29,13 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
       - run: cargo fmt --all -- --check
   clippy:
     name: Clippy
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+      - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
+      - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -- -D warnings
-  minimal_version:
-    name: Minimal versions build
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - run: rustup override set nightly
-      - uses: taiki-e/install-action@v1
-        with:
-          tool: cargo-hack@0.5.22
-      - uses: taiki-e/install-action@v1
-        with:
-          tool: cargo-minimal-versions@0.1.7
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target
-          key: "ubuntu-20.04-nightly-cargo-minimal-all-${{ hashFiles('**/Cargo.toml') }}"
-      - run: cargo minimal-versions check --workspace --ignore-private
