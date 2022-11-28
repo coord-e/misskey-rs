@@ -7,6 +7,7 @@
     ":semanticCommitTypeAll(chore)"
   ],
   "timezone": "Asia/Tokyo",
+  "baseBranches": ["renovate/configure"],
   "regexManagers": [
     {
       "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
@@ -16,14 +17,12 @@
       "datasourceTemplate": "github-releases"
     }
   ],
+  "cargo": {
+    "rangeStrategy": "replace"
+  },
   "packageRules": [
     {
-      "matchManagers": ["cargo"],
-      "matchPaths": ["+(!example/**/*)"],
-      "rangeStrategy": "replace"
-    },
-    {
-      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["action"],
       "excludePackagePrefixes": ["actions/"],
       "pinDigests": true
     }
