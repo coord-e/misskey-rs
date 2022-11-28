@@ -45,9 +45,11 @@ jobs:
       - run: rustup override set nightly
       - uses: taiki-e/install-action@v1
         with:
+          # renovate: depName=taiki-e/cargo-hack
           tool: cargo-hack@0.5.22
       - uses: taiki-e/install-action@v1
         with:
+          # renovate: depName=taiki-e/cargo-minimal-versions
           tool: cargo-minimal-versions@0.1.7
       - uses: Swatinem/rust-cache@v2
       - run: cargo minimal-versions check --workspace --ignore-private
