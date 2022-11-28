@@ -23,7 +23,7 @@ jobs:
       - run: rustup override set "$TOOLCHAIN"
         env:
           TOOLCHAIN: ${{ matrix.toolchain }}
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
@@ -43,13 +43,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: rustup override set nightly
-      - uses: taiki-e/install-action@v1
+      - uses: taiki-e/install-action@v1.14.7
         with:
           # renovate: depName=taiki-e/cargo-hack
           tool: cargo-hack@0.5.22
-      - uses: taiki-e/install-action@v1
+      - uses: taiki-e/install-action@v1.14.7
         with:
           # renovate: depName=taiki-e/cargo-minimal-versions
           tool: cargo-minimal-versions@0.1.7
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - run: cargo minimal-versions check --workspace --ignore-private

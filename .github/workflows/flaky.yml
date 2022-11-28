@@ -79,7 +79,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - name: Build misskey-api
         run: cargo build --tests --locked --manifest-path misskey-api/Cargo.toml ${{ matrix.flags }}
       - name: Build misskey-util
@@ -118,7 +118,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - run: cargo build --tests --locked --manifest-path misskey-api/Cargo.toml --no-default-features --features "12-47-0 ${{ matrix.method }}"
       - id: setup_env
         run: ./ci/testenv/setup.sh
@@ -144,7 +144,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - run: cargo build --locked --tests --manifest-path misskey-websocket/Cargo.toml --no-default-features --features ${{ matrix.features }}
       - id: setup_env
         run: ./ci/testenv/setup.sh
