@@ -14,7 +14,9 @@ pub struct Meid {
 
 impl Meid {
     pub fn datetime(&self) -> DateTime<Utc> {
-        Utc.timestamp_millis(self.timestamp)
+        // NOTE: this does not panic when parsed from valid Meid since the following does not panic
+        // `Utc.timestamp_millis_opt(16_i64.pow(12) - 1).unwrap()`
+        Utc.timestamp_millis_opt(self.timestamp).unwrap()
     }
 }
 

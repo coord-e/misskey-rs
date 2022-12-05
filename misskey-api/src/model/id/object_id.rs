@@ -13,7 +13,9 @@ pub struct ObjectId {
 
 impl ObjectId {
     pub fn datetime(&self) -> DateTime<Utc> {
-        Utc.timestamp_millis(self.timestamp as i64 * 1000)
+        // NOTE: this does not panic since the following does not panic
+        // `Utc.timestamp_opt(u32::MAX.into(), 0).unwrap()`
+        Utc.timestamp_opt(self.timestamp.into(), 0).unwrap()
     }
 }
 

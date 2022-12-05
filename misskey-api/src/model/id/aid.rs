@@ -14,7 +14,9 @@ pub struct Aid {
 
 impl Aid {
     pub fn datetime(&self) -> DateTime<Utc> {
-        Utc.timestamp_millis(self.timestamp)
+        // NOTE: this does not panic when parsed from valid Aid since the following does not panic
+        // `Utc.timestamp_millis_opt(36_i64.pow(8) - 1).unwrap()`
+        Utc.timestamp_millis_opt(self.timestamp).unwrap()
     }
 }
 
