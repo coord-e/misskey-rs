@@ -28,7 +28,7 @@ url = "2.2.0"
 futures-util = { version = "0.3", features = ["sink"] }
 futures-channel = { version = "0.3", features = ["sink"] }
 uuid = { version = "1.2", features = ["serde", "v4"] }
-async-tungstenite = "0.18"
+async-tungstenite = "0.19"
 log = "0.4"
 thiserror = "1.0.2"
 async-rwlock = "1.0"
