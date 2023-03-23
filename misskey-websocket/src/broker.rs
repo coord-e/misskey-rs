@@ -10,6 +10,7 @@ use crate::model::outgoing::OutgoingMessage;
 use async_std::task;
 #[cfg(feature = "async-std-runtime")]
 use async_std::task::sleep;
+use async_tungstenite::tungstenite::http::{header::HeaderMap, Uri};
 use async_tungstenite::tungstenite::Error as WsError;
 use futures_util::stream::StreamExt;
 use log::{info, warn};
@@ -17,7 +18,6 @@ use log::{info, warn};
 use tokio::task;
 #[cfg(feature = "tokio-runtime")]
 use tokio::time::sleep;
-use url::Url;
 
 pub mod channel;
 pub mod handler;
@@ -32,7 +32,8 @@ pub(crate) struct Broker {
     broker_rx: ControlReceiver,
     handler: Handler,
     reconnect: ReconnectConfig,
-    url: Url,
+    uri: Uri,
+    headers: HeaderMap,
 }
 
 /// Specifies the condition for reconnecting.
@@ -179,8 +180,9 @@ impl Default for ReconnectConfig {
 
 impl Broker {
     pub async fn spawn(
-        url: Url,
+        uri: Uri,
         reconnect: ReconnectConfig,
+        headers: HeaderMap,
     ) -> Result<(ControlSender, SharedBrokerState)> {
         let state = SharedBrokerState::working();
         let shared_state = SharedBrokerState::clone(&state);
@@ -189,7 +191,8 @@ impl Broker {
 
         task::spawn(async move {
             let mut broker = Broker {
-                url,
+                uri,
+                headers,
                 broker_rx,
                 reconnect,
                 handler: Handler::new(),
@@ -261,16 +264,17 @@ impl Broker {
     ) -> std::result::Result<(), TaskError> {
         use futures_util::future::{self, Either};
 
-        let (mut websocket_tx, mut websocket_rx) = match connect_websocket(self.url.clone()).await {
-            Ok(x) => x,
-            Err(error) => {
-                // retain `remaining_message` because we've not sent it yet
-                return Err(TaskError {
-                    remaining_message,
-                    error,
-                });
-            }
-        };
+        let (mut websocket_tx, mut websocket_rx) =
+            match connect_websocket(self.uri.clone(), self.headers.clone()).await {
+                Ok(x) => x,
+                Err(error) => {
+                    // retain `remaining_message` because we've not sent it yet
+                    return Err(TaskError {
+                        remaining_message,
+                        error,
+                    });
+                }
+            };
 
         info!("broker: started");
 

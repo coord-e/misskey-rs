@@ -8,6 +8,7 @@ use crate::broker::{
 use crate::error::{Error, Result};
 use crate::model::{ApiRequestId, SubNoteId};
 
+use async_tungstenite::tungstenite::client::IntoClientRequest;
 use futures_util::{
     future::{BoxFuture, FutureExt, TryFutureExt},
     sink::{Sink, SinkExt},
@@ -56,16 +57,24 @@ impl Debug for WebSocketClient {
 
 impl WebSocketClient {
     /// Connects to Misskey using WebSocket, and returns [`WebSocketClient`].
-    pub async fn connect(url: Url) -> Result<WebSocketClient> {
-        WebSocketClient::connect_with_config(url, ReconnectConfig::default()).await
+    pub async fn connect<R>(request: R) -> Result<WebSocketClient>
+    where
+        R: IntoClientRequest,
+    {
+        WebSocketClient::connect_with_config(request, ReconnectConfig::default()).await
     }
 
     /// Connects to Misskey using WebSocket with a given reconnect configuration, and returns [`WebSocketClient`].
-    pub async fn connect_with_config(
-        url: Url,
+    pub async fn connect_with_config<R>(
+        request: R,
         reconnect_config: ReconnectConfig,
-    ) -> Result<WebSocketClient> {
-        let (broker_tx, state) = Broker::spawn(url, reconnect_config).await?;
+    ) -> Result<WebSocketClient>
+    where
+        R: IntoClientRequest,
+    {
+        let request = request.into_client_request()?;
+        let (parts, _) = request.into_parts();
+        let (broker_tx, state) = Broker::spawn(parts.uri, reconnect_config, parts.headers).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 
@@ -244,6 +253,7 @@ mod tests {
 
         WebSocketClientBuilder::new(env::websocket_url())
             .token(env::token())
+            .header("User-Agent", "misskey-rs")
             .connect()
             .await
             .unwrap()
