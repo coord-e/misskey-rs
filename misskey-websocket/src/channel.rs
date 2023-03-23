@@ -11,6 +11,7 @@ use async_tungstenite::async_std::{connect_async, ConnectStream};
 #[cfg(feature = "tokio-runtime")]
 use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::{
+    client::IntoClientRequest,
     error::{Error as WsError, Result as WsResult},
     http::{self, header::HeaderMap},
     Message as WsMessage,
@@ -213,13 +214,13 @@ where
 
 pub async fn connect_websocket(
     uri: http::Uri,
-    headers: HeaderMap,
+    additional_headers: HeaderMap,
 ) -> Result<(WebSocketSender, WebSocketReceiver)> {
-    let mut request = http::Request::builder().uri(uri);
-    for (key, value) in headers.iter() {
-        request = request.header(key, value);
-    }
-    let (ws, _) = connect_async(request.body(()).unwrap()).await?;
+    let request = uri.into_client_request()?;
+    let (mut parts, _) = request.into_parts();
+    parts.headers.extend(additional_headers);
+    let request = http::Request::from_parts(parts, ());
+    let (ws, _) = connect_async(request).await?;
     let (sink, stream) = PingPongWebSocketStream::new(ws).split();
     Ok((WebSocketSender(sink), WebSocketReceiver(stream)))
 }

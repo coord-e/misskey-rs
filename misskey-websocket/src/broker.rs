@@ -33,7 +33,7 @@ pub(crate) struct Broker {
     handler: Handler,
     reconnect: ReconnectConfig,
     uri: Uri,
-    headers: HeaderMap,
+    additional_headers: HeaderMap,
 }
 
 /// Specifies the condition for reconnecting.
@@ -182,7 +182,7 @@ impl Broker {
     pub async fn spawn(
         uri: Uri,
         reconnect: ReconnectConfig,
-        headers: HeaderMap,
+        additional_headers: HeaderMap,
     ) -> Result<(ControlSender, SharedBrokerState)> {
         let state = SharedBrokerState::working();
         let shared_state = SharedBrokerState::clone(&state);
@@ -192,7 +192,7 @@ impl Broker {
         task::spawn(async move {
             let mut broker = Broker {
                 uri,
-                headers,
+                additional_headers,
                 broker_rx,
                 reconnect,
                 handler: Handler::new(),
@@ -265,7 +265,7 @@ impl Broker {
         use futures_util::future::{self, Either};
 
         let (mut websocket_tx, mut websocket_rx) =
-            match connect_websocket(self.uri.clone(), self.headers.clone()).await {
+            match connect_websocket(self.uri.clone(), self.additional_headers.clone()).await {
                 Ok(x) => x,
                 Err(error) => {
                     // retain `remaining_message` because we've not sent it yet

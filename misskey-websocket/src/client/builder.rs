@@ -87,7 +87,7 @@ impl WebSocketClientBuilder {
         WebSocketClientBuilder::new(url.as_str())
     }
 
-    /// Sets a header for the connection request.
+    /// Sets an additional header for the connection request.
     pub fn header<K, V>(&mut self, key: K, value: V) -> &mut Self
     where
         K: TryInto<HeaderName>,
