@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `i/pages`
    - endpoint `i/page_likes`
 - Support for Misskey v12.77.0
+- Support for Misskey v12.77.1 ~ v12.78.0
+   - endpoint `notifications/read`
 
 ### Changed
 ### Deprecated

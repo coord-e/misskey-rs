@@ -3699,6 +3699,23 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Marks the specified notification as read.
+    #[cfg(feature = "12-77-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-77-1")))]
+    fn mark_notification_as_read(
+        &self,
+        notification: impl EntityRef<Notification>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let notification_id = notification.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notifications::read::Request { notification_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Creates a notification with the given text.
     #[cfg(feature = "12-27-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
