@@ -16,6 +16,7 @@ mod me;
 mod messaging;
 mod misc;
 mod note;
+mod page;
 mod user;
 
 #[cfg(feature = "12-47-0")]
@@ -33,6 +34,7 @@ pub use drive::{
 pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use messaging::MessagingMessageBuilder;
 pub use note::NoteBuilder;
+pub use page::{PageBuilder, PageUpdateBuilder};
 pub use user::UserListBuilder;
 
 #[cfg(feature = "12-47-0")]

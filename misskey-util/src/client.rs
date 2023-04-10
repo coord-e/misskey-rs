@@ -9,8 +9,8 @@ use crate::builder::NotificationBuilder;
 use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
     DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
-    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, ServerLogListBuilder,
-    UserListBuilder,
+    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder,
+    PageUpdateBuilder, ServerLogListBuilder, UserListBuilder,
 };
 #[cfg(feature = "12-47-0")]
 use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
@@ -3047,6 +3047,209 @@ pub trait ClientExt: Client + Sync {
     }
     // }}}
 
+    // {{{ Page
+    /// Creates an empty page with the given name.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let page = client.create_page("name").await?;
+    /// assert_eq!(page.name, "name");
+    /// # client.delete_page(&page).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn create_page(&self, name: impl Into<String>) -> BoxFuture<Result<Page, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move { self.build_page().name(name).create().await })
+    }
+
+    /// Returns a builder for creating a page.
+    ///
+    /// The returned builder provides methods to customize details of the page,
+    /// and you can chain them to create a page incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a page.
+    /// See [`pageBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: pageBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # use misskey_api as misskey;
+    /// use misskey::model::page::Content;
+    ///
+    /// let content: Content = r#"[{"type": "text", "text": "Hello World!"}]"#.parse()?;
+    /// let page = client
+    ///     .build_page()
+    ///     .title("My Page")
+    ///     .content(content)
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(page.title, "My Page");
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn build_page(&self) -> PageBuilder<&Self> {
+        PageBuilder::new(self)
+    }
+
+    /// Deletes the specified page.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let page = client.create_page("page_to_delete").await?;
+    /// client.delete_page(&page).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn delete_page(&self, page: impl EntityRef<Page>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let page_id = page.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::pages::delete::Request { page_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding page from the ID.
+    fn get_page(&self, id: Id<Page>) -> BoxFuture<Result<Page, Error<Self::Error>>> {
+        Box::pin(async move {
+            let page = self
+                .request(endpoint::pages::show::Request { page_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(page)
+        })
+    }
+
+    /// Updates the specified page.
+    ///
+    /// This method actually returns a builder, namely [`pageUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`pageUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: pageUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let page = client.create_page("empty_page").await?;
+    ///
+    /// // Change name and add summary of the page
+    /// let page = client
+    ///     .update_page(page)
+    ///     .name("introduction")
+    ///     .summary("Brief introduction to Misskey")
+    ///     .update()
+    ///     .await?;
+    ///
+    /// # client.delete_page(&page).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn update_page(&self, page: Page) -> PageUpdateBuilder<&Self> {
+        PageUpdateBuilder::new(self, page)
+    }
+
+    /// Gives a like to the specified page.
+    fn like_page(&self, page: impl EntityRef<Page>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let page_id = page.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::pages::like::Request { page_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a like from the specified page.
+    fn unlike_page(&self, page: impl EntityRef<Page>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let page_id = page.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::pages::unlike::Request { page_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Pins the specified page to the profile.
+    fn pin_page(&self, page: impl EntityRef<Page>) -> BoxFuture<Result<User, Error<Self::Error>>> {
+        let page_id = page.entity_ref();
+        Box::pin(async move { self.update_me().set_pinned_page(page_id).update().await })
+    }
+
+    /// Unpins the page from the profile.
+    fn unpin_page(&self) -> BoxFuture<Result<User, Error<Self::Error>>> {
+        Box::pin(async move { self.update_me().delete_pinned_page().update().await })
+    }
+
+    /// Lists the pages created by the user logged in with this client.
+    fn pages(&self) -> PagerStream<BoxPager<Self, Page>> {
+        let pager = BackwardPager::new(self, endpoint::i::pages::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the pages liked by the user logged in with this client.
+    fn liked_pages(&self) -> PagerStream<BoxPager<Self, Page>> {
+        let pager = BackwardPager::new(self, endpoint::i::page_likes::Request::default())
+            .map_ok(|v| v.into_iter().map(|l| l.page).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured pages.
+    #[cfg(feature = "12-58-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+    fn featured_pages(&self) -> BoxFuture<Result<Vec<Page>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let pages = self
+                .request(endpoint::pages::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(pages)
+        })
+    }
+
+    /// Lists the pages created by the specified user.
+    #[cfg(feature = "12-61-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-61-0")))]
+    fn user_pages(&self, user: impl EntityRef<User>) -> PagerStream<BoxPager<Self, Page>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::users::pages::Request::builder()
+                .user_id(user.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
     // {{{ Admin
     /// Sets moderator privileges for the specified user.
     ///
@@ -3482,33 +3685,6 @@ pub trait ClientExt: Client + Sync {
     fn announcements(&self) -> PagerStream<BoxPager<Self, Announcement>> {
         let pager = BackwardPager::new(self, endpoint::announcements::Request::default())
             .map_ok(|v| v.into_iter().map(|f| f.announcement).collect());
-        PagerStream::new(Box::pin(pager))
-    }
-
-    /// Lists the featured pages.
-    #[cfg(feature = "12-58-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
-    fn featured_pages(&self) -> BoxFuture<Result<Vec<Page>, Error<Self::Error>>> {
-        Box::pin(async move {
-            let pages = self
-                .request(endpoint::pages::featured::Request::default())
-                .await
-                .map_err(Error::Client)?
-                .into_result()?;
-            Ok(pages)
-        })
-    }
-
-    /// Lists the pages created by the specified user.
-    #[cfg(feature = "12-61-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-61-0")))]
-    fn user_pages(&self, user: impl EntityRef<User>) -> PagerStream<BoxPager<Self, Page>> {
-        let pager = BackwardPager::new(
-            self,
-            endpoint::users::pages::Request::builder()
-                .user_id(user.entity_ref())
-                .build(),
-        );
         PagerStream::new(Box::pin(pager))
     }
 
