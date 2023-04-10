@@ -27,8 +27,6 @@ use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
 #[cfg(feature = "12-47-0")]
 use misskey_api::model::channel::Channel;
-#[cfg(feature = "12-58-0")]
-use misskey_api::model::page::Page;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
 use misskey_api::model::{
@@ -45,6 +43,7 @@ use misskey_api::model::{
     meta::Meta,
     note::{Note, Reaction, Tag},
     notification::Notification,
+    page::Page,
     query::Query,
     user::{User, UserRelation},
     user_group::{UserGroup, UserGroupInvitation},
