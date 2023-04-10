@@ -32,6 +32,10 @@ pub mod clips;
 #[cfg_attr(docsrs, doc(cfg(feature = "12-61-0")))]
 pub mod pages;
 
+#[cfg(feature = "12-79-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+pub mod gallery;
+
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum UserState {

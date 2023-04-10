@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.77.0
 - Support for Misskey v12.77.1 ~ v12.78.0
    - endpoint `notifications/read`
+- Support for Misskey v12.79.0 ~ v12.79.1
+   - endpoint `gallery/*`
+   - endpoint `i/gallery/*`
+   - endpoint `users/gallery/posts`
 
 ### Changed
 ### Deprecated
