@@ -4,6 +4,8 @@ use std::path::Path;
 
 #[cfg(feature = "12-9-0")]
 use crate::builder::EmojiUpdateBuilder;
+#[cfg(feature = "12-79-0")]
+use crate::builder::GalleryPostBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
 use crate::builder::{
@@ -27,6 +29,8 @@ use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
 #[cfg(feature = "12-47-0")]
 use misskey_api::model::channel::Channel;
+#[cfg(feature = "12-79-0")]
+use misskey_api::model::gallery::GalleryPost;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
 use misskey_api::model::{
@@ -3247,6 +3251,161 @@ pub trait ClientExt: Client + Sync {
                 .build(),
         );
         PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
+    // {{{ Gallery
+    /// Creates a gallery post with the given title and files.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn create_gallery_post(
+        &self,
+        title: impl Into<String>,
+        files: impl IntoIterator<Item = impl EntityRef<DriveFile>>,
+    ) -> BoxFuture<Result<GalleryPost, Error<Self::Error>>> {
+        let title = title.into();
+        let files: Vec<Id<DriveFile>> = files.into_iter().map(|file| file.entity_ref()).collect();
+        Box::pin(async move {
+            self.build_gallery_post()
+                .title(title)
+                .files(files)
+                .create()
+                .await
+        })
+    }
+
+    /// Returns a builder for creating a gallery post.
+    ///
+    /// The returned builder provides methods to customize details of the post,
+    /// and you can chain them to create a post incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a post.
+    /// See [`GalleryPostBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: GalleryPostBuilder::create
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn build_gallery_post(&self) -> GalleryPostBuilder<&Self> {
+        GalleryPostBuilder::new(self)
+    }
+
+    /// Gets the corresponding gallery post from the ID.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn get_gallery_post(
+        &self,
+        id: Id<GalleryPost>,
+    ) -> BoxFuture<Result<GalleryPost, Error<Self::Error>>> {
+        Box::pin(async move {
+            let post = self
+                .request(endpoint::gallery::posts::show::Request { post_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(post)
+        })
+    }
+
+    /// Gives a like to the specified gallery post.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn like_gallery_post(
+        &self,
+        post: impl EntityRef<GalleryPost>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let post_id = post.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::gallery::posts::like::Request { post_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a like from the specified gallery post.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn unlike_gallery_post(
+        &self,
+        post: impl EntityRef<GalleryPost>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let post_id = post.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::gallery::posts::unlike::Request { post_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the gallery posts created by the user logged in with this client.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn gallery_posts(&self) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(self, endpoint::i::gallery::posts::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the gallery posts liked by the user logged in with this client.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn liked_gallery_posts(&self) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(self, endpoint::i::gallery::likes::Request::default())
+            .map_ok(|v| v.into_iter().map(|l| l.post).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the gallery posts created by the specified user.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn user_gallery_posts(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::users::gallery::posts::Request::builder()
+                .user_id(user.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the gallery posts in the instance.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn all_gallery_posts(&self) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(self, endpoint::gallery::posts::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured gallery posts.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn featured_gallery_posts(&self) -> BoxFuture<Result<Vec<GalleryPost>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let posts = self
+                .request(endpoint::gallery::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(posts)
+        })
+    }
+
+    /// Lists the popular gallery posts.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn popular_gallery_posts(&self) -> BoxFuture<Result<Vec<GalleryPost>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let posts = self
+                .request(endpoint::gallery::popular::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(posts)
+        })
     }
     // }}}
 

@@ -14,6 +14,7 @@ keywords = ["async", "client", "misskey"]
 [features]
 default = ["aid"]
 
+12-79-0 = ["misskey-api/12-79-0", "12-77-1"]
 12-77-1 = ["misskey-api/12-77-1", "12-77-0"]
 12-77-0 = ["misskey-api/12-77-0", "12-75-0"]
 12-75-0 = ["misskey-api/12-75-0", "12-71-0"]
