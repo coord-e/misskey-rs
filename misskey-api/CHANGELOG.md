@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `admin/ad/*`
 - Support for Misskey v12.81.0 ~ 12.81.2
    - endpoint `admin/get-index-stats`
+- Support for Misskey v12.82.0 ~ v12.87.0
 
 ### Changed
 ### Deprecated
