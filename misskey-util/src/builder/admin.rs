@@ -271,6 +271,13 @@ impl<C> MetaUpdateBuilder<C> {
         pub summaly_proxy: Url { summaly_proxy };
     }
 
+    update_builder_string_option_field! {
+        #[doc_name = "DeepL auth key"]
+        #[cfg(feature = "12-88-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-88-0")))]
+        pub deepl_auth_key;
+    }
+
     update_builder_bool_field! {
         /// Sets whether or not to enable the Twitter integration.
         pub enable_twitter_integration;

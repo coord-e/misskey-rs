@@ -69,6 +69,8 @@ pub struct Meta {
     pub enable_github_integration: bool,
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
+    #[cfg(feature = "12-88-0")]
+    pub translator_available: bool,
     /// This field is [`Option<String>`][`Option`] on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
     #[cfg(feature = "12-58-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]

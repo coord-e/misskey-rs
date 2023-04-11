@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.81.0 ~ 12.81.2
    - endpoint `admin/get-index-stats`
 - Support for Misskey v12.82.0 ~ v12.87.0
+- Partial support for Misskey v12.88.0
 
 ### Changed
 ### Deprecated
@@ -50,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientSettingUpdated` variant from `MainStreamEvent`
    - For Misskey v12.67.0 ~ v12.68.0
 - Latest version flag from being enabled as default
+- endpoint `users`
+   - For Misskey v12.88.0 ~
+- endpoint `users/recommendation`
+   - For Misskey v12.88.0 ~
 
 ### Fixed
 
