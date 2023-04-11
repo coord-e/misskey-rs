@@ -6,6 +6,8 @@ use std::path::Path;
 use crate::builder::EmojiUpdateBuilder;
 #[cfg(feature = "12-79-0")]
 use crate::builder::GalleryPostBuilder;
+#[cfg(feature = "12-79-2")]
+use crate::builder::GalleryPostUpdateBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
 use crate::builder::{
@@ -3288,6 +3290,23 @@ pub trait ClientExt: Client + Sync {
         GalleryPostBuilder::new(self)
     }
 
+    /// Deletes the specified gallery post.
+    #[cfg(feature = "12-79-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+    fn delete_gallery_post(
+        &self,
+        post: impl EntityRef<GalleryPost>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let post_id = post.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::gallery::posts::delete::Request { post_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Gets the corresponding gallery post from the ID.
     #[cfg(feature = "12-79-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
@@ -3303,6 +3322,20 @@ pub trait ClientExt: Client + Sync {
                 .into_result()?;
             Ok(post)
         })
+    }
+
+    /// Updates the gallery post.
+    ///
+    /// This method actually returns a builder, namely [`GalleryPostUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`GalleryPostUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: GalleryPostUpdateBuilder::update
+    #[cfg(feature = "12-79-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+    fn update_gallery_post(&self, post: GalleryPost) -> GalleryPostUpdateBuilder<&Self> {
+        GalleryPostUpdateBuilder::new(self, post)
     }
 
     /// Gives a like to the specified gallery post.

@@ -51,3 +51,7 @@ pub use misc::NotificationBuilder;
 #[cfg(feature = "12-79-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
 pub use gallery::GalleryPostBuilder;
+
+#[cfg(feature = "12-79-2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+pub use gallery::GalleryPostUpdateBuilder;

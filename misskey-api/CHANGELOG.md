@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `gallery/*`
    - endpoint `i/gallery/*`
    - endpoint `users/gallery/posts`
+- Support for Misskey v12.79.2 ~ v12.79.3
+   - endpoint `gallery/posts/delete`
+   - endpoint `gallery/posts/update`
 
 ### Changed
 ### Deprecated

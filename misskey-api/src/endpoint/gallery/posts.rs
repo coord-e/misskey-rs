@@ -8,6 +8,14 @@ pub mod like;
 pub mod show;
 pub mod unlike;
 
+#[cfg(feature = "12-79-2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+pub mod delete;
+
+#[cfg(feature = "12-79-2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+pub mod update;
+
 #[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
