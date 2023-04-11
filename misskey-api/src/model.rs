@@ -17,6 +17,7 @@ macro_rules! impl_entity {
 }
 
 pub mod abuse_user_report;
+pub mod ad;
 pub mod announcement;
 pub mod antenna;
 pub mod blocking;

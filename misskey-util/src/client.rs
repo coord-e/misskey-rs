@@ -10,6 +10,8 @@ use crate::builder::GalleryPostBuilder;
 use crate::builder::GalleryPostUpdateBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
+#[cfg(feature = "12-80-0")]
+use crate::builder::{AdBuilder, AdUpdateBuilder};
 use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
     DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
@@ -29,6 +31,8 @@ use chrono::DateTime;
 use chrono::Utc;
 use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
+#[cfg(feature = "12-80-0")]
+use misskey_api::model::ad::Ad;
 #[cfg(feature = "12-47-0")]
 use misskey_api::model::channel::Channel;
 #[cfg(feature = "12-79-0")]
@@ -3856,6 +3860,80 @@ pub trait ClientExt: Client + Sync {
                 ..Default::default()
             },
         );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Creates an ad from the given urls.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn create_ad(
+        &self,
+        url: impl Into<String>,
+        image_url: impl Into<String>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let url = url.into();
+        let image_url = image_url.into();
+        Box::pin(async move { self.build_ad().url(url).image_url(image_url).create().await })
+    }
+
+    /// Returns a builder for creating an ad.
+    ///
+    /// This method actually returns a builder, namely [`AdBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`create`][builder_create] method will actually perform the update.
+    /// See [`AdBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_create]: AdBuilder::create
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn build_ad(&self) -> AdBuilder<&Self> {
+        AdBuilder::new(self)
+    }
+
+    /// Deletes the specified ad.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn delete_ad(&self, ad: impl EntityRef<Ad>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let ad_id = ad.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::ad::delete::Request { id: ad_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the specified ad.
+    ///
+    /// This method actually returns a builder, namely [`AdUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`AdUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_update]: AdUpdateBuilder::update
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn update_ad(&self, ad: Ad) -> AdUpdateBuilder<&Self> {
+        AdUpdateBuilder::new(self, ad)
+    }
+
+    /// Lists the ads in the instance.
+    ///
+    /// This operation may require moderator privileges.
+    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of ads from normal users,
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn ads(&self) -> PagerStream<BoxPager<Self, Ad>> {
+        let pager = BackwardPager::new(self, endpoint::admin::ad::list::Request::default());
         PagerStream::new(Box::pin(pager))
     }
     // }}}

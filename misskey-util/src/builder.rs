@@ -55,3 +55,7 @@ pub use gallery::GalleryPostBuilder;
 #[cfg(feature = "12-79-2")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
 pub use gallery::GalleryPostUpdateBuilder;
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+pub use admin::{AdBuilder, AdUpdateBuilder};
