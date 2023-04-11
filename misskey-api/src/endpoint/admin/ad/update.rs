@@ -24,6 +24,10 @@ pub struct Request {
     pub place: Place,
     #[builder(default)]
     pub priority: Priority,
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    #[builder(default, setter(into))]
+    pub ratio: u64,
     #[serde(with = "ts_milliseconds")]
     #[builder(setter(into))]
     pub expires_at: DateTime<Utc>,
@@ -71,6 +75,8 @@ mod tests {
                 memo: "memo".to_string(),
                 place: Place::Horizontal,
                 priority: Priority::High,
+                #[cfg(feature = "12-81-0")]
+                ratio: 2,
                 image_url: url.to_string(),
                 expires_at: chrono::Utc::now() + chrono::Duration::hours(2),
             })

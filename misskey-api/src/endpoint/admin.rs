@@ -35,3 +35,7 @@ pub mod resolve_abuse_user_report;
 #[cfg(feature = "12-80-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
 pub mod ad;
+
+#[cfg(feature = "12-81-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+pub mod get_index_stats;

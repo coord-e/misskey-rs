@@ -14,6 +14,9 @@ pub struct Ad {
     pub expires_at: DateTime<Utc>,
     pub place: Place,
     pub priority: Priority,
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    pub ratio: u64,
     pub url: String,
     pub image_url: String,
     pub memo: String,
@@ -22,11 +25,14 @@ pub struct Ad {
 impl_entity!(Ad);
 
 #[derive(Serialize, Deserialize, Default, PartialEq, Eq, Clone, Debug, Copy)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "kebab-case")]
 pub enum Place {
     #[default]
     Square,
     Horizontal,
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    HorizontalBig,
 }
 
 impl Display for Place {
@@ -34,6 +40,8 @@ impl Display for Place {
         match self {
             Place::Square => f.write_str("square"),
             Place::Horizontal => f.write_str("horizontal"),
+            #[cfg(feature = "12-81-0")]
+            Place::HorizontalBig => f.write_str("horizontal-big"),
         }
     }
 }
@@ -51,6 +59,8 @@ impl std::str::FromStr for Place {
         match s {
             "square" | "Square" => Ok(Place::Square),
             "horizontal" | "Horizontal" => Ok(Place::Horizontal),
+            #[cfg(feature = "12-81-0")]
+            "horizontal-big" | "Horizontal-big" => Ok(Place::HorizontalBig),
             _ => Err(ParsePlaceError { _priv: () }),
         }
     }
