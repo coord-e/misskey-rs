@@ -10,7 +10,7 @@ use crate::builder::GalleryPostBuilder;
 use crate::builder::GalleryPostUpdateBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 use crate::builder::UserListBuilder;
 #[cfg(feature = "12-80-0")]
 use crate::builder::{AdBuilder, AdUpdateBuilder};
@@ -651,8 +651,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -678,8 +678,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -705,8 +705,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -732,8 +732,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -759,8 +759,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -783,8 +783,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -815,8 +815,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    #[cfg_attr(not(feature = "12-88-0"), doc = "```")]
-    #[cfg_attr(feature = "12-88-0", doc = "```ignore")]
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -931,8 +931,8 @@ pub trait ClientExt: Client + Sync {
     /// # }
     /// ```
     // misskey-dev/misskey#7656
-    #[cfg(not(feature = "12-88-0"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-88-0"))))]
+    #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))))]
     fn users(&self) -> UserListBuilder<&Self> {
         UserListBuilder::new(self)
     }

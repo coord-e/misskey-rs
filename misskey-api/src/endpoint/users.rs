@@ -1,14 +1,14 @@
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 use crate::model::{
     sort::SortOrder,
     user::{User, UserOrigin, UserSortKey},
 };
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 use serde::Serialize;
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 use thiserror::Error;
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 use typed_builder::TypedBuilder;
 
 pub mod followers;
@@ -44,7 +44,7 @@ pub mod gallery;
 #[cfg_attr(docsrs, doc(cfg(not(feature = "12-88-0"))))]
 pub mod recommendation;
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum UserState {
@@ -55,14 +55,14 @@ pub enum UserState {
     AdminOrModerator,
 }
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[derive(Debug, Error, Clone)]
 #[error("invalid user state")]
 pub struct ParseUserStateError {
     _priv: (),
 }
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 impl std::str::FromStr for UserState {
     type Err = ParseUserStateError;
 
@@ -79,8 +79,8 @@ impl std::str::FromStr for UserState {
 }
 
 // misskey-dev/misskey#7656
-#[cfg(not(feature = "12-88-0"))]
-#[cfg_attr(docsrs, doc(cfg(not(feature = "12-88-0"))))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+#[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))))]
 #[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
@@ -103,16 +103,16 @@ pub struct Request {
     pub origin: Option<UserOrigin>,
 }
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 impl misskey_core::Request for Request {
     type Response = Vec<User>;
     const ENDPOINT: &'static str = "users";
 }
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 impl_offset_pagination!(Request, User);
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[cfg(test)]
 mod tests {
     use super::{Request, UserState};

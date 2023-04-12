@@ -24,7 +24,7 @@ mod channel;
 #[cfg(feature = "12-79-0")]
 mod gallery;
 
-#[cfg(not(feature = "12-88-0"))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 mod user;
 
 pub use admin::{
@@ -62,6 +62,6 @@ pub use gallery::GalleryPostUpdateBuilder;
 pub use admin::{AdBuilder, AdUpdateBuilder};
 
 // misskey-dev/misskey#7656
-#[cfg(not(feature = "12-88-0"))]
-#[cfg_attr(docsrs, doc(cfg(not(feature = "12-88-0"))))]
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+#[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))))]
 pub use user::UserListBuilder;

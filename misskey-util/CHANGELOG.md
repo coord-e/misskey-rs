@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Latest version flag from being enabled as default
 - `ClientExt::users`
-   - For Misskey v12.88.0 ~
+   - For Misskey v12.88.0
 - `ClientExt::recommended_users`
    - For Misskey v12.88.0 ~
 
