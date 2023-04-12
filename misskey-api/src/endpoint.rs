@@ -82,3 +82,7 @@ pub mod ping;
 #[cfg(feature = "12-79-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
 pub mod gallery;
+
+#[cfg(feature = "12-92-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+pub mod email_address;

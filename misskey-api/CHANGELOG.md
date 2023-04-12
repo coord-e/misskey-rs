@@ -47,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.89.1 ~ v12.90.1
 - Support for Misskey v12.91.0
    - endpoint `admin/accounts/delete`
+- Support for Misskey v12.92.0
+   - endpoint `email-address/available`
+   - endpoint `users/groups/leave`
 
 ### Changed
 ### Deprecated

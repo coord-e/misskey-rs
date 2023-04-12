@@ -40,6 +40,9 @@ pub struct Meta {
     pub proxy_remote_files: Option<bool>,
     #[cfg(not(feature = "12-58-0"))]
     pub proxy_remote_files: bool,
+    #[cfg(feature = "12-92-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    pub email_required_for_signup: bool,
     #[cfg(feature = "12-37-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
     pub enable_hcaptcha: bool,
@@ -167,6 +170,9 @@ pub struct FeaturesMeta {
     pub registration: bool,
     pub local_time_line: bool,
     pub global_time_line: bool,
+    #[cfg(feature = "12-92-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    pub email_required_for_signup: bool,
     pub elasticsearch: bool,
     #[cfg(feature = "12-37-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]

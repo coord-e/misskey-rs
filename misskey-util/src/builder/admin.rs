@@ -223,6 +223,11 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     update_builder_bool_field! {
+        /// Sets whether or not the instance requires email for signup.
+        #[cfg(feature = "12-92-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+        pub email_required_for_signup;
+
         /// Sets whether or not the instance enables hCaptcha.
         #[cfg(feature = "12-37-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]

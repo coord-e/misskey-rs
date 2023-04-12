@@ -1690,6 +1690,25 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Leaves the specified user group.
+    ///
+    /// Note that the owner cannot leave the group.
+    #[cfg(feature = "12-92-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    fn leave_group(
+        &self,
+        group: impl EntityRef<UserGroup>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let group_id = group.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::groups::leave::Request { group_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Transfers the specified user group.
     ///
     /// Note that you can only transfer the group to one of its members.

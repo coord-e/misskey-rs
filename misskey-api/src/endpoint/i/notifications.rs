@@ -25,6 +25,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub following: Option<bool>,
+    #[cfg(feature = "12-92-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub unread_only: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub mark_as_read: Option<bool>,
@@ -63,6 +68,8 @@ mod tests {
                 since_id: None,
                 until_id: None,
                 following: None,
+                #[cfg(feature = "12-92-0")]
+                unread_only: None,
                 mark_as_read: None,
                 include_types: None,
                 exclude_types: None,
@@ -81,6 +88,8 @@ mod tests {
                 since_id: None,
                 until_id: None,
                 following: Some(true),
+                #[cfg(feature = "12-92-0")]
+                unread_only: Some(true),
                 mark_as_read: Some(false),
                 include_types: Some(
                     vec![NotificationType::Follow, NotificationType::Reply]
@@ -112,6 +121,8 @@ mod tests {
                     since_id: None,
                     until_id: None,
                     following: None,
+                    #[cfg(feature = "12-92-0")]
+                    unread_only: None,
                     mark_as_read: None,
                     include_types: None,
                     exclude_types: None,
@@ -127,6 +138,8 @@ mod tests {
                 since_id: Some(notification_id.clone()),
                 until_id: Some(notification_id.clone()),
                 following: None,
+                #[cfg(feature = "12-92-0")]
+                unread_only: None,
                 mark_as_read: None,
                 include_types: None,
                 exclude_types: None,

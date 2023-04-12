@@ -74,6 +74,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub proxy_remote_files: Option<bool>,
+    #[cfg(feature = "12-92-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub email_required_for_signup: Option<bool>,
     #[cfg(feature = "12-37-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -299,6 +304,8 @@ mod tests {
                 remote_drive_capacity_mb: Some(1000),
                 cache_remote_files: Some(true),
                 proxy_remote_files: Some(true),
+                #[cfg(feature = "12-92-0")]
+                email_required_for_signup: Some(true),
                 #[cfg(feature = "12-37-0")]
                 enable_hcaptcha: Some(false),
                 #[cfg(feature = "12-37-0")]
