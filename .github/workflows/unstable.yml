@@ -28,9 +28,9 @@ jobs:
       - id: setup_env
         run: ./ci/testenv/setup.sh
         env:
-          MISSKEY_IMAGE: 'misskey/misskey:12.89.1'
+          MISSKEY_IMAGE: 'misskey/misskey:12.91.0'
           MISSKEY_ID: aid
-      - run: cargo test --features 12-89-1
+      - run: cargo test --features 12-91-0
         timeout-minutes: 15
         env:
           TEST_API_URL: http://localhost:3000/api/
