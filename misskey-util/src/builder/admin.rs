@@ -279,6 +279,11 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     update_builder_bool_field! {
+        /// Sets whether or not DeepL is pro.
+        #[cfg(feature = "12-89-1")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+        pub deepl_is_pro;
+
         /// Sets whether or not to enable the Twitter integration.
         pub enable_twitter_integration;
     }

@@ -118,6 +118,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub deepl_auth_key: Option<Option<String>>,
+    #[cfg(feature = "12-89-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub deepl_is_pro: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_twitter_integration: Option<bool>,
@@ -310,6 +315,8 @@ mod tests {
                 summaly_proxy: Some(None),
                 #[cfg(feature = "12-88-0")]
                 deepl_auth_key: Some(None),
+                #[cfg(feature = "12-89-1")]
+                deepl_is_pro: Some(false),
                 enable_twitter_integration: Some(false),
                 twitter_consumer_key: Some(None),
                 twitter_consumer_secret: Some(None),

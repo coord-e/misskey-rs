@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.82.0 ~ v12.87.0
 - Partial support for Misskey v12.88.0
 - Support for Misskey v12.89.0
+- Support for Misskey v12.89.1 ~ v12.90.1
 
 ### Changed
 ### Deprecated

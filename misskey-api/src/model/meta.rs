@@ -153,6 +153,12 @@ pub struct AdminMeta {
     #[cfg(feature = "12-69-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
     pub object_storage_s3_force_path_style: bool,
+    #[cfg(feature = "12-89-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+    pub deepl_auth_key: Option<String>,
+    #[cfg(feature = "12-89-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+    pub deepl_is_pro: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
