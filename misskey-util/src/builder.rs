@@ -27,9 +27,7 @@ mod gallery;
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 mod user;
 
-pub use admin::{
-    AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder, ServerLogListBuilder,
-};
+pub use admin::{AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder};
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use clip::{ClipBuilder, ClipUpdateBuilder};
 pub use drive::{
@@ -65,3 +63,7 @@ pub use admin::{AdBuilder, AdUpdateBuilder};
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))))]
 pub use user::UserListBuilder;
+
+#[cfg(not(feature = "12-93-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
+pub use admin::ServerLogListBuilder;

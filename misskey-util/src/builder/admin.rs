@@ -8,21 +8,22 @@ use misskey_api::model::ad::{Ad, Place, Priority};
 use misskey_api::model::clip::Clip;
 #[cfg(feature = "12-9-0")]
 use misskey_api::model::emoji::Emoji;
-use misskey_api::model::{
-    announcement::Announcement,
-    log::{Log, LogLevel},
-    user::User,
-};
+#[cfg(not(feature = "12-93-0"))]
+use misskey_api::model::log::{Log, LogLevel};
+use misskey_api::model::{announcement::Announcement, user::User};
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
 use url::Url;
 
+#[cfg(not(feature = "12-93-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
 /// Builder for the [`server_logs`][`crate::ClientExt::server_logs`] method.
 pub struct ServerLogListBuilder<C> {
     client: C,
     request: endpoint::admin::logs::Request,
 }
 
+#[cfg(not(feature = "12-93-0"))]
 impl<C> ServerLogListBuilder<C> {
     /// Creates a builder with the client.
     pub fn new(client: C) -> Self {
@@ -109,6 +110,7 @@ impl<C> ServerLogListBuilder<C> {
     }
 }
 
+#[cfg(not(feature = "12-93-0"))]
 impl<C: Client> ServerLogListBuilder<C> {
     /// Lists the logs.
     pub async fn list(&self) -> Result<Vec<Log>, Error<C::Error>> {

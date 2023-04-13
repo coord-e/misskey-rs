@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.92.0
    - endpoint `email-address/available`
    - endpoint `users/groups/leave`
+- Partial support for Misskey v12.93.0 ~ v12.94.1
+   - endpoint `users/reactions`
 
 ### Changed
 ### Deprecated
@@ -62,6 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.88.0
 - endpoint `users/recommendation`
    - For Misskey v12.88.0 ~
+- endpoint `admin/logs` and `admin/delete-logs`
+   - For Misskey v12.93.0 ~
 
 ### Fixed
 

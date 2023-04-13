@@ -1,11 +1,9 @@
 pub mod abuse_user_reports;
 pub mod accounts;
 pub mod announcements;
-pub mod delete_logs;
 pub mod emoji;
 pub mod get_table_stats;
 pub mod invite;
-pub mod logs;
 pub mod moderators;
 pub mod reset_password;
 pub mod resync_chart;
@@ -39,3 +37,11 @@ pub mod ad;
 #[cfg(feature = "12-81-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
 pub mod get_index_stats;
+
+#[cfg(not(feature = "12-93-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
+pub mod delete_logs;
+
+#[cfg(not(feature = "12-93-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
+pub mod logs;

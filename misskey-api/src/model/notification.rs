@@ -43,15 +43,34 @@ pub enum NotificationBody {
     Follow,
     FollowRequestAccepted,
     ReceiveFollowRequest,
-    Mention { note: Note },
-    Reply { note: Note },
-    Renote { note: Note },
-    Quote { note: Note },
-    Reaction { note: Note, reaction: Reaction },
-    PollVote { note: Note, choice: u64 },
-    GroupInvited { invitation: UserGroupInvitation },
-    // TODO: Implement
-    App {},
+    Mention {
+        note: Note,
+    },
+    Reply {
+        note: Note,
+    },
+    Renote {
+        note: Note,
+    },
+    Quote {
+        note: Note,
+    },
+    Reaction {
+        note: Note,
+        reaction: Reaction,
+    },
+    PollVote {
+        note: Note,
+        choice: u64,
+    },
+    GroupInvited {
+        invitation: UserGroupInvitation,
+    },
+    App {
+        body: Option<String>,
+        header: Option<String>,
+        icon: Option<String>,
+    },
 }
 
 #[derive(Debug, Error, Clone)]

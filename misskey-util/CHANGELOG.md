@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Registry APIs
 - Page APIs
 - Gallery APIs
+- Reactions APIs
 
 ### Changed
 ### Deprecated
@@ -22,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.88.0
 - `ClientExt::recommended_users`
    - For Misskey v12.88.0 ~
+- `ClientExt::server_logs`
+   - For Misskey v12.93.0 ~
 
 ### Fixed
 ### Security

@@ -10,6 +10,8 @@ use crate::builder::GalleryPostBuilder;
 use crate::builder::GalleryPostUpdateBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
+#[cfg(not(feature = "12-93-0"))]
+use crate::builder::ServerLogListBuilder;
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 use crate::builder::UserListBuilder;
 #[cfg(feature = "12-80-0")]
@@ -18,7 +20,7 @@ use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
     DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
     MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder,
-    PageUpdateBuilder, ServerLogListBuilder,
+    PageUpdateBuilder,
 };
 #[cfg(feature = "12-47-0")]
 use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
@@ -41,6 +43,8 @@ use misskey_api::model::channel::Channel;
 use misskey_api::model::gallery::GalleryPost;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
+#[cfg(feature = "12-93-0")]
+use misskey_api::model::user::UserOrigin;
 use misskey_api::model::{
     abuse_user_report::AbuseUserReport,
     announcement::Announcement,
@@ -54,6 +58,7 @@ use misskey_api::model::{
     messaging::MessagingMessage,
     meta::Meta,
     note::{Note, Reaction, Tag},
+    note_reaction::NoteReaction,
     notification::Notification,
     page::Page,
     query::Query,
@@ -892,6 +897,34 @@ pub trait ClientExt: Client + Sync {
             self,
             endpoint::users::search::Request::builder()
                 .query(query)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Searches for users in the instance with the specified query string.
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn search_local_users(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::users::search::Request::builder()
+                .query(query)
+                .origin(UserOrigin::Local)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Searches for users in remote instances with the specified query string.
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn search_remote_users(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::users::search::Request::builder()
+                .query(query)
+                .origin(UserOrigin::Remote)
                 .build(),
         );
         PagerStream::new(Box::pin(pager))
@@ -3480,6 +3513,183 @@ pub trait ClientExt: Client + Sync {
     }
     // }}}
 
+    // {{{ Reactions
+    /// Lists the reactions to the specified note.
+    fn note_reactions(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> PagerStream<BoxPager<Self, NoteReaction>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::notes::reactions::Request::builder()
+                .note_id(note.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the reactions from the specified user in the specified range of time.
+    ///
+    /// The bound `Into<TimelineRange<NoteReaction>>` on the argument type is satisfied by the type
+    /// of some range expressions such as `..` or `start..` (which are desugared into [`RangeFull`][range_full] and
+    /// [`RangeFrom`][range_from] respectively). A reaction or [`DateTime<Utc>`][datetime] can
+    /// be used to specify the start and end bounds of the range.
+    ///
+    /// [range_full]: std::ops::RangeFull
+    /// [range_from]: std::ops::RangeFrom
+    /// [datetime]: chrono::DateTime
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.me().await?;
+    /// use futures::stream::{StreamExt, TryStreamExt};
+    /// use chrono::Utc;
+    ///
+    /// // `reactions` variable here is a `Stream` to enumerate first 100 reactions.
+    /// let mut reactions = client.user_reactions(&user, ..).take(100);
+    ///
+    /// // Retrieve all reactions until there are no more.
+    /// while let Some(reaction) = reactions.try_next().await? {
+    ///     // Print the type of reaction.
+    ///     println!("{}", reaction.type_);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.me().await?;
+    /// use chrono::{Duration, Utc};
+    ///
+    /// // Get the user reactions since `time`.
+    /// let time = Utc::now() - Duration::days(1);
+    /// let mut notes = client.user_notes(&user, time..);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn user_reactions(
+        &self,
+        user: impl EntityRef<User>,
+        range: impl Into<TimelineRange<NoteReaction>>,
+    ) -> PagerStream<BoxPager<Self, NoteReaction>> {
+        let user_id = user.entity_ref();
+        let base_request = endpoint::users::reactions::Request::builder()
+            .user_id(user_id)
+            .build();
+        let pager = match range.into() {
+            TimelineRange::Id {
+                since_id,
+                until_id: None,
+            } => BackwardPager::with_since_id(self, since_id, base_request),
+            TimelineRange::Id {
+                since_id,
+                until_id: Some(until_id),
+            } => BackwardPager::new(
+                self,
+                endpoint::users::reactions::Request {
+                    since_id,
+                    until_id: Some(until_id),
+                    ..base_request
+                },
+            ),
+            TimelineRange::DateTime {
+                since_date,
+                until_date,
+            } => BackwardPager::new(
+                self,
+                endpoint::users::reactions::Request {
+                    since_date,
+                    until_date: Some(until_date.unwrap_or_else(Utc::now)),
+                    ..base_request
+                },
+            ),
+            TimelineRange::Unbounded => BackwardPager::new(self, base_request),
+        };
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the reactions from the specified user since the specified point in reverse order (i.e. the old reaction comes first, the new reaction comes after).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.me().await?;
+    /// use futures::stream::{StreamExt, TryStreamExt};
+    /// use chrono::{Duration, Utc};
+    ///
+    /// let time = Utc::now() - Duration::days(1);
+    ///
+    /// // `reactions_since` variable here is a `Stream` to enumerate first 100 reactions.
+    /// let mut reactions_since = client.user_reactions_since(&user, time).take(100);
+    ///
+    /// // Retrieve all reactions until there are no more.
+    /// while let Some(reaction) = reactions_since.try_next().await? {
+    ///     // Print the type of reaction.
+    ///     println!("{}", reaction.type_);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn user_reactions_since(
+        &self,
+        user: impl EntityRef<User>,
+        since: impl Into<TimelineCursor<NoteReaction>>,
+    ) -> PagerStream<BoxPager<Self, NoteReaction>> {
+        let user_id = user.entity_ref();
+        let base_request = endpoint::users::reactions::Request::builder()
+            .user_id(user_id)
+            .build();
+        let request = match since.into() {
+            TimelineCursor::DateTime(since_date) => endpoint::users::reactions::Request {
+                since_date: Some(since_date),
+                ..base_request
+            },
+            TimelineCursor::Id(since_id) => endpoint::users::reactions::Request {
+                since_id: Some(since_id),
+                ..base_request
+            },
+        };
+        let pager = ForwardPager::new(self, request);
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Returns a set of streams that fetch reactions from the specified user around the specified point.
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn user_reactions_around(
+        &self,
+        user: impl EntityRef<User>,
+        cursor: impl Into<TimelineCursor<NoteReaction>>,
+    ) -> (
+        PagerStream<BoxPager<Self, NoteReaction>>,
+        PagerStream<BoxPager<Self, NoteReaction>>,
+    ) {
+        let cursor = cursor.into();
+        let user_id = user.entity_ref();
+        (
+            self.user_reactions_since(user_id, cursor),
+            self.user_reactions(user_id, TimelineRange::until(cursor)),
+        )
+    }
+    // }}}
+
     // {{{ Admin
     /// Sets moderator privileges for the specified user.
     ///
@@ -3616,6 +3826,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "12-93-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
     fn server_logs(&self) -> ServerLogListBuilder<&Self> {
         ServerLogListBuilder::new(self)
     }

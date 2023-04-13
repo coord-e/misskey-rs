@@ -157,6 +157,11 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg_attr(docsrs, doc(cfg(feature = "12-77-0")))]
         pub hide_online_status;
 
+        /// Sets whether to make the reactions public.
+        #[cfg(feature = "12-93-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+        pub public_reactions;
+
         /// Sets whether this user requires a follow request from bots.
         pub require_follow_request_for_bot { careful_bot };
 
