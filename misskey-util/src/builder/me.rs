@@ -344,6 +344,13 @@ impl<C> MeUpdateBuilder<C> {
         self.request.muted_words.replace(muted_words.into());
         self
     }
+
+    update_builder_string_collection_field! {
+        /// Sets the muted instances for this user.
+        #[cfg(feature = "12-99-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-99-0")))]
+        pub muted_instances;
+    }
 }
 
 impl<C: Client> MeUpdateBuilder<C> {
