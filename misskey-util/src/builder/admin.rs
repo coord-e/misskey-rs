@@ -174,6 +174,10 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     update_builder_string_option_field! {
+        #[doc_name = "theme color for the instance"]
+        #[cfg(feature = "12-105-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-105-0")))]
+        pub theme_color;
         #[doc_name = "URL of the mascot image for the instance"]
         pub mascot_image_url;
         #[doc_name = "URL of the banner image for the instance"]
