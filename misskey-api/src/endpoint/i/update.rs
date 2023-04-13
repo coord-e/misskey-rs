@@ -98,6 +98,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub muted_words: Option<Query<String>>,
+    #[cfg(feature = "12-99-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-99-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub muted_instances: Option<Vec<String>>,
     #[cfg(feature = "12-60-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -187,6 +192,8 @@ mod tests {
                     vec!["mute1".to_string(), "mute2".to_string()],
                     vec!["mute3".to_string()],
                 ])),
+                #[cfg(feature = "12-99-0")]
+                muted_instances: Some(vec!["mute1".to_string(), "mute2".to_string()]),
                 #[cfg(feature = "12-60-0")]
                 no_crawle: Some(true),
                 #[cfg(feature = "12-69-0")]
@@ -242,6 +249,8 @@ mod tests {
                 ff_visibility: None,
                 pinned_page_id: Some(None),
                 muted_words: None,
+                #[cfg(feature = "12-99-0")]
+                muted_instances: None,
                 #[cfg(feature = "12-60-0")]
                 no_crawle: None,
                 #[cfg(feature = "12-69-0")]

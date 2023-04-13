@@ -57,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.96.0 ~ v12.97.1
 - Support for Misskey v12.98.0
    - endpoint `following/invalidate`
+- Partial support for Misskey v12.99.0 ~ v12.101.1
 
 ### Changed
 ### Deprecated

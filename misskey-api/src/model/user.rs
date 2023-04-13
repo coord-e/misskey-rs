@@ -263,6 +263,9 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
     #[serde(default)]
     pub ff_visibility: Option<FfVisibility>,
+    #[cfg(feature = "12-99-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-99-0")))]
+    pub muted_instances: Option<Vec<String>>,
 }
 
 fn default_false() -> bool {
