@@ -97,6 +97,8 @@ macro_rules! impl_timeline_method {
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
+            /// # #[cfg(feature = "12-98-0")]
+            /// # let antenna = client.create_antenna("antenna", "misskey").await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             ///
             #[doc = "// `notes` variable here is a `Stream` to enumerate first 100 " $timeline " notes."]
@@ -123,6 +125,8 @@ macro_rules! impl_timeline_method {
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
+            /// # #[cfg(feature = "12-98-0")]
+            /// # let antenna = client.create_antenna("antenna", "misskey").await?;
             /// use chrono::Utc;
             ///
             #[doc = "// Get the " $timeline " notes since `time`."]
@@ -195,6 +199,8 @@ macro_rules! impl_timeline_method {
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
+            /// # #[cfg(feature = "12-98-0")]
+            /// # let antenna = client.create_antenna("antenna", "misskey").await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             /// use chrono::Utc;
             ///
@@ -357,6 +363,24 @@ pub trait ClientExt: Client + Sync {
         Box::pin(async move {
             let user = self
                 .request(endpoint::following::delete::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(user)
+        })
+    }
+
+    #[cfg(feature = "12-98-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-98-0")))]
+    /// Removes follow from the specified user.
+    fn remove_follower(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<User, Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            let user = self
+                .request(endpoint::following::invalidate::Request { user_id })
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
@@ -1404,6 +1428,9 @@ pub trait ClientExt: Client + Sync {
     #[cfg(feature = "12-47-0")]
     impl_timeline_method! { channel, channels::timeline, channel_id = channel : Channel }
 
+    #[cfg(feature = "12-98-0")]
+    impl_timeline_method! { antenna, antennas::notes, antenna_id = antenna : Antenna }
+
     /// Lists the notes with tags as specified in the given query.
     ///
     /// # Examples
@@ -2041,6 +2068,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the notes that hit the specified antenna.
+    #[cfg(not(feature = "12-98-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-98-0"))))]
     fn antenna_notes(&self, antenna: impl EntityRef<Antenna>) -> PagerStream<BoxPager<Self, Note>> {
         let pager = BackwardPager::new(
             self,

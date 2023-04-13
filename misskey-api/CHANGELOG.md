@@ -55,6 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.95.0
    - endpoint `notes/thread-muting/*`
 - Support for Misskey v12.96.0 ~ v12.97.1
+- Support for Misskey v12.98.0
+   - endpoint `following/invalidate`
 
 ### Changed
 ### Deprecated
