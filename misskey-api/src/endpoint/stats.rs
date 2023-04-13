@@ -15,7 +15,11 @@ pub struct Response {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
     pub reactions_count: u64,
     pub instances: u64,
+    #[cfg(not(feature = "12-104-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-104-0"))))]
     pub drive_usage_local: u64,
+    #[cfg(not(feature = "12-104-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-104-0"))))]
     pub drive_usage_remote: u64,
 }
 

@@ -60,6 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Partial support for Misskey v12.99.0 ~ v12.101.1
 - Support for Misskey v12.102.0 ~ v12.103.1
    - endpoint `admin/emoji/*`
+- Support for Misskey v12.104.0
+   - endpoint `charts/ap-request`
 
 ### Changed
 ### Deprecated
@@ -76,6 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.93.0 ~
 - endpoint `admin/emoji/remove`
    - For Misskey v12.102.0 ~
+- endpoint `charts/network`
+   - For Misskey v12.104.0 ~
 
 ### Fixed
 
