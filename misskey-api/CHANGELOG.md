@@ -52,6 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `users/groups/leave`
 - Partial support for Misskey v12.93.0 ~ v12.94.1
    - endpoint `users/reactions`
+- Support for Misskey v12.95.0
+   - endpoint `notes/thread-muting/*`
 
 ### Changed
 ### Deprecated

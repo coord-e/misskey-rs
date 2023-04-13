@@ -1248,6 +1248,37 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Mutes notifications from threads where the specified note belongs to.
+    #[cfg(feature = "12-95-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
+    fn mute_thread(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::thread_muting::create::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unmutes notifications from threads where the specified note belongs to.
+    #[cfg(feature = "12-95-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
+    fn unmute_thread(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::thread_muting::delete::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Checks if the specified note is favorited by the user logged in with this client.
     fn is_favorited(
         &self,
