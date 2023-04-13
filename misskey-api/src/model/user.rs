@@ -111,6 +111,43 @@ impl Display for OnlineStatus {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy, Hash)]
+#[serde(rename_all = "camelCase")]
+pub enum FfVisibility {
+    Public,
+    Followers,
+    Private,
+}
+
+impl Display for FfVisibility {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            FfVisibility::Public => f.write_str("public"),
+            FfVisibility::Followers => f.write_str("followers"),
+            FfVisibility::Private => f.write_str("private"),
+        }
+    }
+}
+
+#[derive(Debug, Error, Clone)]
+#[error("invalid ff visibility")]
+pub struct ParseFfVisibilityError {
+    _priv: (),
+}
+
+impl std::str::FromStr for FfVisibility {
+    type Err = ParseFfVisibilityError;
+
+    fn from_str(s: &str) -> Result<FfVisibility, Self::Err> {
+        match s {
+            "public" | "Public" => Ok(FfVisibility::Public),
+            "followers" | "Followers" => Ok(FfVisibility::Followers),
+            "private" | "Private" => Ok(FfVisibility::Private),
+            _ => Err(ParseFfVisibilityError { _priv: () }),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -222,6 +259,10 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-77-0")))]
     #[serde(default)]
     pub hide_online_status: Option<bool>,
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    #[serde(default)]
+    pub ff_visibility: Option<FfVisibility>,
 }
 
 fn default_false() -> bool {
