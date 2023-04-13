@@ -28,6 +28,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub name: Option<String>,
+    #[cfg(feature = "12-102-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-102-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub comment: Option<String>,
     #[serde(
         skip_serializing_if = "Option::is_none",
         serialize_with = "bool_string_option"
@@ -83,6 +88,8 @@ mod tests {
                 Request {
                     folder_id: None,
                     name: None,
+                    #[cfg(feature = "12-102-0")]
+                    comment: None,
                     is_sensitive: None,
                     force: None,
                 },
@@ -107,6 +114,8 @@ mod tests {
                 Request {
                     folder_id: Some(folder.id),
                     name: Some("hello.txt".to_string()),
+                    #[cfg(feature = "12-102-0")]
+                    comment: Some("comment".to_string()),
                     is_sensitive: Some(true),
                     force: Some(true),
                 },

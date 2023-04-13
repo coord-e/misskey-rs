@@ -25,6 +25,8 @@ pub struct UserStats {
     pub page_liked_count: u64,
     pub drive_files_count: u64,
     pub drive_usage: u64,
+    #[cfg(not(feature = "12-102-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-102-0"))))]
     pub reversi_count: u64,
 }
 

@@ -40,8 +40,12 @@ pub enum MainStreamEvent {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
     ReadAllChannels,
     MyTokenRegenerated,
+    #[cfg(not(feature = "12-102-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-102-0"))))]
     ReversiNoInvites,
     /// TODO: Implement
+    #[cfg(not(feature = "12-102-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-102-0"))))]
     ReversiInvited {},
     /// TODO: Implement
     PageEvent {},

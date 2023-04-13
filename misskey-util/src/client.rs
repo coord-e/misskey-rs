@@ -3849,10 +3849,14 @@ pub trait ClientExt: Client + Sync {
     ) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let report_id = report.entity_ref();
         Box::pin(async move {
-            self.request(endpoint::admin::resolve_abuse_user_report::Request { report_id })
-                .await
-                .map_err(Error::Client)?
-                .into_result()?;
+            self.request(endpoint::admin::resolve_abuse_user_report::Request {
+                report_id,
+                #[cfg(feature = "12-102-0")]
+                forward: None,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
             Ok(())
         })
     }
@@ -4101,8 +4105,12 @@ pub trait ClientExt: Client + Sync {
         emoji: impl EntityRef<Emoji>,
     ) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let emoji_id = emoji.entity_ref();
+        #[cfg(not(feature = "12-102-0"))]
+        let request = endpoint::admin::emoji::remove::Request { id: emoji_id };
+        #[cfg(feature = "12-102-0")]
+        let request = endpoint::admin::emoji::delete::Request { id: emoji_id };
         Box::pin(async move {
-            self.request(endpoint::admin::emoji::remove::Request { id: emoji_id })
+            self.request(request)
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
