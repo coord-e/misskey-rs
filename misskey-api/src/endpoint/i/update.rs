@@ -3,6 +3,8 @@ use std::collections::HashSet;
 
 #[cfg(feature = "12-48-0")]
 use crate::model::notification::NotificationType;
+#[cfg(feature = "12-96-0")]
+use crate::model::user::FfVisibility;
 #[cfg(feature = "12-70-0")]
 use crate::model::user::UserEmailNotificationType;
 use crate::model::{drive::DriveFile, id::Id, page::Page, query::Query, user::User};
@@ -85,6 +87,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub always_mark_nsfw: Option<bool>,
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub ff_visibility: Option<FfVisibility>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_page_id: Option<Option<Id<Page>>>,
@@ -134,6 +141,8 @@ mod tests {
         #[cfg(feature = "12-48-0")]
         use crate::model::notification::NotificationType;
         use crate::model::query::Query;
+        #[cfg(feature = "12-96-0")]
+        use crate::model::user::FfVisibility;
         #[cfg(feature = "12-70-0")]
         use crate::model::user::UserEmailNotificationType;
 
@@ -171,6 +180,8 @@ mod tests {
                 auto_watch: Some(true),
                 inject_featured_note: Some(true),
                 always_mark_nsfw: Some(true),
+                #[cfg(feature = "12-96-0")]
+                ff_visibility: Some(FfVisibility::Public),
                 pinned_page_id: None,
                 muted_words: Some(Query::from_vec(vec![
                     vec!["mute1".to_string(), "mute2".to_string()],
@@ -227,6 +238,8 @@ mod tests {
                 auto_watch: None,
                 inject_featured_note: None,
                 always_mark_nsfw: None,
+                #[cfg(feature = "12-96-0")]
+                ff_visibility: None,
                 pinned_page_id: Some(None),
                 muted_words: None,
                 #[cfg(feature = "12-60-0")]

@@ -86,6 +86,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
             visible_user_ids: None,
             text: text.map(|x| x.to_string()),
             cw: None,
+            #[cfg(not(feature = "12-96-0"))]
             via_mobile: None,
             local_only: None,
             no_extract_mentions: None,

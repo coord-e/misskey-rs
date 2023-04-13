@@ -60,6 +60,8 @@ pub struct Request {
     pub text: Option<String>,
     #[builder(default, setter(strip_option, into))]
     pub cw: Option<String>,
+    #[cfg(not(feature = "12-96-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-96-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub via_mobile: Option<bool>,
@@ -119,6 +121,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("some text".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -143,6 +146,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("aww yeah".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: Some(true),
                 local_only: Some(true),
                 no_extract_mentions: Some(true),
@@ -167,6 +171,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("!".to_string()),
                 cw: Some("nsfw".to_string()),
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -193,6 +198,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("hello home".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -212,6 +218,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("hello public".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -231,6 +238,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("hello followers".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -253,6 +261,7 @@ mod tests {
                 visible_user_ids: Some(vec![admin.id]),
                 text: Some("hello specific person".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -277,6 +286,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("renote".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -297,6 +307,7 @@ mod tests {
                 visible_user_ids: None,
                 text: None,
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -321,6 +332,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("reply".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -341,6 +353,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("hey".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -380,6 +393,7 @@ mod tests {
                     visible_user_ids: None,
                     text: Some("poll".to_string()),
                     cw: None,
+                    #[cfg(not(feature = "12-96-0"))]
                     via_mobile: None,
                     local_only: None,
                     no_extract_mentions: None,
@@ -408,6 +422,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("some text".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,
@@ -441,6 +456,7 @@ mod tests {
                 visible_user_ids: None,
                 text: Some("hi channel".to_string()),
                 cw: None,
+                #[cfg(not(feature = "12-96-0"))]
                 via_mobile: None,
                 local_only: None,
                 no_extract_mentions: None,

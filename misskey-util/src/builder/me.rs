@@ -5,6 +5,8 @@ use crate::Error;
 
 #[cfg(feature = "12-48-0")]
 use misskey_api::model::notification::NotificationType;
+#[cfg(feature = "12-96-0")]
+use misskey_api::model::user::FfVisibility;
 #[cfg(feature = "12-70-0")]
 use misskey_api::model::user::UserEmailNotificationType;
 use misskey_api::model::{
@@ -195,6 +197,41 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg(feature = "12-69-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
         pub receive_announcement_email;
+    }
+
+    /// Sets the visibility of following and followers.
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    pub fn ff_visibility(&mut self, ff_visibility: impl Into<FfVisibility>) -> &mut Self {
+        self.request.ff_visibility.replace(ff_visibility.into());
+        self
+    }
+
+    /// Sets following/followers to be visible to everyone.
+    ///
+    /// This is equivalent to `.ff_visibility(FfVisibility::Public)`.
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    pub fn ff_public(&mut self) -> &mut Self {
+        self.ff_visibility(FfVisibility::Public)
+    }
+
+    /// Sets following/followers to be visible only to the followers.
+    ///
+    /// This is equivalent to `.ff_visibility(FfVisibility::Followers)`.
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    pub fn ff_followers(&mut self) -> &mut Self {
+        self.ff_visibility(FfVisibility::Followers)
+    }
+
+    /// Sets following/followers to be invisible to other users.
+    ///
+    /// This is equivalent to `.ff_visibility(FfVisibility::Private)`.
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    pub fn ff_private(&mut self) -> &mut Self {
+        self.ff_visibility(FfVisibility::Private)
     }
 
     /// Sets the muted notification type for this user.
