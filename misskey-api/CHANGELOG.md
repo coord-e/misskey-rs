@@ -58,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.98.0
    - endpoint `following/invalidate`
 - Partial support for Misskey v12.99.0 ~ v12.101.1
+- Support for Misskey v12.102.0 ~ v12.103.1
+   - endpoint `admin/emoji/*`
 
 ### Changed
 ### Deprecated
@@ -72,6 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.88.0 ~
 - endpoint `admin/logs` and `admin/delete-logs`
    - For Misskey v12.93.0 ~
+- endpoint `admin/emoji/remove`
+   - For Misskey v12.102.0 ~
 
 ### Fixed
 
