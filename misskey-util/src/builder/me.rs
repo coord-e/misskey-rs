@@ -193,6 +193,11 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
         pub no_crawle;
 
+        /// Sets whether to show replies to other users in the timeline.
+        #[cfg(feature = "12-104-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
+        pub show_replies_in_timeline { show_timeline_replies };
+
         /// Sets whether to receive announcement emails.
         #[cfg(feature = "12-69-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]

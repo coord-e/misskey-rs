@@ -1,8 +1,4 @@
-#[cfg(not(feature = "12-104-0"))]
-use crate::model::chart::DriveChart;
-#[cfg(feature = "12-104-0")]
-use crate::model::chart::UserDriveChart;
-use crate::model::{chart::ChartSpan, id::Id, user::User};
+use crate::model::chart::{ApRequestChart, ChartSpan};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -12,7 +8,6 @@ use typed_builder::TypedBuilder;
 #[builder(doc)]
 pub struct Request {
     pub span: ChartSpan,
-    pub user_id: Id<User>,
     /// 1 .. 500
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -22,11 +17,8 @@ pub struct Request {
 }
 
 impl misskey_core::Request for Request {
-    #[cfg(not(feature = "12-104-0"))]
-    type Response = DriveChart;
-    #[cfg(feature = "12-104-0")]
-    type Response = UserDriveChart;
-    const ENDPOINT: &'static str = "charts/user/drive";
+    type Response = ApRequestChart;
+    const ENDPOINT: &'static str = "charts/ap-request";
 }
 
 #[cfg(test)]
@@ -39,12 +31,9 @@ mod tests {
         use crate::model::chart::ChartSpan;
 
         let client = TestClient::new();
-        let user = client.user.me().await;
-
         client
             .test(Request {
                 span: ChartSpan::Day,
-                user_id: user.id.clone(),
                 limit: None,
                 offset: None,
             })
@@ -52,7 +41,6 @@ mod tests {
         client
             .test(Request {
                 span: ChartSpan::Hour,
-                user_id: user.id.clone(),
                 limit: None,
                 offset: None,
             })
@@ -64,12 +52,9 @@ mod tests {
         use crate::model::chart::ChartSpan;
 
         let client = TestClient::new();
-        let user = client.user.me().await;
-
         client
             .test(Request {
                 span: ChartSpan::Day,
-                user_id: user.id,
                 limit: Some(500),
                 offset: None,
             })
@@ -81,12 +66,9 @@ mod tests {
         use crate::model::chart::ChartSpan;
 
         let client = TestClient::new();
-        let user = client.user.me().await;
-
         client
             .test(Request {
                 span: ChartSpan::Day,
-                user_id: user.id,
                 limit: None,
                 offset: Some(5),
             })

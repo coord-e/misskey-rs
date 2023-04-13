@@ -211,6 +211,10 @@ pub struct User {
     pub is_admin: bool,
     #[serde(default = "default_false")]
     pub is_moderator: bool,
+    #[cfg(feature = "12-104-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
+    #[serde(default = "default_false")]
+    pub show_timeline_replies: bool,
     #[serde(default)]
     pub is_locked: Option<bool>,
     #[serde(default)]
