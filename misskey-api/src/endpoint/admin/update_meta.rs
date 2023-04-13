@@ -34,6 +34,11 @@ pub struct Request {
     pub hidden_tags: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
     pub blocked_hosts: Option<Vec<String>>,
+    #[cfg(feature = "12-105-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-105-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub theme_color: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub mascot_image_url: Option<Option<String>>,
@@ -290,6 +295,8 @@ mod tests {
                 pinned_users: Some(vec!["@admin".to_string(), "@testuser".to_string()]),
                 hidden_tags: Some(vec!["not_good".to_string()]),
                 blocked_hosts: Some(vec!["not.good.host".to_string()]),
+                #[cfg(feature = "12-105-0")]
+                theme_color: Some(Some("#31748f".to_string())),
                 mascot_image_url: Some(Some(image_url.to_string())),
                 bannar_url: Some(Some(image_url.to_string())),
                 icon_url: Some(Some(image_url.to_string())),
