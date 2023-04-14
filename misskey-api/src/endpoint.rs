@@ -87,6 +87,6 @@ pub mod gallery;
 pub mod email_address;
 
 // misskey-dev/misskey#8308
-#[cfg(not(feature = "12-106-0"))]
-#[cfg_attr(docsrs, doc(cfg(not(feature = "12-106-0"))))]
+#[cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))]
+#[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))))]
 pub mod stats;
