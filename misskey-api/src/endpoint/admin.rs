@@ -6,7 +6,6 @@ pub mod get_table_stats;
 pub mod invite;
 pub mod moderators;
 pub mod reset_password;
-pub mod resync_chart;
 pub mod server_info;
 pub mod show_moderation_logs;
 pub mod show_user;
@@ -45,3 +44,7 @@ pub mod delete_logs;
 #[cfg(not(feature = "12-93-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
 pub mod logs;
+
+#[cfg(not(feature = "12-106-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-106-0"))))]
+pub mod resync_chart;

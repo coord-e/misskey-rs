@@ -76,8 +76,8 @@ pub struct FederationChart {
     pub dec: Vec<u64>,
 }
 
-#[cfg(feature = "12-104-0")]
-#[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
+#[cfg(all(feature = "12-104-0", not(feature = "12-106-0")))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "12-104-0", not(feature = "12-106-0")))))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct InstanceChart {
@@ -91,10 +91,16 @@ pub struct InstanceChart {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FederationChart {
+    #[cfg(not(feature = "12-106-0"))]
     pub instance: InstanceChart,
     pub delivered_instances: Vec<u64>,
     pub inbox_instances: Vec<u64>,
     pub stalled: Vec<u64>,
+    #[cfg(feature = "12-106-0")]
+    pub sub: Vec<u64>,
+    #[cfg(feature = "12-106-0")]
+    #[serde(rename = "pub")]
+    pub pub_: Vec<u64>,
 }
 
 #[cfg(not(feature = "12-104-0"))]

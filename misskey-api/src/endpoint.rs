@@ -59,7 +59,6 @@ pub mod notes;
 pub mod notifications;
 pub mod pages;
 pub mod pinned_users;
-pub mod stats;
 pub mod username;
 pub mod users;
 
@@ -86,3 +85,8 @@ pub mod gallery;
 #[cfg(feature = "12-92-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
 pub mod email_address;
+
+// misskey-dev/misskey#8308
+#[cfg(not(feature = "12-106-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-106-0"))))]
+pub mod stats;
