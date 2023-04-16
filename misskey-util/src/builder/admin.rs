@@ -10,6 +10,8 @@ use misskey_api::model::clip::Clip;
 use misskey_api::model::emoji::Emoji;
 #[cfg(not(feature = "12-93-0"))]
 use misskey_api::model::log::{Log, LogLevel};
+#[cfg(feature = "12-112-0")]
+use misskey_api::model::meta::{SensitiveMediaDetection, SensitiveMediaDetectionSensitivity};
 use misskey_api::model::{announcement::Announcement, user::User};
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
@@ -264,6 +266,124 @@ impl<C> MetaUpdateBuilder<C> {
         pub recaptcha_secret_key;
     }
 
+    /// Sets sensitive media detection target.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media(&mut self, detection: SensitiveMediaDetection) -> &mut Self {
+        self.request.sensitive_media_detection.replace(detection);
+        self
+    }
+
+    /// Sets sensitive media detection target to none.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::None)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn disable_sensitive_media_detection(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::None)
+    }
+
+    /// Sets sensitive media detection target to all.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::All)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media_for_all_posts(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::All)
+    }
+
+    /// Sets sensitive media detection target to local.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::Local)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media_for_local_posts(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::Local)
+    }
+
+    /// Sets sensitive media detection target to remote.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::Remote)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media_for_remote_posts(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::Remote)
+    }
+
+    /// Sets sensitivity of sensitive media detection.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_sensitivity(
+        &mut self,
+        sensitivity: SensitiveMediaDetectionSensitivity,
+    ) -> &mut Self {
+        self.request
+            .sensitive_media_detection_sensitivity
+            .replace(sensitivity);
+        self
+    }
+
+    /// Sets sensitivity of sensitive media detection to medium.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Medium)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_medium_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Medium)
+    }
+
+    /// Sets sensitivity of sensitive media detection to low.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Low)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_low_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Low)
+    }
+
+    /// Sets sensitivity of sensitive media detection to high.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::High)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_high_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::High)
+    }
+
+    /// Sets sensitivity of sensitive media detection to very low.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryLow)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_very_low_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryLow)
+    }
+
+    /// Sets sensitivity of sensitive media detection to very high.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryHigh)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_very_high_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryHigh)
+    }
+
+    update_builder_bool_field! {
+        /// Sets whether to set sensitive flag automatically on detected media.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub set_sensitive_flag_automatically;
+        /// Sets whether to enable sensitive media detection for videos.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub enable_sensitive_media_detection_for_videos;
+    }
+
     update_builder_option_field! {
         #[doc_name = "proxy account for the instance"]
         pub proxy_account: impl EntityRef<User> { proxy_account_id =  proxy_account.entity_ref() };
@@ -398,6 +518,10 @@ impl<C> MetaUpdateBuilder<C> {
         #[cfg(feature = "12-69-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
         pub object_storage_s3_force_path_style;
+        /// Sets whether or not to log ip address of the users.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub enable_ip_logging;
     }
     update_builder_option_field! {
         #[doc_name = "base URL of the extenal object storage"]

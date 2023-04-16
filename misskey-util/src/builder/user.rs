@@ -108,6 +108,16 @@ impl<C> UserListBuilder<C> {
             .replace(endpoint::users::UserState::AdminOrModerator);
         self
     }
+
+    /// Limits the host from which users are listed.
+    ///
+    /// To list users in the local host, use [`local`][`UserListBuilder::local`] method instead.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn hostname(&mut self, hostname: impl Into<String>) -> &mut Self {
+        self.request.hostname.replace(hostname.into());
+        self
+    }
 }
 
 impl<C: Client + Sync> UserListBuilder<C> {
