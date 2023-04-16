@@ -1,4 +1,4 @@
-use std::net::IpAddr;
+use std::{collections::HashMap, net::IpAddr};
 
 use crate::model::{id::Id, user::User};
 
@@ -13,6 +13,8 @@ pub struct Signin {
     pub ip: IpAddr,
     pub id: Id<Signin>,
     pub created_at: DateTime<Utc>,
+    pub user: Option<User>,
+    pub headers: HashMap<String, serde_json::Value>,
 }
 
 impl_entity!(Signin);
