@@ -105,6 +105,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub origin: Option<UserOrigin>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub hostname: Option<String>,
 }
 
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
@@ -138,6 +143,8 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
     }
@@ -152,6 +159,8 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
     }
@@ -169,6 +178,8 @@ mod tests {
                 sort: Some(SortOrder::Ascending(UserSortKey::Follower)),
                 state: None,
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -178,6 +189,8 @@ mod tests {
                 sort: Some(SortOrder::Ascending(UserSortKey::CreatedAt)),
                 state: None,
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -187,6 +200,8 @@ mod tests {
                 sort: Some(SortOrder::Descending(UserSortKey::UpdatedAt)),
                 state: None,
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
     }
@@ -202,6 +217,8 @@ mod tests {
                 sort: None,
                 state: Some(UserState::All),
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -211,6 +228,8 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Admin),
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -220,6 +239,8 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Alive),
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -229,6 +250,8 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Moderator),
                 origin: None,
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         // TODO: Uncomment with cfg when `adminOrModerator` value is fixed in Misskey
@@ -256,6 +279,8 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Local),
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -265,6 +290,8 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Remote),
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
             })
             .await;
         client
@@ -274,6 +301,25 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Combined),
+                #[cfg(feature = "12-112-0")]
+                hostname: None,
+            })
+            .await;
+    }
+
+    #[cfg(feature = "12-112-0")]
+    #[tokio::test]
+    async fn request_with_hostname() {
+        let client = TestClient::new();
+
+        client
+            .test(Request {
+                limit: None,
+                offset: None,
+                sort: None,
+                state: None,
+                origin: None,
+                hostname: Some("host".to_string()),
             })
             .await;
     }

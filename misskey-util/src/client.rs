@@ -2397,6 +2397,25 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Removes the specified note from the clip.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    fn unclip_note(
+        &self,
+        clip: impl EntityRef<Clip>,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::clips::remove_note::Request { clip_id, note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Lists the notes that are clipped to the specified clip.
     fn clip_notes(&self, clip: impl EntityRef<Clip>) -> PagerStream<BoxPager<Self, Note>> {
         let pager = BackwardPager::new(

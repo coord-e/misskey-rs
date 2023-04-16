@@ -1,3 +1,6 @@
+#[cfg(feature = "12-112-0")]
+use std::fmt::{self, Display};
+
 #[cfg(feature = "12-81-0")]
 use crate::model::ad::{Ad, Place};
 #[cfg(feature = "12-62-0")]
@@ -5,6 +8,8 @@ use crate::model::clip::Clip;
 use crate::model::{emoji::Emoji, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "12-112-0")]
+use thiserror::Error;
 use url::Url;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -230,6 +235,18 @@ pub struct AdminMeta {
     pub blocked_hosts: Vec<String>,
     pub hcaptcha_secret_key: Option<String>,
     pub recaptcha_secret_key: Option<String>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub sensitive_media_detection: Option<SensitiveMediaDetection>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub sensitive_media_detection_sensitivity: Option<SensitiveMediaDetectionSensitivity>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub set_sensitive_flag_automatically: Option<bool>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub enable_sensitive_media_detection_for_videos: Option<bool>,
     pub proxy_account_id: Option<Id<User>>,
     pub twitter_consumer_key: Option<String>,
     pub twitter_consumer_secret: Option<String>,
@@ -261,6 +278,9 @@ pub struct AdminMeta {
     pub object_storage_s3_force_path_style: bool,
     pub deepl_auth_key: Option<String>,
     pub deepl_is_pro: bool,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub enable_ip_logging: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -285,4 +305,99 @@ pub struct FeaturesMeta {
     #[cfg(feature = "12-28-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-28-0")))]
     pub miauth: bool,
+}
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
+#[serde(rename_all = "camelCase")]
+pub enum SensitiveMediaDetection {
+    None,
+    All,
+    Local,
+    Remote,
+}
+
+#[cfg(feature = "12-112-0")]
+impl Display for SensitiveMediaDetection {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SensitiveMediaDetection::None => f.write_str("none"),
+            SensitiveMediaDetection::All => f.write_str("all"),
+            SensitiveMediaDetection::Local => f.write_str("local"),
+            SensitiveMediaDetection::Remote => f.write_str("remote"),
+        }
+    }
+}
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+#[derive(Debug, Error, Clone)]
+#[error("invalid sensitive media detection")]
+pub struct ParseSensitiveMediaDetectionError {
+    _priv: (),
+}
+
+#[cfg(feature = "12-112-0")]
+impl std::str::FromStr for SensitiveMediaDetection {
+    type Err = ParseSensitiveMediaDetectionError;
+
+    fn from_str(s: &str) -> Result<SensitiveMediaDetection, Self::Err> {
+        match s {
+            "none" | "None" => Ok(SensitiveMediaDetection::None),
+            "all" | "All" => Ok(SensitiveMediaDetection::All),
+            "local" | "Local" => Ok(SensitiveMediaDetection::Local),
+            "remote" | "Remote" => Ok(SensitiveMediaDetection::Remote),
+            _ => Err(ParseSensitiveMediaDetectionError { _priv: () }),
+        }
+    }
+}
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy)]
+#[serde(rename_all = "camelCase")]
+pub enum SensitiveMediaDetectionSensitivity {
+    Medium,
+    Low,
+    High,
+    VeryLow,
+    VeryHigh,
+}
+
+#[cfg(feature = "12-112-0")]
+impl Display for SensitiveMediaDetectionSensitivity {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            SensitiveMediaDetectionSensitivity::Medium => f.write_str("medium"),
+            SensitiveMediaDetectionSensitivity::Low => f.write_str("low"),
+            SensitiveMediaDetectionSensitivity::High => f.write_str("high"),
+            SensitiveMediaDetectionSensitivity::VeryLow => f.write_str("veryLow"),
+            SensitiveMediaDetectionSensitivity::VeryHigh => f.write_str("veryHigh"),
+        }
+    }
+}
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+#[derive(Debug, Error, Clone)]
+#[error("invalid sensitive media detection")]
+pub struct ParseSensitiveMediaDetectionSensitivityError {
+    _priv: (),
+}
+
+#[cfg(feature = "12-112-0")]
+impl std::str::FromStr for SensitiveMediaDetectionSensitivity {
+    type Err = ParseSensitiveMediaDetectionSensitivityError;
+
+    fn from_str(s: &str) -> Result<SensitiveMediaDetectionSensitivity, Self::Err> {
+        match s {
+            "medium" | "Medium" => Ok(SensitiveMediaDetectionSensitivity::Medium),
+            "low" | "Low" => Ok(SensitiveMediaDetectionSensitivity::Low),
+            "high" | "High" => Ok(SensitiveMediaDetectionSensitivity::High),
+            "veryLow" | "VeryLow" => Ok(SensitiveMediaDetectionSensitivity::VeryLow),
+            "veryHigh" | "VeryHigh" => Ok(SensitiveMediaDetectionSensitivity::VeryHigh),
+            _ => Err(ParseSensitiveMediaDetectionSensitivityError { _priv: () }),
+        }
+    }
 }

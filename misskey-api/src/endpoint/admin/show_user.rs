@@ -7,7 +7,7 @@ use crate::model::{id::Id, user::User};
 #[cfg(feature = "12-111-0")]
 use crate::model::{notification::NotificationType, signin::Signin, user::IntegrationValue};
 
-#[cfg(not(feature = "12-111-0"))]
+#[cfg(any(not(feature = "12-111-0"), feature = "12-112-0"))]
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 #[cfg(not(feature = "12-111-0"))]
@@ -81,6 +81,10 @@ pub struct Response {
     pub no_crawle: Option<bool>,
     #[serde(default)]
     pub always_mark_nsfw: Option<bool>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(default)]
+    pub auto_sensitive: Option<bool>,
     #[serde(default)]
     pub careful_bot: Option<bool>,
     #[serde(default)]
@@ -98,6 +102,12 @@ pub struct Response {
     pub is_moderator: bool,
     pub is_silenced: bool,
     pub is_suspended: bool,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub last_active_date: Option<DateTime<Utc>>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub moderation_note: Option<String>,
     #[serde(default)]
     pub signins: Option<Vec<Signin>>,
 }

@@ -261,6 +261,11 @@ impl<C> MeUpdateBuilder<C> {
         /// Sets whether to mark uploaded media as NSFW by default.
         pub always_mark_nsfw;
 
+        /// Sets whether to mark uploaded media as NSFW according to automatic detection.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub auto_sensitive;
+
         /// Sets whether to receive notifications about other users' notes that this user has
         /// reacted to or replied to.
         #[cfg(any(docsrs, not(feature = "12-55-0")))]

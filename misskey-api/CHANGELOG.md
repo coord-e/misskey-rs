@@ -69,6 +69,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.109.0 ~ v12.110.1
    - endpoint `admin/meta`
 - Support for Misskey v12.111.0 ~ v12.111.1
+- Partial support for Misskey v12.112.0 ~ v12.112.2
+   - endpoint `admin/delete-account`
+   - endpoint `admin/get-user-ips`
+   - endpoint `admin/update-user-note`
+   - endpoint `admin/drive-capacity-override`
+   - endpoint `clips/remove-note`
 
 ### Changed
 ### Deprecated

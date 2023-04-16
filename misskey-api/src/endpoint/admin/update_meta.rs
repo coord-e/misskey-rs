@@ -1,5 +1,7 @@
 #[cfg(feature = "12-62-0")]
 use crate::model::clip::Clip;
+#[cfg(feature = "12-112-0")]
+use crate::model::meta::{SensitiveMediaDetection, SensitiveMediaDetectionSensitivity};
 use crate::model::{id::Id, user::User};
 
 use serde::Serialize;
@@ -122,6 +124,26 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub recaptcha_secret_key: Option<Option<String>>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub sensitive_media_detection: Option<SensitiveMediaDetection>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub sensitive_media_detection_sensitivity: Option<SensitiveMediaDetectionSensitivity>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub set_sensitive_flag_automatically: Option<bool>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub enable_sensitive_media_detection_for_videos: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub proxy_account_id: Option<Option<Id<User>>>,
@@ -264,6 +286,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub object_storage_s3_force_path_style: Option<bool>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub enable_ip_logging: Option<bool>,
 }
 
 impl misskey_core::Request for Request {
@@ -292,6 +319,9 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_options() {
+        #[cfg(feature = "12-112-0")]
+        use crate::model::meta::{SensitiveMediaDetection, SensitiveMediaDetectionSensitivity};
+
         let client = TestClient::new();
         let image_url = client.avatar_url().await;
 
@@ -342,6 +372,16 @@ mod tests {
                 enable_recaptcha: Some(false),
                 recaptcha_site_key: Some(None),
                 recaptcha_secret_key: Some(None),
+                #[cfg(feature = "12-112-0")]
+                sensitive_media_detection: Some(SensitiveMediaDetection::None),
+                #[cfg(feature = "12-112-0")]
+                sensitive_media_detection_sensitivity: Some(
+                    SensitiveMediaDetectionSensitivity::Medium,
+                ),
+                #[cfg(feature = "12-112-0")]
+                set_sensitive_flag_automatically: Some(false),
+                #[cfg(feature = "12-112-0")]
+                enable_sensitive_media_detection_for_videos: Some(false),
                 proxy_account_id: Some(None),
                 maintainer_name: Some(Some("coord_e".to_string())),
                 maintainer_email: Some(Some("me@coord-e.com".to_string())),
@@ -390,6 +430,8 @@ mod tests {
                 object_storage_set_public_read: Some(false),
                 #[cfg(feature = "12-69-0")]
                 object_storage_s3_force_path_style: Some(false),
+                #[cfg(feature = "12-112-0")]
+                enable_ip_logging: Some(false),
             })
             .await;
     }

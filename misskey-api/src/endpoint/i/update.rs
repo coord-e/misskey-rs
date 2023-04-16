@@ -98,6 +98,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub always_mark_nsfw: Option<bool>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub auto_sensitive: Option<bool>,
     #[cfg(feature = "12-96-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -218,6 +223,8 @@ mod tests {
                 auto_watch: Some(true),
                 inject_featured_note: Some(true),
                 always_mark_nsfw: Some(true),
+                #[cfg(feature = "12-112-0")]
+                auto_sensitive: Some(true),
                 #[cfg(feature = "12-96-0")]
                 ff_visibility: Some(FfVisibility::Public),
                 pinned_page_id: None,
@@ -280,6 +287,8 @@ mod tests {
                 auto_watch: None,
                 inject_featured_note: None,
                 always_mark_nsfw: None,
+                #[cfg(feature = "12-112-0")]
+                auto_sensitive: None,
                 #[cfg(feature = "12-96-0")]
                 ff_visibility: None,
                 #[cfg(not(feature = "12-108-0"))]

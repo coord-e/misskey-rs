@@ -52,3 +52,19 @@ pub mod resync_chart;
 #[cfg(feature = "12-109-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-109-0")))]
 pub mod meta;
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+pub mod delete_account;
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+pub mod get_user_ips;
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+pub mod update_user_note;
+
+#[cfg(feature = "12-112-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+pub mod drive_capacity_override;
