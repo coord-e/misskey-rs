@@ -353,3 +353,5 @@ pub struct UserRelation {
     pub is_blocked: bool,
     pub is_muted: bool,
 }
+
+pub type IntegrationValue = serde_json::Value;

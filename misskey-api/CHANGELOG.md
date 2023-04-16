@@ -68,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.108.0 ~ v12.108.1
 - Support for Misskey v12.109.0 ~ v12.110.1
    - endpoint `admin/meta`
+- Support for Misskey v12.111.0 ~ v12.111.1
 
 ### Changed
 ### Deprecated
