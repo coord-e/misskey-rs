@@ -30,14 +30,15 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{Request, UserListEvent};
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let list = client
+        let list = http_client
             .test(crate::endpoint::users::lists::create::Request {
                 name: "test".to_string(),
             })
@@ -49,15 +50,16 @@ mod tests {
 
     #[tokio::test]
     async fn stream_note() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let admin = client.admin.me().await;
-        let list = client
+        let admin = http_client.admin.me().await;
+        let list = http_client
             .user
             .test(crate::endpoint::users::lists::create::Request {
                 name: "test".to_string(),
             })
             .await;
-        client
+        http_client
             .user
             .test(crate::endpoint::users::lists::push::Request {
                 list_id: list.id.clone(),
@@ -72,7 +74,7 @@ mod tests {
             .unwrap();
 
         future::join(
-            client
+            http_client
                 .admin
                 .create_note(Some("The world is fancy!"), None, None),
             async {

@@ -33,7 +33,7 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{AdminStreamEvent, Request};
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
@@ -46,12 +46,13 @@ mod tests {
 
     #[tokio::test]
     async fn stream() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let (user, _) = client.admin.create_user().await;
+        let (user, _) = http_client.admin.create_user().await;
         let mut stream = client.admin.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::users::report_abuse::Request {
+            http_client.test(crate::endpoint::users::report_abuse::Request {
                 user_id: user.id,
                 comment: "looks bad".to_string(),
             }),

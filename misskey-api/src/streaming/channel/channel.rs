@@ -30,14 +30,15 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::Request;
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let channel = client
+        let channel = http_client
             .test(
                 crate::endpoint::channels::create::Request::builder()
                     .name("test")
@@ -56,8 +57,9 @@ mod tests {
 
     #[tokio::test]
     async fn stream() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let channel = client
+        let channel = http_client
             .test(
                 crate::endpoint::channels::create::Request::builder()
                     .name("test")
@@ -73,7 +75,7 @@ mod tests {
             .unwrap();
 
         future::join(
-            client.test(
+            http_client.test(
                 crate::endpoint::notes::create::Request::builder()
                     .text("some text")
                     .channel_id(channel.id)

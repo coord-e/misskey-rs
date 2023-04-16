@@ -27,14 +27,15 @@ impl misskey_core::streaming::SubNoteEvent for NoteUpdateEvent {}
 #[cfg(test)]
 mod tests {
     use super::NoteUpdateEvent;
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
     #[tokio::test]
     async fn subscribe_unsubscribe() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let note = client.create_note(Some("test"), None, None).await;
+        let note = http_client.create_note(Some("test"), None, None).await;
 
         let mut stream = client
             .subnote::<NoteUpdateEvent, _>(note.id.to_string())
@@ -47,8 +48,9 @@ mod tests {
     async fn reacted() {
         use crate::model::note::Reaction;
 
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let note = client
+        let note = http_client
             .user
             .create_note(Some("looks good"), None, None)
             .await;
@@ -56,7 +58,7 @@ mod tests {
         let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         future::join(
-            client
+            http_client
                 .admin
                 .test(crate::endpoint::notes::reactions::create::Request {
                     note_id: note.id,
@@ -78,12 +80,13 @@ mod tests {
     async fn unreacted() {
         use crate::model::note::Reaction;
 
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let note = client
+        let note = http_client
             .user
             .create_note(Some("not so good"), None, None)
             .await;
-        client
+        http_client
             .admin
             .test(crate::endpoint::notes::reactions::create::Request {
                 note_id: note.id.clone(),
@@ -94,7 +97,7 @@ mod tests {
         let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         future::join(
-            client
+            http_client
                 .admin
                 .test(crate::endpoint::notes::reactions::delete::Request { note_id: note.id }),
             async {
@@ -111,13 +114,17 @@ mod tests {
 
     #[tokio::test]
     async fn deleted() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let note = client.user.create_note(Some("hmm..."), None, None).await;
+        let note = http_client
+            .user
+            .create_note(Some("hmm..."), None, None)
+            .await;
 
         let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         future::join(
-            client
+            http_client
                 .user
                 .test(crate::endpoint::notes::delete::Request { note_id: note.id }),
             async {
@@ -134,6 +141,7 @@ mod tests {
 
     #[tokio::test]
     async fn poll_voted() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
         let poll = crate::endpoint::notes::create::PollRequest {
             choices: vec!["a".to_string(), "b".to_string()],
@@ -141,7 +149,7 @@ mod tests {
             expires_at: Some(chrono::Utc::now() + chrono::Duration::hours(1)),
             expired_after: None,
         };
-        let note = client
+        let note = http_client
             .user
             .test(
                 crate::endpoint::notes::create::Request::builder()
@@ -155,7 +163,7 @@ mod tests {
         let mut stream = client.user.subnote(note.id.to_string()).await.unwrap();
 
         futures::future::join(
-            client
+            http_client
                 .user
                 .test(crate::endpoint::notes::polls::vote::Request {
                     note_id: note.id,
