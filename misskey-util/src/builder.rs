@@ -34,7 +34,7 @@ pub use drive::{
     DriveFileBuilder, DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder,
     DriveFolderUpdateBuilder,
 };
-pub use me::{IntoUserFields, MeUpdateBuilder};
+pub use me::MeUpdateBuilder;
 pub use messaging::MessagingMessageBuilder;
 pub use note::NoteBuilder;
 pub use page::{PageBuilder, PageUpdateBuilder};
@@ -67,3 +67,7 @@ pub use user::UserListBuilder;
 #[cfg(not(feature = "12-93-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
 pub use admin::ServerLogListBuilder;
+
+#[cfg(not(feature = "12-108-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
+pub use me::IntoUserFields;

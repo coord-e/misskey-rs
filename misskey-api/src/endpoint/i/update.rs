@@ -7,11 +7,15 @@ use crate::model::notification::NotificationType;
 use crate::model::user::FfVisibility;
 #[cfg(feature = "12-70-0")]
 use crate::model::user::UserEmailNotificationType;
+#[cfg(feature = "12-108-0")]
+use crate::model::user::UserField;
 use crate::model::{drive::DriveFile, id::Id, page::Page, query::Query, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
+#[cfg(not(feature = "12-108-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
 #[derive(Serialize, Default, Debug, Clone)]
 pub struct UserFieldRequest {
     pub name: Option<String>,
@@ -43,9 +47,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub banner_id: Option<Option<Id<DriveFile>>>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub fields: Option<[UserFieldRequest; 4]>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub fields: Option<Vec<UserField>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_locked: Option<bool>,
@@ -92,9 +103,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub ff_visibility: Option<FfVisibility>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_page_id: Option<Option<Id<Page>>>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub pinned_page_id: Option<Vec<Id<Page>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub muted_words: Option<Query<String>>,
@@ -137,7 +155,9 @@ impl misskey_core::Request for Request {
 
 #[cfg(test)]
 mod tests {
-    use super::{Request, UserFieldRequest};
+    use super::Request;
+    #[cfg(not(feature = "12-108-0"))]
+    use super::UserFieldRequest;
     use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
@@ -155,6 +175,8 @@ mod tests {
         use crate::model::user::FfVisibility;
         #[cfg(feature = "12-70-0")]
         use crate::model::user::UserEmailNotificationType;
+        #[cfg(feature = "12-108-0")]
+        use crate::model::user::UserField;
 
         let client = TestClient::new();
         client
@@ -166,6 +188,7 @@ mod tests {
                 birthday: None,
                 avatar_id: None,
                 banner_id: None,
+                #[cfg(not(feature = "12-108-0"))]
                 fields: Some([
                     UserFieldRequest {
                         name: Some("key".to_string()),
@@ -175,6 +198,11 @@ mod tests {
                     Default::default(),
                     Default::default(),
                 ]),
+                #[cfg(feature = "12-108-0")]
+                fields: Some(vec![UserField {
+                    name: "key".to_string(),
+                    value: "value".to_string(),
+                }]),
                 is_locked: Some(true),
                 #[cfg(feature = "12-63-0")]
                 is_explorable: Some(false),
@@ -254,7 +282,10 @@ mod tests {
                 always_mark_nsfw: None,
                 #[cfg(feature = "12-96-0")]
                 ff_visibility: None,
+                #[cfg(not(feature = "12-108-0"))]
                 pinned_page_id: Some(None),
+                #[cfg(feature = "12-108-0")]
+                pinned_page_id: None,
                 muted_words: None,
                 #[cfg(feature = "12-99-0")]
                 muted_instances: None,

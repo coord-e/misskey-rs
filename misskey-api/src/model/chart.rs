@@ -101,6 +101,12 @@ pub struct FederationChart {
     #[cfg(feature = "12-106-0")]
     #[serde(rename = "pub")]
     pub pub_: Vec<u64>,
+    #[cfg(feature = "12-108-0")]
+    pub pubsub: Vec<u64>,
+    #[cfg(feature = "12-108-0")]
+    pub sub_active: Vec<u64>,
+    #[cfg(feature = "12-108-0")]
+    pub pub_active: Vec<u64>,
 }
 
 #[cfg(not(feature = "12-104-0"))]

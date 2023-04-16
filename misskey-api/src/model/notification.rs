@@ -63,6 +63,10 @@ pub enum NotificationBody {
         note: Note,
         choice: u64,
     },
+    #[cfg(feature = "12-108-0")]
+    PollEnded {
+        note: Note,
+    },
     GroupInvited {
         invitation: UserGroupInvitation,
     },
@@ -97,6 +101,8 @@ impl std::str::FromStr for NotificationType {
             "quote" | "Quote" => Ok(NotificationType::Quote),
             "reaction" | "Reaction" => Ok(NotificationType::Reaction),
             "pollVote" | "PollVote" => Ok(NotificationType::PollVote),
+            #[cfg(feature = "12-108-0")]
+            "pollEnded" | "PollEnded" => Ok(NotificationType::PollEnded),
             "groupInvited" | "GroupInvited" => Ok(NotificationType::GroupInvited),
             "app" | "App" => Ok(NotificationType::App),
             _ => Err(ParseNotificationTypeError { _priv: () }),

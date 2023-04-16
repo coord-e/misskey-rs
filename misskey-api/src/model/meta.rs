@@ -24,7 +24,12 @@ pub struct Meta {
     pub tos_url: Option<String>,
     pub repository_url: Url,
     pub feedback_url: Option<String>,
+    #[cfg(not(feature = "12-108-0"))]
     pub secure: bool,
+    #[cfg(feature = "12-108-0")]
+    pub default_dark_theme: Option<String>,
+    #[cfg(feature = "12-108-0")]
+    pub default_light_theme: Option<String>,
     pub disable_registration: bool,
     pub disable_local_timeline: bool,
     pub disable_global_timeline: bool,
@@ -36,7 +41,7 @@ pub struct Meta {
     #[cfg(not(feature = "12-58-0"))]
     pub cache_remote_files: bool,
     /// This field is [`bool`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
-    #[cfg(feature = "12-58-0")]
+    #[cfg(all(feature = "12-58-0", not(feature = "12-108-0")))]
     pub proxy_remote_files: Option<bool>,
     #[cfg(not(feature = "12-58-0"))]
     pub proxy_remote_files: bool,
