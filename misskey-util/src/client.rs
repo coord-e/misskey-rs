@@ -41,6 +41,8 @@ use misskey_api::model::ad::Ad;
 use misskey_api::model::channel::Channel;
 #[cfg(feature = "12-79-0")]
 use misskey_api::model::gallery::GalleryPost;
+#[cfg(feature = "12-109-0")]
+use misskey_api::model::meta::AdminMeta;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
 #[cfg(feature = "12-93-0")]
@@ -4257,6 +4259,22 @@ pub trait ClientExt: Client + Sync {
     fn ads(&self) -> PagerStream<BoxPager<Self, Ad>> {
         let pager = BackwardPager::new(self, endpoint::admin::ad::list::Request::default());
         PagerStream::new(Box::pin(pager))
+    }
+
+    /// Gets detailed information about the instance.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-109-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-109-0")))]
+    fn admin_meta(&self) -> BoxFuture<Result<AdminMeta, Error<Self::Error>>> {
+        Box::pin(async move {
+            let meta = self
+                .request(endpoint::admin::meta::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(meta)
+        })
     }
     // }}}
 

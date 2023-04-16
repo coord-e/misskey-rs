@@ -48,3 +48,7 @@ pub mod logs;
 #[cfg(not(feature = "12-106-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "12-106-0"))))]
 pub mod resync_chart;
+
+#[cfg(feature = "12-109-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-109-0")))]
+pub mod meta;
