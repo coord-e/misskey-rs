@@ -64,6 +64,18 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub description: Option<Option<String>>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub default_light_theme: Option<Option<String>>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub default_dark_theme: Option<Option<String>>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub max_note_text_length: Option<u64>,
@@ -76,6 +88,8 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub cache_remote_files: Option<bool>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub proxy_remote_files: Option<bool>,
@@ -306,10 +320,16 @@ mod tests {
                 logo_image_url: Some(Some(image_url.to_string())),
                 name: None,
                 description: Some(Some("description!".to_string())),
+                #[cfg(feature = "12-108-0")]
+                default_light_theme: Some(Some("{}".to_string())),
+                #[cfg(feature = "12-108-0")]
+                default_dark_theme: Some(Some("{}".to_string())),
+                #[cfg(not(feature = "12-108-0"))]
                 max_note_text_length: Some(1000),
                 local_drive_capacity_mb: Some(1000),
                 remote_drive_capacity_mb: Some(1000),
                 cache_remote_files: Some(true),
+                #[cfg(not(feature = "12-108-0"))]
                 proxy_remote_files: Some(true),
                 #[cfg(feature = "12-92-0")]
                 email_required_for_signup: Some(true),

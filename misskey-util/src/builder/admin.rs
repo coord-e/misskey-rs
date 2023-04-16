@@ -201,6 +201,8 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     /// Sets the maximum number of characters for posts in the instance.
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     pub fn max_note_text_length(&mut self, max_note_text_length: u64) -> &mut Self {
         self.request
             .max_note_text_length
@@ -225,6 +227,8 @@ impl<C> MetaUpdateBuilder<C> {
         pub cache_remote_files;
         /// Sets whether or not the instance would proxy remote files that are not available
         /// locally.
+        #[cfg(not(feature = "12-108-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
         pub proxy_remote_files;
     }
 

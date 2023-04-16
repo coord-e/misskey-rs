@@ -26,11 +26,14 @@ use misskey_core::Client;
 ///
 /// [set_fields]: MeUpdateBuilder::set_fields
 /// [user_field]: misskey_api::model::user::UserField
+#[cfg(not(feature = "12-108-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
 pub trait IntoUserFields {
     /// Performs the conversion.
     fn into_user_fields(self) -> [Option<UserField>; 4];
 }
 
+#[cfg(not(feature = "12-108-0"))]
 macro_rules! impl_into_field_requests {
     (expand default) => { None };
     (expand $i:ident) => { Some($i) };
@@ -59,9 +62,13 @@ macro_rules! impl_into_field_requests {
     };
 }
 
+#[cfg(not(feature = "12-108-0"))]
 impl_into_field_requests! { 1; f1 => f1, default, default, default }
+#[cfg(not(feature = "12-108-0"))]
 impl_into_field_requests! { 2; f1, f2 => f1, f2, default, default }
+#[cfg(not(feature = "12-108-0"))]
 impl_into_field_requests! { 3; f1, f2, f3 => f1, f2, f3, default }
+#[cfg(not(feature = "12-108-0"))]
 impl_into_field_requests! { 4; f1, f2, f3, f4 => f1, f2, f3, f4 }
 
 /// Builder for the [`update_me`][`crate::ClientExt::update_me`] method.
@@ -96,7 +103,21 @@ impl<C> MeUpdateBuilder<C> {
         pub avatar: impl EntityRef<DriveFile> { avatar_id = avatar.entity_ref() };
         pub banner: impl EntityRef<DriveFile> { banner_id = banner.entity_ref() };
         #[doc_name = "pinned page"]
+        #[cfg(not(feature = "12-108-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
         pub pinned_page: impl EntityRef<Page> { pinned_page_id = pinned_page.entity_ref() };
+    }
+
+    /// Sets the pinned page.
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    pub fn pinned_page(
+        &mut self,
+        pinned_page: impl IntoIterator<Item = impl EntityRef<Page>>,
+    ) -> &mut Self {
+        let pinned_page_id = pinned_page.into_iter().map(|p| p.entity_ref()).collect();
+        self.request.pinned_page_id.replace(pinned_page_id);
+        self
     }
 
     /// Sets the fields in this user's profile.
@@ -121,6 +142,8 @@ impl<C> MeUpdateBuilder<C> {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     pub fn set_fields(&mut self, fields: impl IntoUserFields) -> &mut Self {
         fn to_request(field: UserField) -> endpoint::i::update::UserFieldRequest {
             endpoint::i::update::UserFieldRequest {
@@ -136,6 +159,62 @@ impl<C> MeUpdateBuilder<C> {
             f4.map(to_request).unwrap_or_default(),
         ];
         self.request.fields.replace(fields);
+        self
+    }
+
+    /// Sets the fields in this user's profile.
+    ///
+    /// Since users can set up to 16 fields, it takes a collection with no more than 16 items
+    /// as its argument.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// client
+    ///     .update_me()
+    ///     .set_fields([
+    ///         ("Website", "https://example.com/"),
+    ///         ("Twitter", "@username"),
+    ///     ])
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    pub fn set_fields(
+        &mut self,
+        fields: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>,
+    ) -> &mut Self {
+        let fields = fields
+            .into_iter()
+            .map(|(name, value)| UserField {
+                name: name.into(),
+                value: value.into(),
+            })
+            .collect();
+        self.request.fields.replace(fields);
+        self
+    }
+
+    /// Adds a field with the given name and value to the fields in this user's profile.
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    pub fn add_field(&mut self, name: impl Into<String>, value: impl Into<String>) -> &mut Self {
+        let field = UserField {
+            name: name.into(),
+            value: value.into(),
+        };
+        if let Some(fields) = self.request.fields.as_mut() {
+            fields.push(field);
+        } else {
+            self.request.fields.replace(vec![field]);
+        }
         self
     }
 

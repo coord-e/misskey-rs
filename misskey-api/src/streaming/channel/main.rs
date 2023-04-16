@@ -161,12 +161,13 @@ mod tests {
 
         let mut stream = client.channel(Request::default()).await.unwrap();
 
+        let url = client.avatar_url().await;
         let expected_marker = ulid_crate::Ulid::new().to_string();
         let expected_comment = ulid_crate::Ulid::new().to_string();
 
         futures::future::join(
             client.test(crate::endpoint::drive::files::upload_from_url::Request {
-                url: url::Url::parse("http://example.com/index.html").unwrap(),
+                url,
                 folder_id: None,
                 is_sensitive: None,
                 force: None,

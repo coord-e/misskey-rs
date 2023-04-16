@@ -57,9 +57,11 @@ mod tests {
 
         client
             .user
-            .test(crate::endpoint::mute::create::Request {
-                user_id: user.id.clone(),
-            })
+            .test(
+                crate::endpoint::mute::create::Request::builder()
+                    .user_id(user.id)
+                    .build(),
+            )
             .await;
 
         let mutings = client
