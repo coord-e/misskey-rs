@@ -30,7 +30,7 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{DriveStreamEvent, Request};
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
@@ -43,11 +43,12 @@ mod tests {
 
     #[tokio::test]
     async fn stream_folder_created() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::drive::folders::create::Request::default()),
+            http_client.test(crate::endpoint::drive::folders::create::Request::default()),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
@@ -62,14 +63,15 @@ mod tests {
 
     #[tokio::test]
     async fn stream_folder_updated() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let folder = client
+        let folder = http_client
             .test(crate::endpoint::drive::folders::create::Request::default())
             .await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::drive::folders::update::Request {
+            http_client.test(crate::endpoint::drive::folders::update::Request {
                 folder_id: folder.id,
                 name: Some("test".to_string()),
                 parent_id: None,
@@ -88,14 +90,15 @@ mod tests {
 
     #[tokio::test]
     async fn stream_folder_deleted() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let folder = client
+        let folder = http_client
             .test(crate::endpoint::drive::folders::create::Request::default())
             .await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::drive::folders::delete::Request {
+            http_client.test(crate::endpoint::drive::folders::delete::Request {
                 folder_id: folder.id,
             }),
             async {
@@ -112,11 +115,12 @@ mod tests {
 
     #[tokio::test]
     async fn stream_file_created() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let url = client.avatar_url().await;
+        let url = http_client.avatar_url().await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
-        future::join(client.upload_from_url(url), async {
+        future::join(http_client.upload_from_url(url), async {
             loop {
                 match stream.next().await.unwrap().unwrap() {
                     DriveStreamEvent::FileCreated(_) => break,
@@ -129,13 +133,14 @@ mod tests {
 
     #[tokio::test]
     async fn stream_file_updated() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let url = client.avatar_url().await;
-        let file = client.upload_from_url(url).await;
+        let url = http_client.avatar_url().await;
+        let file = http_client.upload_from_url(url).await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(
+            http_client.test(
                 crate::endpoint::drive::files::update::Request::builder()
                     .file_id(file.id)
                     .name("test")
@@ -155,13 +160,14 @@ mod tests {
 
     #[tokio::test]
     async fn stream_file_deleted() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let url = client.avatar_url().await;
-        let file = client.upload_from_url(url).await;
+        let url = http_client.avatar_url().await;
+        let file = http_client.upload_from_url(url).await;
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::drive::files::delete::Request { file_id: file.id }),
+            http_client.test(crate::endpoint::drive::files::delete::Request { file_id: file.id }),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {

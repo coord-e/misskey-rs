@@ -87,7 +87,7 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{MainStreamEvent, Request};
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
@@ -100,18 +100,17 @@ mod tests {
 
     #[tokio::test]
     async fn reply() {
-        let test_client = TestClient::new().await;
+        let admin_client = HttpTestClient::new().admin;
         // create fresh user (for new main stream) to avoid events
         // to be captured by other test cases
-        let (_, client) = test_client.admin.create_streaming_user().await;
+        let (_, http_client, client) = admin_client.create_http_and_ws_client().await;
 
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
             async {
-                let note = client.create_note(Some("awesome"), None, None).await;
-                test_client
-                    .user
+                let note = http_client.create_note(Some("awesome"), None, None).await;
+                admin_client
                     .create_note(Some("nice"), None, Some(note.id))
                     .await;
             },
@@ -129,14 +128,14 @@ mod tests {
 
     #[tokio::test]
     async fn mention() {
-        let test_client = TestClient::new().await;
+        let http_client = HttpTestClient::new();
         // ditto
-        let (me, client) = test_client.admin.create_streaming_user().await;
+        let (me, client) = http_client.admin.create_streaming_user().await;
 
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         futures::future::join(
-            test_client
+            http_client
                 .user
                 .create_note(Some(&format!("@{} hello", me.username)), None, None),
             async {
@@ -157,16 +156,19 @@ mod tests {
         use crate::model::drive::DriveFile;
 
         // ditto
-        let (_, client) = TestClient::new().await.admin.create_streaming_user().await;
+        let (_, http_client, client) = HttpTestClient::new()
+            .admin
+            .create_http_and_ws_client()
+            .await;
 
         let mut stream = client.channel(Request::default()).await.unwrap();
 
-        let url = client.avatar_url().await;
+        let url = http_client.avatar_url().await;
         let expected_marker = ulid_crate::Ulid::new().to_string();
         let expected_comment = ulid_crate::Ulid::new().to_string();
 
         futures::future::join(
-            client.test(crate::endpoint::drive::files::upload_from_url::Request {
+            http_client.test(crate::endpoint::drive::files::upload_from_url::Request {
                 url,
                 folder_id: None,
                 is_sensitive: None,
@@ -198,14 +200,14 @@ mod tests {
     async fn registry_updated() {
         use serde_json::json;
 
-        let test_client = TestClient::new().await;
+        let http_client = HttpTestClient::new();
         // ditto
-        let (_, client) = test_client.admin.create_streaming_user().await;
+        let (_, http_client, client) = http_client.admin.create_http_and_ws_client().await;
 
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::i::registry::set::Request {
+            http_client.test(crate::endpoint::i::registry::set::Request {
                 key: "stream_test".into(),
                 value: json!({ "test": [] }),
                 scope: None,

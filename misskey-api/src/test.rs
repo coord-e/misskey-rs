@@ -17,6 +17,7 @@ pub trait ClientExt {
     async fn test<R: Request + Send>(&self, req: R) -> R::Response;
     async fn create_user(&self) -> (User, HttpClient);
     async fn create_streaming_user(&self) -> (User, WebSocketClient);
+    async fn create_http_and_ws_client(&self) -> (User, HttpClient, WebSocketClient);
     async fn me(&self) -> User;
     async fn create_note(
         &self,
@@ -67,6 +68,26 @@ impl<T: Client + Send + Sync> ClientExt for T {
 
         (
             res.user,
+            WebSocketClient::builder(env::websocket_url())
+                .token(res.token)
+                .connect()
+                .await
+                .unwrap(),
+        )
+    }
+
+    async fn create_http_and_ws_client(&self) -> (User, HttpClient, WebSocketClient) {
+        let ulid = Ulid::new().to_string();
+        let res = self
+            .test(crate::endpoint::admin::accounts::create::Request {
+                username: ulid[..20].to_owned(),
+                password: "test".to_string(),
+            })
+            .await;
+
+        (
+            res.user,
+            HttpClient::with_token(env::api_url(), res.token.clone()).unwrap(),
             WebSocketClient::builder(env::websocket_url())
                 .token(res.token)
                 .connect()

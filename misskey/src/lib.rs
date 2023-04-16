@@ -36,18 +36,22 @@
 //! use futures::stream::TryStreamExt;
 //! use misskey::prelude::*;
 //! use misskey::streaming::channel::main::MainStreamEvent;
-//! use misskey::WebSocketClient;
+//! use misskey::{HttpClient, WebSocketClient};
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = WebSocketClient::builder("wss://your.instance.example/streaming")
+//! let http_client = HttpClient::builder("https://your.instance.example/api/")
+//!     .token("API_TOKEN")
+//!     .build()?;
+//!
+//! let ws_client = WebSocketClient::builder("wss://your.instance.example/streaming")
 //!     .token("YOUR_API_TOKEN")
 //!     .connect()
 //!     .await?;
 //!
 //! // Connect to the main stream.
 //! // The main stream is a channel that streams events about the connected account.
-//! let mut stream = client.main_stream().await?;
+//! let mut stream = ws_client.main_stream().await?;
 //!
 //! // Wait for the next event in the main stream.
 //! while let Some(event) = stream.try_next().await? {
@@ -57,8 +61,8 @@
 //!             println!("followed from @{}", user.username);
 //!
 //!             // Follow back `user` if you haven't already.
-//!             if !client.is_following(&user).await? {
-//!                 client.follow(&user).await?;
+//!             if !http_client.is_following(&user).await? {
+//!                 http_client.follow(&user).await?;
 //!             }
 //!         }
 //!         // other events are just ignored here

@@ -24,7 +24,7 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{MessagingIndexStreamEvent, Request};
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
@@ -37,12 +37,13 @@ mod tests {
 
     #[tokio::test]
     async fn stream_message() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let user = client.user.me().await;
+        let user = http_client.user.me().await;
         let mut stream = client.user.channel(Request::default()).await.unwrap();
 
         future::join(
-            client
+            http_client
                 .admin
                 .test(crate::endpoint::messaging::messages::create::Request {
                     text: Some("hi".to_string()),
@@ -64,9 +65,10 @@ mod tests {
 
     #[tokio::test]
     async fn stream_read() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let user = client.user.me().await;
-        let message = client
+        let user = http_client.user.me().await;
+        let message = http_client
             .admin
             .test(crate::endpoint::messaging::messages::create::Request {
                 text: Some("hi".to_string()),
@@ -78,7 +80,7 @@ mod tests {
         let mut stream = client.user.channel(Request::default()).await.unwrap();
 
         future::join(
-            client
+            http_client
                 .user
                 .test(crate::endpoint::messaging::messages::read::Request {
                     message_id: message.id,
