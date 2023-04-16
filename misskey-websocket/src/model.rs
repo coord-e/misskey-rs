@@ -18,10 +18,12 @@ impl ChannelId {
     }
 }
 
+#[cfg(not(feature = "12-111-0"))]
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[serde(transparent)]
 pub struct ApiRequestId(pub Uuid);
 
+#[cfg(not(feature = "12-111-0"))]
 impl ApiRequestId {
     pub fn uuid() -> Self {
         ApiRequestId(Uuid::new_v4())

@@ -1,23 +1,28 @@
 use std::collections::HashMap;
 
+#[cfg(not(feature = "12-111-0"))]
+use crate::broker::channel::ResponseSender;
 use crate::broker::{
-    channel::{ChannelPongSender, ResponseSender, ResponseStreamSender},
+    channel::{ChannelPongSender, ResponseStreamSender},
     model::{BroadcastId, BrokerControl},
 };
 use crate::error::Result;
+#[cfg(not(feature = "12-111-0"))]
+use crate::model::{incoming::ApiMessage, ApiRequestId};
 use crate::model::{
     incoming::{
-        ApiMessage, ChannelMessage, ConnectedMessage, IncomingMessage, IncomingMessageType,
-        NoteUpdatedMessage,
+        ChannelMessage, ConnectedMessage, IncomingMessage, IncomingMessageType, NoteUpdatedMessage,
     },
     outgoing::OutgoingMessage,
-    ApiRequestId, ChannelId, SubNoteId,
+    ChannelId, SubNoteId,
 };
 
 use log::{info, warn};
+#[cfg(not(feature = "12-111-0"))]
 use misskey_core::model::ApiResult;
 use serde_json::value::{self, Value};
 
+#[cfg(not(feature = "12-111-0"))]
 #[derive(Debug)]
 struct ApiHandler {
     message: OutgoingMessage,
@@ -39,6 +44,7 @@ struct ChannelHandler {
 
 #[derive(Debug)]
 pub(crate) struct Handler {
+    #[cfg(not(feature = "12-111-0"))]
     api: HashMap<ApiRequestId, ApiHandler>,
     sub_note: HashMap<SubNoteId, SubNoteHandler>,
     channel: HashMap<ChannelId, ChannelHandler>,
@@ -48,6 +54,7 @@ pub(crate) struct Handler {
 impl Handler {
     pub fn new() -> Handler {
         Handler {
+            #[cfg(not(feature = "12-111-0"))]
             api: HashMap::new(),
             sub_note: HashMap::new(),
             channel: HashMap::new(),
@@ -58,6 +65,7 @@ impl Handler {
     pub fn restore_messages(&mut self) -> Vec<OutgoingMessage> {
         let mut messages = Vec::new();
 
+        #[cfg(not(feature = "12-111-0"))]
         for ApiHandler { message, .. } in self.api.values() {
             messages.push(message.clone());
         }
@@ -76,6 +84,7 @@ impl Handler {
 
     pub fn control(&mut self, ctrl: BrokerControl) -> Option<OutgoingMessage> {
         match ctrl {
+            #[cfg(not(feature = "12-111-0"))]
             BrokerControl::Api {
                 id,
                 endpoint,
@@ -149,6 +158,7 @@ impl Handler {
         }
     }
 
+    #[cfg(not(feature = "12-111-0"))]
     pub fn is_empty(&self) -> bool {
         self.api.is_empty()
             && self.sub_note.is_empty()
@@ -156,8 +166,16 @@ impl Handler {
             && self.broadcast.values().all(|m| m.is_empty())
     }
 
+    #[cfg(feature = "12-111-0")]
+    pub fn is_empty(&self) -> bool {
+        self.sub_note.is_empty()
+            && self.channel.is_empty()
+            && self.broadcast.values().all(|m| m.is_empty())
+    }
+
     pub async fn handle(&mut self, msg: IncomingMessage) -> Result<()> {
         match msg.type_ {
+            #[cfg(not(feature = "12-111-0"))]
             IncomingMessageType::Api(id) => {
                 if let Some(ApiHandler { sender, .. }) = self.api.remove(&id) {
                     let msg: ApiResult<ApiMessage> = value::from_value(msg.body)?;

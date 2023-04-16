@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 ### Removed
+
+- implementation of `Client` to `WebSocketClient`
+  - For Misskey v12.111.0 ~
+
 ### Fixed
 ### Security
 
