@@ -1,24 +1,25 @@
 use std::fmt::{self, Debug};
 
-use crate::broker::{
-    channel::{response_channel, ControlSender},
-    model::{BrokerControl, SharedBrokerState},
-    Broker, ReconnectConfig,
-};
+#[cfg(not(feature = "12-111-0"))]
+use crate::broker::{channel::response_channel, model::BrokerControl};
+use crate::broker::{channel::ControlSender, model::SharedBrokerState, Broker, ReconnectConfig};
 use crate::error::{Error, Result};
-use crate::model::{ApiRequestId, SubNoteId};
+#[cfg(not(feature = "12-111-0"))]
+use crate::model::ApiRequestId;
+use crate::model::SubNoteId;
 
 use async_tungstenite::tungstenite::http::HeaderMap;
+#[cfg(not(feature = "12-111-0"))]
+use futures_util::sink::SinkExt;
 use futures_util::{
     future::{BoxFuture, FutureExt, TryFutureExt},
-    sink::{Sink, SinkExt},
+    sink::Sink,
     stream::{BoxStream, Stream, StreamExt},
 };
-use misskey_core::model::ApiResult;
-use misskey_core::{
-    streaming::{BoxStreamSink, StreamingClient},
-    Client,
-};
+use misskey_core::streaming::{BoxStreamSink, StreamingClient};
+#[cfg(not(feature = "12-111-0"))]
+use misskey_core::{model::ApiResult, Client};
+#[cfg(not(feature = "12-111-0"))]
 use serde_json::value;
 use url::Url;
 
@@ -168,6 +169,9 @@ impl WebSocketClient {
     }
 }
 
+// API call through streaming is disabled for Misskey v12.111.0 and later.
+// https://github.com/misskey-dev/misskey/commit/3770bb6
+#[cfg(not(feature = "12-111-0"))]
 impl Client for WebSocketClient {
     type Error = Error;
 
@@ -257,6 +261,7 @@ impl StreamingClient for WebSocketClient {
     }
 }
 
+#[cfg(not(feature = "12-111-0"))]
 #[cfg(test)]
 mod tests {
     use super::{builder::WebSocketClientBuilder, WebSocketClient};
