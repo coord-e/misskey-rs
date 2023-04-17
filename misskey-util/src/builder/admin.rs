@@ -522,6 +522,10 @@ impl<C> MetaUpdateBuilder<C> {
         #[cfg(feature = "12-112-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
         pub enable_ip_logging;
+        /// Sets whether or not to validate email address strictly.
+        #[cfg(feature = "12-112-3")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
+        pub enable_active_email_validation;
     }
     update_builder_option_field! {
         #[doc_name = "base URL of the extenal object storage"]

@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `admin/update-user-note`
    - endpoint `admin/drive-capacity-override`
    - endpoint `clips/remove-note`
+- Support for Misskey v12.112.3 ~ v12.119.2
 
 ### Changed
 ### Deprecated

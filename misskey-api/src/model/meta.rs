@@ -281,6 +281,9 @@ pub struct AdminMeta {
     #[cfg(feature = "12-112-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
     pub enable_ip_logging: bool,
+    #[cfg(feature = "12-112-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
+    pub enable_active_email_validation: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
