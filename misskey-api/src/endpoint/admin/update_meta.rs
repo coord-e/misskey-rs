@@ -291,6 +291,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_ip_logging: Option<bool>,
+    #[cfg(feature = "12-112-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub enable_active_email_validation: Option<bool>,
 }
 
 impl misskey_core::Request for Request {
@@ -432,6 +437,8 @@ mod tests {
                 object_storage_s3_force_path_style: Some(false),
                 #[cfg(feature = "12-112-0")]
                 enable_ip_logging: Some(false),
+                #[cfg(feature = "12-112-3")]
+                enable_active_email_validation: Some(false),
             })
             .await;
     }
