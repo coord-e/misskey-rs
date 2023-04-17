@@ -21,12 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.69.0
 - Support for Misskey v12.70.0
 - Support for Misskey v12.71.0 ~ v12.74.1
-- Support for Misskey v12.75.0 ~ v12.75.1
+- Support for Misskey v12.75.0 ~ v12.76.1
 - `muted_notification_types` user setting which is available since v12.48.0
 - Page related endpoints
    - endpoint `pages/*`
    - endpoint `i/pages`
    - endpoint `i/page_likes`
+- Support for Misskey v12.77.0
 
 ### Changed
 ### Deprecated

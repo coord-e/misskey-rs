@@ -152,6 +152,11 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg_attr(docsrs, doc(cfg(feature = "12-63-0")))]
         pub explorable { is_explorable };
 
+        /// Sets whether to hide online status from other users.
+        #[cfg(feature = "12-77-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-77-0")))]
+        pub hide_online_status;
+
         /// Sets whether this user requires a follow request from bots.
         pub require_follow_request_for_bot { careful_bot };
 
