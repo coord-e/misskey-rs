@@ -135,12 +135,12 @@ mod tests {
         let mut stream = client.channel(Request::default()).await.unwrap();
 
         future::join(
-            client.test(crate::endpoint::drive::files::update::Request {
-                file_id: file.id,
-                folder_id: None,
-                is_sensitive: None,
-                name: Some("test".to_string()),
-            }),
+            client.test(
+                crate::endpoint::drive::files::update::Request::builder()
+                    .file_id(file.id)
+                    .name("test")
+                    .build(),
+            ),
             async {
                 loop {
                     match stream.next().await.unwrap().unwrap() {
