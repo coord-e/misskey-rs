@@ -26,6 +26,8 @@ use crate::builder::{
 use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
 #[cfg(feature = "12-57-0")]
 use crate::builder::{ClipBuilder, ClipUpdateBuilder};
+#[cfg(feature = "13-0-0")]
+use crate::builder::{DefaultPoliciesUpdateBuilder, RoleBuilder, RoleUpdateBuilder};
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
 use crate::{TimelineCursor, TimelineRange};
@@ -45,6 +47,8 @@ use misskey_api::model::gallery::GalleryPost;
 use misskey_api::model::meta::AdminMeta;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
+#[cfg(feature = "13-0-0")]
+use misskey_api::model::role::{PoliciesSimple, Role};
 #[cfg(feature = "12-93-0")]
 use misskey_api::model::user::UserOrigin;
 use misskey_api::model::{
@@ -981,11 +985,10 @@ pub trait ClientExt: Client + Sync {
     /// use futures::stream::TryStreamExt;
     /// use misskey::model::user::{User, UserSortKey};
     ///
-    /// // Get a list of local moderator users sorted by number of followers.
+    /// // Get a list of local users sorted by number of followers.
     /// let users: Vec<User> = client
     ///     .users()
     ///     .local()
-    ///     .moderator()
     ///     .sort_by_followers()
     ///     .list()
     ///     .try_collect()
@@ -3783,6 +3786,8 @@ pub trait ClientExt: Client + Sync {
     /// Sets moderator privileges for the specified user.
     ///
     /// This operation may require this client to be logged in with an admin account.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn add_moderator(
         &self,
         user: impl EntityRef<User>,
@@ -3800,6 +3805,8 @@ pub trait ClientExt: Client + Sync {
     /// Removes moderator privileges for the specified user.
     ///
     /// This operation may require this client to be logged in with an admin account.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn remove_moderator(
         &self,
         user: impl EntityRef<User>,
@@ -3939,6 +3946,8 @@ pub trait ClientExt: Client + Sync {
     /// Silences the specified user.
     ///
     /// This operation may require moderator privileges.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn silence(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let user_id = user.entity_ref();
         Box::pin(async move {
@@ -3967,6 +3976,8 @@ pub trait ClientExt: Client + Sync {
     /// Unsilences the specified user.
     ///
     /// This operation may require moderator privileges.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn unsilence(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let user_id = user.entity_ref();
         Box::pin(async move {
@@ -3999,7 +4010,14 @@ pub trait ClientExt: Client + Sync {
     /// Finally, calling [`update`][builder_update] method will actually perform the update.
     /// See [`MetaUpdateBuilder`] for the fields that can be updated.
     ///
-    /// This operation may require this client to be logged in with an admin account.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require this client to be logged in with an admin account."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require administrator privileges."
+    )]
     ///
     /// [builder_update]: MetaUpdateBuilder::update
     ///
@@ -4013,7 +4031,6 @@ pub trait ClientExt: Client + Sync {
     /// client
     ///     .update_meta()
     ///     .set_name("The Instance of Saturn")
-    ///     .local_drive_capacity(5000)
     ///     .update()
     ///     .await?;
     /// # Ok(())
@@ -4107,7 +4124,14 @@ pub trait ClientExt: Client + Sync {
 
     /// Creates a custom emoji from the given file.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     #[cfg(feature = "12-9-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
     fn create_emoji(
@@ -4128,7 +4152,14 @@ pub trait ClientExt: Client + Sync {
 
     /// Deletes the specified emoji.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     fn delete_emoji(
         &self,
         emoji: impl EntityRef<Emoji>,
@@ -4154,7 +4185,14 @@ pub trait ClientExt: Client + Sync {
     /// Finally, calling [`update`][builder_update] method will actually perform the update.
     /// See [`EmojiUpdateBuilder`] for the fields that can be updated.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     ///
     /// [builder_update]: EmojiUpdateBuilder::update
     #[cfg(feature = "12-9-0")]
@@ -4165,7 +4203,14 @@ pub trait ClientExt: Client + Sync {
 
     /// Copies the specified emoji.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     fn copy_emoji(
         &self,
         emoji: impl EntityRef<Emoji>,
@@ -4184,16 +4229,50 @@ pub trait ClientExt: Client + Sync {
 
     /// Lists the emojis in the instance.
     ///
-    /// This operation may require moderator privileges.
-    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of custom emojis from normal users,
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
+    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of custom emojis from normal users.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn emojis(&self) -> PagerStream<BoxPager<Self, Emoji>> {
+        let pager = BackwardPager::new(self, endpoint::admin::emoji::list::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the emojis in the instance.
+    ///
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
+    /// Use [`emojis`][`ClientExt::emojis`] method if you want to get a list of custom emojis from normal users.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn admin_emojis(&self) -> PagerStream<BoxPager<Self, Emoji>> {
         let pager = BackwardPager::new(self, endpoint::admin::emoji::list::Request::default());
         PagerStream::new(Box::pin(pager))
     }
 
     /// Searches the emojis using the given query string.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     #[cfg(feature = "12-48-0")]
     fn search_emojis(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, Emoji>> {
         let pager = BackwardPager::new(
@@ -4272,7 +4351,7 @@ pub trait ClientExt: Client + Sync {
     /// Lists the ads in the instance.
     ///
     /// This operation may require moderator privileges.
-    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of ads from normal users,
+    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of ads from normal users.
     #[cfg(feature = "12-80-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
     fn ads(&self) -> PagerStream<BoxPager<Self, Ad>> {
@@ -4282,7 +4361,7 @@ pub trait ClientExt: Client + Sync {
 
     /// Gets detailed information about the instance.
     ///
-    /// This operation may require moderator privileges.
+    /// This operation may require administrator privileges.
     #[cfg(feature = "12-109-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-109-0")))]
     fn admin_meta(&self) -> BoxFuture<Result<AdminMeta, Error<Self::Error>>> {
@@ -4294,6 +4373,248 @@ pub trait ClientExt: Client + Sync {
                 .into_result()?;
             Ok(meta)
         })
+    }
+
+    /// Creates a role with the given name.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let role = client.create_role("name").await?;
+    /// assert_eq!(role.name, "name");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn create_role(&self, name: impl Into<String>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move { self.build_role().name(name).create().await })
+    }
+
+    /// Returns a builder for creating a role.
+    ///
+    /// The returned builder provides methods to customize details of the role,
+    /// and you can chain them to create a role incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a role.
+    /// See [`RoleBuilder`] for the provided methods.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// [builder_create]: RoleBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// // Create a role whose members cannot post public notes.
+    /// let role = client
+    ///     .build_role()
+    ///     .name("Silence")
+    ///     .allow_public_note(|mut builder| builder.value(false).use_default(false).build())
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(role.name, "Silence");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn build_role(&self) -> RoleBuilder<&Self> {
+        RoleBuilder::new(self)
+    }
+
+    /// Deletes the specified role.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let role = client.create_role("role").await?;
+    /// client.delete_role(&role).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn delete_role(&self, role: impl EntityRef<Role>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::roles::delete::Request { role_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding role from the ID.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn get_role(&self, id: Id<Role>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
+        Box::pin(async move {
+            let role = self
+                .request(endpoint::admin::roles::show::Request { role_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(role)
+        })
+    }
+
+    /// Updates the role.
+    ///
+    /// This method actually returns a builder, namely [`RoleUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`RoleUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// [builder_update]: RoleUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let role = client
+    ///     .create_role("role")
+    ///     .await?;
+    ///
+    /// // Change description and rate limit factor of the role
+    /// client
+    ///     .update_role(role)
+    ///     .description("description")
+    ///     .rate_limit_factor(|mut builder| builder.value(0.3).use_default(false).build())
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn update_role(&self, role: Role) -> RoleUpdateBuilder<&Self> {
+        RoleUpdateBuilder::new(self, role)
+    }
+
+    /// Assigns a user to the role.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn assign_role(
+        &self,
+        role: impl EntityRef<Role>,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(
+                endpoint::admin::roles::assign::Request::builder()
+                    .role_id(role_id)
+                    .user_id(user_id)
+                    .build(),
+            )
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a user from the role.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn unassign_role(
+        &self,
+        role: impl EntityRef<Role>,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::roles::unassign::Request { role_id, user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the roles of the instance.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn roles(&self) -> BoxFuture<Result<Vec<Role>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let roles = self
+                .request(endpoint::admin::roles::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(roles)
+        })
+    }
+
+    /// Updates the default policies of the instance.
+    ///
+    /// This method actually returns a builder, namely [`DefaultPoliciesUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`DefaultPoliciesUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// [builder_update]: DefaultPoliciesUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let policies = client.admin_meta().await?.policies;
+    /// client
+    ///     .update_default_policies(policies)
+    ///     .allow_hiding_ads(true)
+    ///     .drive_capacity(5000)
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn update_default_policies(
+        &self,
+        policies: PoliciesSimple,
+    ) -> DefaultPoliciesUpdateBuilder<&Self> {
+        DefaultPoliciesUpdateBuilder::new(self, policies)
     }
     // }}}
 

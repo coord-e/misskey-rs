@@ -5,6 +5,8 @@ use std::fmt::{self, Display};
 use crate::model::ad::{Ad, Place};
 #[cfg(feature = "12-62-0")]
 use crate::model::clip::Clip;
+#[cfg(feature = "13-0-0")]
+use crate::model::role::PoliciesSimple;
 use crate::model::{emoji::Emoji, id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
@@ -38,9 +40,17 @@ pub struct Meta {
     #[cfg(feature = "12-108-0")]
     pub default_light_theme: Option<String>,
     pub disable_registration: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub disable_local_timeline: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub disable_global_timeline: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub drive_capacity_per_local_user_mb: u64,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub drive_capacity_per_remote_user_mb: u64,
     /// This field is [`bool`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
     #[cfg(feature = "12-58-0")]
@@ -97,6 +107,9 @@ pub struct Meta {
     pub enable_service_worker: bool,
     #[cfg(feature = "12-88-0")]
     pub translator_available: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub policies: PoliciesSimple,
     /// This field is [`Option<String>`][`Option`] on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
     #[cfg(feature = "12-58-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
@@ -296,7 +309,11 @@ pub struct AdminMeta {
 #[serde(rename_all = "camelCase")]
 pub struct FeaturesMeta {
     pub registration: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub local_time_line: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub global_time_line: bool,
     #[cfg(feature = "12-92-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]

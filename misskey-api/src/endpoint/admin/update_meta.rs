@@ -14,8 +14,12 @@ use url::Url;
 pub struct Request {
     #[builder(default, setter(strip_option))]
     pub disable_registration: Option<bool>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[builder(default, setter(strip_option))]
     pub disable_local_timeline: Option<bool>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[builder(default, setter(strip_option))]
     pub disable_global_timeline: Option<bool>,
     #[builder(default, setter(strip_option))]
@@ -81,9 +85,13 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub max_note_text_length: Option<u64>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub local_drive_capacity_mb: Option<u64>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub remote_drive_capacity_mb: Option<u64>,
@@ -334,7 +342,9 @@ mod tests {
             .admin
             .test(Request {
                 disable_registration: Some(false),
+                #[cfg(not(feature = "13-0-0"))]
                 disable_local_timeline: Some(false),
+                #[cfg(not(feature = "13-0-0"))]
                 disable_global_timeline: Some(false),
                 use_star_for_reaction_fallback: Some(false),
                 #[cfg(feature = "12-58-0")]
@@ -361,7 +371,9 @@ mod tests {
                 default_dark_theme: Some(Some("{}".to_string())),
                 #[cfg(not(feature = "12-108-0"))]
                 max_note_text_length: Some(1000),
+                #[cfg(not(feature = "13-0-0"))]
                 local_drive_capacity_mb: Some(1000),
+                #[cfg(not(feature = "13-0-0"))]
                 remote_drive_capacity_mb: Some(1000),
                 cache_remote_files: Some(true),
                 #[cfg(not(feature = "12-108-0"))]

@@ -3,6 +3,8 @@ use std::collections::HashMap;
 
 #[cfg(not(feature = "12-111-0"))]
 use crate::model::drive::DriveFile;
+#[cfg(feature = "13-0-0")]
+use crate::model::role::{PoliciesSimple, Role};
 use crate::model::{id::Id, user::User};
 #[cfg(feature = "12-111-0")]
 use crate::model::{notification::NotificationType, signin::Signin, user::IntegrationValue};
@@ -99,17 +101,39 @@ pub struct Response {
     pub muted_instances: Option<Vec<String>>,
     #[serde(default)]
     pub muting_notification_types: Option<Vec<NotificationType>>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub is_moderator: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(default)]
+    pub is_moderator: Option<bool>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub is_silenced: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(default)]
+    pub is_silenced: Option<bool>,
     pub is_suspended: bool,
     #[cfg(feature = "12-112-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(default)]
     pub last_active_date: Option<DateTime<Utc>>,
     #[cfg(feature = "12-112-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(default)]
     pub moderation_note: Option<String>,
     #[serde(default)]
     pub signins: Option<Vec<Signin>>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(default)]
+    pub policies: Option<PoliciesSimple>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(default)]
+    pub roles: Option<Vec<Role>>,
 }
 
 impl misskey_core::Request for Request {
@@ -130,6 +154,7 @@ mod tests {
         client.admin.test(Request { user_id: user.id }).await;
     }
 
+    #[cfg(not(feature = "13-0-0"))]
     #[tokio::test]
     async fn request_moderator() {
         let client = TestClient::new();
@@ -137,6 +162,32 @@ mod tests {
         client
             .admin
             .test(crate::endpoint::admin::moderators::add::Request { user_id })
+            .await;
+
+        client.user.test(Request { user_id }).await;
+    }
+
+    #[cfg(feature = "13-0-0")]
+    #[tokio::test]
+    async fn request_moderator() {
+        let client = TestClient::new();
+        let user_id = client.user.me().await.id;
+        let role = client
+            .admin
+            .test(
+                crate::endpoint::admin::roles::create::Request::builder()
+                    .is_moderator(true)
+                    .build(),
+            )
+            .await;
+        client
+            .admin
+            .test(
+                crate::endpoint::admin::roles::assign::Request::builder()
+                    .role_id(role.id)
+                    .user_id(user_id)
+                    .build(),
+            )
             .await;
 
         client.user.test(Request { user_id }).await;

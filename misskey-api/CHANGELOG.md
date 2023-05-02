@@ -76,6 +76,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `admin/drive-capacity-override`
    - endpoint `clips/remove-note`
 - Support for Misskey v12.112.3 ~ v12.119.2
+- Support for Misskey v13.0.0
+   - endpoint `admin/roles/*`
 
 ### Changed
 ### Deprecated
@@ -98,6 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.106.0 ~ v12.106.3
 - endpoint `email-address/available`
    - For Misskey v12.108.0 ~ v12.108.1
+- endpoint `admin/invite`, `admin/moderators/*`, `admin/silence_user`, `admin/unsilence_user`
+   - For Misskey v13.0.0 ~
 
 ### Fixed
 

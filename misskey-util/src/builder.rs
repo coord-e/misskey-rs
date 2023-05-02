@@ -71,3 +71,7 @@ pub use admin::ServerLogListBuilder;
 #[cfg(not(feature = "12-108-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
 pub use me::IntoUserFields;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub use admin::{DefaultPoliciesUpdateBuilder, RoleBuilder, RoleUpdateBuilder};

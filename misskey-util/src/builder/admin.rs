@@ -12,6 +12,10 @@ use misskey_api::model::emoji::Emoji;
 use misskey_api::model::log::{Log, LogLevel};
 #[cfg(feature = "12-112-0")]
 use misskey_api::model::meta::{SensitiveMediaDetection, SensitiveMediaDetectionSensitivity};
+#[cfg(feature = "13-0-0")]
+use misskey_api::model::role::{
+    self, Policies, PoliciesSimple, PolicyValue, Role, RoleCondFormulaValue, Target,
+};
 use misskey_api::model::{announcement::Announcement, user::User};
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
@@ -148,8 +152,12 @@ impl<C> MetaUpdateBuilder<C> {
         /// Sets whether the instance has registration enabled.
         pub disable_registration;
         /// Sets whether the instance has local timeline enabled.
+        #[cfg(not(feature = "13-0-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
         pub disable_local_timeline;
         /// Sets whether the instance has global timeline enabled.
+        #[cfg(not(feature = "13-0-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
         pub disable_global_timeline;
         /// Sets whether the instance uses ★ as fallback if the reaction emoji is unknown.
         pub use_star_for_reaction_fallback;
@@ -213,12 +221,16 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     /// Sets the drive capacity per local user in megabytes.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn local_drive_capacity(&mut self, mb: u64) -> &mut Self {
         self.request.local_drive_capacity_mb.replace(mb);
         self
     }
 
     /// Sets the drive capacity per remote user in megabytes.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn remote_drive_capacity(&mut self, mb: u64) -> &mut Self {
         self.request.remote_drive_capacity_mb.replace(mb);
         self
@@ -961,6 +973,876 @@ impl<C> AdUpdateBuilder<C> {
 #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
 impl<C: Client> AdUpdateBuilder<C> {
     /// Updates the ad.
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for building [`PolicyValue`].
+pub struct PolicyValueBuilder<T> {
+    use_default: bool,
+    priority: role::Priority,
+    value: T,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<T> PolicyValueBuilder<T> {
+    /// Creates a builder.
+    pub fn new(value: T) -> Self {
+        PolicyValueBuilder {
+            use_default: false,
+            priority: role::Priority::Low,
+            value,
+        }
+    }
+
+    /// Sets whether to use default policy.
+    pub fn use_default(&mut self, use_default: bool) -> &mut Self {
+        self.use_default = use_default;
+        self
+    }
+
+    /// Sets the priority of the value.
+    pub fn priority(&mut self, priority: role::Priority) -> &mut Self {
+        self.priority = priority;
+        self
+    }
+
+    /// Sets the priority of the value to high.
+    pub fn priority_high(&mut self) -> &mut Self {
+        self.priority(role::Priority::High)
+    }
+
+    /// Sets the priority of the value to middle.
+    pub fn priority_middle(&mut self) -> &mut Self {
+        self.priority(role::Priority::Middle)
+    }
+
+    /// Sets the priority of the value to low.
+    pub fn priority_low(&mut self) -> &mut Self {
+        self.priority(role::Priority::Low)
+    }
+
+    /// Sets the policy value.
+    pub fn value(&mut self, value: T) -> &mut Self {
+        self.value = value;
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<T: Clone> PolicyValueBuilder<T> {
+    pub fn build(&self) -> PolicyValue<T> {
+        PolicyValue {
+            use_default: self.use_default,
+            priority: self.priority.to_owned(),
+            value: self.value.to_owned(),
+        }
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for the [`build_role`][`crate::ClientExt::build_role`] method.
+pub struct RoleBuilder<C> {
+    client: C,
+    request: endpoint::admin::roles::create::Request,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C> RoleBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C) -> Self {
+        let request = endpoint::admin::roles::create::Request::default();
+        RoleBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::roles::create::Request {
+        &self.request
+    }
+
+    /// Sets the name of the role.
+    pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.request.name = name.into();
+        self
+    }
+
+    /// Sets the description of the role.
+    pub fn description(&mut self, description: impl Into<String>) -> &mut Self {
+        self.request.description = description.into();
+        self
+    }
+
+    /// Sets the color of the role.
+    pub fn color(&mut self, color: impl Into<String>) -> &mut Self {
+        self.request.color.replace(color.into());
+        self
+    }
+
+    /// Sets the assignment type of the role.
+    pub fn target(&mut self, target: impl Into<Target>) -> &mut Self {
+        self.request.target = target.into();
+        self
+    }
+
+    /// Sets the role to be assigned manually.
+    ///
+    /// This is equivalent to `.target(Target::Manual)`.
+    pub fn manual(&mut self) -> &mut Self {
+        self.target(Target::Manual)
+    }
+
+    /// Sets the role to be assigned automatically based on the condition.
+    ///
+    /// This is equivalent to `.target(Target::Conditional)`.
+    pub fn conditional(&mut self) -> &mut Self {
+        self.target(Target::Conditional)
+    }
+
+    /// Sets the condition of the role.
+    pub fn condition(&mut self, condition: impl Into<RoleCondFormulaValue>) -> &mut Self {
+        self.conditional();
+        self.request.cond_formula.replace(condition.into());
+        self
+    }
+
+    /// Sets whether the role is public or not.
+    pub fn public(&mut self, public: bool) -> &mut Self {
+        self.request.is_public = public;
+        self
+    }
+
+    /// Sets whether to give the moderator permission to the members of the role.
+    pub fn moderator(&mut self, moderator: bool) -> &mut Self {
+        self.request.is_moderator = moderator;
+        self
+    }
+
+    /// Sets whether to give the administrator permission to the members of the role.
+    pub fn administrator(&mut self, administrator: bool) -> &mut Self {
+        self.request.is_administrator = administrator;
+        self
+    }
+
+    /// Sets whether to allow moderators to edit members of the role.
+    pub fn allow_moderator_to_edit_members(
+        &mut self,
+        can_edit_members_by_moderator: bool,
+    ) -> &mut Self {
+        self.request.can_edit_members_by_moderator = can_edit_members_by_moderator;
+        self
+    }
+
+    /// Sets the policies of the role.
+    pub fn policies(&mut self, policies: impl Into<Policies>) -> &mut Self {
+        self.request.policies = policies.into();
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the global timeline.
+    pub fn allow_global_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .gtl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the local timeline.
+    pub fn allow_local_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .ltl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to post public note.
+    pub fn allow_public_note(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_public_note
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to create invitation code of the instance.
+    pub fn allow_invitation(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_invite
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to manage custom emojis.
+    pub fn allow_custom_emojis_management(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_manage_custom_emojis
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to hide ads.
+    pub fn allow_hiding_ads(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_hide_ads
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets the drive capacity of the members of the role in megabytes.
+    pub fn drive_capacity(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .drive_capacity_mb
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of pinned notes for the members of the role.
+    pub fn pin_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .pin_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of antennas for the members of the role.
+    pub fn antenna_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .antenna_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of characters in word mutes for the members of the role.
+    pub fn word_mute_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .word_mute_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of webhooks for the members of the role.
+    pub fn webhook_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .webhook_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of clips for the members of the role.
+    pub fn clip_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .clip_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of notes per clip for the members of the role.
+    pub fn note_each_clips_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .note_each_clips_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of user lists for the members of the role.
+    pub fn user_list_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_list_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of users per user list for the members of the role.
+    pub fn user_each_user_lists_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_each_user_lists_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the rate limit factor of the members of the role.
+    pub fn rate_limit_factor(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<f64>) -> PolicyValue<f64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .rate_limit_factor
+            .replace(build_policy_value(PolicyValueBuilder::new(0.0)));
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C: Client> RoleBuilder<C> {
+    /// Creates the role.
+    pub async fn create(&self) -> Result<Role, Error<C::Error>> {
+        let role = self
+            .client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(role)
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for the [`update_role`][`crate::ClientExt::update_role`] method.
+pub struct RoleUpdateBuilder<C> {
+    client: C,
+    request: endpoint::admin::roles::update::Request,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C> RoleUpdateBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C, role: Role) -> Self {
+        let Role {
+            id,
+            name,
+            description,
+            color,
+            target,
+            cond_formula,
+            is_public,
+            is_moderator,
+            is_administrator,
+            can_edit_members_by_moderator,
+            policies,
+            ..
+        } = role;
+        let request = endpoint::admin::roles::update::Request {
+            role_id: id,
+            name,
+            description,
+            color,
+            target,
+            cond_formula,
+            is_public,
+            is_moderator,
+            is_administrator,
+            can_edit_members_by_moderator,
+            policies,
+        };
+        RoleUpdateBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::roles::update::Request {
+        &self.request
+    }
+
+    /// Sets the name of the role.
+    pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.request.name = name.into();
+        self
+    }
+
+    /// Sets the description of the role.
+    pub fn description(&mut self, description: impl Into<String>) -> &mut Self {
+        self.request.description = description.into();
+        self
+    }
+
+    /// Sets the color of the role.
+    pub fn color(&mut self, color: impl Into<String>) -> &mut Self {
+        self.request.color.replace(color.into());
+        self
+    }
+
+    /// Sets the assignment type of the role.
+    pub fn target(&mut self, target: impl Into<Target>) -> &mut Self {
+        self.request.target = target.into();
+        self
+    }
+
+    /// Sets the role to be assigned manually.
+    ///
+    /// This is equivalent to `.target(Target::Manual)`.
+    pub fn manual(&mut self) -> &mut Self {
+        self.target(Target::Manual)
+    }
+
+    /// Sets the role to be assigned automatically based on conditions.
+    ///
+    /// This is equivalent to `.target(Target::Conditional)`.
+    pub fn conditional(&mut self) -> &mut Self {
+        self.target(Target::Conditional)
+    }
+
+    /// Sets the conditions of the role.
+    pub fn cond_formula(&mut self, cond_formula: impl Into<RoleCondFormulaValue>) -> &mut Self {
+        self.request.cond_formula.replace(cond_formula.into());
+        self
+    }
+
+    /// Sets whether the role is public or not.
+    pub fn public(&mut self, public: bool) -> &mut Self {
+        self.request.is_public = public;
+        self
+    }
+
+    /// Sets whether to give the moderator permission to the members of the role.
+    pub fn moderator(&mut self, moderator: bool) -> &mut Self {
+        self.request.is_moderator = moderator;
+        self
+    }
+
+    /// Sets whether to give the administrator permission to the members of the role.
+    pub fn administrator(&mut self, administrator: bool) -> &mut Self {
+        self.request.is_administrator = administrator;
+        self
+    }
+
+    /// Sets whether to allow moderators to edit members of the role.
+    pub fn allow_moderator_to_edit_members(
+        &mut self,
+        can_edit_members_by_moderator: bool,
+    ) -> &mut Self {
+        self.request.can_edit_members_by_moderator = can_edit_members_by_moderator;
+        self
+    }
+
+    /// Sets the policies of the role.
+    pub fn policies(&mut self, policies: impl Into<Policies>) -> &mut Self {
+        self.request.policies = policies.into();
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the global timeline.
+    pub fn allow_global_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .gtl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the local timeline.
+    pub fn allow_local_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .ltl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to post public note.
+    pub fn allow_public_note(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_public_note
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to create invitation code of the instance.
+    pub fn allow_invitation(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_invite
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to manage custom emojis.
+    pub fn allow_custom_emojis_management(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_manage_custom_emojis
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to hide ads.
+    pub fn allow_hiding_ads(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_hide_ads
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets the drive capacity of the members of the role in megabytes.
+    pub fn drive_capacity(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .drive_capacity_mb
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of pinned notes for the members of the role.
+    pub fn pin_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .pin_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of antennas for the members of the role.
+    pub fn antenna_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .antenna_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of characters in word mutes for the members of the role.
+    pub fn word_mute_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .word_mute_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of webhooks for the members of the role.
+    pub fn webhook_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .webhook_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of clips for the members of the role.
+    pub fn clip_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .clip_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of notes per clip for the members of the role.
+    pub fn note_each_clips_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .note_each_clips_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of user lists for the members of the role.
+    pub fn user_list_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_list_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of users per user list for the members of the role.
+    pub fn user_each_user_lists_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_each_user_lists_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the rate limit factor of the members of the role.
+    pub fn rate_limit_factor(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<f64>) -> PolicyValue<f64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .rate_limit_factor
+            .replace(build_policy_value(PolicyValueBuilder::new(0.0)));
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C: Client> RoleUpdateBuilder<C> {
+    /// Updates the role.
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for the [`update_role`][`crate::ClientExt::update_role`] method.
+pub struct DefaultPoliciesUpdateBuilder<C> {
+    client: C,
+    request: endpoint::admin::roles::update_default_policies::Request,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C> DefaultPoliciesUpdateBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C, policies: PoliciesSimple) -> Self {
+        let request = endpoint::admin::roles::update_default_policies::Request { policies };
+        DefaultPoliciesUpdateBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::roles::update_default_policies::Request {
+        &self.request
+    }
+
+    /// Sets whether to allow users to view the global timeline.
+    pub fn allow_global_timeline(&mut self, allow_global_timeline: bool) -> &mut Self {
+        self.request
+            .policies
+            .gtl_available
+            .replace(allow_global_timeline);
+        self
+    }
+
+    /// Sets whether to allow users to view the local timeline.
+    pub fn allow_local_timeline(&mut self, allow_local_timeline: bool) -> &mut Self {
+        self.request
+            .policies
+            .ltl_available
+            .replace(allow_local_timeline);
+        self
+    }
+
+    /// Sets whether to allow users to post public note.
+    pub fn allow_public_note(&mut self, allow_public_note: bool) -> &mut Self {
+        self.request
+            .policies
+            .can_public_note
+            .replace(allow_public_note);
+        self
+    }
+
+    /// Sets whether to allow users to create invitation code of the instance.
+    pub fn allow_invitation(&mut self, allow_invitation: bool) -> &mut Self {
+        self.request.policies.can_invite.replace(allow_invitation);
+        self
+    }
+
+    /// Sets whether to allow users to manage custom emojis.
+    pub fn allow_custom_emojis_management(
+        &mut self,
+        allow_custom_emojis_management: bool,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_manage_custom_emojis
+            .replace(allow_custom_emojis_management);
+        self
+    }
+
+    /// Sets whether to allow users to hide ads.
+    pub fn allow_hiding_ads(&mut self, allow_hiding_ads: bool) -> &mut Self {
+        self.request.policies.can_hide_ads.replace(allow_hiding_ads);
+        self
+    }
+
+    /// Sets the drive capacity per user in megabytes.
+    pub fn drive_capacity(&mut self, mb: u64) -> &mut Self {
+        self.request.policies.drive_capacity_mb.replace(mb);
+        self
+    }
+
+    /// Sets the maximum number of pinned notes for the users.
+    pub fn pin_limit(&mut self, pin_limit: u64) -> &mut Self {
+        self.request.policies.pin_limit.replace(pin_limit);
+        self
+    }
+
+    /// Sets the maximum number of antennas for the users.
+    pub fn antenna_limit(&mut self, antenna_limit: u64) -> &mut Self {
+        self.request.policies.antenna_limit.replace(antenna_limit);
+        self
+    }
+
+    /// Sets the maximum number of characters in word mutes for the users.
+    pub fn word_mute_limit(&mut self, word_mute_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .word_mute_limit
+            .replace(word_mute_limit);
+        self
+    }
+
+    /// Sets the maximum number of webhooks for the users.
+    pub fn webhook_limit(&mut self, webhook_limit: u64) -> &mut Self {
+        self.request.policies.webhook_limit.replace(webhook_limit);
+        self
+    }
+
+    /// Sets the maximum number of clips for the users.
+    pub fn clip_limit(&mut self, clip_limit: u64) -> &mut Self {
+        self.request.policies.clip_limit.replace(clip_limit);
+        self
+    }
+
+    /// Sets the maximum number of notes per clip for the users.
+    pub fn note_each_clips_limit(&mut self, note_each_clips_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .note_each_clips_limit
+            .replace(note_each_clips_limit);
+        self
+    }
+
+    /// Sets the maximum number of user lists for the users.
+    pub fn user_list_limit(&mut self, user_list_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .user_list_limit
+            .replace(user_list_limit);
+        self
+    }
+
+    /// Sets the maximum number of users per user list for the users.
+    pub fn user_each_user_lists_limit(&mut self, user_each_user_lists_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .user_each_user_lists_limit
+            .replace(user_each_user_lists_limit);
+        self
+    }
+
+    /// Sets the rate limit factor of users.
+    pub fn rate_limit_factor(&mut self, rate_limit_factor: f64) -> &mut Self {
+        self.request
+            .policies
+            .rate_limit_factor
+            .replace(rate_limit_factor);
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C: Client> DefaultPoliciesUpdateBuilder<C> {
+    /// Updates the default policies.
     pub async fn update(&self) -> Result<(), Error<C::Error>> {
         self.client
             .request(&self.request)

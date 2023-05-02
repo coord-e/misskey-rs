@@ -78,6 +78,8 @@ impl<C> UserListBuilder<C> {
     }
 
     /// Limits the listed users to moderators.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn moderator(&mut self) -> &mut Self {
         self.request
             .state
@@ -94,6 +96,8 @@ impl<C> UserListBuilder<C> {
     }
 
     /// Limits the listed users to admins.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn admin(&mut self) -> &mut Self {
         self.request
             .state
@@ -102,6 +106,8 @@ impl<C> UserListBuilder<C> {
     }
 
     /// Limits the listed users to admins or moderators.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn admin_or_moderator(&mut self) -> &mut Self {
         self.request
             .state

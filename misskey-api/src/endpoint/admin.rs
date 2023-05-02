@@ -3,16 +3,12 @@ pub mod accounts;
 pub mod announcements;
 pub mod emoji;
 pub mod get_table_stats;
-pub mod invite;
-pub mod moderators;
 pub mod reset_password;
 pub mod server_info;
 pub mod show_moderation_logs;
 pub mod show_user;
 pub mod show_users;
-pub mod silence_user;
 pub mod suspend_user;
-pub mod unsilence_user;
 pub mod unsuspend_user;
 pub mod update_meta;
 pub mod vacuum;
@@ -65,6 +61,26 @@ pub mod get_user_ips;
 #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
 pub mod update_user_note;
 
-#[cfg(feature = "12-112-0")]
-#[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+#[cfg(all(feature = "12-112-0", not(feature = "13-0-0")))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "12-112-0", not(feature = "13-0-0")))))]
 pub mod drive_capacity_override;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod roles;
+
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+pub mod invite;
+
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+pub mod moderators;
+
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+pub mod silence_user;
+
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+pub mod unsilence_user;

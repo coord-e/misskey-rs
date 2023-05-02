@@ -54,8 +54,14 @@ pub mod reactions;
 pub enum UserState {
     All,
     Alive,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     Admin,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     Moderator,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     AdminOrModerator,
 }
 
@@ -74,8 +80,11 @@ impl std::str::FromStr for UserState {
         match s {
             "all" | "All" => Ok(UserState::All),
             "alive" | "Alive" => Ok(UserState::Alive),
+            #[cfg(not(feature = "13-0-0"))]
             "admin" | "Admin" => Ok(UserState::Admin),
+            #[cfg(not(feature = "13-0-0"))]
             "moderator" | "Moderator" => Ok(UserState::Moderator),
+            #[cfg(not(feature = "13-0-0"))]
             "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
             _ => Err(ParseUserStateError { _priv: () }),
         }
@@ -221,6 +230,7 @@ mod tests {
                 hostname: None,
             })
             .await;
+        #[cfg(not(feature = "13-0-0"))]
         client
             .test(Request {
                 limit: None,
@@ -243,6 +253,7 @@ mod tests {
                 hostname: None,
             })
             .await;
+        #[cfg(not(feature = "13-0-0"))]
         client
             .test(Request {
                 limit: None,

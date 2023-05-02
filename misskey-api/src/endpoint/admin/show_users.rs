@@ -16,6 +16,8 @@ pub enum UserState {
     Admin,
     Moderator,
     AdminOrModerator,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     Silenced,
     Suspended,
 }
@@ -37,6 +39,7 @@ impl std::str::FromStr for UserState {
             "admin" | "Admin" => Ok(UserState::Admin),
             "moderator" | "Moderator" => Ok(UserState::Moderator),
             "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
+            #[cfg(not(feature = "13-0-0"))]
             "silenced" | "Silenced" => Ok(UserState::Silenced),
             "suspended" | "Suspended" => Ok(UserState::Suspended),
             _ => Err(ParseUserStateError { _priv: () }),
@@ -309,6 +312,7 @@ mod tests {
         //         origin: None,
         //     })
         //     .await;
+        #[cfg(not(feature = "13-0-0"))]
         client
             .admin
             .test(Request {

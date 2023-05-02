@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.88.0 ~
 - `ClientExt::server_logs`
    - For Misskey v12.93.0 ~
+- `ClientExt::add_moderator`, `ClientExt::remove_moderator`, `ClientExt::silence`, `ClientExt::unsilence`
+   - For Misskey v13.0.0 ~
 
 ### Fixed
 ### Security
