@@ -4,11 +4,14 @@ until nc -z web 3000; do
   sleep 1
 done
 
-ADMIN_TOKEN=$(
+ADMIN_DATA=$(
   curl -fsS -XPOST -H 'Content-Type: application/json' \
     --data '{"username":"admin","password":"admin"}'   \
-    http://web:3000/api/admin/accounts/create | jq -r .token
+    http://web:3000/api/admin/accounts/create
 )
+
+ADMIN_TOKEN=$(echo "$ADMIN_DATA" | jq -r .token)
+ADMIN_ID=$(echo "$ADMIN_DATA" | jq -r .id)
 
 USER_DATA=$(
   curl -fsS -XPOST -H 'Content-Type: application/json'     \
@@ -63,6 +66,9 @@ curl -fsS -XPOST -H 'Content-Type: application/json'            \
       }' \
     http://web:3000/api/admin/roles/create | jq -r .id \
   ) &&
+  curl -fsS -XPOST -H 'Content-Type: application/json' \
+    --data '{"i":"'"${ADMIN_TOKEN}"'", "roleId": "'"${ROLE_ID}"'", "userId":"'"${ADMIN_ID}"'"}' \
+    http://web:3000/api/admin/roles/assign &&
   curl -fsS -XPOST -H 'Content-Type: application/json' \
     --data '{"i":"'"${ADMIN_TOKEN}"'", "roleId": "'"${ROLE_ID}"'", "userId":"'"${USER_ID}"'"}' \
     http://web:3000/api/admin/roles/assign
