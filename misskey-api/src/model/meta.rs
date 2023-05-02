@@ -72,6 +72,12 @@ pub struct Meta {
     pub bannar_url: Option<String>,
     pub error_image_url: Option<String>,
     pub icon_url: Option<String>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    pub background_image_url: Option<String>,
+    #[cfg(feature = "12-60-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+    pub logo_image_url: Option<String>,
     pub max_note_text_length: u64,
     #[serde(default)]
     pub emojis: Vec<Emoji>,
