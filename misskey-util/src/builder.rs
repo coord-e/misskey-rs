@@ -27,6 +27,9 @@ mod gallery;
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 mod user;
 
+#[cfg(feature = "13-0-0")]
+mod flash;
+
 pub use admin::{AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder};
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use clip::{ClipBuilder, ClipUpdateBuilder};
@@ -75,3 +78,7 @@ pub use me::IntoUserFields;
 #[cfg(feature = "13-0-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
 pub use admin::{DefaultPoliciesUpdateBuilder, RoleBuilder, RoleUpdateBuilder};
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub use flash::{FlashBuilder, FlashUpdateBuilder};

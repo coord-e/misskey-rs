@@ -78,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.112.3 ~ v12.119.2
 - Support for Misskey v13.0.0
    - endpoint `admin/roles/*`
+   - endpoint `flash/*`
 
 ### Changed
 ### Deprecated

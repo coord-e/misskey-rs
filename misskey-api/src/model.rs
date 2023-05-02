@@ -26,6 +26,7 @@ pub mod chart;
 pub mod clip;
 pub mod drive;
 pub mod emoji;
+pub mod flash;
 pub mod following;
 pub mod gallery;
 pub mod id;

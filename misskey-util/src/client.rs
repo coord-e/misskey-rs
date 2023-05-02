@@ -27,7 +27,9 @@ use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
 #[cfg(feature = "12-57-0")]
 use crate::builder::{ClipBuilder, ClipUpdateBuilder};
 #[cfg(feature = "13-0-0")]
-use crate::builder::{DefaultPoliciesUpdateBuilder, RoleBuilder, RoleUpdateBuilder};
+use crate::builder::{
+    DefaultPoliciesUpdateBuilder, FlashBuilder, FlashUpdateBuilder, RoleBuilder, RoleUpdateBuilder,
+};
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
 use crate::{TimelineCursor, TimelineRange};
@@ -47,8 +49,6 @@ use misskey_api::model::gallery::GalleryPost;
 use misskey_api::model::meta::AdminMeta;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
-#[cfg(feature = "13-0-0")]
-use misskey_api::model::role::{PoliciesSimple, Role};
 #[cfg(feature = "12-93-0")]
 use misskey_api::model::user::UserOrigin;
 use misskey_api::model::{
@@ -71,6 +71,11 @@ use misskey_api::model::{
     user::{User, UserRelation},
     user_group::{UserGroup, UserGroupInvitation},
     user_list::UserList,
+};
+#[cfg(feature = "13-0-0")]
+use misskey_api::model::{
+    flash::Flash,
+    role::{PoliciesSimple, Role},
 };
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::{Client, UploadFileClient};
@@ -3779,6 +3784,227 @@ pub trait ClientExt: Client + Sync {
             self.user_reactions_since(user_id, cursor),
             self.user_reactions(user_id, TimelineRange::until(cursor)),
         )
+    }
+    // }}}
+
+    // {{{ Play
+    /// Creates a Play with the given title and files.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// // Create a Play that says "Hello World!"
+    /// let script = r#"/// @ 0.12.2
+    /// Ui:render([
+    ///   Ui:C:text({ text: "Hello, World!" })
+    /// ])"#;
+    /// let play = client.create_play("My Play", script).await?;
+    ///
+    /// assert_eq!(play.title, "My Play");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn create_play(
+        &self,
+        title: impl Into<String>,
+        script: impl Into<String>,
+    ) -> BoxFuture<Result<Flash, Error<Self::Error>>> {
+        let title = title.into();
+        let script = script.into();
+        Box::pin(async move {
+            let flash = self
+                .request(endpoint::flash::create::Request {
+                    title,
+                    summary: String::new(),
+                    script,
+                    permissions: Vec::new(),
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(flash)
+        })
+    }
+
+    /// Returns a builder for creating a Play.
+    ///
+    /// The returned builder provides methods to customize details of the Play,
+    /// and you can chain them to create a Play incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a post.
+    /// See [`FlashBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: FlashBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let script = r#"/// @ 0.12.2
+    /// Ui:render([
+    ///   Ui:C:text({ text: "Hello, World!" })
+    /// ])"#;
+    /// let play = client
+    ///     .build_play()
+    ///     .title("title")
+    ///     .summary("summary")
+    ///     .script(script)
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(play.title, "title");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn build_play(&self) -> FlashBuilder<&Self> {
+        FlashBuilder::new(self)
+    }
+
+    /// Deletes the specified Play.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let play = client.create_play("My Play", "").await?;
+    /// client.delete_play(&play).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn delete_play(
+        &self,
+        play: impl EntityRef<Flash>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let flash_id = play.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::flash::delete::Request { flash_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding Play from the ID.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn get_play(&self, id: Id<Flash>) -> BoxFuture<Result<Flash, Error<Self::Error>>> {
+        Box::pin(async move {
+            let flash = self
+                .request(endpoint::flash::show::Request { flash_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(flash)
+        })
+    }
+
+    /// Updates the Play.
+    ///
+    /// This method actually returns a builder, namely [`FlashUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`FlashUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: FlashUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let play = client.create_play("My Play", "").await?;
+    /// client
+    ///     .update_play(play)
+    ///     .summary("summary")
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn update_play(&self, play: Flash) -> FlashUpdateBuilder<&Self> {
+        FlashUpdateBuilder::new(self, play)
+    }
+
+    /// Gives a like to the specified Play.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn like_play(&self, play: impl EntityRef<Flash>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let flash_id = play.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::flash::like::Request { flash_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a like from the specified Play.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn unlike_play(
+        &self,
+        play: impl EntityRef<Flash>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let flash_id = play.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::flash::unlike::Request { flash_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the Plays created by the user logged in with this client.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn plays(&self) -> PagerStream<BoxPager<Self, Flash>> {
+        let pager = BackwardPager::new(self, endpoint::flash::my::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the Plays liked by the user logged in with this client.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn liked_plays(&self) -> PagerStream<BoxPager<Self, Flash>> {
+        let pager = BackwardPager::new(self, endpoint::flash::my_likes::Request::default())
+            .map_ok(|v| v.into_iter().map(|l| l.flash).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured Plays.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn featured_plays(&self) -> BoxFuture<Result<Vec<Flash>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let flashes = self
+                .request(endpoint::flash::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(flashes)
+        })
     }
     // }}}
 

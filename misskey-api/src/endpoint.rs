@@ -90,3 +90,7 @@ pub mod email_address;
 #[cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))]
 #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))))]
 pub mod stats;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod flash;

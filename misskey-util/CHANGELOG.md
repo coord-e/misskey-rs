@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Page APIs
 - Gallery APIs
 - Reactions APIs
+- Play (Flash) APIs
 
 ### Changed
 ### Deprecated
