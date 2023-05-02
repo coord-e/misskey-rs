@@ -5,9 +5,11 @@ use std::fmt::{self, Display};
 use crate::model::ad::{Ad, Place};
 #[cfg(feature = "12-62-0")]
 use crate::model::clip::Clip;
+#[cfg(not(feature = "13-0-0"))]
+use crate::model::emoji::Emoji;
 #[cfg(feature = "13-0-0")]
 use crate::model::role::PoliciesSimple;
-use crate::model::{emoji::Emoji, id::Id, user::User};
+use crate::model::{id::Id, user::User};
 
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "12-112-0")]
@@ -35,10 +37,6 @@ pub struct Meta {
     pub feedback_url: Option<String>,
     #[cfg(not(feature = "12-108-0"))]
     pub secure: bool,
-    #[cfg(feature = "12-108-0")]
-    pub default_dark_theme: Option<String>,
-    #[cfg(feature = "12-108-0")]
-    pub default_light_theme: Option<String>,
     pub disable_registration: bool,
     #[cfg(not(feature = "13-0-0"))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
@@ -73,6 +71,12 @@ pub struct Meta {
     pub hcaptcha_site_key: Option<String>,
     pub enable_recaptcha: bool,
     pub recaptcha_site_key: Option<String>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub enable_turnstile: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub turnstile_site_key: Option<String>,
     #[serde(rename = "swPublickey")]
     pub sw_public_key: Option<String>,
     #[cfg(feature = "12-105-0")]
@@ -89,8 +93,16 @@ pub struct Meta {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
     pub logo_image_url: Option<String>,
     pub max_note_text_length: u64,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[serde(default)]
     pub emojis: Vec<Emoji>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    pub default_dark_theme: Option<String>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    pub default_light_theme: Option<String>,
     #[cfg(feature = "12-81-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
     #[serde(default)]
@@ -218,15 +230,29 @@ pub struct AdminMeta {
     pub repository_url: Url,
     pub feedback_url: Option<String>,
     pub disable_registration: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub disable_local_timeline: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub disable_global_timeline: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub drive_capacity_per_local_user_mb: u64,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub drive_capacity_per_remote_user_mb: u64,
     pub email_required_for_signup: bool,
     pub enable_hcaptcha: bool,
     pub hcaptcha_site_key: Option<String>,
     pub enable_recaptcha: bool,
     pub recaptcha_site_key: Option<String>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub enable_turnstile: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub turnstile_site_key: Option<String>,
     #[serde(rename = "swPublickey")]
     pub sw_public_key: Option<String>,
     pub theme_color: Option<String>,
@@ -254,6 +280,9 @@ pub struct AdminMeta {
     pub blocked_hosts: Vec<String>,
     pub hcaptcha_secret_key: Option<String>,
     pub recaptcha_secret_key: Option<String>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub turnstile_secret_key: Option<String>,
     #[cfg(feature = "12-112-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
     pub sensitive_media_detection: Option<SensitiveMediaDetection>,
@@ -303,6 +332,9 @@ pub struct AdminMeta {
     #[cfg(feature = "12-112-3")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
     pub enable_active_email_validation: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub policies: PoliciesSimple,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -323,6 +355,9 @@ pub struct FeaturesMeta {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
     pub hcaptcha: bool,
     pub recaptcha: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub turnstile: bool,
     pub object_storage: bool,
     pub twitter: bool,
     pub github: bool,

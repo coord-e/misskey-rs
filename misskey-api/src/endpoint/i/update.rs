@@ -108,13 +108,13 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub ff_visibility: Option<FfVisibility>,
-    #[cfg(not(feature = "12-108-0"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
+    #[cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_page_id: Option<Option<Id<Page>>>,
-    #[cfg(feature = "12-108-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[cfg(all(feature = "12-108-0", not(feature = "13-0-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-108-0", not(feature = "13-0-0")))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_page_id: Option<Vec<Id<Page>>>,

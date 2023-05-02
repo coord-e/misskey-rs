@@ -1,21 +1,19 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
+use crate::model::emoji::EmojiSimple;
+
 #[derive(Serialize, Default, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct Request {}
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Stat {
-    pub count: i64,
-    pub size: u64,
+pub struct Response {
+    pub emojis: Vec<EmojiSimple>,
 }
 
 impl misskey_core::Request for Request {
-    type Response = HashMap<String, Stat>;
-    const ENDPOINT: &'static str = "admin/get-table-stats";
+    type Response = Response;
+    const ENDPOINT: &'static str = "emojis";
 }
 
 #[cfg(test)]
@@ -26,6 +24,6 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let client = TestClient::new();
-        client.admin.test(Request::default()).await;
+        client.test(Request::default()).await;
     }
 }

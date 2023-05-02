@@ -24,7 +24,6 @@ pub mod state;
 pub mod timeline;
 pub mod unrenote;
 pub mod user_list_timeline;
-pub mod watching;
 
 #[cfg(feature = "12-58-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
@@ -33,6 +32,10 @@ pub mod clips;
 #[cfg(feature = "12-95-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
 pub mod thread_muting;
+
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+pub mod watching;
 
 #[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]

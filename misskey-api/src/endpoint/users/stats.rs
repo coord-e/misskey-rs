@@ -24,7 +24,13 @@ pub struct UserStats {
     pub page_likes_count: u64,
     pub page_liked_count: u64,
     pub drive_files_count: u64,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub drive_usage: u64,
+    // https://github.com/misskey-dev/misskey/blob/13.0.0/packages/backend/src/core/entities/DriveFileEntityService.ts#L108
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub drive_usage: Option<u64>,
     #[cfg(not(feature = "12-102-0"))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "12-102-0"))))]
     pub reversi_count: u64,

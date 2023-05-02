@@ -18,6 +18,8 @@ pub struct UserField {
     pub value: String,
 }
 
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
 // packed `Emoji` for `User`
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -173,6 +175,8 @@ pub struct User {
     #[cfg(not(feature = "12-42-0"))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "12-42-0"))))]
     pub banner_color: Option<String>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub emojis: Option<Vec<UserEmoji>>,
     pub host: Option<String>,
     #[serde(default)]
@@ -310,6 +314,45 @@ impl std::str::FromStr for UserSortKey {
             "createdAt" | "CreatedAt" => Ok(UserSortKey::CreatedAt),
             "updatedAt" | "UpdatedAt" => Ok(UserSortKey::UpdatedAt),
             _ => Err(ParseUserSortKeyError { _priv: () }),
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+pub enum AdminUserSortKey {
+    Follower,
+    CreatedAt,
+    UpdatedAt,
+    LastActiveDate,
+}
+
+impl Display for AdminUserSortKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            AdminUserSortKey::Follower => f.write_str("follower"),
+            AdminUserSortKey::CreatedAt => f.write_str("createdAt"),
+            AdminUserSortKey::UpdatedAt => f.write_str("updatedAt"),
+            AdminUserSortKey::LastActiveDate => f.write_str("lastActiveDate"),
+        }
+    }
+}
+
+#[derive(Debug, Error, Clone)]
+#[error("invalid sort key")]
+pub struct ParseAdminUserSortKeyError {
+    _priv: (),
+}
+
+impl std::str::FromStr for AdminUserSortKey {
+    type Err = ParseAdminUserSortKeyError;
+
+    fn from_str(s: &str) -> Result<AdminUserSortKey, Self::Err> {
+        match s {
+            "follower" | "Follower" => Ok(AdminUserSortKey::Follower),
+            "createdAt" | "CreatedAt" => Ok(AdminUserSortKey::CreatedAt),
+            "updatedAt" | "UpdatedAt" => Ok(AdminUserSortKey::UpdatedAt),
+            "lastActiveDate" | "LastActiveDate" => Ok(AdminUserSortKey::LastActiveDate),
+            _ => Err(ParseAdminUserSortKeyError { _priv: () }),
         }
     }
 }

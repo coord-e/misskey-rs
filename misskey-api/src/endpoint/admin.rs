@@ -11,7 +11,6 @@ pub mod show_users;
 pub mod suspend_user;
 pub mod unsuspend_user;
 pub mod update_meta;
-pub mod vacuum;
 
 #[cfg(feature = "12-13-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-13-0")))]
@@ -84,3 +83,7 @@ pub mod silence_user;
 #[cfg(not(feature = "13-0-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
 pub mod unsilence_user;
+
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+pub mod vacuum;

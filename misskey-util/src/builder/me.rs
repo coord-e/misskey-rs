@@ -103,14 +103,14 @@ impl<C> MeUpdateBuilder<C> {
         pub avatar: impl EntityRef<DriveFile> { avatar_id = avatar.entity_ref() };
         pub banner: impl EntityRef<DriveFile> { banner_id = banner.entity_ref() };
         #[doc_name = "pinned page"]
-        #[cfg(not(feature = "12-108-0"))]
-        #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
+        #[cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))]
+        #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))))]
         pub pinned_page: impl EntityRef<Page> { pinned_page_id = pinned_page.entity_ref() };
     }
 
     /// Sets the pinned page.
-    #[cfg(feature = "12-108-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[cfg(all(feature = "12-108-0", not(feature = "13-0-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-108-0", not(feature = "13-0-0")))))]
     pub fn pinned_page(
         &mut self,
         pinned_page: impl IntoIterator<Item = impl EntityRef<Page>>,

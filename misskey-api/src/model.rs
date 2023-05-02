@@ -41,6 +41,7 @@ pub mod notification;
 pub mod page;
 pub mod query;
 pub mod registry;
+pub mod retention;
 pub mod role;
 pub mod signin;
 pub mod sort;

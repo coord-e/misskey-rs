@@ -1,21 +1,14 @@
-use std::collections::HashMap;
+use serde::Serialize;
 
-use serde::{Deserialize, Serialize};
+use crate::model::retention::Retention;
 
 #[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {}
 
-#[derive(Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Stat {
-    pub count: i64,
-    pub size: u64,
-}
-
 impl misskey_core::Request for Request {
-    type Response = HashMap<String, Stat>;
-    const ENDPOINT: &'static str = "admin/get-table-stats";
+    type Response = Vec<Retention>;
+    const ENDPOINT: &'static str = "retention";
 }
 
 #[cfg(test)]

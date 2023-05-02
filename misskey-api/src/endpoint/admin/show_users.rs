@@ -1,6 +1,10 @@
+#[cfg(feature = "13-0-0")]
+use crate::model::user::AdminUserSortKey;
+#[cfg(not(feature = "13-0-0"))]
+use crate::model::user::UserSortKey;
 use crate::model::{
     sort::SortOrder,
-    user::{User, UserOrigin, UserSortKey},
+    user::{User, UserOrigin},
 };
 
 use serde::Serialize;
@@ -58,9 +62,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub sort: Option<SortOrder<UserSortKey>>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub sort: Option<SortOrder<AdminUserSortKey>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub state: Option<UserState>,
@@ -153,7 +164,11 @@ mod tests {
 
     #[tokio::test]
     async fn request_with_sort() {
-        use crate::model::{sort::SortOrder, user::UserSortKey};
+        use crate::model::sort::SortOrder;
+        #[cfg(feature = "13-0-0")]
+        use crate::model::user::AdminUserSortKey;
+        #[cfg(not(feature = "13-0-0"))]
+        use crate::model::user::UserSortKey;
 
         let client = TestClient::new();
 
@@ -162,7 +177,10 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
+                #[cfg(not(feature = "13-0-0"))]
                 sort: Some(SortOrder::Ascending(UserSortKey::Follower)),
+                #[cfg(feature = "13-0-0")]
+                sort: Some(SortOrder::Ascending(AdminUserSortKey::Follower)),
                 state: None,
                 origin: None,
                 #[cfg(not(feature = "12-108-0"))]
@@ -180,7 +198,10 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
+                #[cfg(not(feature = "13-0-0"))]
                 sort: Some(SortOrder::Ascending(UserSortKey::CreatedAt)),
+                #[cfg(feature = "13-0-0")]
+                sort: Some(SortOrder::Ascending(AdminUserSortKey::CreatedAt)),
                 state: None,
                 origin: None,
                 #[cfg(not(feature = "12-108-0"))]
@@ -198,7 +219,10 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
+                #[cfg(not(feature = "13-0-0"))]
                 sort: Some(SortOrder::Descending(UserSortKey::UpdatedAt)),
+                #[cfg(feature = "13-0-0")]
+                sort: Some(SortOrder::Descending(AdminUserSortKey::UpdatedAt)),
                 state: None,
                 origin: None,
                 #[cfg(not(feature = "12-108-0"))]
@@ -208,6 +232,19 @@ mod tests {
                 #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
                 #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
+            })
+            .await;
+        #[cfg(feature = "13-0-0")]
+        client
+            .admin
+            .test(Request {
+                limit: None,
+                offset: None,
+                sort: Some(SortOrder::Descending(AdminUserSortKey::LastActiveDate)),
+                state: None,
+                origin: None,
+                username: String::new(),
                 hostname: String::new(),
             })
             .await;

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Default, Debug, Clone)]
@@ -8,14 +6,13 @@ pub struct Request {}
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Stat {
-    pub count: i64,
-    pub size: u64,
+pub struct Response {
+    pub code: String,
 }
 
 impl misskey_core::Request for Request {
-    type Response = HashMap<String, Stat>;
-    const ENDPOINT: &'static str = "admin/get-table-stats";
+    type Response = Response;
+    const ENDPOINT: &'static str = "invite";
 }
 
 #[cfg(test)]

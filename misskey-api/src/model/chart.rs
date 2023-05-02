@@ -226,3 +226,12 @@ pub struct ApRequestChart {
     pub deliver_succeeded: Vec<u64>,
     pub inbox_received: Vec<u64>,
 }
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PerUserPvChart {
+    pub user: Vec<u64>,
+    pub visitor: Vec<u64>,
+}

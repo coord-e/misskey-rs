@@ -79,6 +79,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v13.0.0
    - endpoint `admin/roles/*`
    - endpoint `flash/*`
+   - endpoint `emojis`
+   - endpoint `invite`
+   - endpoint `retention`
+   - endpoint `charts/user/pv`
 
 ### Changed
 ### Deprecated
@@ -101,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.106.0 ~ v12.106.3
 - endpoint `email-address/available`
    - For Misskey v12.108.0 ~ v12.108.1
-- endpoint `admin/invite`, `admin/moderators/*`, `admin/silence_user`, `admin/unsilence_user`
+- endpoint `admin/invite`, `admin/moderators/*`, `admin/silence_user`, `admin/unsilence_user`, `admin/vaccum`, `notes/watching/*`
    - For Misskey v13.0.0 ~
 
 ### Fixed

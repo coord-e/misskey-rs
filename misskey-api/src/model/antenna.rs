@@ -26,6 +26,9 @@ pub struct Antenna {
     pub notify: bool,
     pub with_file: bool,
     pub with_replies: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub has_unread_note: bool,
 }
 
 impl_entity!(Antenna);

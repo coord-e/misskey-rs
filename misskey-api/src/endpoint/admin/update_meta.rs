@@ -132,6 +132,21 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub recaptcha_secret_key: Option<Option<String>>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub enable_turnstile: Option<bool>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub turnstile_site_key: Option<Option<String>>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub turnstile_secret_key: Option<Option<String>>,
     #[cfg(feature = "12-112-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -389,6 +404,12 @@ mod tests {
                 enable_recaptcha: Some(false),
                 recaptcha_site_key: Some(None),
                 recaptcha_secret_key: Some(None),
+                #[cfg(feature = "13-0-0")]
+                enable_turnstile: Some(false),
+                #[cfg(feature = "13-0-0")]
+                turnstile_site_key: Some(None),
+                #[cfg(feature = "13-0-0")]
+                turnstile_secret_key: Some(None),
                 #[cfg(feature = "12-112-0")]
                 sensitive_media_detection: Some(SensitiveMediaDetection::None),
                 #[cfg(feature = "12-112-0")]
