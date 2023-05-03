@@ -1,7 +1,7 @@
 use crate::model::id::Id;
 
 use serde::{Deserialize, Serialize};
-#[cfg(not(feature = "13-0-0"))]
+#[cfg(any(not(feature = "13-0-0"), feature = "13-1-1"))]
 use url::Url;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -27,4 +27,7 @@ pub struct EmojiSimple {
     pub name: String,
     pub aliases: Vec<String>,
     pub category: Option<String>,
+    #[cfg(feature = "13-1-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-1-1")))]
+    pub url: Url,
 }
