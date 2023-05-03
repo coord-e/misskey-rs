@@ -48,6 +48,10 @@ pub mod recommendation;
 #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
 pub mod reactions;
 
+#[cfg(feature = "13-1-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+pub mod achievements;
+
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]

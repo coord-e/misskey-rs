@@ -64,11 +64,17 @@ pub enum NotificationBody {
         choice: u64,
     },
     #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
     PollEnded {
         note: Note,
     },
     GroupInvited {
         invitation: UserGroupInvitation,
+    },
+    #[cfg(feature = "13-1-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+    AchievementEarned {
+        achievement: Option<String>,
     },
     App {
         body: Option<String>,

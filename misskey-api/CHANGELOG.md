@@ -83,6 +83,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `invite`
    - endpoint `retention`
    - endpoint `charts/user/pv`
+- Support for Misskey v13.1.0
+   - endpoint `i/claim-achievement`
+   - endpoint `users/achievements`
 
 ### Changed
 ### Deprecated

@@ -6,6 +6,8 @@ use std::fmt::{self, Display};
 use crate::model::notification::NotificationType;
 use crate::model::{id::Id, note::Note, page::Page};
 
+#[cfg(feature = "13-1-0")]
+use chrono::serde::ts_milliseconds;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -273,7 +275,16 @@ pub struct User {
     pub ff_visibility: Option<FfVisibility>,
     #[cfg(feature = "12-99-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-99-0")))]
+    #[serde(default)]
     pub muted_instances: Option<Vec<String>>,
+    #[cfg(feature = "13-1-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+    #[serde(default)]
+    pub achievements: Option<Vec<Achievement>>,
+    #[cfg(feature = "13-1-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+    #[serde(default)]
+    pub logged_in_dates: Option<u64>,
 }
 
 fn default_false() -> bool {
@@ -398,3 +409,13 @@ pub struct UserRelation {
 }
 
 pub type IntegrationValue = serde_json::Value;
+
+#[cfg(feature = "13-1-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Achievement {
+    pub name: String,
+    #[serde(with = "ts_milliseconds")]
+    pub unlocked_at: DateTime<Utc>,
+}

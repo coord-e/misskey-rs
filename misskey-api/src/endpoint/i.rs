@@ -22,6 +22,10 @@ pub mod registry;
 #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
 pub mod gallery;
 
+#[cfg(feature = "13-1-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+pub mod claim_achievement;
+
 #[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Request {}
