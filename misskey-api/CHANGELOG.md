@@ -89,6 +89,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v13.1.1 ~ v13.2.2
 
 ### Changed
+
+- Moved `streaming::emoji::EmojiAddedEvent` to `streaming::broadcast::emoji_added::EmojiAddedEvent`
+
 ### Deprecated
 ### Removed
 
