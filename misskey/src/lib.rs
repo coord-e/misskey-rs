@@ -106,6 +106,7 @@
 //!
 //! | Feature                    | Supported Misskey versions (inclusive) | Tested Misskey version |
 //! | -------------------------- | -------------------------------------- | ---------------------- |
+//! | `13-2-4`                   | v13.2.4 ~ v13.2.6                      | v13.2.5                |
 //! | `13-2-3`                   | v13.2.3                                | v13.2.3                |
 //! | `13-1-1`                   | v13.1.1 ~ v13.2.2                      | v13.1.1                |
 //! | `13-1-0`                   | v13.1.0                                | v13.1.0                |
@@ -311,7 +312,7 @@ pub mod streaming {
     //!
     //! ```no_run
     //! use futures::stream::StreamExt;
-    //! use misskey::streaming::::broadcast::emoji_added::EmojiAddedEvent;
+    //! use misskey::streaming::broadcast::emoji_added::EmojiAddedEvent;
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {

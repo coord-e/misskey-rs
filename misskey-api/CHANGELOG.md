@@ -90,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v13.2.3
    - broadcast event `emojiDeleted`
    - broadcast event `emojiUpdated`
+- Support for Misskey v13.2.4 ~ v13.2.6
 
 ### Changed
 

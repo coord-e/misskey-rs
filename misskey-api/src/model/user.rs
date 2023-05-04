@@ -1,3 +1,5 @@
+#[cfg(feature = "13-2-4")]
+use std::collections::HashMap;
 #[cfg(feature = "12-48-0")]
 use std::collections::HashSet;
 use std::fmt::{self, Display};
@@ -180,6 +182,10 @@ pub struct User {
     #[cfg(not(feature = "13-0-0"))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub emojis: Option<Vec<UserEmoji>>,
+    #[cfg(feature = "13-2-4")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-2-4")))]
+    #[serde(default)]
+    pub emojis: Option<HashMap<String, Url>>,
     pub host: Option<String>,
     #[serde(default)]
     pub description: Option<String>,
