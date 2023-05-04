@@ -121,6 +121,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - For Misskey v12.108.0 ~ v12.108.1
 - endpoint `admin/invite`, `admin/moderators/*`, `admin/silence_user`, `admin/unsilence_user`, `admin/vaccum`, `notes/watching/*`
    - For Misskey v13.0.0 ~
+- endpoint `messaging/*`, `i/read_all_messaging_messages`, `i/user_group_invites`, `users/groups`
+   - For Misskey v13.7.0 ~
+- channel `messaging`, `messagingIndex`
+   - For Misskey v13.7.0 ~
 
 ### Fixed
 

@@ -1,4 +1,4 @@
-#[cfg(feature = "12-10-0")]
+#[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
 use crate::model::user_group::UserGroup;
 use crate::model::{id::Id, query::Query, user_list::UserList};
 
@@ -18,8 +18,8 @@ pub struct Antenna {
     pub exclude_keywords: Query<String>,
     pub keywords: Query<String>,
     pub src: AntennaSource,
-    #[cfg(feature = "12-10-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     pub user_group_id: Option<Id<UserGroup>>,
     pub user_list_id: Option<Id<UserList>>,
     pub users: Vec<String>,
@@ -41,8 +41,8 @@ pub enum AntennaSource {
     Home,
     Users,
     List,
-    #[cfg(feature = "12-10-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     Group,
 }
 
@@ -61,7 +61,7 @@ impl std::str::FromStr for AntennaSource {
             "home" | "Home" => Ok(AntennaSource::Home),
             "users" | "Users" => Ok(AntennaSource::Users),
             "list" | "List" => Ok(AntennaSource::List),
-            #[cfg(feature = "12-10-0")]
+            #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
             "group" | "Group" => Ok(AntennaSource::Group),
             _ => Err(ParseAntennaSourceError { _priv: () }),
         }

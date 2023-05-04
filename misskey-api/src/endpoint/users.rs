@@ -14,7 +14,6 @@ use typed_builder::TypedBuilder;
 pub mod followers;
 pub mod following;
 pub mod get_frequently_replied_users;
-pub mod groups;
 pub mod lists;
 pub mod notes;
 pub mod relation;
@@ -51,6 +50,10 @@ pub mod reactions;
 #[cfg(feature = "13-1-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
 pub mod achievements;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod groups;
 
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]

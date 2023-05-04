@@ -1,8 +1,9 @@
+#[cfg(not(feature = "13-7-0"))]
+use crate::model::user_group::UserGroupInvitation;
 use crate::model::{
     id::Id,
     note::{Note, Reaction},
     user::User,
-    user_group::UserGroupInvitation,
 };
 
 use chrono::{DateTime, Utc};
@@ -68,6 +69,8 @@ pub enum NotificationBody {
     PollEnded {
         note: Note,
     },
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     GroupInvited {
         invitation: UserGroupInvitation,
     },
@@ -109,6 +112,7 @@ impl std::str::FromStr for NotificationType {
             "pollVote" | "PollVote" => Ok(NotificationType::PollVote),
             #[cfg(feature = "12-108-0")]
             "pollEnded" | "PollEnded" => Ok(NotificationType::PollEnded),
+            #[cfg(not(feature = "13-7-0"))]
             "groupInvited" | "GroupInvited" => Ok(NotificationType::GroupInvited),
             "app" | "App" => Ok(NotificationType::App),
             _ => Err(ParseNotificationTypeError { _priv: () }),

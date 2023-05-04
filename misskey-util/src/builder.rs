@@ -13,7 +13,6 @@ mod antenna;
 mod clip;
 mod drive;
 mod me;
-mod messaging;
 mod misc;
 mod note;
 mod page;
@@ -30,6 +29,9 @@ mod user;
 #[cfg(feature = "13-0-0")]
 mod flash;
 
+#[cfg(not(feature = "13-7-0"))]
+mod messaging;
+
 pub use admin::{AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder};
 pub use antenna::{AntennaBuilder, AntennaUpdateBuilder};
 pub use clip::{ClipBuilder, ClipUpdateBuilder};
@@ -38,7 +40,6 @@ pub use drive::{
     DriveFolderUpdateBuilder,
 };
 pub use me::MeUpdateBuilder;
-pub use messaging::MessagingMessageBuilder;
 pub use note::NoteBuilder;
 pub use page::{PageBuilder, PageUpdateBuilder};
 
@@ -82,3 +83,7 @@ pub use admin::{DefaultPoliciesUpdateBuilder, RoleBuilder, RoleUpdateBuilder};
 #[cfg(feature = "13-0-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
 pub use flash::{FlashBuilder, FlashUpdateBuilder};
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub use messaging::MessagingMessageBuilder;

@@ -8,6 +8,8 @@ use crate::builder::EmojiUpdateBuilder;
 use crate::builder::GalleryPostBuilder;
 #[cfg(feature = "12-79-2")]
 use crate::builder::GalleryPostUpdateBuilder;
+#[cfg(not(feature = "13-7-0"))]
+use crate::builder::MessagingMessageBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
 #[cfg(not(feature = "12-93-0"))]
@@ -19,8 +21,7 @@ use crate::builder::{AdBuilder, AdUpdateBuilder};
 use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
     DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
-    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder,
-    PageUpdateBuilder,
+    MeUpdateBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder, PageUpdateBuilder,
 };
 #[cfg(feature = "12-47-0")]
 use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
@@ -1672,6 +1673,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn create_user_group(
         &self,
         name: impl Into<String>,
@@ -1701,6 +1704,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn delete_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1730,6 +1735,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn rename_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1748,6 +1755,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Gets the corresponding user group from the ID.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn get_user_group(
         &self,
         id: Id<UserGroup>,
@@ -1763,6 +1772,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Invites the user to the specified user group.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn invite_to_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1786,6 +1797,8 @@ pub trait ClientExt: Client + Sync {
     /// [`transfer_user_group`][transfer].
     ///
     /// [transfer]: ClientExt::transfer_user_group
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn pull_from_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1805,8 +1818,8 @@ pub trait ClientExt: Client + Sync {
     /// Leaves the specified user group.
     ///
     /// Note that the owner cannot leave the group.
-    #[cfg(feature = "12-92-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    #[cfg(all(feature = "12-92-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-92-0", not(feature = "13-7-0")))))]
     fn leave_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1824,6 +1837,8 @@ pub trait ClientExt: Client + Sync {
     /// Transfers the specified user group.
     ///
     /// Note that you can only transfer the group to one of its members.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn transfer_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1868,12 +1883,16 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn user_group_invitations(&self) -> PagerStream<BoxPager<Self, UserGroupInvitation>> {
         let pager = BackwardPager::new(self, endpoint::i::user_group_invites::Request::default());
         PagerStream::new(Box::pin(pager))
     }
 
     /// Accepts the specified user group invitation sent to the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn accept_user_group_invitation(
         &self,
         invitation: impl EntityRef<UserGroupInvitation>,
@@ -1889,6 +1908,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Rejects the specified user group invitation sent to the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn reject_user_group_invitation(
         &self,
         invitation: impl EntityRef<UserGroupInvitation>,
@@ -1904,6 +1925,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the user groups joined by the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn joined_user_groups(&self) -> BoxFuture<Result<Vec<UserGroup>, Error<Self::Error>>> {
         Box::pin(async move {
             let groups = self
@@ -1916,6 +1939,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the user groups owned by the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn owned_user_groups(&self) -> BoxFuture<Result<Vec<UserGroup>, Error<Self::Error>>> {
         Box::pin(async move {
             let groups = self
@@ -2523,6 +2548,8 @@ pub trait ClientExt: Client + Sync {
 
     // {{{ Messaging
     /// Sends a message to the user with the given text.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn create_message(
         &self,
         recipient: impl EntityRef<User>,
@@ -2540,6 +2567,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Sends a message to the user group with the given text.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn create_group_message(
         &self,
         recipient: impl EntityRef<UserGroup>,
@@ -2564,11 +2593,15 @@ pub trait ClientExt: Client + Sync {
     /// See [`MessagingMessageBuilder`] for the provided methods.
     ///
     /// [builder_create]: MessagingMessageBuilder::create
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn build_message(&self) -> MessagingMessageBuilder<&Self> {
         MessagingMessageBuilder::new(self)
     }
 
     /// Deletes the specified message.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn delete_message(
         &self,
         message: impl EntityRef<MessagingMessage>,
@@ -2584,6 +2617,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Marks the specified message as read.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn read_message(
         &self,
         message: impl EntityRef<MessagingMessage>,
@@ -2599,6 +2634,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the messages with the specified user.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn user_messages(
         &self,
         user: impl EntityRef<User>,
@@ -2614,6 +2651,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the messages in the specified user group.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn group_messages(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -2629,6 +2668,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Gets message logs for the user who is logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn messaging_history(&self) -> BoxFuture<Result<Vec<MessagingMessage>, Error<Self::Error>>> {
         Box::pin(async move {
             let mut messages = self

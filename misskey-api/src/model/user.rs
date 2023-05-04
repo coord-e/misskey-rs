@@ -57,6 +57,8 @@ pub enum UserEmailNotificationType {
     Mention,
     Reply,
     Quote,
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     GroupInvited,
 }
 
@@ -68,6 +70,7 @@ impl Display for UserEmailNotificationType {
             UserEmailNotificationType::Mention => f.write_str("mention"),
             UserEmailNotificationType::Reply => f.write_str("reply"),
             UserEmailNotificationType::Quote => f.write_str("quote"),
+            #[cfg(not(feature = "13-7-0"))]
             UserEmailNotificationType::GroupInvited => f.write_str("groupInvited"),
         }
     }
@@ -91,6 +94,7 @@ impl std::str::FromStr for UserEmailNotificationType {
             "mention" | "Mention" => Ok(UserEmailNotificationType::Mention),
             "reply" | "Reply" => Ok(UserEmailNotificationType::Reply),
             "quote" | "Quote" => Ok(UserEmailNotificationType::Quote),
+            #[cfg(not(feature = "13-7-0"))]
             "groupInvited" | "GroupInvited" => Ok(UserEmailNotificationType::GroupInvited),
             _ => Err(ParseUserEmailNotificationType { _priv: () }),
         }

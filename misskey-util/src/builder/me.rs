@@ -380,7 +380,7 @@ impl<C> MeUpdateBuilder<C> {
     ///
     /// # Examples
     ///
-    /// The example below updates the user setting to email `'follow'` and `'groupInvited'` notifications.
+    /// The example below updates the user setting to email `'follow'` and `'receiveFollowRequest'` notifications.
     ///
     /// ```
     /// # use misskey_util::ClientExt;
@@ -393,7 +393,7 @@ impl<C> MeUpdateBuilder<C> {
     /// client
     ///     .update_me()
     ///     .email_notification_type(UserEmailNotificationType::Follow)
-    ///     .email_notification_type(UserEmailNotificationType::GroupInvited)
+    ///     .email_notification_type(UserEmailNotificationType::ReceiveFollowRequest)
     ///     .update()
     ///     .await?;
     /// # Ok(())

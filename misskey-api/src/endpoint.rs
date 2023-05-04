@@ -52,7 +52,6 @@ pub mod endpoint;
 pub mod endpoints;
 pub mod following;
 pub mod i;
-pub mod messaging;
 pub mod meta;
 pub mod mute;
 pub mod notes;
@@ -106,3 +105,7 @@ pub mod invite;
 #[cfg(feature = "13-0-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
 pub mod retention;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod messaging;

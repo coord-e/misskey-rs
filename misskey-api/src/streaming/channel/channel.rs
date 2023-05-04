@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase", tag = "type", content = "body")]
 pub enum ChannelEvent {
     Note(Note),
-    #[cfg(feature = "12-71-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-71-0")))]
+    #[cfg(all(feature = "12-71-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-71-0", not(feature = "13-7-0")))))]
     Typers(Vec<User>),
 }
 

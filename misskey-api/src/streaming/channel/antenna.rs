@@ -40,7 +40,7 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::All,
                 user_list_id: None,
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
@@ -73,7 +73,7 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::All,
                 user_list_id: None,
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![vec!["hello".to_string()]]),
                 #[cfg(feature = "12-19-0")]

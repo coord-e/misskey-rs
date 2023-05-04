@@ -7,12 +7,10 @@ pub mod notifications;
 pub mod page_likes;
 pub mod pages;
 pub mod pin;
-pub mod read_all_messaging_messages;
 pub mod read_all_unread_notes;
 pub mod read_announcement;
 pub mod unpin;
 pub mod update;
-pub mod user_group_invites;
 
 #[cfg(feature = "12-67-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
@@ -25,6 +23,14 @@ pub mod gallery;
 #[cfg(feature = "13-1-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
 pub mod claim_achievement;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod read_all_messaging_messages;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod user_group_invites;
 
 #[derive(Serialize, Default, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
