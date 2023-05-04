@@ -92,6 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - broadcast event `emojiUpdated`
 - Support for Misskey v13.2.4 ~ v13.2.6
 - Support for Misskey v13.3.0 ~ v13.3.1
+- Support for Misskey v13.3.2 ~ v13.3.4
 
 ### Changed
 

@@ -128,6 +128,9 @@ pub struct Meta {
     #[cfg(feature = "13-0-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
     pub policies: PoliciesSimple,
+    #[cfg(feature = "13-3-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-3-2")))]
+    pub media_proxy: String,
     /// This field is [`Option<String>`][`Option`] on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
     #[cfg(feature = "12-58-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]

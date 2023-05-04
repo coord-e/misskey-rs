@@ -15,6 +15,7 @@ categories = ["api-bindings", "web-programming::http-client", "web-programming::
 [features]
 default = ["http-client", "websocket-client", "tokio-runtime", "aid"]
 
+13-3-2 = ["misskey-api/13-3-2", "misskey-util/13-3-2", "13-3-0"]
 13-3-0 = ["misskey-api/13-3-0", "misskey-util/13-3-0", "13-2-4"]
 13-2-4 = ["misskey-api/13-2-4", "misskey-util/13-2-4", "13-2-3"]
 13-2-3 = ["misskey-api/13-2-3", "misskey-util/13-2-3", "13-1-1"]
