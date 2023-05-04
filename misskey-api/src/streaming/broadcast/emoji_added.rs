@@ -1,11 +1,19 @@
+#[cfg(not(feature = "13-2-3"))]
 use crate::model::emoji::Emoji;
+#[cfg(feature = "13-2-3")]
+use crate::model::emoji::EmojiSimple;
 
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct EmojiAddedEvent {
+    #[cfg(not(feature = "13-2-3"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-2-3"))))]
     pub emoji: Emoji,
+    #[cfg(feature = "13-2-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-2-3")))]
+    pub emoji: EmojiSimple,
 }
 
 impl misskey_core::streaming::BroadcastEvent for EmojiAddedEvent {

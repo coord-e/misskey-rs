@@ -87,6 +87,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `i/claim-achievement`
    - endpoint `users/achievements`
 - Support for Misskey v13.1.1 ~ v13.2.2
+- Support for Misskey v13.2.3
+   - broadcast event `emojiDeleted`
+   - broadcast event `emojiUpdated`
 
 ### Changed
 
