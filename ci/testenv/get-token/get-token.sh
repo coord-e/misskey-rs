@@ -35,11 +35,13 @@ curl -fsS -XPOST -H 'Content-Type: application/json'            \
         "name": "Moderator",
         "description": "",
         "color": "",
+        "iconUrl": null,
         "target": "manual",
         "condFormula": {},
         "isPublic": false,
         "isModerator": true,
         "isAdministrator": false,
+        "asBadge": false,
         "canEditMembersByModerator": false,
         "policies": {
           "pinLimit": {

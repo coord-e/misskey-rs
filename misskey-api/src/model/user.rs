@@ -291,6 +291,9 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
     #[serde(default)]
     pub logged_in_dates: Option<u64>,
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub badge_roles: Option<Vec<BadgeRole>>,
 }
 
 fn default_false() -> bool {
@@ -426,4 +429,13 @@ pub struct Achievement {
     pub name: String,
     #[serde(with = "ts_milliseconds")]
     pub unlocked_at: DateTime<Utc>,
+}
+
+#[cfg(feature = "13-4-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BadgeRole {
+    pub name: String,
+    pub icon_url: String,
 }

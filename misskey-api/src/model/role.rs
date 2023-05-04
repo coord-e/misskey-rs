@@ -14,12 +14,18 @@ pub struct Role {
     pub name: String,
     pub description: String,
     pub color: Option<String>,
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub icon_url: Option<String>,
     pub target: Target,
     #[serde(with = "cond_formula_option")]
     pub cond_formula: Option<RoleCondFormulaValue>,
     pub is_public: bool,
     pub is_moderator: bool,
     pub is_administrator: bool,
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub as_badge: bool,
     pub can_edit_members_by_moderator: bool,
     pub policies: Policies,
     pub users_count: u64,

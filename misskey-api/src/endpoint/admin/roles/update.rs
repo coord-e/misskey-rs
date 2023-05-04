@@ -17,6 +17,10 @@ pub struct Request {
     pub description: String,
     #[builder(default, setter(strip_option, into))]
     pub color: Option<String>,
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    #[builder(default, setter(strip_option, into))]
+    pub icon_url: Option<String>,
     #[builder(default, setter(into))]
     pub target: Target,
     #[serde(with = "cond_formula_option")]
@@ -28,6 +32,10 @@ pub struct Request {
     pub is_moderator: bool,
     #[builder(default, setter(into))]
     pub is_administrator: bool,
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    #[builder(default, setter(into))]
+    pub as_badge: bool,
     #[builder(default, setter(into))]
     pub can_edit_members_by_moderator: bool,
     #[builder(default, setter(into))]
@@ -61,11 +69,15 @@ mod tests {
                 name: String::new(),
                 description: String::new(),
                 color: None,
+                #[cfg(feature = "13-4-0")]
+                icon_url: None,
                 target: Target::Manual,
                 cond_formula: None,
                 is_public: false,
                 is_moderator: false,
                 is_administrator: false,
+                #[cfg(feature = "13-4-0")]
+                as_badge: true,
                 can_edit_members_by_moderator: false,
                 policies: Policies::default(),
             })
@@ -75,6 +87,8 @@ mod tests {
     #[tokio::test]
     async fn request_with_options() {
         let client = TestClient::new();
+        #[cfg(feature = "13-4-0")]
+        let image_url = client.avatar_url().await;
         let role = client
             .admin
             .test(crate::endpoint::admin::roles::create::Request::default())
@@ -87,6 +101,8 @@ mod tests {
                 name: "role".to_string(),
                 description: "description".to_string(),
                 color: Some("#ff0000".to_string()),
+                #[cfg(feature = "13-4-0")]
+                icon_url: Some(image_url.to_string()),
                 target: Target::Conditional,
                 cond_formula: Some(RoleCondFormulaValue::And {
                     values: vec![
@@ -113,6 +129,8 @@ mod tests {
                 is_public: true,
                 is_moderator: true,
                 is_administrator: true,
+                #[cfg(feature = "13-4-0")]
+                as_badge: true,
                 can_edit_members_by_moderator: true,
                 policies: Policies {
                     gtl_available: Some(PolicyValue {
