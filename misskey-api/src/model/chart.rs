@@ -138,6 +138,8 @@ pub struct ActiveUsersChart {
     pub registered_outside_year: Vec<u64>,
 }
 
+#[cfg(not(feature = "13-3-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HashtagChart {

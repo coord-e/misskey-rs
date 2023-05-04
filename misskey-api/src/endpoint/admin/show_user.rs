@@ -1,13 +1,15 @@
-#[cfg(feature = "12-111-0")]
+#[cfg(all(feature = "12-111-0", not(feature = "13-3-0")))]
 use std::collections::HashMap;
 
 #[cfg(not(feature = "12-111-0"))]
 use crate::model::drive::DriveFile;
 #[cfg(feature = "13-0-0")]
 use crate::model::role::{PoliciesSimple, Role};
+#[cfg(all(feature = "12-111-0", not(feature = "13-3-0")))]
+use crate::model::user::IntegrationValue;
 use crate::model::{id::Id, user::User};
 #[cfg(feature = "12-111-0")]
-use crate::model::{notification::NotificationType, signin::Signin, user::IntegrationValue};
+use crate::model::{notification::NotificationType, signin::Signin};
 
 #[cfg(any(not(feature = "12-111-0"), feature = "12-112-0"))]
 use chrono::{DateTime, Utc};
@@ -93,6 +95,8 @@ pub struct Response {
     pub inject_featured_note: Option<bool>,
     #[serde(default)]
     pub receive_announcement_email: Option<bool>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(default)]
     pub integrations: Option<HashMap<String, IntegrationValue>>,
     #[serde(default)]

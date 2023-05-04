@@ -113,8 +113,14 @@ pub struct Meta {
     #[cfg(not(feature = "12-58-0"))]
     pub require_setup: bool,
     pub enable_email: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub enable_twitter_integration: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub enable_github_integration: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
     #[cfg(feature = "12-88-0")]
@@ -172,12 +178,6 @@ pub struct AdminMeta {
     pub hcaptcha_secret_key: Option<String>,
     pub recaptcha_secret_key: Option<String>,
     pub proxy_account_id: Option<Id<User>>,
-    pub twitter_consumer_key: Option<String>,
-    pub twitter_consumer_secret: Option<String>,
-    pub github_client_id: Option<String>,
-    pub github_client_secret: Option<String>,
-    pub discord_client_id: Option<String>,
-    pub discord_client_secret: Option<String>,
     pub summaly_proxy: Option<Url>,
     pub email: Option<String>,
     pub smtp_secure: bool,
@@ -266,8 +266,14 @@ pub struct AdminMeta {
     pub default_light_theme: Option<String>,
     pub default_dark_theme: Option<String>,
     pub enable_email: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub enable_twitter_integration: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub enable_github_integration: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
     pub translator_available: bool,
@@ -296,11 +302,23 @@ pub struct AdminMeta {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
     pub enable_sensitive_media_detection_for_videos: Option<bool>,
     pub proxy_account_id: Option<Id<User>>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub twitter_consumer_key: Option<String>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub twitter_consumer_secret: Option<String>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub github_client_id: Option<String>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub github_client_secret: Option<String>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub discord_client_id: Option<String>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub discord_client_secret: Option<String>,
     pub summaly_proxy: Option<Url>,
     pub email: Option<String>,
@@ -359,8 +377,14 @@ pub struct FeaturesMeta {
     #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
     pub turnstile: bool,
     pub object_storage: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub twitter: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub github: bool,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     pub discord: bool,
     pub service_worker: bool,
     #[cfg(feature = "12-28-0")]

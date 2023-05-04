@@ -432,34 +432,52 @@ impl<C> MetaUpdateBuilder<C> {
         pub deepl_is_pro;
 
         /// Sets whether or not to enable the Twitter integration.
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub enable_twitter_integration;
     }
     update_builder_string_option_field! {
         #[doc_name = "Twitter consumer key"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub twitter_consumer_key;
         #[doc_name = "Twitter consumer secret"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub twitter_consumer_secret;
     }
 
     update_builder_bool_field! {
         /// Sets whether or not to enable the GitHub integration.
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub enable_github_integration;
     }
     update_builder_string_option_field! {
         #[doc_name = "GitHub client ID"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub github_client_id;
         #[doc_name = "GitHub client secret"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub github_client_secret;
     }
 
     update_builder_bool_field! {
         /// Sets whether or not to enable the Discord integration.
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub enable_discord_integration;
     }
     update_builder_string_option_field! {
         #[doc_name = "Discord client ID"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub discord_client_id;
         #[doc_name = "Discord client secret"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub discord_client_secret;
     }
 

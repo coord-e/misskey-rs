@@ -414,6 +414,8 @@ pub struct UserRelation {
     pub is_muted: bool,
 }
 
+#[cfg(all(feature = "12-111-0", not(feature = "13-3-0")))]
+#[cfg_attr(docsrs, doc(all(feature = "12-111-0", not(feature = "13-3-0"))))]
 pub type IntegrationValue = serde_json::Value;
 
 #[cfg(feature = "13-1-0")]

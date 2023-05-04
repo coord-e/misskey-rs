@@ -192,30 +192,48 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub deepl_is_pro: Option<bool>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_twitter_integration: Option<bool>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub twitter_consumer_key: Option<Option<String>>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub twitter_consumer_secret: Option<Option<String>>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_github_integration: Option<bool>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub github_client_id: Option<Option<String>>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub github_client_secret: Option<Option<String>>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_discord_integration: Option<bool>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub discord_client_id: Option<Option<String>>,
+    #[cfg(not(feature = "13-3-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub discord_client_secret: Option<Option<String>>,
@@ -429,14 +447,23 @@ mod tests {
                 deepl_auth_key: Some(None),
                 #[cfg(feature = "12-89-1")]
                 deepl_is_pro: Some(false),
+                #[cfg(not(feature = "13-3-0"))]
                 enable_twitter_integration: Some(false),
+                #[cfg(not(feature = "13-3-0"))]
                 twitter_consumer_key: Some(None),
+                #[cfg(not(feature = "13-3-0"))]
                 twitter_consumer_secret: Some(None),
+                #[cfg(not(feature = "13-3-0"))]
                 enable_github_integration: Some(false),
+                #[cfg(not(feature = "13-3-0"))]
                 github_client_id: Some(None),
+                #[cfg(not(feature = "13-3-0"))]
                 github_client_secret: Some(None),
+                #[cfg(not(feature = "13-3-0"))]
                 enable_discord_integration: Some(false),
+                #[cfg(not(feature = "13-3-0"))]
                 discord_client_id: Some(None),
+                #[cfg(not(feature = "13-3-0"))]
                 discord_client_secret: Some(None),
                 enable_email: Some(false),
                 email: Some(None),
