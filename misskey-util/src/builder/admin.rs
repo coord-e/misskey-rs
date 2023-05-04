@@ -183,7 +183,7 @@ impl<C> MetaUpdateBuilder<C> {
         #[doc_name = "URL of the mascot image for the instance"]
         pub mascot_image_url;
         #[doc_name = "URL of the banner image for the instance"]
-        pub bannar_url;
+        pub banner_url;
         #[doc_name = "URL of the error image for the instance"]
         pub error_image_url;
         #[doc_name = "URL of the icon for the instance"]

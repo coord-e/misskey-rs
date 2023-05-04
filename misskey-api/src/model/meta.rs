@@ -69,7 +69,7 @@ pub struct Meta {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-105-0")))]
     pub theme_color: Option<String>,
     pub mascot_image_url: Option<String>,
-    pub bannar_url: Option<String>,
+    pub banner_url: Option<String>,
     pub error_image_url: Option<String>,
     pub icon_url: Option<String>,
     #[cfg(feature = "12-60-0")]

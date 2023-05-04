@@ -46,7 +46,7 @@ pub struct Request {
     pub mascot_image_url: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub bannar_url: Option<Option<String>>,
+    pub banner_url: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub icon_url: Option<Option<String>>,
@@ -347,7 +347,7 @@ mod tests {
                 #[cfg(feature = "12-105-0")]
                 theme_color: Some(Some("#31748f".to_string())),
                 mascot_image_url: Some(Some(image_url.to_string())),
-                bannar_url: Some(Some(image_url.to_string())),
+                banner_url: Some(Some(image_url.to_string())),
                 icon_url: Some(Some(image_url.to_string())),
                 #[cfg(feature = "12-60-0")]
                 background_image_url: Some(Some(image_url.to_string())),
