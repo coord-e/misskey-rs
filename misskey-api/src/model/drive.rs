@@ -1,8 +1,13 @@
+#[cfg(feature = "13-10-0")]
+use std::fmt::{self, Display};
+
 use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
 use mime::Mime;
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "13-10-0")]
+use thiserror::Error;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -52,6 +57,48 @@ pub struct DriveFile {
 }
 
 impl_entity!(DriveFile);
+
+#[cfg(feature = "13-10-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+#[derive(PartialEq, Eq, Clone, Debug, Copy)]
+pub enum DriveFileSortKey {
+    CreatedAt,
+    Name,
+    Size,
+}
+
+#[cfg(feature = "13-10-0")]
+impl Display for DriveFileSortKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            DriveFileSortKey::CreatedAt => f.write_str("createdAt"),
+            DriveFileSortKey::Name => f.write_str("name"),
+            DriveFileSortKey::Size => f.write_str("size"),
+        }
+    }
+}
+
+#[cfg(feature = "13-10-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+#[derive(Debug, Error, Clone)]
+#[error("invalid sort key")]
+pub struct ParseDriveFileSortKeyError {
+    _priv: (),
+}
+
+#[cfg(feature = "13-10-0")]
+impl std::str::FromStr for DriveFileSortKey {
+    type Err = ParseDriveFileSortKeyError;
+
+    fn from_str(s: &str) -> Result<DriveFileSortKey, Self::Err> {
+        match s {
+            "createdAt" | "CreatedAt" => Ok(DriveFileSortKey::CreatedAt),
+            "name" | "Name" => Ok(DriveFileSortKey::Name),
+            "size" | "Size" => Ok(DriveFileSortKey::Size),
+            _ => Err(ParseDriveFileSortKeyError { _priv: () }),
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]

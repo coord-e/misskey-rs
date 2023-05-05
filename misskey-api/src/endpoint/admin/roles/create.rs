@@ -34,6 +34,10 @@ pub struct Request {
     pub as_badge: bool,
     #[builder(default, setter(into))]
     pub can_edit_members_by_moderator: bool,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    #[builder(default, setter(into))]
+    pub display_order: i64,
     #[builder(default, setter(into))]
     pub policies: Policies,
 }
@@ -104,6 +108,8 @@ mod tests {
                 #[cfg(feature = "13-4-0")]
                 as_badge: true,
                 can_edit_members_by_moderator: true,
+                #[cfg(feature = "13-10-0")]
+                display_order: 1,
                 policies: Policies {
                     gtl_available: Some(PolicyValue {
                         use_default: true,
@@ -126,6 +132,12 @@ mod tests {
                         value: true,
                     }),
                     can_manage_custom_emojis: Some(PolicyValue {
+                        use_default: false,
+                        priority: Priority::High,
+                        value: true,
+                    }),
+                    #[cfg(feature = "13-10-0")]
+                    can_search_notes: Some(PolicyValue {
                         use_default: false,
                         priority: Priority::High,
                         value: true,

@@ -25,7 +25,8 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     #[builder(default, setter(strip_option))]
     pub user_group_id: Option<Id<UserGroup>>,
-    #[builder(default, setter(into))]
+    #[cfg_attr(not(feature = "13-10-0"), builder(default))]
+    #[builder(setter(into))]
     pub keywords: Query<String>,
     #[cfg(feature = "12-19-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]

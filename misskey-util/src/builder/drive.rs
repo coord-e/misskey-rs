@@ -7,6 +7,8 @@ use crate::Error;
 use futures::stream::TryStreamExt;
 use mime::Mime;
 use misskey_api::model::drive::{DriveFile, DriveFolder};
+#[cfg(feature = "13-10-0")]
+use misskey_api::model::{drive::DriveFileSortKey, sort::SortOrder};
 #[cfg(feature = "12-48-0")]
 use misskey_api::streaming::channel;
 use misskey_api::{endpoint, EntityRef};
@@ -412,6 +414,82 @@ impl<C> DriveFileListBuilder<C> {
     pub fn folder(&mut self, folder: impl EntityRef<DriveFolder>) -> &mut Self {
         self.request.folder_id.replace(folder.entity_ref());
         self
+    }
+
+    /// Sorts the results by the given order.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn order(&mut self, order: SortOrder<DriveFileSortKey>) -> &mut Self {
+        self.request.sort.replace(order);
+        self
+    }
+
+    /// Sorts the results in ascending order by the given key.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_by(&mut self, key: DriveFileSortKey) -> &mut Self {
+        self.order(SortOrder::Ascending(key))
+    }
+
+    /// Sorts the results in ascending order by creation date.
+    ///
+    /// This is equivalent to `.sort_by(DriveFileSortKey::CreatedAt)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_by_creation_date(&mut self) -> &mut Self {
+        self.sort_by(DriveFileSortKey::CreatedAt)
+    }
+
+    /// Sorts the results in ascending order by number of followers.
+    ///
+    /// This is equivalent to `.sort_by(DriveFileSortKey::Name)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_by_name(&mut self) -> &mut Self {
+        self.sort_by(DriveFileSortKey::Name)
+    }
+
+    /// Sorts the results in ascending order by update date.
+    ///
+    /// This is equivalent to `.sort_by(DriveFileSortKey::Size)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_by_size(&mut self) -> &mut Self {
+        self.sort_by(DriveFileSortKey::Size)
+    }
+
+    /// Sorts the results in descending order by the given key.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_desc_by(&mut self, key: DriveFileSortKey) -> &mut Self {
+        self.order(SortOrder::Descending(key))
+    }
+
+    /// Sorts the results in descending order by creation date.
+    ///
+    /// This is equivalent to `.sort_desc_by(DriveFileSortKey::CreatedAt)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_desc_by_creation_date(&mut self) -> &mut Self {
+        self.sort_desc_by(DriveFileSortKey::CreatedAt)
+    }
+
+    /// Sorts the results in descending order by number of followers.
+    ///
+    /// This is equivalent to `.sort_desc_by(DriveFileSortKey::Name)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_desc_by_name(&mut self) -> &mut Self {
+        self.sort_desc_by(DriveFileSortKey::Name)
+    }
+
+    /// Sorts the results in descending order by update date.
+    ///
+    /// This is equivalent to `.sort_desc_by(DriveFileSortKey::Size)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn sort_desc_by_size(&mut self) -> &mut Self {
+        self.sort_desc_by(DriveFileSortKey::Size)
     }
 }
 

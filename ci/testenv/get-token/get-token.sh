@@ -43,7 +43,13 @@ curl -fsS -XPOST -H 'Content-Type: application/json'            \
         "isAdministrator": false,
         "asBadge": false,
         "canEditMembersByModerator": false,
+        "displayOrder": 0,
         "policies": {
+          "canSearchNotes": {
+            "value": true,
+            "priority": 0,
+            "useDefault": false
+          },
           "pinLimit": {
             "value": 1000,
             "priority": 0,

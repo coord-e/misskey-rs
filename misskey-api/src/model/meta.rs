@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 
 #[cfg(feature = "12-81-0")]
 use crate::model::ad::{Ad, Place};
-#[cfg(feature = "12-62-0")]
+#[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
 use crate::model::clip::Clip;
 #[cfg(not(feature = "13-0-0"))]
 use crate::model::emoji::Emoji;
@@ -140,18 +140,20 @@ pub struct Meta {
     pub proxy_account_name: Option<String>,
     #[cfg(all(
         feature = "12-58-0",
-        any(not(feature = "12-62-0"), feature = "12-62-2")
+        any(not(feature = "12-62-0"), feature = "12-62-2"),
+        not(feature = "13-10-0"),
     ))]
     #[cfg_attr(
         docsrs,
         doc(cfg(all(
             feature = "12-58-0",
-            any(not(feature = "12-62-0"), feature = "12-62-2")
+            any(not(feature = "12-62-0"), feature = "12-62-2"),
+            not(feature = "13-10-0"),
         )))
     )]
     pub pinned_pages: Option<Vec<String>>,
-    #[cfg(feature = "12-62-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    #[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-62-0", not(feature = "13-10-0")))))]
     pub pinned_clip_id: Option<Id<Clip>>,
 }
 
@@ -282,13 +284,20 @@ pub struct AdminMeta {
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
     pub translator_available: bool,
+    #[cfg(not(feature = "13-10-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-0"))))]
     pub pinned_pages: Option<Vec<String>>,
+    #[cfg(not(feature = "13-10-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-0"))))]
     pub pinned_clip_id: Option<Id<Clip>>,
     pub cache_remote_files: Option<bool>,
     pub use_star_for_reaction_fallback: bool,
     pub pinned_users: Vec<String>,
     pub hidden_tags: Vec<String>,
     pub blocked_hosts: Vec<String>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub sensitive_words: Vec<String>,
     pub hcaptcha_secret_key: Option<String>,
     pub recaptcha_secret_key: Option<String>,
     #[cfg(feature = "13-0-0")]

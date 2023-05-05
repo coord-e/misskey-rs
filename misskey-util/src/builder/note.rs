@@ -3,6 +3,8 @@ use crate::Error;
 use chrono::{DateTime, Duration, Utc};
 #[cfg(feature = "12-47-0")]
 use misskey_api::model::channel::Channel;
+#[cfg(feature = "13-10-0")]
+use misskey_api::model::note::ReactionAcceptance;
 use misskey_api::model::{
     drive::DriveFile,
     note::{Note, Visibility},
@@ -20,6 +22,9 @@ fn initial_notes_create_request() -> endpoint::notes::create::Request {
         #[cfg(not(feature = "12-96-0"))]
         via_mobile: Some(false),
         local_only: Some(false),
+        #[cfg(feature = "13-10-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+        reaction_acceptance: None,
         no_extract_mentions: Some(false),
         no_extract_hashtags: Some(false),
         no_extract_emojis: Some(false),
@@ -211,6 +216,42 @@ impl<C> NoteBuilder<C> {
     /// Sets the note to be visible only to users on the same instance.
     pub fn local_only(&mut self, local_only: bool) -> &mut Self {
         self.request.local_only.replace(local_only);
+        self
+    }
+
+    /// Sets the reaction acceptance of the note.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn reaction_acceptance(&mut self, reaction_acceptance: ReactionAcceptance) -> &mut Self {
+        self.request
+            .reaction_acceptance
+            .replace(reaction_acceptance);
+        self
+    }
+
+    /// Sets the note to reject any reactions other than likes.
+    ///
+    /// This is equivalent to `.reaction_acceptance(ReactionAcceptance::LikesOnly)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn accept_only_likes(&mut self) -> &mut Self {
+        self.reaction_acceptance(ReactionAcceptance::LikeOnly)
+    }
+
+    /// Sets the note to reject any reactions from remote servers that are not likes.
+    ///
+    /// This is equivalent to `.reaction_acceptance(ReactionAcceptance::LikesOnlyForRemote)`.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn accept_only_likes_for_remote(&mut self) -> &mut Self {
+        self.reaction_acceptance(ReactionAcceptance::LikeOnlyForRemote)
+    }
+
+    /// Sets the note to receive all reactions.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn accept_all_reactions(&mut self) -> &mut Self {
+        self.request.reaction_acceptance = None;
         self
     }
 

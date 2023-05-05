@@ -445,4 +445,7 @@ pub struct Achievement {
 pub struct BadgeRole {
     pub name: String,
     pub icon_url: String,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub display_order: i64,
 }

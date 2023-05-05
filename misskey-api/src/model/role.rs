@@ -27,6 +27,9 @@ pub struct Role {
     #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
     pub as_badge: bool,
     pub can_edit_members_by_moderator: bool,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub display_order: i64,
     pub policies: Policies,
     pub users_count: u64,
     #[cfg(not(feature = "13-7-0"))]
@@ -200,6 +203,11 @@ pub struct Policies {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub can_manage_custom_emojis: Option<PolicyValue<bool>>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub can_search_notes: Option<PolicyValue<bool>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub can_hide_ads: Option<PolicyValue<bool>>,
@@ -321,6 +329,11 @@ pub struct PoliciesSimple {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub can_manage_custom_emojis: Option<bool>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub can_search_notes: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub can_hide_ads: Option<bool>,

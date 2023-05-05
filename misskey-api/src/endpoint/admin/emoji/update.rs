@@ -19,6 +19,11 @@ pub struct Request {
     #[cfg(any(docsrs, not(feature = "12-9-0")))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]
     pub url: Url,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub license: Option<String>,
 }
 
 impl misskey_core::Request for Request {
@@ -47,6 +52,8 @@ mod tests {
                 aliases: vec!["namename".to_string()],
                 #[cfg(not(feature = "12-9-0"))]
                 url: image_url,
+                #[cfg(feature = "13-10-0")]
+                license: Some("license".to_string()),
             })
             .await;
     }

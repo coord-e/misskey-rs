@@ -89,6 +89,36 @@ impl std::str::FromStr for Visibility {
     }
 }
 
+#[cfg(feature = "13-10-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Copy)]
+#[serde(rename_all = "camelCase")]
+pub enum ReactionAcceptance {
+    LikeOnly,
+    LikeOnlyForRemote,
+}
+
+#[cfg(feature = "13-10-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+#[derive(Debug, Error, Clone)]
+#[error("invalid reaction acceptance")]
+pub struct ParseReactionAcceptanceError {
+    _priv: (),
+}
+
+#[cfg(feature = "13-10-0")]
+impl std::str::FromStr for ReactionAcceptance {
+    type Err = ParseReactionAcceptanceError;
+
+    fn from_str(s: &str) -> Result<ReactionAcceptance, Self::Err> {
+        match s {
+            "likeOnly" | "LikeOnly" => Ok(ReactionAcceptance::LikeOnly),
+            "likeOnlyForRemote" | "LikeOnlyForRemote" => Ok(ReactionAcceptance::LikeOnlyForRemote),
+            _ => Err(ParseReactionAcceptanceError { _priv: () }),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PollChoice {
@@ -147,6 +177,9 @@ pub struct Note {
     pub is_hidden: bool,
     #[serde(default = "default_false")]
     pub local_only: bool,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub reaction_acceptance: Option<ReactionAcceptance>,
     pub visibility: Visibility,
     #[serde(default)]
     pub mentions: Vec<Id<User>>,

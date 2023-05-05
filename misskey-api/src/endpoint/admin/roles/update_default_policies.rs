@@ -39,6 +39,8 @@ mod tests {
                     can_public_note: Some(true),
                     can_invite: Some(true),
                     can_manage_custom_emojis: Some(true),
+                    #[cfg(feature = "13-10-0")]
+                    can_search_notes: Some(true),
                     can_hide_ads: Some(false),
                     drive_capacity_mb: Some(1000),
                     pin_limit: Some(100),

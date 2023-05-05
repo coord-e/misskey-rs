@@ -5219,6 +5219,24 @@ pub trait ClientExt: Client + Sync {
             Ok(response.emojis)
         })
     }
+
+    /// Gets a emoji from the name.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn get_emoji_from_name(
+        &self,
+        name: impl Into<String>,
+    ) -> BoxFuture<Result<Emoji, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move {
+            let emoji = self
+                .request(endpoint::emoji::Request { name })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(emoji)
+        })
+    }
     // }}}
 }
 

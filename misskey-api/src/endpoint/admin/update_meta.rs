@@ -1,4 +1,4 @@
-#[cfg(feature = "12-62-0")]
+#[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
 use crate::model::clip::Clip;
 #[cfg(feature = "12-112-0")]
 use crate::model::meta::{SensitiveMediaDetection, SensitiveMediaDetectionSensitivity};
@@ -26,18 +26,22 @@ pub struct Request {
     pub use_star_for_reaction_fallback: Option<bool>,
     #[builder(default, setter(strip_option))]
     pub pinned_users: Option<Vec<String>>,
-    #[cfg(feature = "12-58-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+    #[cfg(all(feature = "12-58-0", not(feature = "13-10-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-58-0", not(feature = "13-10-0")))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_pages: Option<Vec<String>>,
-    #[cfg(feature = "12-62-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+    #[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-62-0", not(feature = "13-10-0")))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_clip_id: Option<Option<Id<Clip>>>,
     #[builder(default, setter(strip_option))]
     pub hidden_tags: Option<Vec<String>>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    #[builder(default, setter(strip_option))]
+    pub sensitive_words: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
     pub blocked_hosts: Option<Vec<String>>,
     #[cfg(feature = "12-105-0")]
@@ -380,13 +384,15 @@ mod tests {
                 #[cfg(not(feature = "13-0-0"))]
                 disable_global_timeline: Some(false),
                 use_star_for_reaction_fallback: Some(false),
-                #[cfg(feature = "12-58-0")]
+                #[cfg(all(feature = "12-58-0", not(feature = "13-10-0")))]
                 pinned_pages: Some(vec!["/announcements".to_string()]),
-                #[cfg(feature = "12-62-0")]
+                #[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
                 pinned_clip_id: Some(None),
                 pinned_users: Some(vec!["@admin".to_string(), "@testuser".to_string()]),
                 hidden_tags: Some(vec!["not_good".to_string()]),
                 blocked_hosts: Some(vec!["not.good.host".to_string()]),
+                #[cfg(feature = "13-10-0")]
+                sensitive_words: Some(vec!["sensitive".to_string()]),
                 #[cfg(feature = "12-105-0")]
                 theme_color: Some(Some("#31748f".to_string())),
                 mascot_image_url: Some(Some(image_url.to_string())),

@@ -15,6 +15,9 @@ pub struct Emoji {
     pub host: Option<String>,
     pub category: Option<String>,
     pub aliases: Vec<String>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub license: Option<String>,
 }
 
 impl_entity!(Emoji);

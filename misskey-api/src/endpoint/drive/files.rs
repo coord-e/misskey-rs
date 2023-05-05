@@ -1,3 +1,5 @@
+#[cfg(feature = "13-10-0")]
+use crate::model::{drive::DriveFileSortKey, sort::SortOrder};
 use crate::model::{
     drive::{DriveFile, DriveFolder},
     id::Id,
@@ -40,6 +42,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub until_id: Option<Id<DriveFile>>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub sort: Option<SortOrder<DriveFileSortKey>>,
 }
 
 impl misskey_core::Request for Request {
@@ -81,6 +88,8 @@ mod tests {
                 limit: None,
                 since_id: None,
                 until_id: None,
+                #[cfg(feature = "13-10-0")]
+                sort: None,
             })
             .await;
     }
@@ -97,6 +106,8 @@ mod tests {
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
+                #[cfg(feature = "13-10-0")]
+                sort: None,
             })
             .await;
     }
@@ -113,6 +124,48 @@ mod tests {
                 limit: None,
                 since_id: Some(file.id.clone()),
                 until_id: Some(file.id.clone()),
+                #[cfg(feature = "13-10-0")]
+                sort: None,
+            })
+            .await;
+    }
+
+    #[cfg(feature = "13-10-0")]
+    #[tokio::test]
+    async fn request_with_sort() {
+        use crate::model::{drive::DriveFileSortKey, sort::SortOrder};
+
+        let client = TestClient::new();
+        client.create_text_file("test.txt", "test").await;
+
+        client
+            .test(Request {
+                type_: None,
+                folder_id: None,
+                limit: None,
+                since_id: None,
+                until_id: None,
+                sort: Some(SortOrder::Ascending(DriveFileSortKey::CreatedAt)),
+            })
+            .await;
+        client
+            .test(Request {
+                type_: None,
+                folder_id: None,
+                limit: None,
+                since_id: None,
+                until_id: None,
+                sort: Some(SortOrder::Ascending(DriveFileSortKey::Name)),
+            })
+            .await;
+        client
+            .test(Request {
+                type_: None,
+                folder_id: None,
+                limit: None,
+                since_id: None,
+                until_id: None,
+                sort: Some(SortOrder::Descending(DriveFileSortKey::Size)),
             })
             .await;
     }

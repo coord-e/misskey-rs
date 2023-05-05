@@ -23,6 +23,7 @@ mod tests {
             .test(
                 crate::endpoint::antennas::create::Request::builder()
                     .name("test")
+                    .keywords("test")
                     .build(),
             )
             .await;

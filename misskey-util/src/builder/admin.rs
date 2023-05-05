@@ -4,7 +4,7 @@ use crate::Error;
 use chrono::{DateTime, Utc};
 #[cfg(feature = "12-80-0")]
 use misskey_api::model::ad::{Ad, Place, Priority};
-#[cfg(feature = "12-62-0")]
+#[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
 use misskey_api::model::clip::Clip;
 #[cfg(feature = "12-9-0")]
 use misskey_api::model::emoji::Emoji;
@@ -168,18 +168,22 @@ impl<C> MetaUpdateBuilder<C> {
         pub pinned_users;
         /// Sets the hashtags that the instance will ignore for statistics, etc.
         pub hidden_tags;
+        /// Sets the list of words where notes that contain any of the words will be set their visibility to home.
+        #[cfg(feature = "13-10-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+        pub sensitive_words;
         /// Sets the hosts to be blocked by the instance.
         pub blocked_hosts;
         /// Sets the pinned pages of the instance.
-        #[cfg(feature = "12-58-0")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+        #[cfg(all(feature = "12-58-0", not(feature = "13-10-0")))]
+        #[cfg_attr(docsrs, doc(cfg(all(feature = "12-58-0", not(feature = "13-10-0")))))]
         pub pinned_pages;
     }
 
     update_builder_option_field! {
         #[doc_name = "pinned clip"]
-        #[cfg(feature = "12-62-0")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+        #[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
+        #[cfg_attr(docsrs, doc(cfg(all(feature = "12-62-0", not(feature = "13-10-0")))))]
         pub pinned_clip : impl EntityRef<Clip> { pinned_clip_id =  pinned_clip.entity_ref() };
     }
 
@@ -674,6 +678,8 @@ impl<C> EmojiUpdateBuilder<C> {
             name,
             category,
             aliases,
+            #[cfg(feature = "13-10-0")]
+            license,
             ..
         } = emoji;
         let request = endpoint::admin::emoji::update::Request {
@@ -681,6 +687,8 @@ impl<C> EmojiUpdateBuilder<C> {
             name,
             category,
             aliases,
+            #[cfg(feature = "13-10-0")]
+            license,
         };
         EmojiUpdateBuilder { client, request }
     }
@@ -728,6 +736,14 @@ impl<C> EmojiUpdateBuilder<C> {
     /// Adds the given alias to the custom emoji.
     pub fn add_alias(&mut self, alias: impl Into<String>) -> &mut Self {
         self.request.aliases.push(alias.into());
+        self
+    }
+
+    /// Sets the license of the custom emoji.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn license(&mut self, license: impl Into<String>) -> &mut Self {
+        self.request.license.replace(license.into());
         self
     }
 }
@@ -1199,6 +1215,16 @@ impl<C> RoleBuilder<C> {
         self
     }
 
+    /// Sets the display order of the role on UI.
+    ///
+    /// The role with the highest value will be shown at the top of the list.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn display_order(&mut self, display_order: i64) -> &mut Self {
+        self.request.display_order = display_order;
+        self
+    }
+
     /// Sets the policies of the role.
     pub fn policies(&mut self, policies: impl Into<Policies>) -> &mut Self {
         self.request.policies = policies.into();
@@ -1441,6 +1467,8 @@ impl<C> RoleUpdateBuilder<C> {
             #[cfg(feature = "13-4-0")]
             as_badge,
             can_edit_members_by_moderator,
+            #[cfg(feature = "13-10-0")]
+            display_order,
             policies,
             ..
         } = role;
@@ -1459,6 +1487,8 @@ impl<C> RoleUpdateBuilder<C> {
             #[cfg(feature = "13-4-0")]
             as_badge,
             can_edit_members_by_moderator,
+            #[cfg(feature = "13-10-0")]
+            display_order,
             policies,
         };
         RoleUpdateBuilder { client, request }
@@ -1553,6 +1583,16 @@ impl<C> RoleUpdateBuilder<C> {
         can_edit_members_by_moderator: bool,
     ) -> &mut Self {
         self.request.can_edit_members_by_moderator = can_edit_members_by_moderator;
+        self
+    }
+
+    /// Sets the display order of the role on UI.
+    ///
+    /// The role with the highest value will be shown at the top of the list.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn display_order(&mut self, display_order: i64) -> &mut Self {
+        self.request.display_order = display_order;
         self
     }
 

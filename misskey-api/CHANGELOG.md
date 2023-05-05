@@ -104,6 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `clips/favorite`
    - endpoint `clips/my-favorites`
    - endpoint `clips/unfavorite`
+   - endpoint `emoji`
 
 ### Changed
 
