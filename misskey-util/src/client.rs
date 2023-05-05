@@ -2631,6 +2631,55 @@ pub trait ClientExt: Client + Sync {
         );
         PagerStream::new(Box::pin(pager))
     }
+
+    /// Favorites the specified clip.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn favorite_clip(
+        &self,
+        clip: impl EntityRef<Clip>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::clips::favorite::Request { clip_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unfavorites the specified clip.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn unfavorite_clip(
+        &self,
+        clip: impl EntityRef<Clip>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::clips::unfavorite::Request { clip_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the clips favorited by the user logged in with this client.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn favorited_clips(&self) -> BoxFuture<Result<Vec<Clip>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let clips = self
+                .request(endpoint::clips::my_favorites::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(clips)
+        })
+    }
+
     // }}}
 
     // {{{ Messaging

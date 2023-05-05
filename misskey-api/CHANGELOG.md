@@ -101,6 +101,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v13.9.0 ~ v13.9.2
 - Support for Misskey v13.10.0 ~ v13.10.2
    - endpoint `renote-mute/*`
+   - endpoint `clips/favorite`
+   - endpoint `clips/my-favorites`
+   - endpoint `clips/unfavorite`
 
 ### Changed
 

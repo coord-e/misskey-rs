@@ -10,6 +10,9 @@ use serde::{Deserialize, Serialize};
 pub struct Clip {
     pub id: Id<Clip>,
     pub created_at: DateTime<Utc>,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub last_clipped_at: Option<DateTime<Utc>>,
     pub name: String,
     #[cfg(feature = "12-57-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-57-0")))]
@@ -23,6 +26,12 @@ pub struct Clip {
     #[cfg(feature = "12-57-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-57-0")))]
     pub is_public: bool,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub favorited_count: u64,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub is_favorited: Option<bool>,
 }
 
 impl_entity!(Clip);
