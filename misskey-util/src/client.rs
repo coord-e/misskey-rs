@@ -4890,6 +4890,34 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Assigns a user to the role with time limit.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-9-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-9-0")))]
+    fn assign_role_with_time_limit(
+        &self,
+        role: impl EntityRef<Role>,
+        user: impl EntityRef<User>,
+        expires_at: DateTime<Utc>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(
+                endpoint::admin::roles::assign::Request::builder()
+                    .role_id(role_id)
+                    .user_id(user_id)
+                    .expires_at(expires_at)
+                    .build(),
+            )
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Removes a user from the role.
     ///
     /// This operation may require moderator privileges.
