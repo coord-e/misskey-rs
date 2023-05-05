@@ -160,6 +160,8 @@ impl<C> MetaUpdateBuilder<C> {
         #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
         pub disable_global_timeline;
         /// Sets whether the instance uses ★ as fallback if the reaction emoji is unknown.
+        #[cfg(not(feature = "13-10-3"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-3"))))]
         pub use_star_for_reaction_fallback;
     }
 
@@ -560,6 +562,14 @@ impl<C> MetaUpdateBuilder<C> {
         #[cfg(feature = "12-112-3")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
         pub enable_active_email_validation;
+        /// Sets whether or not to generate charts of remote users
+        #[cfg(feature = "13-10-3")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+        pub enable_charts_for_remote_user;
+        /// Sets whether or not to generate charts of remote instances
+        #[cfg(feature = "13-10-3")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+        pub enable_charts_for_federated_instances;
     }
     update_builder_option_field! {
         #[doc_name = "base URL of the extenal object storage"]

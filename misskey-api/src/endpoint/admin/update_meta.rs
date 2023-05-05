@@ -22,6 +22,8 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[builder(default, setter(strip_option))]
     pub disable_global_timeline: Option<bool>,
+    #[cfg(not(feature = "13-10-3"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-3"))))]
     #[builder(default, setter(strip_option))]
     pub use_star_for_reaction_fallback: Option<bool>,
     #[builder(default, setter(strip_option))]
@@ -341,6 +343,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_active_email_validation: Option<bool>,
+    #[cfg(feature = "13-10-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub enable_charts_for_remote_user: Option<bool>,
+    #[cfg(feature = "13-10-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub enable_charts_for_federated_instances: Option<bool>,
 }
 
 impl misskey_core::Request for Request {
@@ -383,6 +395,7 @@ mod tests {
                 disable_local_timeline: Some(false),
                 #[cfg(not(feature = "13-0-0"))]
                 disable_global_timeline: Some(false),
+                #[cfg(not(feature = "13-10-3"))]
                 use_star_for_reaction_fallback: Some(false),
                 #[cfg(all(feature = "12-58-0", not(feature = "13-10-0")))]
                 pinned_pages: Some(vec!["/announcements".to_string()]),
@@ -505,6 +518,10 @@ mod tests {
                 enable_ip_logging: Some(false),
                 #[cfg(feature = "12-112-3")]
                 enable_active_email_validation: Some(false),
+                #[cfg(feature = "13-10-3")]
+                enable_charts_for_remote_user: Some(false),
+                #[cfg(feature = "13-10-3")]
+                enable_charts_for_federated_instances: Some(false),
             })
             .await;
     }

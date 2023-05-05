@@ -291,6 +291,8 @@ pub struct AdminMeta {
     #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-0"))))]
     pub pinned_clip_id: Option<Id<Clip>>,
     pub cache_remote_files: Option<bool>,
+    #[cfg(not(feature = "13-10-3"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-3"))))]
     pub use_star_for_reaction_fallback: bool,
     pub pinned_users: Vec<String>,
     pub hidden_tags: Vec<String>,
@@ -364,6 +366,12 @@ pub struct AdminMeta {
     #[cfg(feature = "12-112-3")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
     pub enable_active_email_validation: bool,
+    #[cfg(feature = "13-10-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+    pub enable_charts_for_remote_user: bool,
+    #[cfg(feature = "13-10-3")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+    pub enable_charts_for_federated_instances: bool,
     #[cfg(feature = "13-0-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
     pub policies: PoliciesSimple,

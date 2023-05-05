@@ -124,6 +124,16 @@ pub enum RoleCondFormulaValue {
     FollowingMoreThanOrEq {
         value: u64,
     },
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    NotesLessThanOrEq {
+        value: u64,
+    },
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    NotesMoreThanOrEq {
+        value: u64,
+    },
 }
 
 mod duration_seconds {

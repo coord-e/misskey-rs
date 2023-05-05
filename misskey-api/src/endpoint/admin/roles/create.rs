@@ -100,6 +100,10 @@ mod tests {
                         RoleCondFormulaValue::FollowersMoreThanOrEq { value: 10 },
                         RoleCondFormulaValue::FollowingLessThanOrEq { value: 100 },
                         RoleCondFormulaValue::FollowingMoreThanOrEq { value: 10 },
+                        #[cfg(feature = "13-10-3")]
+                        RoleCondFormulaValue::NotesLessThanOrEq { value: 100 },
+                        #[cfg(feature = "13-10-3")]
+                        RoleCondFormulaValue::NotesMoreThanOrEq { value: 10 },
                     ],
                 }),
                 is_public: true,
