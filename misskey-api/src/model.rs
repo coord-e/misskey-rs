@@ -41,6 +41,7 @@ pub mod notification;
 pub mod page;
 pub mod query;
 pub mod registry;
+pub mod renote_muting;
 pub mod retention;
 pub mod role;
 pub mod signin;

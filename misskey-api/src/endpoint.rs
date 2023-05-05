@@ -113,3 +113,7 @@ pub mod messaging;
 #[cfg(feature = "13-7-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
 pub mod roles;
+
+#[cfg(feature = "13-10-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+pub mod renote_mute;

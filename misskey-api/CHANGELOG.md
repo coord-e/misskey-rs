@@ -99,6 +99,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `roles/*`
 - Support for Misskey v13.8.0 ~ v13.8.1
 - Support for Misskey v13.9.0 ~ v13.9.2
+- Support for Misskey v13.10.0 ~ v13.10.2
+   - endpoint `renote-mute/*`
 
 ### Changed
 

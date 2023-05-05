@@ -419,6 +419,9 @@ pub struct UserRelation {
     pub is_blocking: bool,
     pub is_blocked: bool,
     pub is_muted: bool,
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub is_renote_muted: bool,
 }
 
 #[cfg(all(feature = "12-111-0", not(feature = "13-3-0")))]

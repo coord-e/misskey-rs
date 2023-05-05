@@ -432,6 +432,37 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Mutes renotes of the specified user.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn renote_mute(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::renote_mute::create::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unmutes renotes of the specified user.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn renote_unmute(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::renote_mute::delete::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Blocks the specified user.
     fn block(&self, user: impl EntityRef<User>) -> BoxFuture<Result<User, Error<Self::Error>>> {
         let user_id = user.entity_ref();
@@ -620,6 +651,15 @@ pub trait ClientExt: Client + Sync {
     /// Lists the users muted by the user logged in with this client.
     fn muting_users(&self) -> PagerStream<BoxPager<Self, User>> {
         let pager = BackwardPager::new(self, endpoint::mute::list::Request::default())
+            .map_ok(|v| v.into_iter().map(|m| m.mutee).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    /// Lists the users renote-muted by the user logged in with this client.
+    fn renote_muting_users(&self) -> PagerStream<BoxPager<Self, User>> {
+        let pager = BackwardPager::new(self, endpoint::renote_mute::list::Request::default())
             .map_ok(|v| v.into_iter().map(|m| m.mutee).collect());
         PagerStream::new(Box::pin(pager))
     }
@@ -824,6 +864,34 @@ pub trait ClientExt: Client + Sync {
     fn is_muted(&self, user: impl EntityRef<User>) -> BoxFuture<Result<bool, Error<Self::Error>>> {
         let user_id = user.entity_ref();
         Box::pin(async move { Ok(self.user_relation(user_id).await?.is_muted) })
+    }
+
+    /// Checks if renotes of the specified user is muted by the user logged in with this client.
+    ///
+    /// If you are also interested in other relationships, use [`user_relation`][user_relation].
+    ///
+    /// [user_relation]: ClientExt::user_relation
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # use futures::stream::TryStreamExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.users().list().try_next().await?.unwrap();
+    /// let relation = client.user_relation(&user).await?;
+    /// assert_eq!(client.is_renote_muted(&user).await?, relation.is_renote_muted);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    fn is_renote_muted(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<bool, Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move { Ok(self.user_relation(user_id).await?.is_renote_muted) })
     }
 
     /// Checks if the specified user has a pending follow request from the user logged in with this client.
