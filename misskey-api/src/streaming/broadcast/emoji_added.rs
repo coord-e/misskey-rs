@@ -1,6 +1,6 @@
-#[cfg(not(feature = "13-2-3"))]
+#[cfg(any(not(feature = "13-2-3"), feature = "13-7-0"))]
 use crate::model::emoji::Emoji;
-#[cfg(feature = "13-2-3")]
+#[cfg(all(feature = "13-2-3", not(feature = "13-7-0")))]
 use crate::model::emoji::EmojiSimple;
 
 use serde::Deserialize;
@@ -8,11 +8,11 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct EmojiAddedEvent {
-    #[cfg(not(feature = "13-2-3"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-2-3"))))]
+    #[cfg(any(not(feature = "13-2-3"), feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "13-2-3"), feature = "13-7-0"))))]
     pub emoji: Emoji,
-    #[cfg(feature = "13-2-3")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "13-2-3")))]
+    #[cfg(all(feature = "13-2-3", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "13-2-3", not(feature = "13-7-0")))))]
     pub emoji: EmojiSimple,
 }
 

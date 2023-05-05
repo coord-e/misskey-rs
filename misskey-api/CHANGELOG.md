@@ -94,6 +94,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v13.3.0 ~ v13.3.1
 - Support for Misskey v13.3.2 ~ v13.3.4
 - Support for Misskey v13.4.0 ~ v13.6.1
+- Support for Misskey v13.7.0 ~ v13.7.5
+   - endpoint `admin/roles/users`
+   - endpoint `roles/*`
 
 ### Changed
 

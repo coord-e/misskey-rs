@@ -9,8 +9,8 @@ use url::Url;
 pub struct Emoji {
     pub id: Id<Emoji>,
     pub name: String,
-    #[cfg(not(feature = "13-0-0"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
+    #[cfg(any(not(feature = "13-0-0"), feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "13-0-0"), feature = "13-7-0"))))]
     pub url: Url,
     pub host: Option<String>,
     pub category: Option<String>,

@@ -265,6 +265,8 @@ pub struct AdminMeta {
     pub icon_url: Option<String>,
     pub background_image_url: Option<String>,
     pub logo_image_url: Option<String>,
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     pub max_note_text_length: u64,
     pub default_light_theme: Option<String>,
     pub default_dark_theme: Option<String>,

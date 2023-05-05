@@ -12,6 +12,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - image: 'misskey/misskey:13.7.0'
+            flags: --features 13-7-0
           - image: 'misskey/misskey:13.4.0'
             flags: --features 13-4-0
           - image: 'misskey/misskey:13.3.2'

@@ -62,7 +62,6 @@ use misskey_api::model::{
     following::FollowRequest,
     id::Id,
     log::ModerationLog,
-    messaging::MessagingMessage,
     meta::Meta,
     note::{Note, Reaction, Tag},
     note_reaction::NoteReaction,
@@ -70,7 +69,6 @@ use misskey_api::model::{
     page::Page,
     query::Query,
     user::{User, UserRelation},
-    user_group::{UserGroup, UserGroupInvitation},
     user_list::UserList,
 };
 #[cfg(feature = "13-0-0")]
@@ -78,6 +76,11 @@ use misskey_api::model::{
     emoji::EmojiSimple,
     flash::Flash,
     role::{PoliciesSimple, Role},
+};
+#[cfg(not(feature = "13-7-0"))]
+use misskey_api::model::{
+    messaging::MessagingMessage,
+    user_group::{UserGroup, UserGroupInvitation},
 };
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::{Client, UploadFileClient};
@@ -4056,6 +4059,56 @@ pub trait ClientExt: Client + Sync {
     }
     // }}}
 
+    // {{{ Roles
+    /// Gets the corresponding public role from the ID.
+    ///
+    /// Use [`get_role`][`ClientExt::get_role`] method with moderator privileges if you want to get private roles.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn get_public_role(&self, id: Id<Role>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
+        Box::pin(async move {
+            let role = self
+                .request(endpoint::roles::show::Request { role_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(role)
+        })
+    }
+
+    /// Lists the public roles of the instance.
+    ///
+    /// Use [`roles`][`ClientExt::roles`] method with moderator privileges if you want to get a list of all roles.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn public_roles(&self) -> BoxFuture<Result<Vec<Role>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let roles = self
+                .request(endpoint::roles::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(roles)
+        })
+    }
+
+    /// Lists the members of the public role.
+    ///
+    /// Use [`role_users`][`ClientExt::role_users`] method with moderator privileges if you want to get members of private roles.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn public_role_users(&self, role: impl EntityRef<Role>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::roles::users::Request::builder()
+                .role_id(role.entity_ref())
+                .build(),
+        )
+        .map_ok(|v| v.into_iter().map(|a| a.user).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
     // {{{ Admin
     /// Sets moderator privileges for the specified user.
     ///
@@ -4740,6 +4793,10 @@ pub trait ClientExt: Client + Sync {
     /// Gets the corresponding role from the ID.
     ///
     /// This operation may require moderator privileges.
+    #[cfg_attr(
+        feature = "13-7-0",
+        doc = "Use [`get_public_role`][`ClientExt::get_public_role`] method if you want to get roles from normal users."
+    )]
     #[cfg(feature = "13-0-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
     fn get_role(&self, id: Id<Role>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
@@ -4841,6 +4898,10 @@ pub trait ClientExt: Client + Sync {
     /// Lists the roles of the instance.
     ///
     /// This operation may require moderator privileges.
+    #[cfg_attr(
+        feature = "13-7-0",
+        doc = "Use [`public_roles`][`ClientExt::public_roles`] method if you want to get a list of roles from normal users."
+    )]
     #[cfg(feature = "13-0-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
     fn roles(&self) -> BoxFuture<Result<Vec<Role>, Error<Self::Error>>> {
@@ -4852,6 +4913,23 @@ pub trait ClientExt: Client + Sync {
                 .into_result()?;
             Ok(roles)
         })
+    }
+
+    /// Lists the members of the role.
+    ///
+    /// This operation may require moderator privileges.
+    /// Use [`public_role_users`][`ClientExt::public_role_users`] method if you want to get a list of members from normal users.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn role_users(&self, role: impl EntityRef<Role>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::admin::roles::users::Request::builder()
+                .role_id(role.entity_ref())
+                .build(),
+        )
+        .map_ok(|v| v.into_iter().map(|a| a.user).collect());
+        PagerStream::new(Box::pin(pager))
     }
 
     /// Updates the default policies of the instance.

@@ -109,3 +109,7 @@ pub mod retention;
 #[cfg(not(feature = "13-7-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
 pub mod messaging;
+
+#[cfg(feature = "13-7-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+pub mod roles;

@@ -1,4 +1,4 @@
-#[cfg(feature = "12-71-0")]
+#[cfg(all(feature = "12-71-0", not(feature = "13-7-0")))]
 use crate::model::user::User;
 use crate::model::{channel::Channel, id::Id, note::Note};
 use crate::streaming::channel::NoOutgoing;

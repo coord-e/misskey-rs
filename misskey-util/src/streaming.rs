@@ -296,6 +296,7 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     /// Returns a stream to receive notes in the timeline of the specified channel.
     #[cfg(feature = "12-47-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
+    #[allow(irrefutable_let_patterns)]
     fn channel_timeline(
         &self,
         channel: impl EntityRef<Channel>,

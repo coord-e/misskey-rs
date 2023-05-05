@@ -11,6 +11,9 @@ use thiserror::Error;
 pub struct Ad {
     pub id: Id<Ad>,
     pub created_at: DateTime<Utc>,
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    pub starts_at: DateTime<Utc>,
     pub expires_at: DateTime<Utc>,
     pub place: Place,
     pub priority: Priority,

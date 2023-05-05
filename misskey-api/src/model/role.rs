@@ -29,6 +29,8 @@ pub struct Role {
     pub can_edit_members_by_moderator: bool,
     pub policies: Policies,
     pub users_count: u64,
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     #[serde(default)]
     pub users: Option<Vec<User>>,
 }
@@ -353,3 +355,12 @@ pub struct PoliciesSimple {
     #[builder(default, setter(strip_option))]
     pub rate_limit_factor: Option<f64>,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RoleAssignment {
+    pub id: Id<RoleAssignment>,
+    pub user: User,
+}
+
+impl_entity!(RoleAssignment);

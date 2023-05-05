@@ -1,3 +1,6 @@
+#[cfg(feature = "13-7-0")]
+use crate::model::emoji::Emoji;
+#[cfg(not(feature = "13-7-0"))]
 use crate::model::emoji::EmojiSimple;
 
 use serde::Deserialize;
@@ -5,7 +8,10 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct EmojiDeletedEvent {
+    #[cfg(not(feature = "13-7-0"))]
     pub emojis: Vec<EmojiSimple>,
+    #[cfg(feature = "13-7-0")]
+    pub emojis: Vec<Emoji>,
 }
 
 impl misskey_core::streaming::BroadcastEvent for EmojiDeletedEvent {

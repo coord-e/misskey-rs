@@ -21,6 +21,11 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
     #[builder(default, setter(into))]
     pub ratio: u64,
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    #[serde(with = "ts_milliseconds")]
+    #[builder(default, setter(into))]
+    pub starts_at: DateTime<Utc>,
     #[serde(with = "ts_milliseconds")]
     #[builder(setter(into))]
     pub expires_at: DateTime<Utc>,
@@ -57,6 +62,8 @@ mod tests {
                 #[cfg(feature = "12-81-0")]
                 ratio: 1,
                 image_url: url.to_string(),
+                #[cfg(feature = "13-7-0")]
+                starts_at: chrono::Utc::now(),
                 expires_at: chrono::Utc::now() + chrono::Duration::hours(1),
             })
             .await;
