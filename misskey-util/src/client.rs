@@ -2296,6 +2296,22 @@ pub trait ClientExt: Client + Sync {
             Ok(channels)
         })
     }
+
+    /// Lists the featured notes on the specified channel.
+    #[cfg(feature = "13-8-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-8-0")))]
+    fn channel_featured_notes(
+        &self,
+        channel: impl EntityRef<Channel>,
+    ) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::notes::featured::Request::builder()
+                .channel_id(channel.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
     // }}}
 
     // {{{ Clip

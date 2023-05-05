@@ -56,6 +56,7 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub visible_user_ids: Option<Vec<Id<User>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub text: Option<String>,
     #[builder(default, setter(strip_option, into))]
