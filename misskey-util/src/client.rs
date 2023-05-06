@@ -3047,26 +3047,6 @@ pub trait ClientExt: Client + Sync {
     // }}}
 
     // {{{ Page
-    /// Creates an empty page with the given name.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use misskey_util::ClientExt;
-    /// # #[tokio::main]
-    /// # async fn main() -> anyhow::Result<()> {
-    /// # let client = misskey_test::test_client().await?;
-    /// let page = client.create_page("name").await?;
-    /// assert_eq!(page.name, "name");
-    /// # client.delete_page(&page).await?;
-    /// # Ok(())
-    /// # }
-    /// ```
-    fn create_page(&self, name: impl Into<String>) -> BoxFuture<Result<Page, Error<Self::Error>>> {
-        let name = name.into();
-        Box::pin(async move { self.build_page().name(name).create().await })
-    }
-
     /// Returns a builder for creating a page.
     ///
     /// The returned builder provides methods to customize details of the page,
@@ -3111,7 +3091,7 @@ pub trait ClientExt: Client + Sync {
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
     /// # let client = misskey_test::test_client().await?;
-    /// let page = client.create_page("page_to_delete").await?;
+    /// let page = client.build_page().name("page_to_delete").create().await?;
     /// client.delete_page(&page).await?;
     /// # Ok(())
     /// # }
@@ -3173,17 +3153,18 @@ pub trait ClientExt: Client + Sync {
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
     /// # let client = misskey_test::test_client().await?;
-    /// let page = client.create_page("empty_page").await?;
+    /// let page = client.build_page().name("empty_page").create().await?;
+    /// # let page_id = page.id;
     ///
     /// // Change name and add summary of the page
-    /// let page = client
+    /// client
     ///     .update_page(page)
     ///     .name("introduction")
     ///     .summary("Brief introduction to Misskey")
     ///     .update()
     ///     .await?;
     ///
-    /// # client.delete_page(&page).await?;
+    /// # client.delete_page(page_id).await?;
     /// # Ok(())
     /// # }
     /// ```
