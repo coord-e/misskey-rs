@@ -3141,12 +3141,12 @@ pub trait ClientExt: Client + Sync {
 
     /// Updates the specified page.
     ///
-    /// This method actually returns a builder, namely [`pageUpdateBuilder`].
+    /// This method actually returns a builder, namely [`PageUpdateBuilder`].
     /// You can chain the method calls to it corresponding to the fields you want to update.
     /// Finally, calling [`update`][builder_update] method will actually perform the update.
-    /// See [`pageUpdateBuilder`] for the fields that can be updated.
+    /// See [`PageUpdateBuilder`] for the fields that can be updated.
     ///
-    /// [builder_update]: pageUpdateBuilder::update
+    /// [builder_update]: PageUpdateBuilder::update
     ///
     /// # Examples
     ///
