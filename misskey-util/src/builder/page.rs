@@ -1,5 +1,6 @@
 use crate::Error;
 
+use chrono::Utc;
 use misskey_api::model::drive::DriveFile;
 use misskey_api::model::page::{Content, Font, Page, Variables};
 use misskey_api::{endpoint, EntityRef};
@@ -14,7 +15,19 @@ pub struct PageBuilder<C> {
 impl<C> PageBuilder<C> {
     /// Creates a builder with the client.
     pub fn new(client: C) -> Self {
-        let request = endpoint::pages::create::Request::default();
+        let request = endpoint::pages::create::Request {
+            title: String::default(),
+            name: Utc::now().timestamp_millis().to_string(),
+            summary: None,
+            content: Content::default(),
+            variables: Variables::default(),
+            #[cfg(feature = "12-31-0")]
+            script: String::default(),
+            eye_catching_image_id: None,
+            font: None,
+            align_center: None,
+            hide_title_when_pinned: None,
+        };
         PageBuilder { client, request }
     }
 

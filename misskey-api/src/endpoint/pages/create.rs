@@ -4,7 +4,6 @@ use crate::model::{
     page::{Content, Font, Page, Variables},
 };
 
-use chrono::Utc;
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
@@ -42,24 +41,6 @@ pub struct Request {
     pub hide_title_when_pinned: Option<bool>,
 }
 
-impl Default for Request {
-    fn default() -> Self {
-        Request {
-            title: String::default(),
-            name: Utc::now().timestamp_millis().to_string(),
-            summary: None,
-            content: Content::default(),
-            variables: Variables::default(),
-            #[cfg(feature = "12-31-0")]
-            script: String::default(),
-            eye_catching_image_id: None,
-            font: None,
-            align_center: None,
-            hide_title_when_pinned: None,
-        }
-    }
-}
-
 impl misskey_core::Request for Request {
     type Response = Page;
     const ENDPOINT: &'static str = "pages/create";
@@ -67,7 +48,7 @@ impl misskey_core::Request for Request {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Utc;
+    use ulid_crate::Ulid;
 
     use super::Request;
     use crate::test::{ClientExt, TestClient};
@@ -75,7 +56,9 @@ mod tests {
     #[tokio::test]
     async fn request() {
         let client = TestClient::new();
-        client.test(Request::default()).await;
+        client
+            .test(Request::builder().name(Ulid::new()).build())
+            .await;
     }
 
     #[tokio::test]
@@ -87,7 +70,7 @@ mod tests {
         client
             .test(Request {
                 title: "page".to_string(),
-                name: Utc::now().timestamp_millis().to_string(),
+                name: Ulid::new().to_string(),
                 summary: Some("page summary".to_string()),
                 content: r#"[
                     {

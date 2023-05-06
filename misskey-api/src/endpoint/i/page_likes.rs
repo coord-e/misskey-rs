@@ -28,6 +28,8 @@ impl_pagination!(Request, PageLike);
 
 #[cfg(test)]
 mod tests {
+    use ulid_crate::Ulid;
+
     use super::Request;
     use crate::test::{ClientExt, TestClient};
 
@@ -60,7 +62,11 @@ mod tests {
         let client = TestClient::new();
         let page = client
             .admin
-            .test(crate::endpoint::pages::create::Request::default())
+            .test(
+                crate::endpoint::pages::create::Request::builder()
+                    .name(Ulid::new())
+                    .build(),
+            )
             .await;
         client
             .user

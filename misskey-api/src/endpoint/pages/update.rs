@@ -49,7 +49,7 @@ impl misskey_core::Request for Request {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Utc;
+    use ulid_crate::Ulid;
 
     use super::Request;
     use crate::{
@@ -61,14 +61,18 @@ mod tests {
     async fn request() {
         let client = TestClient::new();
         let page = client
-            .test(crate::endpoint::pages::create::Request::default())
+            .test(
+                crate::endpoint::pages::create::Request::builder()
+                    .name(Ulid::new())
+                    .build(),
+            )
             .await;
 
         client
             .test(Request {
                 page_id: page.id,
                 title: String::default(),
-                name: Utc::now().timestamp_millis().to_string(),
+                name: Ulid::new().to_string(),
                 summary: None,
                 content: Content::default(),
                 variables: Variables::default(),
@@ -89,14 +93,18 @@ mod tests {
         let file = client.upload_from_url(url).await;
 
         let page = client
-            .test(crate::endpoint::pages::create::Request::default())
+            .test(
+                crate::endpoint::pages::create::Request::builder()
+                    .name(Ulid::new())
+                    .build(),
+            )
             .await;
 
         client
             .test(Request {
                 page_id: page.id,
                 title: "renamed".to_string(),
-                name: Utc::now().timestamp_millis().to_string(),
+                name: Ulid::new().to_string(),
                 summary: Some("page summary".to_string()),
                 content: r#"[
                     {

@@ -28,6 +28,8 @@ impl_pagination!(Request, Page);
 
 #[cfg(test)]
 mod tests {
+    use ulid_crate::Ulid;
+
     use super::Request;
     use crate::test::{ClientExt, TestClient};
 
@@ -59,7 +61,11 @@ mod tests {
     async fn request_paginate() {
         let client = TestClient::new();
         let page = client
-            .test(crate::endpoint::pages::create::Request::default())
+            .test(
+                crate::endpoint::pages::create::Request::builder()
+                    .name(Ulid::new())
+                    .build(),
+            )
             .await;
 
         client
