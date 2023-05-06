@@ -81,8 +81,8 @@ impl<C> PageBuilder<C> {
     }
 
     /// Sets the font of the page.
-    pub fn font(&mut self, font: impl Into<Font>) -> &mut Self {
-        self.request.font.replace(font.into());
+    pub fn font(&mut self, font: Font) -> &mut Self {
+        self.request.font.replace(font);
         self
     }
 
@@ -215,8 +215,8 @@ impl<C> PageUpdateBuilder<C> {
     }
 
     /// Sets the font of the page.
-    pub fn font(&mut self, font: impl Into<Font>) -> &mut Self {
-        self.request.font.replace(font.into());
+    pub fn font(&mut self, font: Font) -> &mut Self {
+        self.request.font.replace(font);
         self
     }
 
