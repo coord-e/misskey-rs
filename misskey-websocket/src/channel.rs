@@ -13,7 +13,7 @@ use async_tungstenite::tokio::{connect_async, ConnectStream};
 use async_tungstenite::tungstenite::{
     client::IntoClientRequest,
     error::{Error as WsError, Result as WsResult},
-    http::{self, header::HeaderMap},
+    http::header::HeaderMap,
     Message as WsMessage,
 };
 use async_tungstenite::WebSocketStream;
@@ -23,6 +23,7 @@ use futures_util::{
 };
 #[cfg(feature = "inspect-contents")]
 use log::debug;
+use url::Url;
 
 /// Receiver channel that communicates with Misskey
 pub struct WebSocketReceiver(SplitStream<PingPongWebSocketStream<WebSocketStream<ConnectStream>>>);
@@ -213,13 +214,11 @@ where
 }
 
 pub async fn connect_websocket(
-    uri: http::Uri,
+    url: Url,
     additional_headers: HeaderMap,
 ) -> Result<(WebSocketSender, WebSocketReceiver)> {
-    let request = uri.into_client_request()?;
-    let (mut parts, _) = request.into_parts();
-    parts.headers.extend(additional_headers);
-    let request = http::Request::from_parts(parts, ());
+    let mut request = url.into_client_request()?;
+    request.headers_mut().extend(additional_headers);
     let (ws, _) = connect_async(request).await?;
     let (sink, stream) = PingPongWebSocketStream::new(ws).split();
     Ok((WebSocketSender(sink), WebSocketReceiver(stream)))

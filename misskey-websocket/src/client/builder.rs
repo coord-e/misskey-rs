@@ -15,8 +15,8 @@ use url::Url;
 #[derive(Debug, Clone)]
 struct WebSocketClientBuilderInner {
     url: Url,
+    additional_headers: HeaderMap,
     reconnect: ReconnectConfig,
-    headers: HeaderMap,
 }
 
 /// Builder for [`WebSocketClient`].
@@ -68,8 +68,8 @@ impl WebSocketClientBuilder {
             .map_err(Into::into)
             .map(|url| WebSocketClientBuilderInner {
                 url,
+                additional_headers: HeaderMap::new(),
                 reconnect: ReconnectConfig::default(),
-                headers: HeaderMap::new(),
             });
 
         WebSocketClientBuilder { inner }
@@ -102,7 +102,7 @@ impl WebSocketClientBuilder {
             });
             match result {
                 Ok((key, value)) => {
-                    inner.headers.insert(key, value);
+                    inner.additional_headers.insert(key, value);
                     Ok(())
                 }
                 Err(e) => Err(Error::WebSocket(Arc::new(e.into()))),
@@ -191,17 +191,13 @@ impl WebSocketClientBuilder {
     pub async fn connect(&self) -> Result<WebSocketClient> {
         let WebSocketClientBuilderInner {
             url,
+            additional_headers,
             reconnect,
-            headers,
         } = match self.inner.clone() {
             Err(e) => return Err(e),
             Ok(inner) => inner,
         };
 
-        let mut request = http::Request::builder().uri(url.to_string());
-        for (key, value) in headers.iter() {
-            request = request.header(key, value);
-        }
-        WebSocketClient::connect_with_config(request.body(()).unwrap(), reconnect).await
+        WebSocketClient::connect_with_headers_and_config(url, additional_headers, reconnect).await
     }
 }

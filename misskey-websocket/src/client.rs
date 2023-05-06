@@ -8,7 +8,7 @@ use crate::broker::{
 use crate::error::{Error, Result};
 use crate::model::{ApiRequestId, SubNoteId};
 
-use async_tungstenite::tungstenite::client::IntoClientRequest;
+use async_tungstenite::tungstenite::http::HeaderMap;
 use futures_util::{
     future::{BoxFuture, FutureExt, TryFutureExt},
     sink::{Sink, SinkExt},
@@ -57,24 +57,44 @@ impl Debug for WebSocketClient {
 
 impl WebSocketClient {
     /// Connects to Misskey using WebSocket, and returns [`WebSocketClient`].
-    pub async fn connect<R>(request: R) -> Result<WebSocketClient>
-    where
-        R: IntoClientRequest,
-    {
-        WebSocketClient::connect_with_config(request, ReconnectConfig::default()).await
+    pub async fn connect(url: Url) -> Result<WebSocketClient> {
+        WebSocketClient::connect_with_config(url, ReconnectConfig::default()).await
+    }
+
+    /// Connects to Misskey using WebSocket with given additional headers, and returns [`WebSocketClient`].
+    pub async fn connect_with_headers(
+        url: Url,
+        additional_headers: HeaderMap,
+    ) -> Result<WebSocketClient> {
+        WebSocketClient::connect_with_headers_and_config(
+            url,
+            additional_headers,
+            ReconnectConfig::default(),
+        )
+        .await
     }
 
     /// Connects to Misskey using WebSocket with a given reconnect configuration, and returns [`WebSocketClient`].
-    pub async fn connect_with_config<R>(
-        request: R,
+    pub async fn connect_with_config(
+        url: Url,
         reconnect_config: ReconnectConfig,
-    ) -> Result<WebSocketClient>
-    where
-        R: IntoClientRequest,
-    {
-        let request = request.into_client_request()?;
-        let (parts, _) = request.into_parts();
-        let (broker_tx, state) = Broker::spawn(parts.uri, reconnect_config, parts.headers).await?;
+    ) -> Result<WebSocketClient> {
+        WebSocketClient::connect_with_headers_and_config(
+            url,
+            HeaderMap::default(),
+            reconnect_config,
+        )
+        .await
+    }
+
+    /// Connects to Misskey using WebSocket with given additional headers and
+    /// reconnect configuration, and returns [`WebSocketClient`].
+    pub async fn connect_with_headers_and_config(
+        url: Url,
+        additional_headers: HeaderMap,
+        reconnect_config: ReconnectConfig,
+    ) -> Result<WebSocketClient> {
+        let (broker_tx, state) = Broker::spawn(url, additional_headers, reconnect_config).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 
