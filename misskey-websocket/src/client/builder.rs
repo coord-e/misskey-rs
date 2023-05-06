@@ -65,7 +65,7 @@ impl WebSocketClientBuilder {
     {
         let inner = url
             .try_into()
-            .map_err(Into::into)
+            .err_into()
             .map(|url| WebSocketClientBuilderInner {
                 url,
                 additional_headers: HeaderMap::new(),
