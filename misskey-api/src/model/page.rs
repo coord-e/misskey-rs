@@ -16,19 +16,15 @@ pub struct Page {
     pub user: Box<User>,
     pub content: Content,
     pub variables: Variables,
-    #[serde(default)]
     pub title: String,
     pub name: String,
     #[serde(default)]
     pub summary: Option<String>,
-    #[serde(default = "default_false")]
     pub align_center: bool,
-    #[serde(default = "default_false")]
     pub hide_title_when_pinned: bool,
     pub font: Font,
     #[cfg(feature = "12-31-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-31-0")))]
-    #[serde(default)]
     pub script: String,
     pub eye_catching_image_id: Option<Id<DriveFile>>,
     pub eye_catching_image: Option<Box<DriveFile>>,
@@ -48,10 +44,6 @@ pub struct PageLike {
 }
 
 impl_entity!(PageLike);
-
-fn default_false() -> bool {
-    false
-}
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct Content(Vec<serde_json::Map<String, serde_json::Value>>);
