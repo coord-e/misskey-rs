@@ -3,9 +3,12 @@ use crate::model::{id::Id, page::Page};
 use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Request {
-    pub page_id: Id<Page>,
+#[serde(untagged)]
+pub enum Request {
+    #[serde(rename_all = "camelCase")]
+    WithPageId { page_id: Id<Page> },
+    #[serde(rename_all = "camelCase")]
+    WithName { name: String, username: String },
 }
 
 impl misskey_core::Request for Request {
@@ -21,7 +24,7 @@ mod tests {
     use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
-    async fn request() {
+    async fn request_with_page_id() {
         let client = TestClient::new();
         let page = client
             .test(
@@ -31,6 +34,27 @@ mod tests {
             )
             .await;
 
-        client.test(Request { page_id: page.id }).await;
+        client.test(Request::WithPageId { page_id: page.id }).await;
+    }
+
+    #[tokio::test]
+    async fn request_with_name() {
+        let client = TestClient::new();
+        let user = client.me().await;
+        let name = Ulid::new().to_string();
+        client
+            .test(
+                crate::endpoint::pages::create::Request::builder()
+                    .name(name.clone())
+                    .build(),
+            )
+            .await;
+
+        client
+            .test(Request::WithName {
+                name,
+                username: user.username,
+            })
+            .await;
     }
 }

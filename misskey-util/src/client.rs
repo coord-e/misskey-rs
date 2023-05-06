@@ -3131,7 +3131,25 @@ pub trait ClientExt: Client + Sync {
     fn get_page(&self, id: Id<Page>) -> BoxFuture<Result<Page, Error<Self::Error>>> {
         Box::pin(async move {
             let page = self
-                .request(endpoint::pages::show::Request { page_id: id })
+                .request(endpoint::pages::show::Request::WithPageId { page_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(page)
+        })
+    }
+
+    /// Gets the corresponding page from the name and the username of the author.
+    fn get_page_from_name(
+        &self,
+        name: impl Into<String>,
+        username: impl Into<String>,
+    ) -> BoxFuture<Result<Page, Error<Self::Error>>> {
+        let name = name.into();
+        let username = username.into();
+        Box::pin(async move {
+            let page = self
+                .request(endpoint::pages::show::Request::WithName { name, username })
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
