@@ -21,7 +21,7 @@ pub struct Request {
 
 impl misskey_core::Request for Request {
     type Response = Vec<PageLike>;
-    const ENDPOINT: &'static str = "i/page_likes";
+    const ENDPOINT: &'static str = "i/page-likes";
 }
 
 impl_pagination!(Request, PageLike);

@@ -44,7 +44,7 @@ pub struct Request {
 
 impl misskey_core::Request for Request {
     type Response = Page;
-    const ENDPOINT: &'static str = "pages/create";
+    const ENDPOINT: &'static str = "pages/update";
 }
 
 #[cfg(test)]
