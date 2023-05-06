@@ -78,7 +78,7 @@ impl Display for Font {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Font::Serif => f.write_str("serif"),
-            Font::SansSerif => f.write_str("san-serif"),
+            Font::SansSerif => f.write_str("sans-serif"),
         }
     }
 }
@@ -95,7 +95,7 @@ impl std::str::FromStr for Font {
     fn from_str(s: &str) -> Result<Font, Self::Err> {
         match s {
             "serif" | "Serif" => Ok(Font::Serif),
-            "sans-serif" | "Sans-serif" | "Sans-Serif" => Ok(Font::SansSerif),
+            "sans-serif" | "Sans-Serif" => Ok(Font::SansSerif),
             _ => Err(ParseFontError { _priv: () }),
         }
     }

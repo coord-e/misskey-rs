@@ -79,7 +79,7 @@ impl<C> PageBuilder<C> {
     }
 
     /// Sets the font of the page to sans-serif.
-    pub fn san_serif(&mut self) -> &mut Self {
+    pub fn sans_serif(&mut self) -> &mut Self {
         self.font(Font::SansSerif)
     }
 
@@ -213,7 +213,7 @@ impl<C> PageUpdateBuilder<C> {
     }
 
     /// Sets the font of the page to sans-serif.
-    pub fn san_serif(&mut self) -> &mut Self {
+    pub fn sans_serif(&mut self) -> &mut Self {
         self.font(Font::SansSerif)
     }
 
