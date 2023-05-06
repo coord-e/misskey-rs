@@ -298,6 +298,12 @@ pub struct User {
     #[cfg(feature = "13-4-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
     pub badge_roles: Option<Vec<BadgeRole>>,
+    #[cfg(feature = "13-11-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
+    pub moved_to_uri: Option<String>,
+    #[cfg(feature = "13-11-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
+    pub also_known_as: Option<Vec<String>>,
 }
 
 fn default_false() -> bool {

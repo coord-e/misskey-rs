@@ -106,6 +106,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `clips/unfavorite`
    - endpoint `emoji`
 - Support for Misskey v13.10.3
+- Partial support for v13.11.0 ~ v13.11.1
+   - endpoint `channels/favorite`
+   - endpoint `channels/my-favorites`
+   - endpoint `channels/unfavorite`
 
 ### Changed
 

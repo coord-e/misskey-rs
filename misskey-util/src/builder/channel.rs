@@ -1,5 +1,7 @@
 use crate::Error;
 
+#[cfg(feature = "13-11-0")]
+use misskey_api::model::note::Note;
 use misskey_api::model::{channel::Channel, drive::DriveFile};
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
@@ -73,6 +75,8 @@ impl<C> ChannelUpdateBuilder<C> {
             name: None,
             description: None,
             banner_id: None,
+            #[cfg(feature = "13-11-0")]
+            pinned_note_ids: None,
         };
         ChannelUpdateBuilder { client, request }
     }
@@ -95,6 +99,19 @@ impl<C> ChannelUpdateBuilder<C> {
     update_builder_option_field! {
         #[doc_name = "banner image"]
         pub banner: impl EntityRef<DriveFile> { banner_id = banner.entity_ref() };
+    }
+
+    /// Sets the pinned notes of the channel.
+    #[cfg(feature = "13-11-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
+    pub fn pinned_notes(
+        &mut self,
+        notes: impl IntoIterator<Item = impl EntityRef<Note>>,
+    ) -> &mut Self {
+        self.request
+            .pinned_note_ids
+            .replace(notes.into_iter().map(|note| note.entity_ref()).collect());
+        self
     }
 }
 

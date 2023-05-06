@@ -2196,6 +2196,54 @@ pub trait ClientExt: Client + Sync {
         );
         PagerStream::new(Box::pin(pager))
     }
+
+    /// Favorites the specified channel.
+    #[cfg(feature = "13-11-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
+    fn favorite_channel(
+        &self,
+        channel: impl EntityRef<Channel>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let channel_id = channel.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::channels::favorite::Request { channel_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unfavorites the specified channel.
+    #[cfg(feature = "13-11-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
+    fn unfavorite_channel(
+        &self,
+        channel: impl EntityRef<Channel>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let channel_id = channel.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::channels::unfavorite::Request { channel_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the channels favorited by the user logged in with this client.
+    #[cfg(feature = "13-11-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
+    fn favorited_channels(&self) -> BoxFuture<Result<Vec<Channel>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let channels = self
+                .request(endpoint::channels::my_favorites::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(channels)
+        })
+    }
     // }}}
 
     // {{{ Channel
@@ -5163,8 +5211,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Marks the specified notification as read.
-    #[cfg(feature = "12-77-1")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-77-1")))]
+    #[cfg(all(feature = "12-77-1", not(feature = "13-11-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-77-1", not(feature = "13-11-0")))))]
     fn mark_notification_as_read(
         &self,
         notification: impl EntityRef<Notification>,
