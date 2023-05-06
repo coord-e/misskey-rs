@@ -247,13 +247,12 @@ impl<C> PageUpdateBuilder<C> {
 
 impl<C: Client> PageUpdateBuilder<C> {
     /// Updates the page.
-    pub async fn update(&self) -> Result<Page, Error<C::Error>> {
-        let response = self
-            .client
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
             .request(&self.request)
             .await
             .map_err(Error::Client)?
             .into_result()?;
-        Ok(response)
+        Ok(())
     }
 }
