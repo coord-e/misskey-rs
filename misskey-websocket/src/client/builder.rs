@@ -105,7 +105,7 @@ impl WebSocketClientBuilder {
                     inner.additional_headers.insert(key, value);
                     Ok(())
                 }
-                Err(e) => Err(Error::WebSocket(Arc::new(e.into()))),
+                Err(e) => Err(Error::InvalidHeader(Arc::new(e.into()))),
             }
         });
         self
