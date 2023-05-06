@@ -2428,6 +2428,19 @@ pub trait ClientExt: Client + Sync {
         );
         PagerStream::new(Box::pin(pager))
     }
+
+    #[cfg(feature = "13-11-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-11-2")))]
+    /// Searches for channels with the specified query string.
+    fn search_channels(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, Channel>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::channels::search::Request::builder()
+                .query(query)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
     // }}}
 
     // {{{ Clip

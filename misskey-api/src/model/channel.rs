@@ -4,6 +4,8 @@ use crate::model::{id::Id, user::User};
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "13-11-2")]
+use thiserror::Error;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -36,3 +38,34 @@ pub struct Channel {
 }
 
 impl_entity!(Channel);
+
+#[cfg(feature = "13-11-2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-11-2")))]
+#[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
+#[serde(rename_all = "camelCase")]
+pub enum ChannelSearchType {
+    NameAndDescription,
+    NameOnly,
+}
+
+#[cfg(feature = "13-11-2")]
+#[derive(Debug, Error, Clone)]
+#[error("invalid search type")]
+pub struct ParseChannelSearchTypeError {
+    _priv: (),
+}
+
+#[cfg(feature = "13-11-2")]
+impl std::str::FromStr for ChannelSearchType {
+    type Err = ParseChannelSearchTypeError;
+
+    fn from_str(s: &str) -> Result<ChannelSearchType, Self::Err> {
+        match s {
+            "nameAndDescription" | "NameAndDescription" => {
+                Ok(ChannelSearchType::NameAndDescription)
+            }
+            "nameOnly" | "NameOnly" => Ok(ChannelSearchType::NameOnly),
+            _ => Err(ParseChannelSearchTypeError { _priv: () }),
+        }
+    }
+}

@@ -19,3 +19,7 @@ pub mod my_favorites;
 #[cfg(feature = "13-11-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
 pub mod unfavorite;
+
+#[cfg(feature = "13-11-2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-11-2")))]
+pub mod search;
