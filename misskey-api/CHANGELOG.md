@@ -112,6 +112,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `channels/unfavorite`
 - Support for Misskey v13.11.2
    - endpoint `channels/search`
+- Support for Misskey v13.11.3
+   - endpoint `roles/note`
+   - channel `roleTimeline`
 
 ### Changed
 

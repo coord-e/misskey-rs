@@ -108,13 +108,15 @@ macro_rules! impl_timeline_method {
             /// # use futures::stream::TryStreamExt;
             /// # #[tokio::main]
             /// # async fn main() -> anyhow::Result<()> {
-            /// # let client = misskey_test::test_client().await?;
+            /// # let client = misskey_test::test_admin_client().await?;
             /// # let user = client.me().await?;
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
             /// # #[cfg(feature = "12-98-0")]
             /// # let antenna = client.create_antenna("antenna", "misskey").await?;
+            /// # #[cfg(feature = "13-11-3")]
+            /// # let role = client.create_role("test").await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             ///
             #[doc = "// `notes` variable here is a `Stream` to enumerate first 100 " $timeline " notes."]
@@ -136,13 +138,15 @@ macro_rules! impl_timeline_method {
             /// # use futures::stream::TryStreamExt;
             /// # #[tokio::main]
             /// # async fn main() -> anyhow::Result<()> {
-            /// # let client = misskey_test::test_client().await?;
+            /// # let client = misskey_test::test_admin_client().await?;
             /// # let user = client.me().await?;
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
             /// # #[cfg(feature = "12-98-0")]
             /// # let antenna = client.create_antenna("antenna", "misskey").await?;
+            /// # #[cfg(feature = "13-11-3")]
+            /// # let role = client.create_role("test").await?;
             /// use chrono::Utc;
             ///
             #[doc = "// Get the " $timeline " notes since `time`."]
@@ -210,13 +214,15 @@ macro_rules! impl_timeline_method {
             /// # use futures::stream::TryStreamExt;
             /// # #[tokio::main]
             /// # async fn main() -> anyhow::Result<()> {
-            /// # let client = misskey_test::test_client().await?;
+            /// # let client = misskey_test::test_admin_client().await?;
             /// # let user = client.me().await?;
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
             /// # #[cfg(feature = "12-98-0")]
             /// # let antenna = client.create_antenna("antenna", "misskey").await?;
+            /// # #[cfg(feature = "13-11-3")]
+            /// # let role = client.create_role("test").await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             /// use chrono::Utc;
             ///
@@ -1523,6 +1529,9 @@ pub trait ClientExt: Client + Sync {
 
     #[cfg(feature = "12-98-0")]
     impl_timeline_method! { antenna, antennas::notes, antenna_id = antenna : Antenna }
+
+    #[cfg(feature = "13-11-3")]
+    impl_timeline_method! { role, roles::notes, role_id = role : Role }
 
     /// Lists the notes with tags as specified in the given query.
     ///

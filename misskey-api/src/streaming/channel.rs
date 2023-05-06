@@ -36,3 +36,7 @@ pub mod messaging;
 #[cfg(not(feature = "13-7-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
 pub mod messaging_index;
+
+#[cfg(feature = "13-11-3")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-11-3")))]
+pub mod role_timeline;
