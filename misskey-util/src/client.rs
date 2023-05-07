@@ -3120,7 +3120,7 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Gets the corresponding page from the name and the username of the author.
-    fn get_page_from_name(
+    fn get_page_by_name(
         &self,
         name: impl Into<String>,
         username: impl Into<String>,
