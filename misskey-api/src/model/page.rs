@@ -46,14 +46,11 @@ pub struct PageLike {
 impl_entity!(PageLike);
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
+#[serde(transparent)]
 pub struct Content(pub Vec<serde_json::Map<String, serde_json::Value>>);
 
-#[derive(Debug, Error)]
-#[error("invalid content: {0}")]
-pub struct ParseContentError(#[from] serde_json::Error);
-
 impl std::str::FromStr for Content {
-    type Err = ParseContentError;
+    type Err = serde_json::Error;
 
     fn from_str(s: &str) -> Result<Content, Self::Err> {
         serde_json::from_str(s).map_err(Into::into)
@@ -61,27 +58,19 @@ impl std::str::FromStr for Content {
 }
 
 impl TryFrom<serde_json::Value> for Content {
-    type Error = ParseContentError;
+    type Error = serde_json::Error;
 
     fn try_from(value: serde_json::Value) -> Result<Self, Self::Error> {
-        if let Some(map) = value.as_object() {
-            if map.is_empty() {
-                return Ok(Content::default());
-            }
-        }
         serde_json::from_value(value).map_err(Into::into)
     }
 }
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
-pub struct Variables(Vec<serde_json::Map<String, serde_json::Value>>);
-
-#[derive(Debug, Error)]
-#[error("invalid variables: {0}")]
-pub struct ParseVariablesError(#[from] serde_json::Error);
+#[serde(transparent)]
+pub struct Variables(pub Vec<serde_json::Map<String, serde_json::Value>>);
 
 impl std::str::FromStr for Variables {
-    type Err = ParseVariablesError;
+    type Err = serde_json::Error;
 
     fn from_str(s: &str) -> Result<Variables, Self::Err> {
         serde_json::from_str(s).map_err(Into::into)
@@ -89,14 +78,9 @@ impl std::str::FromStr for Variables {
 }
 
 impl TryFrom<serde_json::Value> for Variables {
-    type Error = ParseVariablesError;
+    type Error = serde_json::Error;
 
     fn try_from(value: serde_json::Value) -> Result<Self, Self::Error> {
-        if let Some(map) = value.as_object() {
-            if map.is_empty() {
-                return Ok(Variables::default());
-            }
-        }
         serde_json::from_value(value).map_err(Into::into)
     }
 }
