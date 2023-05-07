@@ -1,7 +1,7 @@
 # misskey-api
 
-[![crates.io](https://img.shields.io/crates/v/misskey-api?style=flat-square)](https://crates.io/crates/misskey-api)
-[![docs.rs](https://img.shields.io/badge/docs.rs-misskey--api-blue?style=flat-square)](https://docs.rs/misskey-api)
+[![crates.io](https://img.shields.io/crates/v/misskey-api)](https://crates.io/crates/misskey-api)
+[![docs.rs](https://docs.rs/misskey-api/badge.svg)](https://docs.rs/misskey-api)
 
 API bindings of [Misskey](https://github.com/misskey-dev/misskey), including requests/responses of endpoints and messages on channels.
 Implemented as a part of [misskey-rs](https://crates.io/crates/misskey).

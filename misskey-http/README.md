@@ -1,7 +1,7 @@
 # misskey-http
 
-[![crates.io](https://img.shields.io/crates/v/misskey-http?style=flat-square)](https://crates.io/crates/misskey-http)
-[![docs.rs](https://img.shields.io/badge/docs.rs-misskey--http-blue?style=flat-square)](https://docs.rs/misskey-http)
+[![crates.io](https://img.shields.io/crates/v/misskey-http)](https://crates.io/crates/misskey-http)
+[![docs.rs](https://docs.rs/misskey-http/badge.svg)](https://docs.rs/misskey-http)
 
 Asynchronous HTTP-based client implementation for [Misskey](https://github.com/misskey-dev/misskey).
 Implemented as a part of [misskey-rs](https://crates.io/crates/misskey).

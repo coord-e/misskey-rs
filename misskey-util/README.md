@@ -1,7 +1,7 @@
 # misskey-util
 
-[![crates.io](https://img.shields.io/crates/v/misskey-util?style=flat-square)](https://crates.io/crates/misskey-util)
-[![docs.rs](https://img.shields.io/badge/docs.rs-misskey--util-blue?style=flat-square)](https://docs.rs/misskey-util)
+[![crates.io](https://img.shields.io/crates/v/misskey-util)](https://crates.io/crates/misskey-util)
+[![docs.rs](https://docs.rs/misskey-util/badge.svg)](https://docs.rs/misskey-util)
 
 High-level API for the [misskey-rs](https://crates.io/crates/misskey).
 

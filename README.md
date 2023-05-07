@@ -1,9 +1,8 @@
 # misskey-rs
 
-[![crates.io](https://img.shields.io/crates/v/misskey?style=flat-square)](https://crates.io/crates/misskey)
-[![docs.rs](https://img.shields.io/badge/docs.rs-misskey-blue?style=flat-square)](https://docs.rs/misskey)
-[![Actions Status](https://img.shields.io/github/workflow/status/coord-e/misskey-rs/CI?style=flat-square)](https://github.com/coord-e/misskey-rs/actions?workflow=CI)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![crates.io](https://img.shields.io/crates/v/misskey)](https://crates.io/crates/misskey)
+[![docs.rs](https://docs.rs/misskey/badge.svg)](https://docs.rs/misskey)
+[![CI](https://github.com/coord-e/misskey-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/coord-e/misskey-rs/actions/workflows/ci.yml)
 
 `misskey-rs` is an asynchronous [Misskey](https://github.com/misskey-dev/misskey) client library for Rust.
 
@@ -31,7 +30,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-misskey = { version = "0.2", features = ["12-75-0"] }
+misskey = { version = "0.3.0-rc.1", features = ["12-75-0"] }
 ```
 
 To run the example above, you will need to add the following dependencies:

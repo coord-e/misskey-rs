@@ -1,7 +1,7 @@
 # misskey-websocket
 
-[![crates.io](https://img.shields.io/crates/v/misskey-websocket?style=flat-square)](https://crates.io/crates/misskey-websocket)
-[![docs.rs](https://img.shields.io/badge/docs.rs-misskey--websocket-blue?style=flat-square)](https://docs.rs/misskey-websocket)
+[![crates.io](https://img.shields.io/crates/v/misskey-websocket)](https://crates.io/crates/misskey-websocket)
+[![docs.rs](https://docs.rs/misskey-websocket/badge.svg)](https://docs.rs/misskey-websocket)
 
 Asynchronous WebSocket-based client implementation for [Misskey](https://github.com/misskey-dev/misskey).
 Implemented as a part of [misskey-rs](https://crates.io/crates/misskey).
