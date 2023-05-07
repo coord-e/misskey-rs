@@ -3052,9 +3052,9 @@ pub trait ClientExt: Client + Sync {
     /// The returned builder provides methods to customize details of the page,
     /// and you can chain them to create a page incrementally.
     /// Finally, calling [`create`][builder_create] method will actually create a page.
-    /// See [`pageBuilder`] for the provided methods.
+    /// See [`PageBuilder`] for the provided methods.
     ///
-    /// [builder_create]: pageBuilder::create
+    /// [builder_create]: PageBuilder::create
     ///
     /// # Examples
     ///
