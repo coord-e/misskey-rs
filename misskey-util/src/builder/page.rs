@@ -1,6 +1,5 @@
 use crate::Error;
 
-use chrono::Utc;
 use misskey_api::model::drive::DriveFile;
 use misskey_api::model::page::{Content, Font, Page, Variables};
 use misskey_api::{endpoint, EntityRef};
@@ -17,7 +16,7 @@ impl<C> PageBuilder<C> {
     pub fn new(client: C) -> Self {
         let request = endpoint::pages::create::Request {
             title: String::default(),
-            name: Utc::now().timestamp_millis().to_string(),
+            name: String::default(),
             summary: None,
             content: Content::default(),
             variables: Variables::default(),
@@ -43,6 +42,8 @@ impl<C> PageBuilder<C> {
     }
 
     /// Sets the name of the page.
+    ///
+    /// The name must be unique among the user's pages.
     pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
         self.request.name = name.into();
         self
@@ -177,6 +178,8 @@ impl<C> PageUpdateBuilder<C> {
     }
 
     /// Sets the name of the page.
+    ///
+    /// The name must be unique among the user's pages.
     pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
         self.request.name = name.into();
         self

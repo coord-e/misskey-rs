@@ -3069,12 +3069,14 @@ pub trait ClientExt: Client + Sync {
     /// let content: Content = r#"[{"type": "text", "text": "Hello World!"}]"#.parse()?;
     /// let page = client
     ///     .build_page()
+    ///     .name("my_page")
     ///     .title("My Page")
     ///     .content(content)
     ///     .create()
     ///     .await?;
     ///
     /// assert_eq!(page.title, "My Page");
+    /// # client.delete_page(&page).await?;
     /// # Ok(())
     /// # }
     /// ```
