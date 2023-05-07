@@ -72,10 +72,10 @@ mod tests {
                 title: "page".to_string(),
                 name: Ulid::new().to_string(),
                 summary: Some("page summary".to_string()),
-                content: r#"[
+                content: serde_json::json!([
                     {
                         "type": "text",
-                        "text": "Hello World!"
+                        "text": "Hello World!",
                     },
                     {
                         "type": "section",
@@ -83,21 +83,21 @@ mod tests {
                         "children": [
                             {
                                 "type": "text",
-                                "text": "text in section"
+                                "text": "text in section",
                             }
                         ]
                     }
-                ]"#
-                .parse()
+                ])
+                .try_into()
                 .unwrap(),
-                variables: r#"[
+                variables: serde_json::json!([
                     {
                         "name": "x",
                         "type": "number",
-                        "value": "1"
+                        "value": "1",
                     }
-                ]"#
-                .parse()
+                ])
+                .try_into()
                 .unwrap(),
                 #[cfg(feature = "12-31-0")]
                 script: r#"<: "Hello, world!""#.to_string(),

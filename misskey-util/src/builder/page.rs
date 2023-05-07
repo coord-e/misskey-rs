@@ -55,14 +55,14 @@ impl<C> PageBuilder<C> {
     }
 
     /// Sets the content of the page.
-    pub fn content(&mut self, content: impl Into<Content>) -> &mut Self {
-        self.request.content = content.into();
+    pub fn content(&mut self, content: Content) -> &mut Self {
+        self.request.content = content;
         self
     }
 
     /// Sets the variables of the page.
-    pub fn variables(&mut self, variables: impl Into<Variables>) -> &mut Self {
-        self.request.variables = variables.into();
+    pub fn variables(&mut self, variables: Variables) -> &mut Self {
+        self.request.variables = variables;
         self
     }
 
@@ -189,14 +189,14 @@ impl<C> PageUpdateBuilder<C> {
     }
 
     /// Sets the content of the page.
-    pub fn content(&mut self, content: impl Into<Content>) -> &mut Self {
-        self.request.content = content.into();
+    pub fn content(&mut self, content: Content) -> &mut Self {
+        self.request.content = content;
         self
     }
 
     /// Sets the variables of the page.
-    pub fn variables(&mut self, variables: impl Into<Variables>) -> &mut Self {
-        self.request.variables = variables.into();
+    pub fn variables(&mut self, variables: Variables) -> &mut Self {
+        self.request.variables = variables;
         self
     }
 
