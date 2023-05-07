@@ -4,6 +4,8 @@ use serde::Serialize;
 
 pub mod favorites;
 pub mod notifications;
+pub mod page_likes;
+pub mod pages;
 pub mod pin;
 pub mod read_all_messaging_messages;
 pub mod read_all_unread_notes;

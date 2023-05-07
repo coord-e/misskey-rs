@@ -1,31 +1,30 @@
-use crate::model::{id::Id, page::Page, user::User};
+use crate::model::{id::Id, page::PageLike};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
-#[derive(Serialize, Debug, Clone, TypedBuilder)]
+#[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]
 pub struct Request {
-    pub user_id: Id<User>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub since_id: Option<Id<Page>>,
+    pub since_id: Option<Id<PageLike>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
-    pub until_id: Option<Id<Page>>,
+    pub until_id: Option<Id<PageLike>>,
 }
 
 impl misskey_core::Request for Request {
-    type Response = Vec<Page>;
-    const ENDPOINT: &'static str = "users/pages";
+    type Response = Vec<PageLike>;
+    const ENDPOINT: &'static str = "i/page-likes";
 }
 
-impl_pagination!(Request, Page);
+impl_pagination!(Request, PageLike);
 
 #[cfg(test)]
 mod tests {
@@ -37,11 +36,8 @@ mod tests {
     #[tokio::test]
     async fn request_simple() {
         let client = TestClient::new();
-        let user = client.user.me().await;
         client
-            .user
             .test(Request {
-                user_id: user.id,
                 limit: None,
                 since_id: None,
                 until_id: None,
@@ -52,11 +48,8 @@ mod tests {
     #[tokio::test]
     async fn request_with_limit() {
         let client = TestClient::new();
-        let user = client.user.me().await;
         client
-            .user
             .test(Request {
-                user_id: user.id,
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -67,23 +60,32 @@ mod tests {
     #[tokio::test]
     async fn request_paginate() {
         let client = TestClient::new();
-        let user = client.user.me().await;
         let page = client
-            .user
+            .admin
             .test(
                 crate::endpoint::pages::create::Request::builder()
                     .name(Ulid::new())
                     .build(),
             )
             .await;
-
         client
             .user
+            .test(crate::endpoint::pages::like::Request { page_id: page.id })
+            .await;
+
+        let likes = client
             .test(Request {
-                user_id: user.id,
                 limit: None,
-                since_id: Some(page.id.clone()),
-                until_id: Some(page.id.clone()),
+                since_id: None,
+                until_id: None,
+            })
+            .await;
+
+        client
+            .test(Request {
+                limit: None,
+                since_id: Some(likes[0].id.clone()),
+                until_id: Some(likes[0].id.clone()),
             })
             .await;
     }
