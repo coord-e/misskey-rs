@@ -10,6 +10,7 @@ use crate::model::outgoing::OutgoingMessage;
 use async_std::task;
 #[cfg(feature = "async-std-runtime")]
 use async_std::task::sleep;
+use async_tungstenite::tungstenite::http::HeaderMap;
 use async_tungstenite::tungstenite::Error as WsError;
 use futures_util::stream::StreamExt;
 use log::{info, warn};
@@ -33,6 +34,7 @@ pub(crate) struct Broker {
     handler: Handler,
     reconnect: ReconnectConfig,
     url: Url,
+    additional_headers: HeaderMap,
 }
 
 /// Specifies the condition for reconnecting.
@@ -180,6 +182,7 @@ impl Default for ReconnectConfig {
 impl Broker {
     pub async fn spawn(
         url: Url,
+        additional_headers: HeaderMap,
         reconnect: ReconnectConfig,
     ) -> Result<(ControlSender, SharedBrokerState)> {
         let state = SharedBrokerState::working();
@@ -190,6 +193,7 @@ impl Broker {
         task::spawn(async move {
             let mut broker = Broker {
                 url,
+                additional_headers,
                 broker_rx,
                 reconnect,
                 handler: Handler::new(),
@@ -261,16 +265,17 @@ impl Broker {
     ) -> std::result::Result<(), TaskError> {
         use futures_util::future::{self, Either};
 
-        let (mut websocket_tx, mut websocket_rx) = match connect_websocket(self.url.clone()).await {
-            Ok(x) => x,
-            Err(error) => {
-                // retain `remaining_message` because we've not sent it yet
-                return Err(TaskError {
-                    remaining_message,
-                    error,
-                });
-            }
-        };
+        let (mut websocket_tx, mut websocket_rx) =
+            match connect_websocket(self.url.clone(), self.additional_headers.clone()).await {
+                Ok(x) => x,
+                Err(error) => {
+                    // retain `remaining_message` because we've not sent it yet
+                    return Err(TaskError {
+                        remaining_message,
+                        error,
+                    });
+                }
+            };
 
         info!("broker: started");
 

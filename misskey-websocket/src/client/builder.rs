@@ -1,15 +1,21 @@
 use std::result::Result as StdResult;
+use std::sync::Arc;
 use std::time::Duration;
 
 use crate::broker::{ReconnectCondition, ReconnectConfig};
 use crate::client::WebSocketClient;
 use crate::error::{Error, Result};
 
+use async_tungstenite::tungstenite::http::{
+    self,
+    header::{HeaderMap, HeaderName, HeaderValue},
+};
 use url::Url;
 
 #[derive(Debug, Clone)]
 struct WebSocketClientBuilderInner {
     url: Url,
+    additional_headers: HeaderMap,
     reconnect: ReconnectConfig,
 }
 
@@ -20,12 +26,22 @@ pub struct WebSocketClientBuilder {
 }
 
 trait ResultExt<T, E> {
+    fn err_into<U>(self) -> StdResult<T, U>
+    where
+        E: Into<U>;
     fn and_then_mut<F>(&mut self, op: F)
     where
         F: FnOnce(&mut T) -> StdResult<(), E>;
 }
 
 impl<T, E> ResultExt<T, E> for StdResult<T, E> {
+    fn err_into<U>(self) -> StdResult<T, U>
+    where
+        E: Into<U>,
+    {
+        self.map_err(Into::into)
+    }
+
     fn and_then_mut<F>(&mut self, f: F)
     where
         F: FnOnce(&mut T) -> StdResult<(), E>,
@@ -49,9 +65,10 @@ impl WebSocketClientBuilder {
     {
         let inner = url
             .try_into()
-            .map_err(Into::into)
+            .err_into()
             .map(|url| WebSocketClientBuilderInner {
                 url,
+                additional_headers: HeaderMap::new(),
                 reconnect: ReconnectConfig::default(),
             });
 
@@ -68,6 +85,30 @@ impl WebSocketClientBuilder {
     {
         let url = format!("wss://{}/streaming", host.as_ref());
         WebSocketClientBuilder::new(url.as_str())
+    }
+
+    /// Sets an additional header for the connection request.
+    pub fn header<K, V>(&mut self, key: K, value: V) -> &mut Self
+    where
+        K: TryInto<HeaderName>,
+        V: TryInto<HeaderValue>,
+        K::Error: Into<http::Error>,
+        V::Error: Into<http::Error>,
+    {
+        self.inner.and_then_mut(|inner| {
+            let result = key.try_into().err_into().and_then(|key| {
+                let value = value.try_into().err_into()?;
+                Ok((key, value))
+            });
+            match result {
+                Ok((key, value)) => {
+                    inner.additional_headers.insert(key, value);
+                    Ok(())
+                }
+                Err(e) => Err(Error::InvalidHeader(Arc::new(e))),
+            }
+        });
+        self
     }
 
     /// Sets an API token.
@@ -148,11 +189,15 @@ impl WebSocketClientBuilder {
 
     /// Finish this builder instance and connect to Misskey using this configuration.
     pub async fn connect(&self) -> Result<WebSocketClient> {
-        let WebSocketClientBuilderInner { url, reconnect } = match self.inner.clone() {
+        let WebSocketClientBuilderInner {
+            url,
+            additional_headers,
+            reconnect,
+        } = match self.inner.clone() {
             Err(e) => return Err(e),
             Ok(inner) => inner,
         };
 
-        WebSocketClient::connect_with_config(url, reconnect).await
+        WebSocketClient::connect_with_headers_and_config(url, additional_headers, reconnect).await
     }
 }

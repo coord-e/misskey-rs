@@ -19,6 +19,9 @@ pub enum Error {
     /// JSON encode/decode error.
     #[error("JSON error: {0}")]
     Json(#[source] Arc<serde_json::Error>),
+    /// Invalid header.
+    #[error("Invalid header: {0}")]
+    InvalidHeader(#[source] Arc<tungstenite::http::Error>),
 }
 
 impl From<Infallible> for Error {

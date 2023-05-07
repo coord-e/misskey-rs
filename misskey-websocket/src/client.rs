@@ -8,6 +8,7 @@ use crate::broker::{
 use crate::error::{Error, Result};
 use crate::model::{ApiRequestId, SubNoteId};
 
+use async_tungstenite::tungstenite::http::HeaderMap;
 use futures_util::{
     future::{BoxFuture, FutureExt, TryFutureExt},
     sink::{Sink, SinkExt},
@@ -60,12 +61,40 @@ impl WebSocketClient {
         WebSocketClient::connect_with_config(url, ReconnectConfig::default()).await
     }
 
+    /// Connects to Misskey using WebSocket with given additional headers, and returns [`WebSocketClient`].
+    pub async fn connect_with_headers(
+        url: Url,
+        additional_headers: HeaderMap,
+    ) -> Result<WebSocketClient> {
+        WebSocketClient::connect_with_headers_and_config(
+            url,
+            additional_headers,
+            ReconnectConfig::default(),
+        )
+        .await
+    }
+
     /// Connects to Misskey using WebSocket with a given reconnect configuration, and returns [`WebSocketClient`].
     pub async fn connect_with_config(
         url: Url,
         reconnect_config: ReconnectConfig,
     ) -> Result<WebSocketClient> {
-        let (broker_tx, state) = Broker::spawn(url, reconnect_config).await?;
+        WebSocketClient::connect_with_headers_and_config(
+            url,
+            HeaderMap::default(),
+            reconnect_config,
+        )
+        .await
+    }
+
+    /// Connects to Misskey using WebSocket with given additional headers and
+    /// reconnect configuration, and returns [`WebSocketClient`].
+    pub async fn connect_with_headers_and_config(
+        url: Url,
+        additional_headers: HeaderMap,
+        reconnect_config: ReconnectConfig,
+    ) -> Result<WebSocketClient> {
+        let (broker_tx, state) = Broker::spawn(url, additional_headers, reconnect_config).await?;
         Ok(WebSocketClient { broker_tx, state })
     }
 
@@ -244,6 +273,7 @@ mod tests {
 
         WebSocketClientBuilder::new(env::websocket_url())
             .token(env::token())
+            .header("User-Agent", "misskey-rs")
             .connect()
             .await
             .unwrap()
