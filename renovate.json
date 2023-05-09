@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":disableDependencyDashboard",
+    "schedule:weekly",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "timezone": "Asia/Tokyo",
+  "baseBranches": ["renovate/configure"],
+  "regexManagers": [
+    {
+      "fileMatch": ["^\\.github\\/workflows\\/[^/]+\\.ya?ml$"],
+      "matchStrings": [
+        "uses: taiki-e\\/install-action@.+\\s+with:\\s+# renovate: depName=(?<depName>.*?)\\s+tool: .+?@(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "cargo": {
+    "rangeStrategy": "replace"
+  },
+  "packageRules": [
+    {
+      "matchDepTypes": ["action"],
+      "excludePackagePrefixes": ["actions/"],
+      "pinDigests": true
+    }
+  ]
+}

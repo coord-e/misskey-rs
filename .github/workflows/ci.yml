@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - run: cargo build --tests --locked
       - id: setup_env
         run: ./ci/testenv/setup.sh
@@ -37,5 +37,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: cp ci/Cargo.lock ci/rust-toolchain.toml .
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2.2.0
       - run: cargo clippy -- -D warnings
