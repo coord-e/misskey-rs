@@ -353,6 +353,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_charts_for_federated_instances: Option<bool>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub server_rules: Option<Vec<String>>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub preserved_usernames: Option<Vec<String>>,
 }
 
 impl misskey_core::Request for Request {
@@ -522,6 +532,10 @@ mod tests {
                 enable_charts_for_remote_user: Some(false),
                 #[cfg(feature = "13-10-3")]
                 enable_charts_for_federated_instances: Some(false),
+                #[cfg(feature = "13-12-0")]
+                server_rules: Some(vec!["rule".to_string()]),
+                #[cfg(feature = "13-12-0")]
+                preserved_usernames: Some(vec!["admin".to_string()]),
             })
             .await;
     }

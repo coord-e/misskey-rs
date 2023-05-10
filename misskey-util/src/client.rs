@@ -115,8 +115,10 @@ macro_rules! impl_timeline_method {
             /// # let list = client.create_user_list("test").await?;
             /// # #[cfg(feature = "12-98-0")]
             /// # let antenna = client.create_antenna("antenna", "misskey").await?;
-            /// # #[cfg(feature = "13-11-3")]
+            /// # #[cfg(all(feature = "13-11-3", not(feature = "13-12-0")))]
             /// # let role = client.create_role("test").await?;
+            /// # #[cfg(feature = "13-12-0")]
+            /// # let role = client.build_role().public(true).show_timeline(true).create().await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             ///
             #[doc = "// `notes` variable here is a `Stream` to enumerate first 100 " $timeline " notes."]
@@ -145,8 +147,10 @@ macro_rules! impl_timeline_method {
             /// # let list = client.create_user_list("test").await?;
             /// # #[cfg(feature = "12-98-0")]
             /// # let antenna = client.create_antenna("antenna", "misskey").await?;
-            /// # #[cfg(feature = "13-11-3")]
+            /// # #[cfg(all(feature = "13-11-3", not(feature = "13-12-0")))]
             /// # let role = client.create_role("test").await?;
+            /// # #[cfg(feature = "13-12-0")]
+            /// # let role = client.build_role().public(true).show_timeline(true).create().await?;
             /// use chrono::Utc;
             ///
             #[doc = "// Get the " $timeline " notes since `time`."]
@@ -221,8 +225,10 @@ macro_rules! impl_timeline_method {
             /// # let list = client.create_user_list("test").await?;
             /// # #[cfg(feature = "12-98-0")]
             /// # let antenna = client.create_antenna("antenna", "misskey").await?;
-            /// # #[cfg(feature = "13-11-3")]
+            /// # #[cfg(all(feature = "13-11-3", not(feature = "13-12-0")))]
             /// # let role = client.create_role("test").await?;
+            /// # #[cfg(feature = "13-12-0")]
+            /// # let role = client.build_role().public(true).show_timeline(true).create().await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             /// use chrono::Utc;
             ///
@@ -1130,6 +1136,24 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Edits the memo for the specified user.
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    fn update_user_memo(
+        &self,
+        user: impl EntityRef<User>,
+        memo: impl Into<String>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        let memo = memo.into();
+        Box::pin(async move {
+            self.request(endpoint::users::update_memo::Request { user_id, memo })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
     // }}}
 
     // {{{ Note
@@ -1512,6 +1536,20 @@ pub trait ClientExt: Client + Sync {
             self,
             endpoint::notes::search::Request::builder()
                 .query(query)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Searches for local notes with the specified query string.
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    fn search_local_notes(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::notes::search::Request::builder()
+                .query(query)
+                .host(".")
                 .build(),
         );
         PagerStream::new(Box::pin(pager))

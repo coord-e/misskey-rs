@@ -17,6 +17,7 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
     #[builder(default, setter(strip_option))]
     pub channel_id: Option<Id<Channel>>,
+    #[cfg_attr(feature = "13-12-0", serde(skip_serializing_if = "Option::is_none"))]
     #[builder(default, setter(strip_option, into))]
     pub host: Option<String>,
     /// 1 .. 100

@@ -32,6 +32,11 @@ pub struct Request {
     pub is_moderator: bool,
     #[builder(default, setter(into))]
     pub is_administrator: bool,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option, into))]
+    pub is_explorable: Option<bool>,
     #[cfg(feature = "13-4-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
     #[builder(default, setter(into))]
@@ -80,6 +85,8 @@ mod tests {
                 is_public: false,
                 is_moderator: false,
                 is_administrator: false,
+                #[cfg(feature = "13-12-0")]
+                is_explorable: None,
                 #[cfg(feature = "13-4-0")]
                 as_badge: true,
                 can_edit_members_by_moderator: false,
@@ -135,6 +142,8 @@ mod tests {
                 is_public: true,
                 is_moderator: true,
                 is_administrator: true,
+                #[cfg(feature = "13-12-0")]
+                is_explorable: Some(true),
                 #[cfg(feature = "13-4-0")]
                 as_badge: true,
                 can_edit_members_by_moderator: true,

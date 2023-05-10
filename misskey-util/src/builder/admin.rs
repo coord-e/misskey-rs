@@ -591,6 +591,17 @@ impl<C> MetaUpdateBuilder<C> {
         #[doc_name = "secret key for the extenal object storage"]
         pub object_storage_secret_key;
     }
+
+    update_builder_string_collection_field! {
+        /// Sets the rules that users must confirm before signing up for the instance.
+        #[cfg(feature = "13-12-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+        pub server_rules;
+        /// Sets the usernames that are not available for normal users.
+        #[cfg(feature = "13-12-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+        pub reserved_usernames { preserved_usernames };
+    }
 }
 
 impl<C: Client> MetaUpdateBuilder<C> {
@@ -1208,6 +1219,14 @@ impl<C> RoleBuilder<C> {
         self
     }
 
+    /// Sets whether the role timeline of this role is public or not.
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub fn show_timeline(&mut self, show_timeline: bool) -> &mut Self {
+        self.request.is_explorable.replace(show_timeline);
+        self
+    }
+
     /// Sets whether to show the icon image next to the usernames.
     #[cfg(feature = "13-4-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
@@ -1474,6 +1493,8 @@ impl<C> RoleUpdateBuilder<C> {
             is_public,
             is_moderator,
             is_administrator,
+            #[cfg(feature = "13-12-0")]
+            is_explorable,
             #[cfg(feature = "13-4-0")]
             as_badge,
             can_edit_members_by_moderator,
@@ -1494,6 +1515,8 @@ impl<C> RoleUpdateBuilder<C> {
             is_public,
             is_moderator,
             is_administrator,
+            #[cfg(feature = "13-12-0")]
+            is_explorable: Some(is_explorable),
             #[cfg(feature = "13-4-0")]
             as_badge,
             can_edit_members_by_moderator,
@@ -1576,6 +1599,14 @@ impl<C> RoleUpdateBuilder<C> {
     /// Sets whether to give the administrator permission to the members of the role.
     pub fn administrator(&mut self, administrator: bool) -> &mut Self {
         self.request.is_administrator = administrator;
+        self
+    }
+
+    /// Sets whether the role timeline of this role is public or not.
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub fn show_timeline(&mut self, show_timeline: bool) -> &mut Self {
+        self.request.is_explorable.replace(show_timeline);
         self
     }
 

@@ -23,6 +23,9 @@ pub struct Role {
     pub is_public: bool,
     pub is_moderator: bool,
     pub is_administrator: bool,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub is_explorable: bool,
     #[cfg(feature = "13-4-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
     pub as_badge: bool,

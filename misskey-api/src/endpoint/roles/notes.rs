@@ -50,7 +50,12 @@ mod tests {
         let client = TestClient::new();
         let role = client
             .admin
-            .test(crate::endpoint::admin::roles::create::Request::default())
+            .test(
+                crate::endpoint::admin::roles::create::Request::builder()
+                    .is_public(true)
+                    .is_explorable(true)
+                    .build(),
+            )
             .await;
 
         client
@@ -70,7 +75,12 @@ mod tests {
         let client = TestClient::new();
         let role = client
             .admin
-            .test(crate::endpoint::admin::roles::create::Request::default())
+            .test(
+                crate::endpoint::admin::roles::create::Request::builder()
+                    .is_public(true)
+                    .is_explorable(true)
+                    .build(),
+            )
             .await;
 
         client
@@ -92,7 +102,12 @@ mod tests {
 
         let role = client
             .admin
-            .test(crate::endpoint::admin::roles::create::Request::default())
+            .test(
+                crate::endpoint::admin::roles::create::Request::builder()
+                    .is_public(true)
+                    .is_explorable(true)
+                    .build(),
+            )
             .await;
         client
             .admin
@@ -129,7 +144,12 @@ mod tests {
         let client = TestClient::new();
         let role = client
             .admin
-            .test(crate::endpoint::admin::roles::create::Request::default())
+            .test(
+                crate::endpoint::admin::roles::create::Request::builder()
+                    .is_public(true)
+                    .is_explorable(true)
+                    .build(),
+            )
             .await;
         let now = chrono::Utc::now();
 

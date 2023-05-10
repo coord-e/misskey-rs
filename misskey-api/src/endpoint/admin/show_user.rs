@@ -124,10 +124,13 @@ pub struct Response {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
     #[serde(default)]
     pub last_active_date: Option<DateTime<Utc>>,
-    #[cfg(feature = "12-112-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[cfg(all(feature = "12-112-0", not(feature = "13-12-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-112-0", not(feature = "13-12-0")))))]
     #[serde(default)]
     pub moderation_note: Option<String>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub moderation_note: String,
     #[serde(default)]
     pub signins: Option<Vec<Signin>>,
     #[cfg(feature = "13-0-0")]

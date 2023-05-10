@@ -149,6 +149,9 @@ pub struct NoteEmoji {
 pub struct NoteChannel {
     pub id: Id<Channel>,
     pub name: String,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub color: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

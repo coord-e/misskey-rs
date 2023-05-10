@@ -125,6 +125,9 @@ pub struct Meta {
     pub enable_service_worker: bool,
     #[cfg(feature = "12-88-0")]
     pub translator_available: bool,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub server_rules: Vec<String>,
     #[cfg(feature = "13-0-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
     pub policies: PoliciesSimple,
@@ -300,6 +303,9 @@ pub struct AdminMeta {
     #[cfg(feature = "13-10-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
     pub sensitive_words: Vec<String>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub preserved_usernames: Vec<String>,
     pub hcaptcha_secret_key: Option<String>,
     pub recaptcha_secret_key: Option<String>,
     #[cfg(feature = "13-0-0")]
@@ -390,6 +396,8 @@ pub struct FeaturesMeta {
     #[cfg(feature = "12-92-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
     pub email_required_for_signup: bool,
+    #[cfg(not(feature = "13-12-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-12-0"))))]
     pub elasticsearch: bool,
     #[cfg(feature = "12-37-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]

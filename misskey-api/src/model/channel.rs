@@ -20,6 +20,12 @@ pub struct Channel {
     #[cfg(feature = "13-11-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-11-0")))]
     pub pinned_note_ids: Vec<Id<Note>>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub color: String,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub is_archived: bool,
     pub notes_count: u64,
     pub users_count: u64,
     pub user_id: Id<User>,

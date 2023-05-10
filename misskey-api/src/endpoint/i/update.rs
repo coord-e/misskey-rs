@@ -151,6 +151,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub email_notification_types: Option<HashSet<UserEmailNotificationType>>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub also_known_as: Option<Vec<String>>,
 }
 
 impl misskey_core::Request for Request {
@@ -255,6 +260,8 @@ mod tests {
                     .into_iter()
                     .collect(),
                 ),
+                #[cfg(feature = "13-12-0")]
+                also_known_as: Some(Vec::new()),
             })
             .await;
     }
@@ -308,6 +315,8 @@ mod tests {
                 muting_notification_types: None,
                 #[cfg(feature = "12-70-0")]
                 email_notification_types: None,
+                #[cfg(feature = "13-12-0")]
+                also_known_as: None,
             })
             .await;
     }

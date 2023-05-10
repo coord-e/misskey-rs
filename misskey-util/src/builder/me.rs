@@ -439,6 +439,10 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg(feature = "12-99-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-99-0")))]
         pub muted_instances;
+        /// Sets accounts from which this user has moved from.
+        #[cfg(feature = "13-12-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+        pub also_known_as;
     }
 }
 

@@ -29,3 +29,7 @@ pub mod set_aliases_bulk;
 #[cfg(feature = "12-102-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-102-0")))]
 pub mod set_category_bulk;
+
+#[cfg(feature = "13-12-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+pub mod set_license_bulk;

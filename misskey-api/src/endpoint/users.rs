@@ -55,6 +55,10 @@ pub mod achievements;
 #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
 pub mod groups;
 
+#[cfg(feature = "13-12-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+pub mod update_memo;
+
 #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
 #[derive(Serialize, PartialEq, Eq, Clone, Debug, Copy)]
 #[serde(rename_all = "camelCase")]
