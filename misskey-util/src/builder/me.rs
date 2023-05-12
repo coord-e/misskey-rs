@@ -277,6 +277,11 @@ impl<C> MeUpdateBuilder<C> {
         #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
         pub no_crawle;
 
+        /// Sets whether to tell AI datasets not to use this user's contents.
+        #[cfg(feature = "13-12-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-12-2")))]
+        pub prevent_ai_learning;
+
         /// Sets whether to show replies to other users in the timeline.
         #[cfg(feature = "12-104-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]

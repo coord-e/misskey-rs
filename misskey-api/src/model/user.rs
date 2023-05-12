@@ -313,6 +313,9 @@ pub struct User {
     #[cfg(feature = "13-12-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
     pub mederation_note: Option<String>,
+    #[cfg(feature = "13-12-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-2")))]
+    pub prevent_ai_learning: Option<bool>,
 }
 
 fn default_false() -> bool {

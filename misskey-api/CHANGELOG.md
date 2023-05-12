@@ -118,6 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v13.12.0
    - endpoint `admin/emoji/set-license-bulk`
    - endpoint `users/update-memo`
+- Support for Misskey v13.12.2
 
 ### Changed
 

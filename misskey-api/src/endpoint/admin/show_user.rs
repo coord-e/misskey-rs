@@ -81,8 +81,17 @@ pub struct Response {
     pub email_verified: Option<bool>,
     #[serde(default)]
     pub auto_accept_followed: Option<bool>,
+    #[cfg(not(feature = "13-12-2"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-12-2"))))]
     #[serde(default)]
     pub no_crawle: Option<bool>,
+    #[cfg(feature = "13-12-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-2")))]
+    #[serde(default)]
+    pub no_crawle: bool,
+    #[cfg(feature = "13-12-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-2")))]
+    pub prevent_ai_learning: bool,
     #[serde(default)]
     pub always_mark_nsfw: Option<bool>,
     #[cfg(feature = "12-112-0")]

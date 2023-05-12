@@ -131,6 +131,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub no_crawle: Option<bool>,
+    #[cfg(feature = "13-12-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-2")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub prevent_ai_learning: Option<bool>,
     #[cfg(feature = "12-104-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -241,6 +246,8 @@ mod tests {
                 muted_instances: Some(vec!["mute1".to_string(), "mute2".to_string()]),
                 #[cfg(feature = "12-60-0")]
                 no_crawle: Some(true),
+                #[cfg(feature = "13-12-2")]
+                prevent_ai_learning: Some(true),
                 #[cfg(feature = "12-104-0")]
                 show_timeline_replies: Some(true),
                 #[cfg(feature = "12-69-0")]
@@ -307,6 +314,8 @@ mod tests {
                 muted_instances: None,
                 #[cfg(feature = "12-60-0")]
                 no_crawle: None,
+                #[cfg(feature = "13-12-2")]
+                prevent_ai_learning: None,
                 #[cfg(feature = "12-104-0")]
                 show_timeline_replies: None,
                 #[cfg(feature = "12-69-0")]
