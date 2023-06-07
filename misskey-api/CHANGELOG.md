@@ -119,6 +119,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `admin/emoji/set-license-bulk`
    - endpoint `users/update-memo`
 - Support for Misskey v13.12.2
+- Support for Misskey v13.13.0 ~ v13.13.1
+   - endpoint `users/lists/create-from-public`
+   - endpoint `users/lists/favorite`
+   - endpoint `users/lists/unfavorite`
 
 ### Changed
 

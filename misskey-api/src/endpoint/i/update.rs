@@ -136,8 +136,8 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub prevent_ai_learning: Option<bool>,
-    #[cfg(feature = "12-104-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
+    #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-104-0", not(feature = "13-13-0")))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub show_timeline_replies: Option<bool>,
@@ -248,7 +248,7 @@ mod tests {
                 no_crawle: Some(true),
                 #[cfg(feature = "13-12-2")]
                 prevent_ai_learning: Some(true),
-                #[cfg(feature = "12-104-0")]
+                #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
                 show_timeline_replies: Some(true),
                 #[cfg(feature = "12-69-0")]
                 receive_announcement_email: Some(true),
@@ -316,7 +316,7 @@ mod tests {
                 no_crawle: None,
                 #[cfg(feature = "13-12-2")]
                 prevent_ai_learning: None,
-                #[cfg(feature = "12-104-0")]
+                #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
                 show_timeline_replies: None,
                 #[cfg(feature = "12-69-0")]
                 receive_announcement_email: None,

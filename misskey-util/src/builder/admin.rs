@@ -17,6 +17,8 @@ use misskey_api::model::role::{
     self, Policies, PoliciesSimple, PolicyValue, Role, RoleCondFormulaValue, Target,
 };
 use misskey_api::model::{announcement::Announcement, user::User};
+#[cfg(feature = "13-13-0")]
+use misskey_api::model::{drive::DriveFile, id::Id};
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
 use url::Url;
@@ -683,6 +685,115 @@ impl<C: Client> AnnouncementUpdateBuilder<C> {
     }
 }
 
+/// Builder for the [`create_emoji`][`crate::ClientExt::create_emoji`] method.
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+pub struct EmojiBuilder<C> {
+    client: C,
+    request: endpoint::admin::emoji::add::Request,
+}
+
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+impl<C> EmojiBuilder<C> {
+    /// Creates a builder with the client and the emoji you are going to update.
+    pub fn new(client: C, file: impl EntityRef<DriveFile>) -> Self {
+        let request = endpoint::admin::emoji::add::Request {
+            name: String::default(),
+            file_id: file.entity_ref(),
+            category: None,
+            aliases: None,
+            license: None,
+            is_sensitive: None,
+            local_only: None,
+            role_ids_that_can_be_used_this_emoji_as_reaction: None,
+        };
+        EmojiBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::emoji::add::Request {
+        &self.request
+    }
+
+    /// Sets the name of the custom emoji.
+    pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.request.name = name.into();
+        self
+    }
+
+    /// Sets the file to use as the custom emoji.
+    pub fn file(&mut self, file: impl EntityRef<DriveFile>) -> &mut Self {
+        self.request.file_id = file.entity_ref();
+        self
+    }
+
+    /// Sets the category of the custom emoji.
+    pub fn set_category(&mut self, category: impl Into<String>) -> &mut Self {
+        self.request.category.replace(category.into());
+        self
+    }
+
+    /// Deletes the category of the custom emoji.
+    pub fn delete_category(&mut self) -> &mut Self {
+        self.request.category.take();
+        self
+    }
+
+    /// Sets the aliases of the custom emoji.
+    pub fn aliases(&mut self, aliases: impl IntoIterator<Item = impl Into<String>>) -> &mut Self {
+        self.request
+            .aliases
+            .replace(aliases.into_iter().map(Into::into).collect());
+        self
+    }
+
+    /// Sets the license of the custom emoji.
+    pub fn license(&mut self, license: impl Into<String>) -> &mut Self {
+        self.request.license.replace(license.into());
+        self
+    }
+
+    /// Sets whether the custom emoji is sensitive or not.
+    pub fn is_sensitive(&mut self, is_sensitive: bool) -> &mut Self {
+        self.request.is_sensitive.replace(is_sensitive);
+        self
+    }
+
+    /// Sets whether the custom emoji can be used only for local posts or not.
+    pub fn local_only(&mut self, local_only: bool) -> &mut Self {
+        self.request.local_only.replace(local_only);
+        self
+    }
+
+    /// Sets roles that can use the custom emoji as reaction.
+    pub fn reaction_roles(
+        &mut self,
+        roles: impl IntoIterator<Item = impl EntityRef<Role>>,
+    ) -> &mut Self {
+        self.request
+            .role_ids_that_can_be_used_this_emoji_as_reaction
+            .replace(roles.into_iter().map(|role| role.entity_ref()).collect());
+        self
+    }
+}
+
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+impl<C: Client> EmojiBuilder<C> {
+    /// Creates the custom emoji.
+    pub async fn create(&self) -> Result<Id<Emoji>, Error<C::Error>> {
+        let emoji_id = self
+            .client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?
+            .id;
+        Ok(emoji_id)
+    }
+}
+
 /// Builder for the [`update_emoji`][`crate::ClientExt::update_emoji`] method.
 pub struct EmojiUpdateBuilder<C> {
     client: C,
@@ -701,15 +812,29 @@ impl<C> EmojiUpdateBuilder<C> {
             aliases,
             #[cfg(feature = "13-10-0")]
             license,
+            #[cfg(feature = "13-13-0")]
+            is_sensitive,
+            #[cfg(feature = "13-13-0")]
+            local_only,
+            #[cfg(feature = "13-13-0")]
+            role_ids_that_can_be_used_this_emoji_as_reaction,
             ..
         } = emoji;
         let request = endpoint::admin::emoji::update::Request {
             id,
             name,
+            #[cfg(feature = "13-13-0")]
+            file_id: None,
             category,
             aliases,
             #[cfg(feature = "13-10-0")]
             license,
+            #[cfg(feature = "13-13-0")]
+            is_sensitive,
+            #[cfg(feature = "13-13-0")]
+            local_only,
+            #[cfg(feature = "13-13-0")]
+            role_ids_that_can_be_used_this_emoji_as_reaction,
         };
         EmojiUpdateBuilder { client, request }
     }
@@ -722,6 +847,14 @@ impl<C> EmojiUpdateBuilder<C> {
     /// Sets the name of the custom emoji.
     pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
         self.request.name = name.into();
+        self
+    }
+
+    /// Sets the file to use as the custom emoji.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn file(&mut self, file: impl EntityRef<DriveFile>) -> &mut Self {
+        self.request.file_id.replace(file.entity_ref());
         self
     }
 
@@ -765,6 +898,35 @@ impl<C> EmojiUpdateBuilder<C> {
     #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
     pub fn license(&mut self, license: impl Into<String>) -> &mut Self {
         self.request.license.replace(license.into());
+        self
+    }
+
+    /// Sets whether the custom emoji is sensitive or not.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn is_sensitive(&mut self, is_sensitive: bool) -> &mut Self {
+        self.request.is_sensitive.replace(is_sensitive);
+        self
+    }
+
+    /// Sets whether the custom emoji can be used only for local posts or not.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn local_only(&mut self, local_only: bool) -> &mut Self {
+        self.request.local_only.replace(local_only);
+        self
+    }
+
+    /// Sets roles that can use the custom emoji as reaction.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn reaction_roles(
+        &mut self,
+        roles: impl IntoIterator<Item = impl EntityRef<Role>>,
+    ) -> &mut Self {
+        self.request
+            .role_ids_that_can_be_used_this_emoji_as_reaction
+            .replace(roles.into_iter().map(|role| role.entity_ref()).collect());
         self
     }
 }

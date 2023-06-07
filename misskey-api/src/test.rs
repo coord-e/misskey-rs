@@ -157,7 +157,7 @@ impl<T: Client + Send + Sync> ClientExt for T {
         }
     }
 
-    #[cfg(feature = "12-9-0")]
+    #[cfg(all(feature = "12-9-0", not(feature = "13-13-0")))]
     async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
         let file = self.upload_from_url(url).await;
         self.test(crate::endpoint::admin::emoji::add::Request { file_id: file.id })
@@ -174,6 +174,20 @@ impl<T: Client + Send + Sync> ClientExt for T {
             category: None,
             aliases: None,
         })
+        .await
+        .id
+    }
+
+    #[cfg(feature = "13-13-0")]
+    async fn add_emoji_from_url(&self, url: Url) -> Id<Emoji> {
+        let ulid = Ulid::new().to_string();
+        let file = self.upload_from_url(url).await;
+        self.test(
+            crate::endpoint::admin::emoji::add::Request::builder()
+                .file_id(file.id)
+                .name(ulid)
+                .build(),
+        )
         .await
         .id
     }

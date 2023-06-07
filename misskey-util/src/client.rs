@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+#[cfg(feature = "13-13-0")]
+use crate::builder::EmojiBuilder;
 #[cfg(feature = "12-9-0")]
 use crate::builder::EmojiUpdateBuilder;
 #[cfg(feature = "12-79-0")]
@@ -22,6 +24,7 @@ use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
     DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
     MeUpdateBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder, PageUpdateBuilder,
+    UserListUpdateBuilder,
 };
 #[cfg(feature = "12-47-0")]
 use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
@@ -1719,21 +1722,30 @@ pub trait ClientExt: Client + Sync {
     ) -> BoxFuture<Result<UserList, Error<Self::Error>>> {
         let list_id = list.entity_ref();
         let name = name.into();
-        Box::pin(async move {
-            let list = self
-                .request(endpoint::users::lists::update::Request { list_id, name })
-                .await
-                .map_err(Error::Client)?
-                .into_result()?;
-            Ok(list)
-        })
+        Box::pin(async move { self.update_user_list(list_id).name(name).update().await })
+    }
+
+    /// Updates the user list.
+    ///
+    /// This method actually returns a builder, namely [`UserListUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`UserListUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: UserListUpdateBuilder::update
+    fn update_user_list(&self, list: impl EntityRef<UserList>) -> UserListUpdateBuilder<&Self> {
+        UserListUpdateBuilder::new(self, list)
     }
 
     /// Gets the corresponding user list from the ID.
     fn get_user_list(&self, id: Id<UserList>) -> BoxFuture<Result<UserList, Error<Self::Error>>> {
         Box::pin(async move {
             let list = self
-                .request(endpoint::users::lists::show::Request { list_id: id })
+                .request(endpoint::users::lists::show::Request {
+                    list_id: id,
+                    #[cfg(feature = "13-13-0")]
+                    for_public: Some(true),
+                })
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
@@ -1768,6 +1780,94 @@ pub trait ClientExt: Client + Sync {
         let user_id = user.entity_ref();
         Box::pin(async move {
             self.request(endpoint::users::lists::pull::Request { list_id, user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the user lists created by the user logged in with this client.
+    fn user_lists(&self) -> BoxFuture<Result<Vec<UserList>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let lists = self
+                .request(endpoint::users::lists::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(lists)
+        })
+    }
+
+    /// Lists the clips created by the specified user.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    fn user_user_lists(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<Vec<UserList>, Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            let lists = self
+                .request(
+                    endpoint::users::lists::list::Request::builder()
+                        .user_id(user_id)
+                        .build(),
+                )
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(lists)
+        })
+    }
+
+    /// Copies the public user list.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-0"))))]
+    fn copy_public_user_list(
+        &self,
+        name: impl Into<String>,
+        list: impl EntityRef<UserList>,
+    ) -> BoxFuture<Result<UserList, Error<Self::Error>>> {
+        let name = name.into();
+        let list_id = list.entity_ref();
+        Box::pin(async move {
+            let list = self
+                .request(endpoint::users::lists::create_from_public::Request { name, list_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(list)
+        })
+    }
+
+    /// Favorites the specified user list.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    fn favorite_user_list(
+        &self,
+        list: impl EntityRef<UserList>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let list_id = list.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::lists::favorite::Request { list_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unfavorites the specified user list.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    fn unfavorite_user_list(
+        &self,
+        list: impl EntityRef<UserList>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let list_id = list.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::lists::unfavorite::Request { list_id })
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
@@ -4700,8 +4800,8 @@ pub trait ClientExt: Client + Sync {
         feature = "13-0-0",
         doc = "This operation may require `canManageCustomEmojis` policy."
     )]
-    #[cfg(feature = "12-9-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
+    #[cfg(all(feature = "12-9-0", not(feature = "13-13-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-9-0", not(feature = "13-13-0")))))]
     fn create_emoji(
         &self,
         file: impl EntityRef<DriveFile>,
@@ -4716,6 +4816,35 @@ pub trait ClientExt: Client + Sync {
                 .id;
             Ok(id)
         })
+    }
+
+    /// Creates a custom emoji from the given name and file.
+    ///
+    /// This operation may require `canManageCustomEmojis` policy.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    fn create_emoji(
+        &self,
+        name: impl Into<String>,
+        file: impl EntityRef<DriveFile>,
+    ) -> BoxFuture<Result<Id<Emoji>, Error<Self::Error>>> {
+        let name = name.into();
+        let file_id = file.entity_ref();
+        Box::pin(async move { self.build_emoji(file_id).name(name).create().await })
+    }
+
+    /// Returns a builder for creating a custom emoji.
+    ///
+    /// The returned builder provides methods to customize details of the emoji,
+    /// and you can chain them to create a emoji incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a emoji.
+    /// See [`EmojiBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: EmojiBuilder::create
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    fn build_emoji(&self, file: impl EntityRef<DriveFile>) -> EmojiBuilder<&Self> {
+        EmojiBuilder::new(self, file)
     }
 
     /// Deletes the specified emoji.

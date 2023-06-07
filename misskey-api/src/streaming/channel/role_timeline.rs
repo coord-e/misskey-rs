@@ -42,6 +42,7 @@ mod tests {
         stream.disconnect().await.unwrap();
     }
 
+    #[cfg(not(feature = "13-13-0"))]
     #[tokio::test]
     async fn stream() {
         let http_client = HttpTestClient::new();
@@ -50,6 +51,40 @@ mod tests {
         let role = http_client
             .admin
             .test(crate::endpoint::admin::roles::create::Request::default())
+            .await;
+        http_client
+            .admin
+            .test(
+                crate::endpoint::admin::roles::assign::Request::builder()
+                    .role_id(role.id)
+                    .user_id(new_user.id)
+                    .build(),
+            )
+            .await;
+
+        let mut stream = client.channel(Request { role_id: role.id }).await.unwrap();
+
+        future::join(
+            new_client.create_note(Some("The world is fancy!"), None, None),
+            async { stream.next().await.unwrap().unwrap() },
+        )
+        .await;
+    }
+
+    #[cfg(feature = "13-13-0")]
+    #[tokio::test]
+    async fn stream() {
+        let http_client = HttpTestClient::new();
+        let client = TestClient::new().await;
+        let (new_user, new_client) = http_client.admin.create_user().await;
+        let role = http_client
+            .admin
+            .test(
+                crate::endpoint::admin::roles::create::Request::builder()
+                    .is_public(true)
+                    .is_explorable(true)
+                    .build(),
+            )
             .await;
         http_client
             .admin

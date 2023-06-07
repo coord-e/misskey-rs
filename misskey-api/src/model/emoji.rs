@@ -1,4 +1,6 @@
 use crate::model::id::Id;
+#[cfg(feature = "13-13-0")]
+use crate::model::role::Role;
 
 use serde::{Deserialize, Serialize};
 #[cfg(any(not(feature = "13-0-0"), feature = "13-1-1"))]
@@ -18,6 +20,15 @@ pub struct Emoji {
     #[cfg(feature = "13-10-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
     pub license: Option<String>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub is_sensitive: Option<bool>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub local_only: Option<bool>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub role_ids_that_can_be_used_this_emoji_as_reaction: Option<Vec<Id<Role>>>,
 }
 
 impl_entity!(Emoji);
@@ -33,4 +44,10 @@ pub struct EmojiSimple {
     #[cfg(feature = "13-1-1")]
     #[cfg_attr(docsrs, doc(cfg(feature = "13-1-1")))]
     pub url: Url,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub is_sensitive: Option<bool>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub role_ids_that_can_be_used_this_emoji_as_reaction: Option<Vec<Id<Role>>>,
 }

@@ -227,8 +227,8 @@ pub struct User {
     pub is_admin: bool,
     #[serde(default = "default_false")]
     pub is_moderator: bool,
-    #[cfg(feature = "12-104-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
+    #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-104-0", not(feature = "13-13-0")))))]
     #[serde(default = "default_false")]
     pub show_timeline_replies: bool,
     #[serde(default)]

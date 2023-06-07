@@ -16,6 +16,7 @@ mod me;
 mod misc;
 mod note;
 mod page;
+mod user_list;
 
 #[cfg(feature = "12-47-0")]
 mod channel;
@@ -42,6 +43,7 @@ pub use drive::{
 pub use me::MeUpdateBuilder;
 pub use note::NoteBuilder;
 pub use page::{PageBuilder, PageUpdateBuilder};
+pub use user_list::UserListUpdateBuilder;
 
 #[cfg(feature = "12-47-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
@@ -87,3 +89,7 @@ pub use flash::{FlashBuilder, FlashUpdateBuilder};
 #[cfg(not(feature = "13-7-0"))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
 pub use messaging::MessagingMessageBuilder;
+
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-0"))))]
+pub use admin::EmojiBuilder;

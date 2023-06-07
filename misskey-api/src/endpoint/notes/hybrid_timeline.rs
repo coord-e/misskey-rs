@@ -11,6 +11,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub with_replies: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub include_my_renotes: Option<bool>,
@@ -68,6 +73,8 @@ mod tests {
         client
             .test(Request {
                 with_files: Some(true),
+                #[cfg(feature = "13-13-0")]
+                with_replies: Some(true),
                 include_my_renotes: Some(false),
                 include_renoted_my_notes: Some(false),
                 include_local_renotes: Some(false),
@@ -86,6 +93,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 include_my_renotes: None,
                 include_renoted_my_notes: None,
                 include_local_renotes: None,
@@ -106,6 +115,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 include_my_renotes: None,
                 include_renoted_my_notes: None,
                 include_local_renotes: None,
@@ -126,6 +137,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 include_my_renotes: None,
                 include_renoted_my_notes: None,
                 include_local_renotes: None,

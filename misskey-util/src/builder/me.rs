@@ -283,8 +283,8 @@ impl<C> MeUpdateBuilder<C> {
         pub prevent_ai_learning;
 
         /// Sets whether to show replies to other users in the timeline.
-        #[cfg(feature = "12-104-0")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "12-104-0")))]
+        #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
+        #[cfg_attr(docsrs, doc(cfg(all(feature = "12-104-0", not(feature = "13-13-0")))))]
         pub show_replies_in_timeline { show_timeline_replies };
 
         /// Sets whether to receive announcement emails.

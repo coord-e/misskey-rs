@@ -255,6 +255,24 @@ impl<C> NoteBuilder<C> {
         self
     }
 
+    /// Sets the note to receive only non sensitive reactions.
+    ///
+    /// This is equivalent to `.reaction_acceptance(ReactionAcceptance::NonSensitiveOnly)`.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn accept_non_sensitive_only(&mut self) -> &mut Self {
+        self.reaction_acceptance(ReactionAcceptance::NonSensitiveOnly)
+    }
+
+    /// Sets the note to receive only non sensitive reactions and only likes from remote.
+    ///
+    /// This is equivalent to `.reaction_acceptance(ReactionAcceptance::NonSensitiveOnlyForLocalLikeOnlyForRemote)`.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn accept_only_non_sensitive_and_remote_likes(&mut self) -> &mut Self {
+        self.reaction_acceptance(ReactionAcceptance::NonSensitiveOnlyForLocalLikeOnlyForRemote)
+    }
+
     /// Sets whether or not to extract mentions (i.e. `@username`) from the text of the note.
     ///
     /// Mentions are extracted by default, and you would need this method if you want to disable this behavior.

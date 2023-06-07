@@ -11,6 +11,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub with_replies: Option<bool>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -59,6 +64,8 @@ mod tests {
         client
             .test(Request {
                 with_files: Some(true),
+                #[cfg(feature = "13-13-0")]
+                with_replies: Some(true),
                 limit: None,
                 since_id: None,
                 until_id: None,
@@ -74,6 +81,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -91,6 +100,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 limit: None,
                 since_id: Some(note.id.clone()),
                 until_id: Some(note.id.clone()),
@@ -108,6 +119,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 limit: None,
                 since_id: None,
                 until_id: None,

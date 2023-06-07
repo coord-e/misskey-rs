@@ -96,6 +96,10 @@ impl std::str::FromStr for Visibility {
 pub enum ReactionAcceptance {
     LikeOnly,
     LikeOnlyForRemote,
+    #[cfg(feature = "13-13-0")]
+    NonSensitiveOnly,
+    #[cfg(feature = "13-13-0")]
+    NonSensitiveOnlyForLocalLikeOnlyForRemote,
 }
 
 #[cfg(feature = "13-10-0")]
@@ -114,6 +118,13 @@ impl std::str::FromStr for ReactionAcceptance {
         match s {
             "likeOnly" | "LikeOnly" => Ok(ReactionAcceptance::LikeOnly),
             "likeOnlyForRemote" | "LikeOnlyForRemote" => Ok(ReactionAcceptance::LikeOnlyForRemote),
+            #[cfg(feature = "13-13-0")]
+            "nonSensitiveOnly" | "NonSensitiveOnly" => Ok(ReactionAcceptance::NonSensitiveOnly),
+            #[cfg(feature = "13-13-0")]
+            "nonSensitiveOnlyForLocalLikeOnlyForRemote"
+            | "NonSensitiveOnlyForLocalLikeOnlyForRemote" => {
+                Ok(ReactionAcceptance::NonSensitiveOnlyForLocalLikeOnlyForRemote)
+            }
             _ => Err(ParseReactionAcceptanceError { _priv: () }),
         }
     }
