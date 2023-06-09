@@ -87,6 +87,7 @@ mod tests {
         .await;
     }
 
+    #[cfg(not(feature = "12-108-0"))]
     #[tokio::test]
     async fn stream_added() {
         let client = TestClient::new().await;
@@ -125,6 +126,7 @@ mod tests {
         .await;
     }
 
+    #[cfg(not(feature = "12-108-0"))]
     #[tokio::test]
     async fn stream_removed() {
         let client = TestClient::new().await;

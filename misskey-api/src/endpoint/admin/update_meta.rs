@@ -34,6 +34,11 @@ pub struct Request {
     pub hidden_tags: Option<Vec<String>>,
     #[builder(default, setter(strip_option))]
     pub blocked_hosts: Option<Vec<String>>,
+    #[cfg(feature = "12-105-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-105-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub theme_color: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub mascot_image_url: Option<Option<String>>,
@@ -59,6 +64,18 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub description: Option<Option<String>>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub default_light_theme: Option<Option<String>>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub default_dark_theme: Option<Option<String>>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub max_note_text_length: Option<u64>,
@@ -71,9 +88,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub cache_remote_files: Option<bool>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub proxy_remote_files: Option<bool>,
+    #[cfg(feature = "12-92-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub email_required_for_signup: Option<bool>,
     #[cfg(feature = "12-37-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -113,6 +137,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub summaly_proxy: Option<Option<Url>>,
+    #[cfg(feature = "12-88-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-88-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub deepl_auth_key: Option<Option<String>>,
+    #[cfg(feature = "12-89-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub deepl_is_pro: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_twitter_integration: Option<bool>,
@@ -275,6 +309,8 @@ mod tests {
                 pinned_users: Some(vec!["@admin".to_string(), "@testuser".to_string()]),
                 hidden_tags: Some(vec!["not_good".to_string()]),
                 blocked_hosts: Some(vec!["not.good.host".to_string()]),
+                #[cfg(feature = "12-105-0")]
+                theme_color: Some(Some("#31748f".to_string())),
                 mascot_image_url: Some(Some(image_url.to_string())),
                 bannar_url: Some(Some(image_url.to_string())),
                 icon_url: Some(Some(image_url.to_string())),
@@ -284,11 +320,19 @@ mod tests {
                 logo_image_url: Some(Some(image_url.to_string())),
                 name: None,
                 description: Some(Some("description!".to_string())),
+                #[cfg(feature = "12-108-0")]
+                default_light_theme: Some(Some("{}".to_string())),
+                #[cfg(feature = "12-108-0")]
+                default_dark_theme: Some(Some("{}".to_string())),
+                #[cfg(not(feature = "12-108-0"))]
                 max_note_text_length: Some(1000),
                 local_drive_capacity_mb: Some(1000),
                 remote_drive_capacity_mb: Some(1000),
                 cache_remote_files: Some(true),
+                #[cfg(not(feature = "12-108-0"))]
                 proxy_remote_files: Some(true),
+                #[cfg(feature = "12-92-0")]
+                email_required_for_signup: Some(true),
                 #[cfg(feature = "12-37-0")]
                 enable_hcaptcha: Some(false),
                 #[cfg(feature = "12-37-0")]
@@ -303,6 +347,10 @@ mod tests {
                 maintainer_email: Some(Some("me@coord-e.com".to_string())),
                 langs: Some(vec!["ja_JP".to_string()]),
                 summaly_proxy: Some(None),
+                #[cfg(feature = "12-88-0")]
+                deepl_auth_key: Some(None),
+                #[cfg(feature = "12-89-1")]
+                deepl_is_pro: Some(false),
                 enable_twitter_integration: Some(false),
                 twitter_consumer_key: Some(None),
                 twitter_consumer_secret: Some(None),

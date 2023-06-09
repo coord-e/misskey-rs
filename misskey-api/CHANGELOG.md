@@ -21,12 +21,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.69.0
 - Support for Misskey v12.70.0
 - Support for Misskey v12.71.0 ~ v12.74.1
-- Support for Misskey v12.75.0 ~ v12.75.1
+- Support for Misskey v12.75.0 ~ v12.76.1
 - `muted_notification_types` user setting which is available since v12.48.0
 - Page related endpoints
    - endpoint `pages/*`
    - endpoint `i/pages`
    - endpoint `i/page_likes`
+- Support for Misskey v12.77.0
+- Support for Misskey v12.77.1 ~ v12.78.0
+   - endpoint `notifications/read`
+- Support for Misskey v12.79.0 ~ v12.79.1
+   - endpoint `gallery/*`
+   - endpoint `i/gallery/*`
+   - endpoint `users/gallery/posts`
+- Support for Misskey v12.79.2 ~ v12.79.3
+   - endpoint `gallery/posts/delete`
+   - endpoint `gallery/posts/update`
+- Partial support for Misskey v12.80.0 ~ v12.80.3
+   - endpoint `admin/ad/*`
+- Support for Misskey v12.81.0 ~ 12.81.2
+   - endpoint `admin/get-index-stats`
+- Support for Misskey v12.82.0 ~ v12.87.0
+- Partial support for Misskey v12.88.0
+- Support for Misskey v12.89.0
+- Support for Misskey v12.89.1 ~ v12.90.1
+- Support for Misskey v12.91.0
+   - endpoint `admin/accounts/delete`
+- Support for Misskey v12.92.0
+   - endpoint `email-address/available`
+   - endpoint `users/groups/leave`
+- Partial support for Misskey v12.93.0 ~ v12.94.1
+   - endpoint `users/reactions`
+- Support for Misskey v12.95.0
+   - endpoint `notes/thread-muting/*`
+- Support for Misskey v12.96.0 ~ v12.97.1
+- Support for Misskey v12.98.0
+   - endpoint `following/invalidate`
+- Partial support for Misskey v12.99.0 ~ v12.101.1
+- Support for Misskey v12.102.0 ~ v12.103.1
+   - endpoint `admin/emoji/*`
+- Support for Misskey v12.104.0
+   - endpoint `charts/ap-request`
+- Support for Misskey v12.105.0
+- Support for Misskey v12.106.0 ~ v12.106.3
+- Support for Misskey v12.107.0
+- Support for Misskey v12.108.0 ~ v12.108.1
+- Support for Misskey v12.109.0 ~ v12.110.1
+   - endpoint `admin/meta`
 
 ### Changed
 ### Deprecated
@@ -35,6 +76,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientSettingUpdated` variant from `MainStreamEvent`
    - For Misskey v12.67.0 ~ v12.68.0
 - Latest version flag from being enabled as default
+- endpoint `users`
+   - For Misskey v12.88.0
+- endpoint `users/recommendation`
+   - For Misskey v12.88.0 ~
+- endpoint `admin/logs` and `admin/delete-logs`
+   - For Misskey v12.93.0 ~
+- endpoint `admin/emoji/remove`
+   - For Misskey v12.102.0 ~
+- endpoint `charts/network`
+   - For Misskey v12.104.0 ~
+- endpoint `stats`
+   - For Misskey v12.106.0 ~ v12.106.3
+- endpoint `email-address/available`
+   - For Misskey v12.108.0 ~ v12.108.1
 
 ### Fixed
 

@@ -136,6 +136,8 @@ pub struct Note {
     pub reply: Option<Box<Note>>,
     #[serde(default)]
     pub renote: Option<Box<Note>>,
+    #[cfg(not(feature = "12-96-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-96-0"))))]
     #[serde(default = "default_false")]
     pub via_mobile: bool,
     #[serde(default = "default_false")]

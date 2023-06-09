@@ -30,23 +30,12 @@ mod tests {
             expired_after: None,
         };
         let note = client
-            .test(crate::endpoint::notes::create::Request {
-                visibility: None,
-                visible_user_ids: None,
-                text: Some("poll".to_string()),
-                cw: None,
-                via_mobile: None,
-                local_only: None,
-                no_extract_mentions: None,
-                no_extract_hashtags: None,
-                no_extract_emojis: None,
-                file_ids: None,
-                reply_id: None,
-                renote_id: None,
-                poll: Some(poll),
-                #[cfg(feature = "12-47-0")]
-                channel_id: None,
-            })
+            .test(
+                crate::endpoint::notes::create::Request::builder()
+                    .text("poll")
+                    .poll(poll)
+                    .build(),
+            )
             .await
             .created_note;
 

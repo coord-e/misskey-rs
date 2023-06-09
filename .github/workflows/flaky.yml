@@ -12,6 +12,52 @@ jobs:
     strategy:
       matrix:
         include:
+          - image: 'misskey/misskey:12.109.2'
+            flags: --features 12-109-0
+          - image: 'misskey/misskey:12.108.1'
+            flags: --features 12-108-0
+          - image: 'misskey/misskey:12.107.0'
+            flags: --features 12-107-0
+          - image: 'misskey/misskey:12.106.0'
+            flags: --features 12-106-0
+          - image: 'misskey/misskey:12.105.0'
+            flags: --features 12-105-0
+          - image: 'misskey/misskey:12.102.0'
+            flags: --features 12-102-0
+          - image: 'misskey/misskey:12.99.1'
+            flags: --features 12-99-0
+          - image: 'misskey/misskey:12.98.0'
+            flags: --features 12-98-0
+          - image: 'misskey/misskey:12.97.0'
+            flags: --features 12-96-0
+          - image: 'misskey/misskey:12.95.0'
+            flags: --features 12-95-0
+          - image: 'misskey/misskey:12.93.0'
+            flags: --features 12-93-0
+          - image: 'misskey/misskey:12.92.0'
+            flags: --features 12-92-0
+          - image: 'misskey/misskey:12.91.0'
+            flags: --features 12-91-0
+          - image: 'misskey/misskey:12.89.1'
+            flags: --features 12-89-1
+          - image: 'misskey/misskey:12.89.0'
+            flags: --features 12-89-0
+          - image: 'misskey/misskey:12.88.0'
+            flags: --features 12-88-0
+          - image: 'misskey/misskey:12.82.0'
+            flags: --features 12-82-0
+          - image: 'misskey/misskey:12.81.0'
+            flags: --features 12-81-0
+          - image: 'misskey/misskey:12.80.0'
+            flags: --features 12-80-0
+          - image: 'misskey/misskey:12.79.2'
+            flags: --features 12-79-2
+          - image: 'misskey/misskey:12.79.0'
+            flags: --features 12-79-0
+          - image: 'misskey/misskey:12.77.1'
+            flags: --features 12-77-1
+          - image: 'misskey/misskey:12.77.0'
+            flags: --features 12-77-0
           - image: 'misskey/misskey:12.75.0'
             flags: --features 12-75-0
           - image: 'misskey/misskey:12.71.0'

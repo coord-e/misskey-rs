@@ -18,6 +18,8 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub limit: Option<u8>,
+    #[cfg(not(feature = "12-93-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
@@ -28,6 +30,7 @@ impl misskey_core::Request for Request {
     const ENDPOINT: &'static str = "users/search-by-username-and-host";
 }
 
+#[cfg(not(feature = "12-93-0"))]
 impl_offset_pagination!(Request, User);
 
 #[cfg(test)]
@@ -44,6 +47,7 @@ mod tests {
                 host: None,
                 detail: None,
                 limit: None,
+                #[cfg(not(feature = "12-93-0"))]
                 offset: None,
             })
             .await;
@@ -58,6 +62,7 @@ mod tests {
                 host: Some("dummy".to_string()), // TODO: use proper host string
                 detail: None,
                 limit: None,
+                #[cfg(not(feature = "12-93-0"))]
                 offset: None,
             })
             .await;
@@ -72,6 +77,7 @@ mod tests {
                 host: None,
                 detail: Some(false),
                 limit: None,
+                #[cfg(not(feature = "12-93-0"))]
                 offset: None,
             })
             .await;
@@ -86,11 +92,13 @@ mod tests {
                 host: None,
                 detail: None,
                 limit: Some(100),
+                #[cfg(not(feature = "12-93-0"))]
                 offset: None,
             })
             .await;
     }
 
+    #[cfg(not(feature = "12-93-0"))]
     #[tokio::test]
     async fn request_with_offset() {
         let client = TestClient::new();

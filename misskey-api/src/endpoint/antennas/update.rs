@@ -55,21 +55,17 @@ mod tests {
         let client = TestClient::new();
         let antenna = client
             .user
-            .test(crate::endpoint::antennas::create::Request {
-                name: "test".to_string(),
-                src: AntennaSource::All,
-                user_list_id: None,
-                #[cfg(feature = "12-10-0")]
-                user_group_id: None,
-                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
-                #[cfg(feature = "12-19-0")]
-                exclude_keywords: Query::default(),
-                users: Vec::new(),
-                case_sensitive: true,
-                with_replies: false,
-                with_file: true,
-                notify: false,
-            })
+            .test(
+                crate::endpoint::antennas::create::Request::builder()
+                    .name("test")
+                    .keywords(Query::from_vec(vec![vec![
+                        "hello".to_string(),
+                        "awesome".to_string(),
+                    ]]))
+                    .case_sensitive(true)
+                    .with_file(true)
+                    .build(),
+            )
             .await;
 
         let list = client

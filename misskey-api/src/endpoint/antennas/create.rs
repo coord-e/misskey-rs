@@ -17,6 +17,7 @@ pub struct Request {
     /// [ 1 .. 100 ] characters
     #[builder(setter(into))]
     pub name: String,
+    #[builder(default)]
     pub src: AntennaSource,
     #[builder(default, setter(strip_option))]
     pub user_list_id: Option<Id<UserList>>,
@@ -30,10 +31,15 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]
     #[builder(default, setter(into))]
     pub exclude_keywords: Query<String>,
+    #[builder(default)]
     pub users: Vec<String>,
+    #[builder(default)]
     pub case_sensitive: bool,
+    #[builder(default)]
     pub with_replies: bool,
+    #[builder(default)]
     pub with_file: bool,
+    #[builder(default)]
     pub notify: bool,
 }
 
