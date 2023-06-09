@@ -17,10 +17,15 @@ mod messaging;
 mod misc;
 mod note;
 mod page;
-mod user;
 
 #[cfg(feature = "12-47-0")]
 mod channel;
+
+#[cfg(feature = "12-79-0")]
+mod gallery;
+
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+mod user;
 
 pub use admin::{
     AnnouncementUpdateBuilder, EmojiUpdateBuilder, MetaUpdateBuilder, ServerLogListBuilder,
@@ -35,7 +40,6 @@ pub use me::{IntoUserFields, MeUpdateBuilder};
 pub use messaging::MessagingMessageBuilder;
 pub use note::NoteBuilder;
 pub use page::{PageBuilder, PageUpdateBuilder};
-pub use user::UserListBuilder;
 
 #[cfg(feature = "12-47-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
@@ -44,3 +48,20 @@ pub use channel::{ChannelBuilder, ChannelUpdateBuilder};
 #[cfg(feature = "12-27-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
 pub use misc::NotificationBuilder;
+
+#[cfg(feature = "12-79-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+pub use gallery::GalleryPostBuilder;
+
+#[cfg(feature = "12-79-2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+pub use gallery::GalleryPostUpdateBuilder;
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+pub use admin::{AdBuilder, AdUpdateBuilder};
+
+// misskey-dev/misskey#7656
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+#[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))))]
+pub use user::UserListBuilder;

@@ -30,9 +30,10 @@ pub struct Antenna {
 
 impl_entity!(Antenna);
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum AntennaSource {
+    #[default]
     All,
     Home,
     Users,

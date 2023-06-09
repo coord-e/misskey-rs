@@ -78,3 +78,7 @@ pub mod server_info;
 #[cfg(feature = "12-67-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
 pub mod ping;
+
+#[cfg(feature = "12-79-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+pub mod gallery;

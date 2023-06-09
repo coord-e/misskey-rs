@@ -91,6 +91,26 @@ impl std::str::FromStr for UserEmailNotificationType {
     }
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Copy, Hash)]
+#[serde(rename_all = "camelCase")]
+pub enum OnlineStatus {
+    Unknown,
+    Online,
+    Active,
+    Offline,
+}
+
+impl Display for OnlineStatus {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            OnlineStatus::Unknown => f.write_str("unknown"),
+            OnlineStatus::Online => f.write_str("online"),
+            OnlineStatus::Active => f.write_str("active"),
+            OnlineStatus::Offline => f.write_str("offline"),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct User {
@@ -194,6 +214,14 @@ pub struct User {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
     #[serde(default)]
     pub email_notification_types: Option<HashSet<UserEmailNotificationType>>,
+    #[cfg(feature = "12-77-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-77-0")))]
+    #[serde(default)]
+    pub online_status: Option<OnlineStatus>,
+    #[cfg(feature = "12-77-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-77-0")))]
+    #[serde(default)]
+    pub hide_online_status: Option<bool>,
 }
 
 fn default_false() -> bool {

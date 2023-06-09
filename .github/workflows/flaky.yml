@@ -12,6 +12,26 @@ jobs:
     strategy:
       matrix:
         include:
+          - image: 'misskey/misskey:12.89.1'
+            flags: --features 12-89-1
+          - image: 'misskey/misskey:12.89.0'
+            flags: --features 12-89-0
+          - image: 'misskey/misskey:12.88.0'
+            flags: --features 12-88-0
+          - image: 'misskey/misskey:12.82.0'
+            flags: --features 12-82-0
+          - image: 'misskey/misskey:12.81.0'
+            flags: --features 12-81-0
+          - image: 'misskey/misskey:12.80.0'
+            flags: --features 12-80-0
+          - image: 'misskey/misskey:12.79.2'
+            flags: --features 12-79-2
+          - image: 'misskey/misskey:12.79.0'
+            flags: --features 12-79-0
+          - image: 'misskey/misskey:12.77.1'
+            flags: --features 12-77-1
+          - image: 'misskey/misskey:12.77.0'
+            flags: --features 12-77-0
           - image: 'misskey/misskey:12.75.0'
             flags: --features 12-75-0
           - image: 'misskey/misskey:12.71.0'

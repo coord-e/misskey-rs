@@ -97,11 +97,11 @@ mod tests {
     async fn request_paginate() {
         let client = TestClient::new();
         client
-            .test(crate::endpoint::notifications::create::Request {
-                body: "hi".to_string(),
-                header: None,
-                icon: None,
-            })
+            .test(
+                crate::endpoint::notifications::create::Request::builder()
+                    .body("hi")
+                    .build(),
+            )
             .await;
 
         let mut notification = None;

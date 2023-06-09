@@ -1,3 +1,5 @@
+#[cfg(feature = "12-81-0")]
+use crate::model::ad::{Ad, Place};
 #[cfg(feature = "12-62-0")]
 use crate::model::clip::Clip;
 use crate::model::{emoji::Emoji, id::Id, user::User};
@@ -54,6 +56,9 @@ pub struct Meta {
     pub icon_url: Option<String>,
     pub max_note_text_length: u64,
     pub emojis: Vec<Emoji>,
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    pub ads: Vec<MetaAd>,
     /// This field is [`bool`] (i.e. not [`Option`]) on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
     #[cfg(feature = "12-58-0")]
     pub require_setup: Option<bool>,
@@ -64,6 +69,8 @@ pub struct Meta {
     pub enable_github_integration: bool,
     pub enable_discord_integration: bool,
     pub enable_service_worker: bool,
+    #[cfg(feature = "12-88-0")]
+    pub translator_available: bool,
     /// This field is [`Option<String>`][`Option`] on <span class="module-item stab portability" style="display: inline-block; font-size: 80%;"><strong>non-<code style="background-color: transparent;">feature="12-58-0"</code></strong></span>.
     #[cfg(feature = "12-58-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-48-0")))]
@@ -86,6 +93,18 @@ pub struct Meta {
     #[cfg(feature = "12-62-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
     pub pinned_clip_id: Option<Id<Clip>>,
+}
+
+#[cfg(feature = "12-81-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+#[derive(Deserialize, Serialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct MetaAd {
+    pub id: Id<Ad>,
+    pub url: String,
+    pub place: Place,
+    pub ratio: u64,
+    pub image_url: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -134,6 +153,12 @@ pub struct AdminMeta {
     #[cfg(feature = "12-69-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
     pub object_storage_s3_force_path_style: bool,
+    #[cfg(feature = "12-89-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+    pub deepl_auth_key: Option<String>,
+    #[cfg(feature = "12-89-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+    pub deepl_is_pro: bool,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

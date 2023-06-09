@@ -21,12 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Misskey v12.69.0
 - Support for Misskey v12.70.0
 - Support for Misskey v12.71.0 ~ v12.74.1
-- Support for Misskey v12.75.0 ~ v12.75.1
+- Support for Misskey v12.75.0 ~ v12.76.1
 - `muted_notification_types` user setting which is available since v12.48.0
 - Page related endpoints
    - endpoint `pages/*`
    - endpoint `i/pages`
    - endpoint `i/page_likes`
+- Support for Misskey v12.77.0
+- Support for Misskey v12.77.1 ~ v12.78.0
+   - endpoint `notifications/read`
+- Support for Misskey v12.79.0 ~ v12.79.1
+   - endpoint `gallery/*`
+   - endpoint `i/gallery/*`
+   - endpoint `users/gallery/posts`
+- Support for Misskey v12.79.2 ~ v12.79.3
+   - endpoint `gallery/posts/delete`
+   - endpoint `gallery/posts/update`
+- Partial support for Misskey v12.80.0 ~ v12.80.3
+   - endpoint `admin/ad/*`
+- Support for Misskey v12.81.0 ~ 12.81.2
+   - endpoint `admin/get-index-stats`
+- Support for Misskey v12.82.0 ~ v12.87.0
+- Partial support for Misskey v12.88.0
+- Support for Misskey v12.89.0
+- Support for Misskey v12.89.1 ~ v12.90.1
 
 ### Changed
 ### Deprecated
@@ -35,6 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ClientSettingUpdated` variant from `MainStreamEvent`
    - For Misskey v12.67.0 ~ v12.68.0
 - Latest version flag from being enabled as default
+- endpoint `users`
+   - For Misskey v12.88.0
+- endpoint `users/recommendation`
+   - For Misskey v12.88.0 ~
 
 ### Fixed
 

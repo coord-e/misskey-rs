@@ -24,37 +24,11 @@ mod tests {
         let (new_user, new_client) = client.admin.create_user().await;
 
         new_client
-            .test(crate::endpoint::i::update::Request {
-                name: None,
-                description: None,
-                lang: None,
-                location: None,
-                birthday: None,
-                avatar_id: None,
-                banner_id: None,
-                fields: None,
-                is_locked: Some(true),
-                #[cfg(feature = "12-63-0")]
-                is_explorable: None,
-                careful_bot: None,
-                auto_accept_followed: None,
-                is_bot: None,
-                is_cat: None,
-                #[cfg(not(feature = "12-55-0"))]
-                auto_watch: None,
-                inject_featured_note: None,
-                always_mark_nsfw: None,
-                pinned_page_id: None,
-                muted_words: None,
-                #[cfg(feature = "12-60-0")]
-                no_crawle: None,
-                #[cfg(feature = "12-69-0")]
-                receive_announcement_email: None,
-                #[cfg(feature = "12-48-0")]
-                muting_notification_types: None,
-                #[cfg(feature = "12-70-0")]
-                email_notification_types: None,
-            })
+            .test(
+                crate::endpoint::i::update::Request::builder()
+                    .is_locked(true)
+                    .build(),
+            )
             .await;
         client
             .user

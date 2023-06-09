@@ -1,5 +1,9 @@
 use crate::Error;
 
+#[cfg(feature = "12-80-0")]
+use chrono::{DateTime, Utc};
+#[cfg(feature = "12-80-0")]
+use misskey_api::model::ad::{Ad, Place, Priority};
 #[cfg(feature = "12-62-0")]
 use misskey_api::model::clip::Clip;
 #[cfg(feature = "12-9-0")]
@@ -267,7 +271,19 @@ impl<C> MetaUpdateBuilder<C> {
         pub summaly_proxy: Url { summaly_proxy };
     }
 
+    update_builder_string_option_field! {
+        #[doc_name = "DeepL auth key"]
+        #[cfg(feature = "12-88-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-88-0")))]
+        pub deepl_auth_key;
+    }
+
     update_builder_bool_field! {
+        /// Sets whether or not DeepL is pro.
+        #[cfg(feature = "12-89-1")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+        pub deepl_is_pro;
+
         /// Sets whether or not to enable the Twitter integration.
         pub enable_twitter_integration;
     }
@@ -545,6 +561,263 @@ impl<C> EmojiUpdateBuilder<C> {
 
 impl<C: Client> EmojiUpdateBuilder<C> {
     /// Updates the custom emoji.
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+/// Builder for the [`build_ad`][`crate::ClientExt::build_ad`] method.
+pub struct AdBuilder<C> {
+    client: C,
+    request: endpoint::admin::ad::create::Request,
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C> AdBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C) -> Self {
+        let request = endpoint::admin::ad::create::Request {
+            url: String::default(),
+            memo: String::default(),
+            place: Place::default(),
+            priority: Priority::default(),
+            #[cfg(feature = "12-81-0")]
+            ratio: 1,
+            expires_at: DateTime::default(),
+            image_url: String::default(),
+        };
+        AdBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::ad::create::Request {
+        &self.request
+    }
+
+    /// Sets the url of the ad.
+    pub fn url(&mut self, url: impl Into<String>) -> &mut Self {
+        self.request.url = url.into();
+        self
+    }
+
+    /// Sets the memo of the ad.
+    pub fn memo(&mut self, memo: impl Into<String>) -> &mut Self {
+        self.request.memo = memo.into();
+        self
+    }
+
+    /// Sets the place of the ad.
+    pub fn place(&mut self, place: Place) -> &mut Self {
+        self.request.place = place;
+        self
+    }
+
+    /// Sets the place of the ad to square.
+    pub fn square(&mut self) -> &mut Self {
+        self.place(Place::Square)
+    }
+
+    /// Sets the place of the ad to horizontal.
+    pub fn horizontal(&mut self) -> &mut Self {
+        self.place(Place::Horizontal)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the place of the ad to horizontal-big.
+    pub fn horizontal_big(&mut self) -> &mut Self {
+        self.place(Place::HorizontalBig)
+    }
+
+    /// Sets the priority of the ad.
+    pub fn priority(&mut self, priority: Priority) -> &mut Self {
+        self.request.priority = priority;
+        self
+    }
+
+    /// Sets the priority of the ad to high.
+    pub fn high_priority(&mut self) -> &mut Self {
+        self.priority(Priority::High)
+    }
+
+    /// Sets the priority of the ad to middle.
+    pub fn middle_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Middle)
+    }
+
+    /// Sets the priority of the ad to low.
+    pub fn low_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Low)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the ratio of the ad.
+    pub fn ratio(&mut self, ratio: u64) -> &mut Self {
+        self.request.ratio = ratio;
+        self
+    }
+
+    /// Sets the expiration date of the ad.
+    pub fn expires_at(&mut self, expires_at: impl Into<DateTime<Utc>>) -> &mut Self {
+        self.request.expires_at = expires_at.into();
+        self
+    }
+
+    /// Sets the image url of the ad.
+    pub fn image_url(&mut self, image_url: impl Into<String>) -> &mut Self {
+        self.request.image_url = image_url.into();
+        self
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C: Client> AdBuilder<C> {
+    /// Creates the ad.
+    pub async fn create(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+/// Builder for the [`update_ad`][`crate::ClientExt::update_ad`] method.
+pub struct AdUpdateBuilder<C> {
+    client: C,
+    request: endpoint::admin::ad::update::Request,
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C> AdUpdateBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C, ad: Ad) -> Self {
+        let Ad {
+            id,
+            expires_at,
+            place,
+            priority,
+            #[cfg(feature = "12-81-0")]
+            ratio,
+            url,
+            image_url,
+            memo,
+            ..
+        } = ad;
+        let request = endpoint::admin::ad::update::Request {
+            id,
+            url,
+            memo,
+            place,
+            priority,
+            #[cfg(feature = "12-81-0")]
+            ratio,
+            expires_at,
+            image_url,
+        };
+        AdUpdateBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::ad::update::Request {
+        &self.request
+    }
+
+    /// Sets the url of the ad.
+    pub fn url(&mut self, url: impl Into<String>) -> &mut Self {
+        self.request.url = url.into();
+        self
+    }
+
+    /// Sets the memo of the ad.
+    pub fn memo(&mut self, memo: impl Into<String>) -> &mut Self {
+        self.request.memo = memo.into();
+        self
+    }
+
+    /// Sets the place of the ad.
+    pub fn place(&mut self, place: Place) -> &mut Self {
+        self.request.place = place;
+        self
+    }
+
+    /// Sets the place of the ad to square.
+    pub fn square(&mut self) -> &mut Self {
+        self.place(Place::Square)
+    }
+
+    /// Sets the place of the ad to horizontal.
+    pub fn horizontal(&mut self) -> &mut Self {
+        self.place(Place::Horizontal)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the place of the ad to horizontal-big.
+    pub fn horizontal_big(&mut self) -> &mut Self {
+        self.place(Place::HorizontalBig)
+    }
+
+    /// Sets the priority of the ad.
+    pub fn priority(&mut self, priority: Priority) -> &mut Self {
+        self.request.priority = priority;
+        self
+    }
+
+    /// Sets the priority of the ad to high.
+    pub fn high_priority(&mut self) -> &mut Self {
+        self.priority(Priority::High)
+    }
+
+    /// Sets the priority of the ad to middle.
+    pub fn middle_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Middle)
+    }
+
+    /// Sets the priority of the ad to low.
+    pub fn low_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Low)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the ratio of the ad.
+    pub fn ratio(&mut self, ratio: u64) -> &mut Self {
+        self.request.ratio = ratio;
+        self
+    }
+
+    /// Sets the expiration date of the ad.
+    pub fn expires_at(&mut self, expires_at: impl Into<DateTime<Utc>>) -> &mut Self {
+        self.request.expires_at = expires_at.into();
+        self
+    }
+
+    /// Sets the image url of the ad.
+    pub fn image_url(&mut self, image_url: impl Into<String>) -> &mut Self {
+        self.request.image_url = image_url.into();
+        self
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C: Client> AdUpdateBuilder<C> {
+    /// Updates the ad.
     pub async fn update(&self) -> Result<(), Error<C::Error>> {
         self.client
             .request(&self.request)

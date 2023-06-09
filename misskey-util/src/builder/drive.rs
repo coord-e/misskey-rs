@@ -270,6 +270,8 @@ impl<C> DriveFileUpdateBuilder<C> {
             folder_id: None,
             name: None,
             is_sensitive: None,
+            #[cfg(feature = "12-82-0")]
+            comment: None,
         };
         DriveFileUpdateBuilder { client, request }
     }
@@ -300,6 +302,14 @@ impl<C> DriveFileUpdateBuilder<C> {
     /// Sets whether the file contains NSFW content.
     pub fn sensitive(&mut self, sensitive: bool) -> &mut Self {
         self.request.is_sensitive = Some(sensitive);
+        self
+    }
+
+    #[cfg(feature = "12-82-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-82-0")))]
+    /// Sets the comment of the file.
+    pub fn comment(&mut self, comment: impl Into<String>) -> &mut Self {
+        self.request.comment.replace(comment.into());
         self
     }
 }
