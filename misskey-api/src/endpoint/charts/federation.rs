@@ -1,6 +1,8 @@
 use crate::model::chart::{ChartSpan, FederationChart};
 
-use serde::{Deserialize, Serialize};
+#[cfg(not(feature = "12-104-0"))]
+use serde::Deserialize;
+use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 #[derive(Serialize, Debug, Clone, TypedBuilder)]
@@ -16,6 +18,8 @@ pub struct Request {
     pub offset: Option<u64>,
 }
 
+#[cfg(not(feature = "12-104-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-104-0"))))]
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Response {
@@ -23,7 +27,10 @@ pub struct Response {
 }
 
 impl misskey_core::Request for Request {
+    #[cfg(not(feature = "12-104-0"))]
     type Response = Response;
+    #[cfg(feature = "12-104-0")]
+    type Response = FederationChart;
     const ENDPOINT: &'static str = "charts/federation";
 }
 

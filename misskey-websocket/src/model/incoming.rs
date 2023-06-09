@@ -1,12 +1,16 @@
-use crate::model::{ApiRequestId, ChannelId, SubNoteId};
+#[cfg(not(feature = "12-111-0"))]
+use crate::model::ApiRequestId;
+use crate::model::{ChannelId, SubNoteId};
 
 use serde::de::{self, Deserializer};
 use serde::Deserialize;
 use serde_json::Value;
+#[cfg(not(feature = "12-111-0"))]
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IncomingMessageType {
+    #[cfg(not(feature = "12-111-0"))]
     Api(ApiRequestId),
     Channel,
     Connected,
@@ -40,6 +44,7 @@ impl<'de> Deserialize<'de> for IncomingMessageType {
                     _ => (),
                 }
 
+                #[cfg(not(feature = "12-111-0"))]
                 if let Some(id) = value.strip_prefix("api:") {
                     let uuid = Uuid::try_parse(id)
                         .map_err(|e| e.to_string())
@@ -48,6 +53,9 @@ impl<'de> Deserialize<'de> for IncomingMessageType {
                 } else {
                     Ok(IncomingMessageType::Other(value.to_string()))
                 }
+
+                #[cfg(feature = "12-111-0")]
+                Ok(IncomingMessageType::Other(value.to_string()))
             }
         }
 

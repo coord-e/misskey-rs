@@ -20,6 +20,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_sensitive: Option<bool>,
+    #[cfg(feature = "12-82-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-82-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub comment: Option<String>,
 }
 
 impl misskey_core::Request for Request {
@@ -42,6 +47,8 @@ mod tests {
                 folder_id: None,
                 name: None,
                 is_sensitive: None,
+                #[cfg(feature = "12-82-0")]
+                comment: None,
             })
             .await;
     }
@@ -63,6 +70,8 @@ mod tests {
                 folder_id: Some(Some(folder.id)),
                 name: Some("test2.txt".to_string()),
                 is_sensitive: Some(true),
+                #[cfg(feature = "12-82-0")]
+                comment: Some("comment".to_string()),
             })
             .await;
     }
@@ -77,6 +86,8 @@ mod tests {
                 folder_id: Some(None),
                 name: None,
                 is_sensitive: None,
+                #[cfg(feature = "12-82-0")]
+                comment: None,
             })
             .await;
     }

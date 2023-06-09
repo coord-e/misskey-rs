@@ -30,6 +30,10 @@ pub mod watching;
 #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
 pub mod clips;
 
+#[cfg(feature = "12-95-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
+pub mod thread_muting;
+
 #[derive(Serialize, Default, Debug, Clone, TypedBuilder)]
 #[serde(rename_all = "camelCase")]
 #[builder(doc)]

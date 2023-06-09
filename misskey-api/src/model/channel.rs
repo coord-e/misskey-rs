@@ -12,7 +12,7 @@ pub struct Channel {
     pub last_noted_at: Option<DateTime<Utc>>,
     pub name: String,
     pub description: Option<String>,
-    pub banner_id: Option<Url>,
+    pub banner_url: Option<Url>,
     pub notes_count: u64,
     pub users_count: u64,
     pub user_id: Id<User>,

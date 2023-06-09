@@ -17,6 +17,7 @@ fn initial_notes_create_request() -> endpoint::notes::create::Request {
         visible_user_ids: None,
         text: None,
         cw: None,
+        #[cfg(not(feature = "12-96-0"))]
         via_mobile: Some(false),
         local_only: Some(false),
         no_extract_mentions: Some(false),
@@ -199,6 +200,8 @@ impl<C> NoteBuilder<C> {
         self
     }
 
+    #[cfg(not(feature = "12-96-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-96-0"))))]
     /// Sets whether to show the note as posted from a mobile device.
     pub fn via_mobile(&mut self, via_mobile: bool) -> &mut Self {
         self.request.via_mobile.replace(via_mobile);

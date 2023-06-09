@@ -74,6 +74,8 @@ impl HttpClientExt for HttpClient {
             crate::endpoint::drive::files::create::Request {
                 folder_id: None,
                 name: Some(file_name.to_string()),
+                #[cfg(feature = "12-102-0")]
+                comment: None,
                 is_sensitive: None,
                 force: Some(true),
             },

@@ -40,13 +40,14 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
     /// # use misskey_api as misskey;
-    /// # let client = misskey_test::test_websocket_client(misskey_test::env::token()).await?;
+    /// # let http_client = misskey_test::test_client().await?;
+    /// # let ws_client = misskey_test::test_websocket_client(misskey_test::env::token()).await?;
     /// # misskey_test::persist(std::time::Duration::from_secs(3), async move {
     /// use futures::stream::TryStreamExt;
     /// use misskey::streaming::note::NoteUpdateEvent;
     ///
-    /// let note = client.create_note("Hello!").await?;
-    /// let mut note_stream = client.subscribe_note(&note).await?;
+    /// let note = http_client.create_note("Hello!").await?;
+    /// let mut note_stream = ws_client.subscribe_note(&note).await?;
     /// // Wait for the next event in the stream.
     /// while let Some(event) = note_stream.try_next().await? {
     ///     match event {
@@ -93,7 +94,8 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     /// # use misskey_util::StreamingClientExt;
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
-    /// # let client = misskey_test::test_websocket_client(misskey_test::env::token()).await?;
+    /// # let http_client = misskey_test::test_client().await?;
+    /// # let ws_client = misskey_test::test_websocket_client(misskey_test::env::token()).await?;
     /// # mod misskey {
     /// #   pub use misskey_api::streaming;
     /// #   pub use misskey_util::ClientExt;
@@ -103,15 +105,15 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     /// use misskey::ClientExt;
     /// use misskey::streaming::channel::main::MainStreamEvent;
     ///
-    /// let mut main_stream = client.main_stream().await?;
+    /// let mut main_stream = ws_client.main_stream().await?;
     /// // Wait for the next event in the main stream.
     /// while let Some(event) = main_stream.try_next().await? {
     ///     match event {
     ///         // Check if the event is 'followed'
     ///         MainStreamEvent::Followed(user) => {
     ///             // Follow back `user` if you haven't already.
-    ///             if !client.is_following(&user).await? {
-    ///                 client.follow(&user).await?;
+    ///             if !http_client.is_following(&user).await? {
+    ///                 http_client.follow(&user).await?;
     ///             }
     ///         }
     ///         // other events are just ignored here
@@ -151,7 +153,8 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     /// # use misskey_util::StreamingClientExt;
     /// # #[tokio::main]
     /// # async fn main() -> anyhow::Result<()> {
-    /// # let client = misskey_test::test_websocket_client(misskey_test::env::token()).await?;
+    /// # let http_client = misskey_test::test_client().await?;
+    /// # let ws_client = misskey_test::test_websocket_client(misskey_test::env::token()).await?;
     /// # mod misskey {
     /// #   pub use misskey_api::model;
     /// #   pub use misskey_util::ClientExt;
@@ -161,13 +164,13 @@ pub trait StreamingClientExt: StreamingClient + Sync {
     /// use misskey::ClientExt;
     /// use misskey::model::note::Note;
     ///
-    /// let mut home = client.home_timeline().await?;
+    /// let mut home = ws_client.home_timeline().await?;
     /// // Wait for the next note in the home timeline.
     /// while let Some(note) = home.try_next().await? {
     ///     // if the note's text contains "Hello", react with "🙌".
     ///     match note {
     ///         Note { id, text: Some(text), .. } if text.contains("Hello") => {
-    ///             client.react(id, "🙌").await?;
+    ///             http_client.react(id, "🙌").await?;
     ///         }
     ///         _ => {}
     ///     }
