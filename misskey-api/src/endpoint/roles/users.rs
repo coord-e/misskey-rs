@@ -38,14 +38,16 @@ mod tests {
     #[tokio::test]
     async fn request_simple() {
         let client = TestClient::new();
-        let role = client
-            .admin
-            .test(
-                crate::endpoint::admin::roles::create::Request::builder()
-                    .is_public(true)
-                    .build(),
-            )
-            .await;
+        #[cfg(not(feature = "13-13-2"))]
+        let create_role_request = crate::endpoint::admin::roles::create::Request::builder()
+            .is_public(true)
+            .build();
+        #[cfg(feature = "13-13-2")]
+        let create_role_request = crate::endpoint::admin::roles::create::Request::builder()
+            .is_public(true)
+            .is_explorable(true)
+            .build();
+        let role = client.admin.test(create_role_request).await;
 
         client
             .test(Request {
@@ -60,14 +62,16 @@ mod tests {
     #[tokio::test]
     async fn request_with_limit() {
         let client = TestClient::new();
-        let role = client
-            .admin
-            .test(
-                crate::endpoint::admin::roles::create::Request::builder()
-                    .is_public(true)
-                    .build(),
-            )
-            .await;
+        #[cfg(not(feature = "13-13-2"))]
+        let create_role_request = crate::endpoint::admin::roles::create::Request::builder()
+            .is_public(true)
+            .build();
+        #[cfg(feature = "13-13-2")]
+        let create_role_request = crate::endpoint::admin::roles::create::Request::builder()
+            .is_public(true)
+            .is_explorable(true)
+            .build();
+        let role = client.admin.test(create_role_request).await;
 
         client
             .test(Request {
@@ -82,14 +86,16 @@ mod tests {
     #[tokio::test]
     async fn request_paginate() {
         let client = TestClient::new();
-        let role = client
-            .admin
-            .test(
-                crate::endpoint::admin::roles::create::Request::builder()
-                    .is_public(true)
-                    .build(),
-            )
-            .await;
+        #[cfg(not(feature = "13-13-2"))]
+        let create_role_request = crate::endpoint::admin::roles::create::Request::builder()
+            .is_public(true)
+            .build();
+        #[cfg(feature = "13-13-2")]
+        let create_role_request = crate::endpoint::admin::roles::create::Request::builder()
+            .is_public(true)
+            .is_explorable(true)
+            .build();
+        let role = client.admin.test(create_role_request).await;
         let (user, _) = client.admin.create_user().await;
         client
             .admin

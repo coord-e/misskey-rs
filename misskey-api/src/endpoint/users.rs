@@ -22,8 +22,8 @@ pub mod search;
 pub mod search_by_username_and_host;
 pub mod show;
 
-#[cfg(feature = "12-60-0")]
-#[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
+#[cfg(all(feature = "12-60-0", not(feature = "13-13-2")))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "12-60-0", not(feature = "13-13-2")))))]
 pub mod stats;
 
 #[cfg(feature = "12-61-0")]

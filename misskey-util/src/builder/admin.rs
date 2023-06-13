@@ -201,7 +201,21 @@ impl<C> MetaUpdateBuilder<C> {
         #[doc_name = "URL of the banner image for the instance"]
         pub banner_url;
         #[doc_name = "URL of the error image for the instance"]
+        #[cfg(not(feature = "13-13-2"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-2"))))]
         pub error_image_url;
+        #[doc_name = "URL of the error image for the instance"]
+        #[cfg(feature = "13-13-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+        pub server_error_image_url;
+        #[doc_name = "URL of the info image for the instance"]
+        #[cfg(feature = "13-13-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+        pub info_image_url;
+        #[doc_name = "URL of the not found image for the instance"]
+        #[cfg(feature = "13-13-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+        pub not_found_image_url;
         #[doc_name = "URL of the icon for the instance"]
         pub icon_url;
         #[doc_name = "name of the instance"]

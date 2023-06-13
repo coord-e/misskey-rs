@@ -84,7 +84,18 @@ pub struct Meta {
     pub theme_color: Option<String>,
     pub mascot_image_url: Option<String>,
     pub banner_url: Option<String>,
+    #[cfg(not(feature = "13-13-2"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-2"))))]
     pub error_image_url: Option<String>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    pub server_error_image_url: Option<String>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    pub info_image_url: Option<String>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    pub not_found_image_url: Option<String>,
     pub icon_url: Option<String>,
     #[cfg(feature = "12-60-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
@@ -266,7 +277,18 @@ pub struct AdminMeta {
     pub theme_color: Option<String>,
     pub mascot_image_url: Option<String>,
     pub banner_url: Option<String>,
+    #[cfg(not(feature = "13-13-2"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-2"))))]
     pub error_image_url: Option<String>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    pub server_error_image_url: Option<String>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    pub info_image_url: Option<String>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    pub not_found_image_url: Option<String>,
     pub icon_url: Option<String>,
     pub background_image_url: Option<String>,
     pub logo_image_url: Option<String>,

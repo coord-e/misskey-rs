@@ -264,9 +264,26 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub smtp_pass: Option<Option<String>>,
+    #[cfg(not(feature = "13-13-2"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-2"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub error_image_url: Option<Option<String>>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub server_error_image_url: Option<Option<String>>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub info_image_url: Option<Option<String>>,
+    #[cfg(feature = "13-13-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub not_found_image_url: Option<Option<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub enable_service_worker: Option<bool>,
@@ -501,7 +518,14 @@ mod tests {
                 smtp_port: Some(None),
                 smtp_user: Some(None),
                 smtp_pass: Some(None),
+                #[cfg(not(feature = "13-13-2"))]
                 error_image_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "13-13-2")]
+                server_error_image_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "13-13-2")]
+                info_image_url: Some(Some(image_url.to_string())),
+                #[cfg(feature = "13-13-2")]
+                not_found_image_url: Some(Some(image_url.to_string())),
                 enable_service_worker: Some(false),
                 sw_public_key: Some(None),
                 sw_private_key: Some(None),

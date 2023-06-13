@@ -123,6 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - endpoint `users/lists/create-from-public`
    - endpoint `users/lists/favorite`
    - endpoint `users/lists/unfavorite`
+- Support for Misskey v13.13.2
 
 ### Changed
 
