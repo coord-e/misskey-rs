@@ -20,11 +20,11 @@ services:
 
   redis:
     restart: always
-    image: redis:4.0-alpine
+    image: redis:7-alpine
 
   db:
     restart: always
-    image: postgres:11.2-alpine
+    image: postgres:15-alpine
     environment:
       - POSTGRES_PASSWORD=misskey-test
       - POSTGRES_USER=misskey-test

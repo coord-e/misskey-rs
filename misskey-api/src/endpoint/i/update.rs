@@ -3,13 +3,19 @@ use std::collections::HashSet;
 
 #[cfg(feature = "12-48-0")]
 use crate::model::notification::NotificationType;
+#[cfg(feature = "12-96-0")]
+use crate::model::user::FfVisibility;
 #[cfg(feature = "12-70-0")]
 use crate::model::user::UserEmailNotificationType;
+#[cfg(feature = "12-108-0")]
+use crate::model::user::UserField;
 use crate::model::{drive::DriveFile, id::Id, page::Page, query::Query, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
+#[cfg(not(feature = "12-108-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
 #[derive(Serialize, Default, Debug, Clone)]
 pub struct UserFieldRequest {
     pub name: Option<String>,
@@ -41,9 +47,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub banner_id: Option<Option<Id<DriveFile>>>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub fields: Option<[UserFieldRequest; 4]>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub fields: Option<Vec<UserField>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_locked: Option<bool>,
@@ -52,6 +65,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub is_explorable: Option<bool>,
+    #[cfg(feature = "12-77-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-77-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub hide_online_status: Option<bool>,
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub public_reactions: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub careful_bot: Option<bool>,
@@ -75,17 +98,49 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub always_mark_nsfw: Option<bool>,
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub auto_sensitive: Option<bool>,
+    #[cfg(feature = "12-96-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-96-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub ff_visibility: Option<FfVisibility>,
+    #[cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub pinned_page_id: Option<Option<Id<Page>>>,
+    #[cfg(all(feature = "12-108-0", not(feature = "13-0-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-108-0", not(feature = "13-0-0")))))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub pinned_page_id: Option<Vec<Id<Page>>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub muted_words: Option<Query<String>>,
+    #[cfg(feature = "12-99-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-99-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub muted_instances: Option<Vec<String>>,
     #[cfg(feature = "12-60-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-60-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub no_crawle: Option<bool>,
+    #[cfg(feature = "13-12-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-2")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub prevent_ai_learning: Option<bool>,
+    #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-104-0", not(feature = "13-13-0")))))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub show_timeline_replies: Option<bool>,
     #[cfg(feature = "12-69-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -101,6 +156,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub email_notification_types: Option<HashSet<UserEmailNotificationType>>,
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub also_known_as: Option<Vec<String>>,
 }
 
 impl misskey_core::Request for Request {
@@ -110,7 +170,9 @@ impl misskey_core::Request for Request {
 
 #[cfg(test)]
 mod tests {
-    use super::{Request, UserFieldRequest};
+    use super::Request;
+    #[cfg(not(feature = "12-108-0"))]
+    use super::UserFieldRequest;
     use crate::test::{ClientExt, TestClient};
 
     #[tokio::test]
@@ -124,8 +186,12 @@ mod tests {
         #[cfg(feature = "12-48-0")]
         use crate::model::notification::NotificationType;
         use crate::model::query::Query;
+        #[cfg(feature = "12-96-0")]
+        use crate::model::user::FfVisibility;
         #[cfg(feature = "12-70-0")]
         use crate::model::user::UserEmailNotificationType;
+        #[cfg(feature = "12-108-0")]
+        use crate::model::user::UserField;
 
         let client = TestClient::new();
         client
@@ -137,6 +203,7 @@ mod tests {
                 birthday: None,
                 avatar_id: None,
                 banner_id: None,
+                #[cfg(not(feature = "12-108-0"))]
                 fields: Some([
                     UserFieldRequest {
                         name: Some("key".to_string()),
@@ -146,9 +213,18 @@ mod tests {
                     Default::default(),
                     Default::default(),
                 ]),
+                #[cfg(feature = "12-108-0")]
+                fields: Some(vec![UserField {
+                    name: "key".to_string(),
+                    value: "value".to_string(),
+                }]),
                 is_locked: Some(true),
                 #[cfg(feature = "12-63-0")]
                 is_explorable: Some(false),
+                #[cfg(feature = "12-77-0")]
+                hide_online_status: Some(true),
+                #[cfg(feature = "12-93-0")]
+                public_reactions: Some(true),
                 careful_bot: Some(true),
                 auto_accept_followed: Some(true),
                 is_bot: Some(true),
@@ -157,13 +233,23 @@ mod tests {
                 auto_watch: Some(true),
                 inject_featured_note: Some(true),
                 always_mark_nsfw: Some(true),
+                #[cfg(feature = "12-112-0")]
+                auto_sensitive: Some(true),
+                #[cfg(feature = "12-96-0")]
+                ff_visibility: Some(FfVisibility::Public),
                 pinned_page_id: None,
                 muted_words: Some(Query::from_vec(vec![
                     vec!["mute1".to_string(), "mute2".to_string()],
                     vec!["mute3".to_string()],
                 ])),
+                #[cfg(feature = "12-99-0")]
+                muted_instances: Some(vec!["mute1".to_string(), "mute2".to_string()]),
                 #[cfg(feature = "12-60-0")]
                 no_crawle: Some(true),
+                #[cfg(feature = "13-12-2")]
+                prevent_ai_learning: Some(true),
+                #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
+                show_timeline_replies: Some(true),
                 #[cfg(feature = "12-69-0")]
                 receive_announcement_email: Some(true),
                 #[cfg(feature = "12-48-0")]
@@ -181,6 +267,8 @@ mod tests {
                     .into_iter()
                     .collect(),
                 ),
+                #[cfg(feature = "13-12-0")]
+                also_known_as: Some(Vec::new()),
             })
             .await;
     }
@@ -201,6 +289,10 @@ mod tests {
                 is_locked: None,
                 #[cfg(feature = "12-63-0")]
                 is_explorable: None,
+                #[cfg(feature = "12-77-0")]
+                hide_online_status: None,
+                #[cfg(feature = "12-93-0")]
+                public_reactions: None,
                 careful_bot: None,
                 auto_accept_followed: None,
                 is_bot: None,
@@ -209,16 +301,31 @@ mod tests {
                 auto_watch: None,
                 inject_featured_note: None,
                 always_mark_nsfw: None,
+                #[cfg(feature = "12-112-0")]
+                auto_sensitive: None,
+                #[cfg(feature = "12-96-0")]
+                ff_visibility: None,
+                #[cfg(not(feature = "12-108-0"))]
                 pinned_page_id: Some(None),
+                #[cfg(feature = "12-108-0")]
+                pinned_page_id: None,
                 muted_words: None,
+                #[cfg(feature = "12-99-0")]
+                muted_instances: None,
                 #[cfg(feature = "12-60-0")]
                 no_crawle: None,
+                #[cfg(feature = "13-12-2")]
+                prevent_ai_learning: None,
+                #[cfg(all(feature = "12-104-0", not(feature = "13-13-0")))]
+                show_timeline_replies: None,
                 #[cfg(feature = "12-69-0")]
                 receive_announcement_email: None,
                 #[cfg(feature = "12-48-0")]
                 muting_notification_types: None,
                 #[cfg(feature = "12-70-0")]
                 email_notification_types: None,
+                #[cfg(feature = "13-12-0")]
+                also_known_as: None,
             })
             .await;
     }

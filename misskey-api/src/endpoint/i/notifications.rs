@@ -22,9 +22,16 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub until_id: Option<Id<Notification>>,
+    #[cfg(not(feature = "13-11-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-11-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub following: Option<bool>,
+    #[cfg(all(feature = "12-92-0", not(feature = "13-11-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-92-0", not(feature = "13-11-0")))))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub unread_only: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub mark_as_read: Option<bool>,
@@ -62,7 +69,10 @@ mod tests {
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
+                #[cfg(not(feature = "13-11-0"))]
                 following: None,
+                #[cfg(all(feature = "12-92-0", not(feature = "13-11-0")))]
+                unread_only: None,
                 mark_as_read: None,
                 include_types: None,
                 exclude_types: None,
@@ -80,7 +90,10 @@ mod tests {
                 limit: None,
                 since_id: None,
                 until_id: None,
+                #[cfg(not(feature = "13-11-0"))]
                 following: Some(true),
+                #[cfg(all(feature = "12-92-0", not(feature = "13-11-0")))]
+                unread_only: Some(true),
                 mark_as_read: Some(false),
                 include_types: Some(
                     vec![NotificationType::Follow, NotificationType::Reply]
@@ -97,11 +110,11 @@ mod tests {
     async fn request_paginate() {
         let client = TestClient::new();
         client
-            .test(crate::endpoint::notifications::create::Request {
-                body: "hi".to_string(),
-                header: None,
-                icon: None,
-            })
+            .test(
+                crate::endpoint::notifications::create::Request::builder()
+                    .body("hi")
+                    .build(),
+            )
             .await;
 
         let mut notification = None;
@@ -111,7 +124,10 @@ mod tests {
                     limit: None,
                     since_id: None,
                     until_id: None,
+                    #[cfg(not(feature = "13-11-0"))]
                     following: None,
+                    #[cfg(all(feature = "12-92-0", not(feature = "13-11-0")))]
+                    unread_only: None,
                     mark_as_read: None,
                     include_types: None,
                     exclude_types: None,
@@ -126,7 +142,10 @@ mod tests {
                 limit: None,
                 since_id: Some(notification_id.clone()),
                 until_id: Some(notification_id.clone()),
+                #[cfg(not(feature = "13-11-0"))]
                 following: None,
+                #[cfg(all(feature = "12-92-0", not(feature = "13-11-0")))]
+                unread_only: None,
                 mark_as_read: None,
                 include_types: None,
                 exclude_types: None,

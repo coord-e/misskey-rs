@@ -17,6 +17,7 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-70-0")))]
     #[builder(default, setter(strip_option))]
     pub channel_id: Option<Id<Channel>>,
+    #[cfg_attr(feature = "13-12-0", serde(skip_serializing_if = "Option::is_none"))]
     #[builder(default, setter(strip_option, into))]
     pub host: Option<String>,
     /// 1 .. 100
@@ -83,11 +84,11 @@ mod tests {
     async fn request_with_channel_id() {
         let client = TestClient::new();
         let channel = client
-            .test(crate::endpoint::channels::create::Request {
-                name: "test channel".to_string(),
-                description: None,
-                banner_id: None,
-            })
+            .test(
+                crate::endpoint::channels::create::Request::builder()
+                    .name("test channel")
+                    .build(),
+            )
             .await;
 
         client

@@ -1,24 +1,37 @@
 use crate::Error;
 
-#[cfg(feature = "12-62-0")]
+#[cfg(feature = "12-80-0")]
+use chrono::{DateTime, Utc};
+#[cfg(feature = "12-80-0")]
+use misskey_api::model::ad::{Ad, Place, Priority};
+#[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
 use misskey_api::model::clip::Clip;
 #[cfg(feature = "12-9-0")]
 use misskey_api::model::emoji::Emoji;
-use misskey_api::model::{
-    announcement::Announcement,
-    log::{Log, LogLevel},
-    user::User,
+#[cfg(not(feature = "12-93-0"))]
+use misskey_api::model::log::{Log, LogLevel};
+#[cfg(feature = "12-112-0")]
+use misskey_api::model::meta::{SensitiveMediaDetection, SensitiveMediaDetectionSensitivity};
+#[cfg(feature = "13-0-0")]
+use misskey_api::model::role::{
+    self, Policies, PoliciesSimple, PolicyValue, Role, RoleCondFormulaValue, Target,
 };
+use misskey_api::model::{announcement::Announcement, user::User};
+#[cfg(feature = "13-13-0")]
+use misskey_api::model::{drive::DriveFile, id::Id};
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::Client;
 use url::Url;
 
+#[cfg(not(feature = "12-93-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
 /// Builder for the [`server_logs`][`crate::ClientExt::server_logs`] method.
 pub struct ServerLogListBuilder<C> {
     client: C,
     request: endpoint::admin::logs::Request,
 }
 
+#[cfg(not(feature = "12-93-0"))]
 impl<C> ServerLogListBuilder<C> {
     /// Creates a builder with the client.
     pub fn new(client: C) -> Self {
@@ -105,6 +118,7 @@ impl<C> ServerLogListBuilder<C> {
     }
 }
 
+#[cfg(not(feature = "12-93-0"))]
 impl<C: Client> ServerLogListBuilder<C> {
     /// Lists the logs.
     pub async fn list(&self) -> Result<Vec<Log>, Error<C::Error>> {
@@ -140,10 +154,16 @@ impl<C> MetaUpdateBuilder<C> {
         /// Sets whether the instance has registration enabled.
         pub disable_registration;
         /// Sets whether the instance has local timeline enabled.
+        #[cfg(not(feature = "13-0-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
         pub disable_local_timeline;
         /// Sets whether the instance has global timeline enabled.
+        #[cfg(not(feature = "13-0-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
         pub disable_global_timeline;
         /// Sets whether the instance uses ★ as fallback if the reaction emoji is unknown.
+        #[cfg(not(feature = "13-10-3"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-10-3"))))]
         pub use_star_for_reaction_fallback;
     }
 
@@ -152,28 +172,50 @@ impl<C> MetaUpdateBuilder<C> {
         pub pinned_users;
         /// Sets the hashtags that the instance will ignore for statistics, etc.
         pub hidden_tags;
+        /// Sets the list of words where notes that contain any of the words will be set their visibility to home.
+        #[cfg(feature = "13-10-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+        pub sensitive_words;
         /// Sets the hosts to be blocked by the instance.
         pub blocked_hosts;
         /// Sets the pinned pages of the instance.
-        #[cfg(feature = "12-58-0")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "12-58-0")))]
+        #[cfg(all(feature = "12-58-0", not(feature = "13-10-0")))]
+        #[cfg_attr(docsrs, doc(cfg(all(feature = "12-58-0", not(feature = "13-10-0")))))]
         pub pinned_pages;
     }
 
     update_builder_option_field! {
         #[doc_name = "pinned clip"]
-        #[cfg(feature = "12-62-0")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "12-62-0")))]
+        #[cfg(all(feature = "12-62-0", not(feature = "13-10-0")))]
+        #[cfg_attr(docsrs, doc(cfg(all(feature = "12-62-0", not(feature = "13-10-0")))))]
         pub pinned_clip : impl EntityRef<Clip> { pinned_clip_id =  pinned_clip.entity_ref() };
     }
 
     update_builder_string_option_field! {
+        #[doc_name = "theme color for the instance"]
+        #[cfg(feature = "12-105-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-105-0")))]
+        pub theme_color;
         #[doc_name = "URL of the mascot image for the instance"]
         pub mascot_image_url;
         #[doc_name = "URL of the banner image for the instance"]
-        pub bannar_url;
+        pub banner_url;
         #[doc_name = "URL of the error image for the instance"]
+        #[cfg(not(feature = "13-13-2"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-13-2"))))]
         pub error_image_url;
+        #[doc_name = "URL of the error image for the instance"]
+        #[cfg(feature = "13-13-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+        pub server_error_image_url;
+        #[doc_name = "URL of the info image for the instance"]
+        #[cfg(feature = "13-13-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+        pub info_image_url;
+        #[doc_name = "URL of the not found image for the instance"]
+        #[cfg(feature = "13-13-2")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-13-2")))]
+        pub not_found_image_url;
         #[doc_name = "URL of the icon for the instance"]
         pub icon_url;
         #[doc_name = "name of the instance"]
@@ -191,6 +233,8 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     /// Sets the maximum number of characters for posts in the instance.
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     pub fn max_note_text_length(&mut self, max_note_text_length: u64) -> &mut Self {
         self.request
             .max_note_text_length
@@ -199,12 +243,16 @@ impl<C> MetaUpdateBuilder<C> {
     }
 
     /// Sets the drive capacity per local user in megabytes.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn local_drive_capacity(&mut self, mb: u64) -> &mut Self {
         self.request.local_drive_capacity_mb.replace(mb);
         self
     }
 
     /// Sets the drive capacity per remote user in megabytes.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub fn remote_drive_capacity(&mut self, mb: u64) -> &mut Self {
         self.request.remote_drive_capacity_mb.replace(mb);
         self
@@ -215,10 +263,17 @@ impl<C> MetaUpdateBuilder<C> {
         pub cache_remote_files;
         /// Sets whether or not the instance would proxy remote files that are not available
         /// locally.
+        #[cfg(not(feature = "12-108-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
         pub proxy_remote_files;
     }
 
     update_builder_bool_field! {
+        /// Sets whether or not the instance requires email for signup.
+        #[cfg(feature = "12-92-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+        pub email_required_for_signup;
+
         /// Sets whether or not the instance enables hCaptcha.
         #[cfg(feature = "12-37-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-37-0")))]
@@ -245,6 +300,124 @@ impl<C> MetaUpdateBuilder<C> {
         pub recaptcha_secret_key;
     }
 
+    /// Sets sensitive media detection target.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media(&mut self, detection: SensitiveMediaDetection) -> &mut Self {
+        self.request.sensitive_media_detection.replace(detection);
+        self
+    }
+
+    /// Sets sensitive media detection target to none.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::None)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn disable_sensitive_media_detection(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::None)
+    }
+
+    /// Sets sensitive media detection target to all.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::All)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media_for_all_posts(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::All)
+    }
+
+    /// Sets sensitive media detection target to local.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::Local)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media_for_local_posts(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::Local)
+    }
+
+    /// Sets sensitive media detection target to remote.
+    ///
+    /// This is equivalent to `.detect_sensitive_media(SensitiveMediaDetection::Remote)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn detect_sensitive_media_for_remote_posts(&mut self) -> &mut Self {
+        self.detect_sensitive_media(SensitiveMediaDetection::Remote)
+    }
+
+    /// Sets sensitivity of sensitive media detection.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_sensitivity(
+        &mut self,
+        sensitivity: SensitiveMediaDetectionSensitivity,
+    ) -> &mut Self {
+        self.request
+            .sensitive_media_detection_sensitivity
+            .replace(sensitivity);
+        self
+    }
+
+    /// Sets sensitivity of sensitive media detection to medium.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Medium)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_medium_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Medium)
+    }
+
+    /// Sets sensitivity of sensitive media detection to low.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Low)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_low_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::Low)
+    }
+
+    /// Sets sensitivity of sensitive media detection to high.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::High)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_high_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::High)
+    }
+
+    /// Sets sensitivity of sensitive media detection to very low.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryLow)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_very_low_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryLow)
+    }
+
+    /// Sets sensitivity of sensitive media detection to very high.
+    ///
+    /// This is equivalent to
+    /// `.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryHigh)`.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    pub fn sensitive_media_detection_very_high_sensitivity(&mut self) -> &mut Self {
+        self.sensitive_media_detection_sensitivity(SensitiveMediaDetectionSensitivity::VeryHigh)
+    }
+
+    update_builder_bool_field! {
+        /// Sets whether to set sensitive flag automatically on detected media.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub set_sensitive_flag_automatically;
+        /// Sets whether to enable sensitive media detection for videos.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub enable_sensitive_media_detection_for_videos;
+    }
+
     update_builder_option_field! {
         #[doc_name = "proxy account for the instance"]
         pub proxy_account: impl EntityRef<User> { proxy_account_id =  proxy_account.entity_ref() };
@@ -267,36 +440,66 @@ impl<C> MetaUpdateBuilder<C> {
         pub summaly_proxy: Url { summaly_proxy };
     }
 
+    update_builder_string_option_field! {
+        #[doc_name = "DeepL auth key"]
+        #[cfg(feature = "12-88-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-88-0")))]
+        pub deepl_auth_key;
+    }
+
     update_builder_bool_field! {
+        /// Sets whether or not DeepL is pro.
+        #[cfg(feature = "12-89-1")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-89-1")))]
+        pub deepl_is_pro;
+
         /// Sets whether or not to enable the Twitter integration.
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub enable_twitter_integration;
     }
     update_builder_string_option_field! {
         #[doc_name = "Twitter consumer key"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub twitter_consumer_key;
         #[doc_name = "Twitter consumer secret"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub twitter_consumer_secret;
     }
 
     update_builder_bool_field! {
         /// Sets whether or not to enable the GitHub integration.
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub enable_github_integration;
     }
     update_builder_string_option_field! {
         #[doc_name = "GitHub client ID"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub github_client_id;
         #[doc_name = "GitHub client secret"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub github_client_secret;
     }
 
     update_builder_bool_field! {
         /// Sets whether or not to enable the Discord integration.
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub enable_discord_integration;
     }
     update_builder_string_option_field! {
         #[doc_name = "Discord client ID"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub discord_client_id;
         #[doc_name = "Discord client secret"]
+        #[cfg(not(feature = "13-3-0"))]
+        #[cfg_attr(docsrs, doc(cfg(not(feature = "13-3-0"))))]
         pub discord_client_secret;
     }
 
@@ -367,6 +570,22 @@ impl<C> MetaUpdateBuilder<C> {
         #[cfg(feature = "12-69-0")]
         #[cfg_attr(docsrs, doc(cfg(feature = "12-69-0")))]
         pub object_storage_s3_force_path_style;
+        /// Sets whether or not to log ip address of the users.
+        #[cfg(feature = "12-112-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+        pub enable_ip_logging;
+        /// Sets whether or not to validate email address strictly.
+        #[cfg(feature = "12-112-3")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "12-112-3")))]
+        pub enable_active_email_validation;
+        /// Sets whether or not to generate charts of remote users
+        #[cfg(feature = "13-10-3")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+        pub enable_charts_for_remote_user;
+        /// Sets whether or not to generate charts of remote instances
+        #[cfg(feature = "13-10-3")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-10-3")))]
+        pub enable_charts_for_federated_instances;
     }
     update_builder_option_field! {
         #[doc_name = "base URL of the extenal object storage"]
@@ -387,6 +606,17 @@ impl<C> MetaUpdateBuilder<C> {
         pub object_storage_access_key;
         #[doc_name = "secret key for the extenal object storage"]
         pub object_storage_secret_key;
+    }
+
+    update_builder_string_collection_field! {
+        /// Sets the rules that users must confirm before signing up for the instance.
+        #[cfg(feature = "13-12-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+        pub server_rules;
+        /// Sets the usernames that are not available for normal users.
+        #[cfg(feature = "13-12-0")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+        pub reserved_usernames { preserved_usernames };
     }
 }
 
@@ -469,6 +699,115 @@ impl<C: Client> AnnouncementUpdateBuilder<C> {
     }
 }
 
+/// Builder for the [`create_emoji`][`crate::ClientExt::create_emoji`] method.
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+pub struct EmojiBuilder<C> {
+    client: C,
+    request: endpoint::admin::emoji::add::Request,
+}
+
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+impl<C> EmojiBuilder<C> {
+    /// Creates a builder with the client and the emoji you are going to update.
+    pub fn new(client: C, file: impl EntityRef<DriveFile>) -> Self {
+        let request = endpoint::admin::emoji::add::Request {
+            name: String::default(),
+            file_id: file.entity_ref(),
+            category: None,
+            aliases: None,
+            license: None,
+            is_sensitive: None,
+            local_only: None,
+            role_ids_that_can_be_used_this_emoji_as_reaction: None,
+        };
+        EmojiBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::emoji::add::Request {
+        &self.request
+    }
+
+    /// Sets the name of the custom emoji.
+    pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.request.name = name.into();
+        self
+    }
+
+    /// Sets the file to use as the custom emoji.
+    pub fn file(&mut self, file: impl EntityRef<DriveFile>) -> &mut Self {
+        self.request.file_id = file.entity_ref();
+        self
+    }
+
+    /// Sets the category of the custom emoji.
+    pub fn set_category(&mut self, category: impl Into<String>) -> &mut Self {
+        self.request.category.replace(category.into());
+        self
+    }
+
+    /// Deletes the category of the custom emoji.
+    pub fn delete_category(&mut self) -> &mut Self {
+        self.request.category.take();
+        self
+    }
+
+    /// Sets the aliases of the custom emoji.
+    pub fn aliases(&mut self, aliases: impl IntoIterator<Item = impl Into<String>>) -> &mut Self {
+        self.request
+            .aliases
+            .replace(aliases.into_iter().map(Into::into).collect());
+        self
+    }
+
+    /// Sets the license of the custom emoji.
+    pub fn license(&mut self, license: impl Into<String>) -> &mut Self {
+        self.request.license.replace(license.into());
+        self
+    }
+
+    /// Sets whether the custom emoji is sensitive or not.
+    pub fn is_sensitive(&mut self, is_sensitive: bool) -> &mut Self {
+        self.request.is_sensitive.replace(is_sensitive);
+        self
+    }
+
+    /// Sets whether the custom emoji can be used only for local posts or not.
+    pub fn local_only(&mut self, local_only: bool) -> &mut Self {
+        self.request.local_only.replace(local_only);
+        self
+    }
+
+    /// Sets roles that can use the custom emoji as reaction.
+    pub fn reaction_roles(
+        &mut self,
+        roles: impl IntoIterator<Item = impl EntityRef<Role>>,
+    ) -> &mut Self {
+        self.request
+            .role_ids_that_can_be_used_this_emoji_as_reaction
+            .replace(roles.into_iter().map(|role| role.entity_ref()).collect());
+        self
+    }
+}
+
+#[cfg(feature = "13-13-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+impl<C: Client> EmojiBuilder<C> {
+    /// Creates the custom emoji.
+    pub async fn create(&self) -> Result<Id<Emoji>, Error<C::Error>> {
+        let emoji_id = self
+            .client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?
+            .id;
+        Ok(emoji_id)
+    }
+}
+
 /// Builder for the [`update_emoji`][`crate::ClientExt::update_emoji`] method.
 pub struct EmojiUpdateBuilder<C> {
     client: C,
@@ -485,13 +824,31 @@ impl<C> EmojiUpdateBuilder<C> {
             name,
             category,
             aliases,
+            #[cfg(feature = "13-10-0")]
+            license,
+            #[cfg(feature = "13-13-0")]
+            is_sensitive,
+            #[cfg(feature = "13-13-0")]
+            local_only,
+            #[cfg(feature = "13-13-0")]
+            role_ids_that_can_be_used_this_emoji_as_reaction,
             ..
         } = emoji;
         let request = endpoint::admin::emoji::update::Request {
             id,
             name,
+            #[cfg(feature = "13-13-0")]
+            file_id: None,
             category,
             aliases,
+            #[cfg(feature = "13-10-0")]
+            license,
+            #[cfg(feature = "13-13-0")]
+            is_sensitive,
+            #[cfg(feature = "13-13-0")]
+            local_only,
+            #[cfg(feature = "13-13-0")]
+            role_ids_that_can_be_used_this_emoji_as_reaction,
         };
         EmojiUpdateBuilder { client, request }
     }
@@ -504,6 +861,14 @@ impl<C> EmojiUpdateBuilder<C> {
     /// Sets the name of the custom emoji.
     pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
         self.request.name = name.into();
+        self
+    }
+
+    /// Sets the file to use as the custom emoji.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn file(&mut self, file: impl EntityRef<DriveFile>) -> &mut Self {
+        self.request.file_id.replace(file.entity_ref());
         self
     }
 
@@ -541,10 +906,1279 @@ impl<C> EmojiUpdateBuilder<C> {
         self.request.aliases.push(alias.into());
         self
     }
+
+    /// Sets the license of the custom emoji.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn license(&mut self, license: impl Into<String>) -> &mut Self {
+        self.request.license.replace(license.into());
+        self
+    }
+
+    /// Sets whether the custom emoji is sensitive or not.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn is_sensitive(&mut self, is_sensitive: bool) -> &mut Self {
+        self.request.is_sensitive.replace(is_sensitive);
+        self
+    }
+
+    /// Sets whether the custom emoji can be used only for local posts or not.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn local_only(&mut self, local_only: bool) -> &mut Self {
+        self.request.local_only.replace(local_only);
+        self
+    }
+
+    /// Sets roles that can use the custom emoji as reaction.
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    pub fn reaction_roles(
+        &mut self,
+        roles: impl IntoIterator<Item = impl EntityRef<Role>>,
+    ) -> &mut Self {
+        self.request
+            .role_ids_that_can_be_used_this_emoji_as_reaction
+            .replace(roles.into_iter().map(|role| role.entity_ref()).collect());
+        self
+    }
 }
 
 impl<C: Client> EmojiUpdateBuilder<C> {
     /// Updates the custom emoji.
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+/// Builder for the [`build_ad`][`crate::ClientExt::build_ad`] method.
+pub struct AdBuilder<C> {
+    client: C,
+    request: endpoint::admin::ad::create::Request,
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C> AdBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C) -> Self {
+        let request = endpoint::admin::ad::create::Request {
+            url: String::default(),
+            memo: String::default(),
+            place: Place::default(),
+            priority: Priority::default(),
+            #[cfg(feature = "12-81-0")]
+            ratio: 1,
+            #[cfg(feature = "13-7-0")]
+            starts_at: DateTime::default(),
+            expires_at: DateTime::default(),
+            image_url: String::default(),
+        };
+        AdBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::ad::create::Request {
+        &self.request
+    }
+
+    /// Sets the url of the ad.
+    pub fn url(&mut self, url: impl Into<String>) -> &mut Self {
+        self.request.url = url.into();
+        self
+    }
+
+    /// Sets the memo of the ad.
+    pub fn memo(&mut self, memo: impl Into<String>) -> &mut Self {
+        self.request.memo = memo.into();
+        self
+    }
+
+    /// Sets the place of the ad.
+    pub fn place(&mut self, place: Place) -> &mut Self {
+        self.request.place = place;
+        self
+    }
+
+    /// Sets the place of the ad to square.
+    pub fn square(&mut self) -> &mut Self {
+        self.place(Place::Square)
+    }
+
+    /// Sets the place of the ad to horizontal.
+    pub fn horizontal(&mut self) -> &mut Self {
+        self.place(Place::Horizontal)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the place of the ad to horizontal-big.
+    pub fn horizontal_big(&mut self) -> &mut Self {
+        self.place(Place::HorizontalBig)
+    }
+
+    /// Sets the priority of the ad.
+    pub fn priority(&mut self, priority: Priority) -> &mut Self {
+        self.request.priority = priority;
+        self
+    }
+
+    /// Sets the priority of the ad to high.
+    pub fn high_priority(&mut self) -> &mut Self {
+        self.priority(Priority::High)
+    }
+
+    /// Sets the priority of the ad to middle.
+    pub fn middle_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Middle)
+    }
+
+    /// Sets the priority of the ad to low.
+    pub fn low_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Low)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the ratio of the ad.
+    pub fn ratio(&mut self, ratio: u64) -> &mut Self {
+        self.request.ratio = ratio;
+        self
+    }
+
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    /// Sets the start date of the ad.
+    pub fn starts_at(&mut self, starts_at: impl Into<DateTime<Utc>>) -> &mut Self {
+        self.request.starts_at = starts_at.into();
+        self
+    }
+
+    /// Sets the expiration date of the ad.
+    pub fn expires_at(&mut self, expires_at: impl Into<DateTime<Utc>>) -> &mut Self {
+        self.request.expires_at = expires_at.into();
+        self
+    }
+
+    /// Sets the image url of the ad.
+    pub fn image_url(&mut self, image_url: impl Into<String>) -> &mut Self {
+        self.request.image_url = image_url.into();
+        self
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C: Client> AdBuilder<C> {
+    /// Creates the ad.
+    pub async fn create(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+/// Builder for the [`update_ad`][`crate::ClientExt::update_ad`] method.
+pub struct AdUpdateBuilder<C> {
+    client: C,
+    request: endpoint::admin::ad::update::Request,
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C> AdUpdateBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C, ad: Ad) -> Self {
+        let Ad {
+            id,
+            #[cfg(feature = "13-7-0")]
+            starts_at,
+            expires_at,
+            place,
+            priority,
+            #[cfg(feature = "12-81-0")]
+            ratio,
+            url,
+            image_url,
+            memo,
+            ..
+        } = ad;
+        let request = endpoint::admin::ad::update::Request {
+            id,
+            url,
+            memo,
+            place,
+            priority,
+            #[cfg(feature = "12-81-0")]
+            ratio,
+            #[cfg(feature = "13-7-0")]
+            starts_at,
+            expires_at,
+            image_url,
+        };
+        AdUpdateBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::ad::update::Request {
+        &self.request
+    }
+
+    /// Sets the url of the ad.
+    pub fn url(&mut self, url: impl Into<String>) -> &mut Self {
+        self.request.url = url.into();
+        self
+    }
+
+    /// Sets the memo of the ad.
+    pub fn memo(&mut self, memo: impl Into<String>) -> &mut Self {
+        self.request.memo = memo.into();
+        self
+    }
+
+    /// Sets the place of the ad.
+    pub fn place(&mut self, place: Place) -> &mut Self {
+        self.request.place = place;
+        self
+    }
+
+    /// Sets the place of the ad to square.
+    pub fn square(&mut self) -> &mut Self {
+        self.place(Place::Square)
+    }
+
+    /// Sets the place of the ad to horizontal.
+    pub fn horizontal(&mut self) -> &mut Self {
+        self.place(Place::Horizontal)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the place of the ad to horizontal-big.
+    pub fn horizontal_big(&mut self) -> &mut Self {
+        self.place(Place::HorizontalBig)
+    }
+
+    /// Sets the priority of the ad.
+    pub fn priority(&mut self, priority: Priority) -> &mut Self {
+        self.request.priority = priority;
+        self
+    }
+
+    /// Sets the priority of the ad to high.
+    pub fn high_priority(&mut self) -> &mut Self {
+        self.priority(Priority::High)
+    }
+
+    /// Sets the priority of the ad to middle.
+    pub fn middle_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Middle)
+    }
+
+    /// Sets the priority of the ad to low.
+    pub fn low_priority(&mut self) -> &mut Self {
+        self.priority(Priority::Low)
+    }
+
+    #[cfg(feature = "12-81-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-81-0")))]
+    /// Sets the ratio of the ad.
+    pub fn ratio(&mut self, ratio: u64) -> &mut Self {
+        self.request.ratio = ratio;
+        self
+    }
+
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    /// Sets the start date of the ad.
+    pub fn starts_at(&mut self, starts_at: impl Into<DateTime<Utc>>) -> &mut Self {
+        self.request.starts_at = starts_at.into();
+        self
+    }
+    /// Sets the expiration date of the ad.
+    pub fn expires_at(&mut self, expires_at: impl Into<DateTime<Utc>>) -> &mut Self {
+        self.request.expires_at = expires_at.into();
+        self
+    }
+
+    /// Sets the image url of the ad.
+    pub fn image_url(&mut self, image_url: impl Into<String>) -> &mut Self {
+        self.request.image_url = image_url.into();
+        self
+    }
+}
+
+#[cfg(feature = "12-80-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+impl<C: Client> AdUpdateBuilder<C> {
+    /// Updates the ad.
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for building [`PolicyValue`].
+pub struct PolicyValueBuilder<T> {
+    use_default: bool,
+    priority: role::Priority,
+    value: T,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<T> PolicyValueBuilder<T> {
+    /// Creates a builder.
+    pub fn new(value: T) -> Self {
+        PolicyValueBuilder {
+            use_default: false,
+            priority: role::Priority::Low,
+            value,
+        }
+    }
+
+    /// Sets whether to use default policy.
+    pub fn use_default(&mut self, use_default: bool) -> &mut Self {
+        self.use_default = use_default;
+        self
+    }
+
+    /// Sets the priority of the value.
+    pub fn priority(&mut self, priority: role::Priority) -> &mut Self {
+        self.priority = priority;
+        self
+    }
+
+    /// Sets the priority of the value to high.
+    pub fn priority_high(&mut self) -> &mut Self {
+        self.priority(role::Priority::High)
+    }
+
+    /// Sets the priority of the value to middle.
+    pub fn priority_middle(&mut self) -> &mut Self {
+        self.priority(role::Priority::Middle)
+    }
+
+    /// Sets the priority of the value to low.
+    pub fn priority_low(&mut self) -> &mut Self {
+        self.priority(role::Priority::Low)
+    }
+
+    /// Sets the policy value.
+    pub fn value(&mut self, value: T) -> &mut Self {
+        self.value = value;
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<T: Clone> PolicyValueBuilder<T> {
+    pub fn build(&self) -> PolicyValue<T> {
+        PolicyValue {
+            use_default: self.use_default,
+            priority: self.priority.to_owned(),
+            value: self.value.to_owned(),
+        }
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for the [`build_role`][`crate::ClientExt::build_role`] method.
+pub struct RoleBuilder<C> {
+    client: C,
+    request: endpoint::admin::roles::create::Request,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C> RoleBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C) -> Self {
+        let request = endpoint::admin::roles::create::Request::default();
+        RoleBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::roles::create::Request {
+        &self.request
+    }
+
+    /// Sets the name of the role.
+    pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.request.name = name.into();
+        self
+    }
+
+    /// Sets the description of the role.
+    pub fn description(&mut self, description: impl Into<String>) -> &mut Self {
+        self.request.description = description.into();
+        self
+    }
+
+    /// Sets the color of the role.
+    pub fn color(&mut self, color: impl Into<String>) -> &mut Self {
+        self.request.color.replace(color.into());
+        self
+    }
+
+    /// Sets the icon url of the role.
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub fn icon_url(&mut self, icon_url: impl Into<String>) -> &mut Self {
+        self.request.icon_url.replace(icon_url.into());
+        self
+    }
+
+    /// Sets the assignment type of the role.
+    pub fn target(&mut self, target: impl Into<Target>) -> &mut Self {
+        self.request.target = target.into();
+        self
+    }
+
+    /// Sets the role to be assigned manually.
+    ///
+    /// This is equivalent to `.target(Target::Manual)`.
+    pub fn manual(&mut self) -> &mut Self {
+        self.target(Target::Manual)
+    }
+
+    /// Sets the role to be assigned automatically based on the condition.
+    ///
+    /// This is equivalent to `.target(Target::Conditional)`.
+    pub fn conditional(&mut self) -> &mut Self {
+        self.target(Target::Conditional)
+    }
+
+    /// Sets the condition of the role.
+    pub fn condition(&mut self, condition: impl Into<RoleCondFormulaValue>) -> &mut Self {
+        self.conditional();
+        self.request.cond_formula.replace(condition.into());
+        self
+    }
+
+    /// Sets whether the role is public or not.
+    pub fn public(&mut self, public: bool) -> &mut Self {
+        self.request.is_public = public;
+        self
+    }
+
+    /// Sets whether to give the moderator permission to the members of the role.
+    pub fn moderator(&mut self, moderator: bool) -> &mut Self {
+        self.request.is_moderator = moderator;
+        self
+    }
+
+    /// Sets whether to give the administrator permission to the members of the role.
+    pub fn administrator(&mut self, administrator: bool) -> &mut Self {
+        self.request.is_administrator = administrator;
+        self
+    }
+
+    /// Sets whether the role timeline of this role is public or not.
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub fn show_timeline(&mut self, show_timeline: bool) -> &mut Self {
+        self.request.is_explorable.replace(show_timeline);
+        self
+    }
+
+    /// Sets whether to show the icon image next to the usernames.
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub fn show_as_badge(&mut self, as_badge: bool) -> &mut Self {
+        self.request.as_badge = as_badge;
+        self
+    }
+
+    /// Sets whether to allow moderators to edit members of the role.
+    pub fn allow_moderator_to_edit_members(
+        &mut self,
+        can_edit_members_by_moderator: bool,
+    ) -> &mut Self {
+        self.request.can_edit_members_by_moderator = can_edit_members_by_moderator;
+        self
+    }
+
+    /// Sets the display order of the role on UI.
+    ///
+    /// The role with the highest value will be shown at the top of the list.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn display_order(&mut self, display_order: i64) -> &mut Self {
+        self.request.display_order = display_order;
+        self
+    }
+
+    /// Sets the policies of the role.
+    pub fn policies(&mut self, policies: impl Into<Policies>) -> &mut Self {
+        self.request.policies = policies.into();
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the global timeline.
+    pub fn allow_global_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .gtl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the local timeline.
+    pub fn allow_local_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .ltl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to post public note.
+    pub fn allow_public_note(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_public_note
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to create invitation code of the instance.
+    pub fn allow_invitation(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_invite
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to manage custom emojis.
+    pub fn allow_custom_emojis_management(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_manage_custom_emojis
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to hide ads.
+    pub fn allow_hiding_ads(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_hide_ads
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets the drive capacity of the members of the role in megabytes.
+    pub fn drive_capacity(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .drive_capacity_mb
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of pinned notes for the members of the role.
+    pub fn pin_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .pin_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of antennas for the members of the role.
+    pub fn antenna_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .antenna_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of characters in word mutes for the members of the role.
+    pub fn word_mute_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .word_mute_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of webhooks for the members of the role.
+    pub fn webhook_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .webhook_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of clips for the members of the role.
+    pub fn clip_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .clip_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of notes per clip for the members of the role.
+    pub fn note_each_clips_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .note_each_clips_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of user lists for the members of the role.
+    pub fn user_list_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_list_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of users per user list for the members of the role.
+    pub fn user_each_user_lists_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_each_user_lists_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the rate limit factor of the members of the role.
+    pub fn rate_limit_factor(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<f64>) -> PolicyValue<f64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .rate_limit_factor
+            .replace(build_policy_value(PolicyValueBuilder::new(0.0)));
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C: Client> RoleBuilder<C> {
+    /// Creates the role.
+    pub async fn create(&self) -> Result<Role, Error<C::Error>> {
+        let role = self
+            .client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(role)
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for the [`update_role`][`crate::ClientExt::update_role`] method.
+pub struct RoleUpdateBuilder<C> {
+    client: C,
+    request: endpoint::admin::roles::update::Request,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C> RoleUpdateBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C, role: Role) -> Self {
+        let Role {
+            id,
+            name,
+            description,
+            color,
+            #[cfg(feature = "13-4-0")]
+            icon_url,
+            target,
+            cond_formula,
+            is_public,
+            is_moderator,
+            is_administrator,
+            #[cfg(feature = "13-12-0")]
+            is_explorable,
+            #[cfg(feature = "13-4-0")]
+            as_badge,
+            can_edit_members_by_moderator,
+            #[cfg(feature = "13-10-0")]
+            display_order,
+            policies,
+            ..
+        } = role;
+        let request = endpoint::admin::roles::update::Request {
+            role_id: id,
+            name,
+            description,
+            color,
+            #[cfg(feature = "13-4-0")]
+            icon_url,
+            target,
+            cond_formula,
+            is_public,
+            is_moderator,
+            is_administrator,
+            #[cfg(feature = "13-12-0")]
+            is_explorable: Some(is_explorable),
+            #[cfg(feature = "13-4-0")]
+            as_badge,
+            can_edit_members_by_moderator,
+            #[cfg(feature = "13-10-0")]
+            display_order,
+            policies,
+        };
+        RoleUpdateBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::roles::update::Request {
+        &self.request
+    }
+
+    /// Sets the name of the role.
+    pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
+        self.request.name = name.into();
+        self
+    }
+
+    /// Sets the description of the role.
+    pub fn description(&mut self, description: impl Into<String>) -> &mut Self {
+        self.request.description = description.into();
+        self
+    }
+
+    /// Sets the color of the role.
+    pub fn color(&mut self, color: impl Into<String>) -> &mut Self {
+        self.request.color.replace(color.into());
+        self
+    }
+
+    /// Sets the icon url of the role.
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub fn icon_url(&mut self, icon_url: impl Into<String>) -> &mut Self {
+        self.request.icon_url.replace(icon_url.into());
+        self
+    }
+
+    /// Sets the assignment type of the role.
+    pub fn target(&mut self, target: impl Into<Target>) -> &mut Self {
+        self.request.target = target.into();
+        self
+    }
+
+    /// Sets the role to be assigned manually.
+    ///
+    /// This is equivalent to `.target(Target::Manual)`.
+    pub fn manual(&mut self) -> &mut Self {
+        self.target(Target::Manual)
+    }
+
+    /// Sets the role to be assigned automatically based on conditions.
+    ///
+    /// This is equivalent to `.target(Target::Conditional)`.
+    pub fn conditional(&mut self) -> &mut Self {
+        self.target(Target::Conditional)
+    }
+
+    /// Sets the conditions of the role.
+    pub fn cond_formula(&mut self, cond_formula: impl Into<RoleCondFormulaValue>) -> &mut Self {
+        self.request.cond_formula.replace(cond_formula.into());
+        self
+    }
+
+    /// Sets whether the role is public or not.
+    pub fn public(&mut self, public: bool) -> &mut Self {
+        self.request.is_public = public;
+        self
+    }
+
+    /// Sets whether to give the moderator permission to the members of the role.
+    pub fn moderator(&mut self, moderator: bool) -> &mut Self {
+        self.request.is_moderator = moderator;
+        self
+    }
+
+    /// Sets whether to give the administrator permission to the members of the role.
+    pub fn administrator(&mut self, administrator: bool) -> &mut Self {
+        self.request.is_administrator = administrator;
+        self
+    }
+
+    /// Sets whether the role timeline of this role is public or not.
+    #[cfg(feature = "13-12-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-12-0")))]
+    pub fn show_timeline(&mut self, show_timeline: bool) -> &mut Self {
+        self.request.is_explorable.replace(show_timeline);
+        self
+    }
+
+    /// Sets whether to show the icon image next to the usernames.
+    #[cfg(feature = "13-4-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-4-0")))]
+    pub fn show_as_badge(&mut self, as_badge: bool) -> &mut Self {
+        self.request.as_badge = as_badge;
+        self
+    }
+
+    /// Sets whether to allow moderators to edit members of the role.
+    pub fn allow_moderator_to_edit_members(
+        &mut self,
+        can_edit_members_by_moderator: bool,
+    ) -> &mut Self {
+        self.request.can_edit_members_by_moderator = can_edit_members_by_moderator;
+        self
+    }
+
+    /// Sets the display order of the role on UI.
+    ///
+    /// The role with the highest value will be shown at the top of the list.
+    #[cfg(feature = "13-10-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-10-0")))]
+    pub fn display_order(&mut self, display_order: i64) -> &mut Self {
+        self.request.display_order = display_order;
+        self
+    }
+
+    /// Sets the policies of the role.
+    pub fn policies(&mut self, policies: impl Into<Policies>) -> &mut Self {
+        self.request.policies = policies.into();
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the global timeline.
+    pub fn allow_global_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .gtl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to view the local timeline.
+    pub fn allow_local_timeline(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .ltl_available
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to post public note.
+    pub fn allow_public_note(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_public_note
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to create invitation code of the instance.
+    pub fn allow_invitation(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_invite
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to manage custom emojis.
+    pub fn allow_custom_emojis_management(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_manage_custom_emojis
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets whether to allow the members of the role to hide ads.
+    pub fn allow_hiding_ads(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<bool>) -> PolicyValue<bool>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_hide_ads
+            .replace(build_policy_value(PolicyValueBuilder::new(false)));
+        self
+    }
+
+    /// Sets the drive capacity of the members of the role in megabytes.
+    pub fn drive_capacity(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .drive_capacity_mb
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of pinned notes for the members of the role.
+    pub fn pin_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .pin_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of antennas for the members of the role.
+    pub fn antenna_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .antenna_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of characters in word mutes for the members of the role.
+    pub fn word_mute_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .word_mute_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of webhooks for the members of the role.
+    pub fn webhook_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .webhook_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of clips for the members of the role.
+    pub fn clip_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .clip_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of notes per clip for the members of the role.
+    pub fn note_each_clips_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .note_each_clips_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of user lists for the members of the role.
+    pub fn user_list_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_list_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the maximum number of users per user list for the members of the role.
+    pub fn user_each_user_lists_limit(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<u64>) -> PolicyValue<u64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .user_each_user_lists_limit
+            .replace(build_policy_value(PolicyValueBuilder::new(0)));
+        self
+    }
+
+    /// Sets the rate limit factor of the members of the role.
+    pub fn rate_limit_factor(
+        &mut self,
+        build_policy_value: impl FnOnce(PolicyValueBuilder<f64>) -> PolicyValue<f64>,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .rate_limit_factor
+            .replace(build_policy_value(PolicyValueBuilder::new(0.0)));
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C: Client> RoleUpdateBuilder<C> {
+    /// Updates the role.
+    pub async fn update(&self) -> Result<(), Error<C::Error>> {
+        self.client
+            .request(&self.request)
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+        Ok(())
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+/// Builder for the [`update_role`][`crate::ClientExt::update_role`] method.
+pub struct DefaultPoliciesUpdateBuilder<C> {
+    client: C,
+    request: endpoint::admin::roles::update_default_policies::Request,
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C> DefaultPoliciesUpdateBuilder<C> {
+    /// Creates a builder with the client.
+    pub fn new(client: C, policies: PoliciesSimple) -> Self {
+        let request = endpoint::admin::roles::update_default_policies::Request { policies };
+        DefaultPoliciesUpdateBuilder { client, request }
+    }
+
+    /// Gets the request object for reuse.
+    pub fn as_request(&self) -> &endpoint::admin::roles::update_default_policies::Request {
+        &self.request
+    }
+
+    /// Sets whether to allow users to view the global timeline.
+    pub fn allow_global_timeline(&mut self, allow_global_timeline: bool) -> &mut Self {
+        self.request
+            .policies
+            .gtl_available
+            .replace(allow_global_timeline);
+        self
+    }
+
+    /// Sets whether to allow users to view the local timeline.
+    pub fn allow_local_timeline(&mut self, allow_local_timeline: bool) -> &mut Self {
+        self.request
+            .policies
+            .ltl_available
+            .replace(allow_local_timeline);
+        self
+    }
+
+    /// Sets whether to allow users to post public note.
+    pub fn allow_public_note(&mut self, allow_public_note: bool) -> &mut Self {
+        self.request
+            .policies
+            .can_public_note
+            .replace(allow_public_note);
+        self
+    }
+
+    /// Sets whether to allow users to create invitation code of the instance.
+    pub fn allow_invitation(&mut self, allow_invitation: bool) -> &mut Self {
+        self.request.policies.can_invite.replace(allow_invitation);
+        self
+    }
+
+    /// Sets whether to allow users to manage custom emojis.
+    pub fn allow_custom_emojis_management(
+        &mut self,
+        allow_custom_emojis_management: bool,
+    ) -> &mut Self {
+        self.request
+            .policies
+            .can_manage_custom_emojis
+            .replace(allow_custom_emojis_management);
+        self
+    }
+
+    /// Sets whether to allow users to hide ads.
+    pub fn allow_hiding_ads(&mut self, allow_hiding_ads: bool) -> &mut Self {
+        self.request.policies.can_hide_ads.replace(allow_hiding_ads);
+        self
+    }
+
+    /// Sets the drive capacity per user in megabytes.
+    pub fn drive_capacity(&mut self, mb: u64) -> &mut Self {
+        self.request.policies.drive_capacity_mb.replace(mb);
+        self
+    }
+
+    /// Sets the maximum number of pinned notes for the users.
+    pub fn pin_limit(&mut self, pin_limit: u64) -> &mut Self {
+        self.request.policies.pin_limit.replace(pin_limit);
+        self
+    }
+
+    /// Sets the maximum number of antennas for the users.
+    pub fn antenna_limit(&mut self, antenna_limit: u64) -> &mut Self {
+        self.request.policies.antenna_limit.replace(antenna_limit);
+        self
+    }
+
+    /// Sets the maximum number of characters in word mutes for the users.
+    pub fn word_mute_limit(&mut self, word_mute_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .word_mute_limit
+            .replace(word_mute_limit);
+        self
+    }
+
+    /// Sets the maximum number of webhooks for the users.
+    pub fn webhook_limit(&mut self, webhook_limit: u64) -> &mut Self {
+        self.request.policies.webhook_limit.replace(webhook_limit);
+        self
+    }
+
+    /// Sets the maximum number of clips for the users.
+    pub fn clip_limit(&mut self, clip_limit: u64) -> &mut Self {
+        self.request.policies.clip_limit.replace(clip_limit);
+        self
+    }
+
+    /// Sets the maximum number of notes per clip for the users.
+    pub fn note_each_clips_limit(&mut self, note_each_clips_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .note_each_clips_limit
+            .replace(note_each_clips_limit);
+        self
+    }
+
+    /// Sets the maximum number of user lists for the users.
+    pub fn user_list_limit(&mut self, user_list_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .user_list_limit
+            .replace(user_list_limit);
+        self
+    }
+
+    /// Sets the maximum number of users per user list for the users.
+    pub fn user_each_user_lists_limit(&mut self, user_each_user_lists_limit: u64) -> &mut Self {
+        self.request
+            .policies
+            .user_each_user_lists_limit
+            .replace(user_each_user_lists_limit);
+        self
+    }
+
+    /// Sets the rate limit factor of users.
+    pub fn rate_limit_factor(&mut self, rate_limit_factor: f64) -> &mut Self {
+        self.request
+            .policies
+            .rate_limit_factor
+            .replace(rate_limit_factor);
+        self
+    }
+}
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+impl<C: Client> DefaultPoliciesUpdateBuilder<C> {
+    /// Updates the default policies.
     pub async fn update(&self) -> Result<(), Error<C::Error>> {
         self.client
             .request(&self.request)

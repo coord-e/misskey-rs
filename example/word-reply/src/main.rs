@@ -2,7 +2,7 @@ use anyhow::Result;
 use futures::stream::TryStreamExt;
 use misskey::model::query::Query;
 use misskey::prelude::*;
-use misskey::WebSocketClient;
+use misskey::{HttpClient, WebSocketClient};
 use structopt::StructOpt;
 use url::Url;
 
@@ -24,14 +24,17 @@ struct Opt {
 async fn main() -> Result<()> {
     let opt = Opt::from_args();
 
+    // Create `HttpClient`.
+    let http_client = HttpClient::with_token(opt.url.clone(), opt.i.clone())?;
+
     // Build a client and connect to Misskey.
-    let client = WebSocketClient::builder(opt.url)
+    let ws_client = WebSocketClient::builder(opt.url)
         .token(opt.i)
         .connect()
         .await?;
 
     // Create a new antenna.
-    let antenna = client
+    let antenna = http_client
         .build_antenna()
         .name("word-reply example")
         .include(Query::from_vec(
@@ -42,14 +45,14 @@ async fn main() -> Result<()> {
         .await?;
 
     // Connect to the antenna's timeline.
-    let mut stream = client.antenna_timeline(&antenna).await?;
+    let mut stream = ws_client.antenna_timeline(&antenna).await?;
 
     // Wait for the next note using `try_next` method from `TryStreamExt`.
     while let Some(note) = stream.try_next().await? {
         println!("received a note from @{}", note.user.username);
 
         // Create a note as a reply to the note
-        client.reply(&note, &opt.reply).await?;
+        http_client.reply(&note, &opt.reply).await?;
     }
 
     Ok(())

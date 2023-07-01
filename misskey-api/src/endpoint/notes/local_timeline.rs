@@ -12,6 +12,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub with_files: Option<bool>,
+    #[cfg(feature = "13-13-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-13-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub with_replies: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub exclude_nsfw: Option<bool>,
@@ -71,6 +76,8 @@ mod tests {
         client
             .test(Request {
                 with_files: Some(true),
+                #[cfg(feature = "13-13-0")]
+                with_replies: Some(true),
                 exclude_nsfw: Some(true),
                 file_type: None,
                 limit: None,
@@ -88,6 +95,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 exclude_nsfw: None,
                 file_type: Some(vec![IMAGE_PNG]),
                 limit: None,
@@ -105,6 +114,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 exclude_nsfw: None,
                 file_type: None,
                 limit: Some(100),
@@ -124,6 +135,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 exclude_nsfw: None,
                 file_type: None,
                 limit: None,
@@ -143,6 +156,8 @@ mod tests {
         client
             .test(Request {
                 with_files: None,
+                #[cfg(feature = "13-13-0")]
+                with_replies: None,
                 exclude_nsfw: None,
                 file_type: None,
                 limit: None,

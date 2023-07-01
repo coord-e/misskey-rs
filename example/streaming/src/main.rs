@@ -1,7 +1,7 @@
 use anyhow::Result;
 use futures::stream::TryStreamExt;
 use misskey::prelude::*;
-use misskey::WebSocketClient;
+use misskey::{HttpClient, WebSocketClient};
 use structopt::StructOpt;
 use url::Url;
 
@@ -17,20 +17,23 @@ struct Opt {
 async fn main() -> Result<()> {
     let opt = Opt::from_args();
 
+    // Create `HttpClient`.
+    let http_client = HttpClient::with_token(opt.url.clone(), opt.i.clone())?;
+
     // Configure and build a client using `WebSocketClientBuilder`.
-    let client = WebSocketClient::builder(opt.url)
+    let ws_client = WebSocketClient::builder(opt.url)
         .token(opt.i)
         .connect()
         .await?;
 
     // Run two asynchronous tasks simultaneously.
-    futures::try_join!(post(&client), timeline(&client))?;
+    futures::try_join!(post(&http_client), timeline(&ws_client))?;
 
     Ok(())
 }
 
 // Post what you entered
-async fn post(client: &WebSocketClient) -> Result<()> {
+async fn post(client: &HttpClient) -> Result<()> {
     // We use async I/O from `tokio` for now
     use tokio::io::{self, AsyncBufReadExt, BufReader};
 

@@ -37,14 +37,15 @@ impl misskey_core::streaming::ConnectChannelRequest for Request {
 #[cfg(test)]
 mod tests {
     use super::{Message, MessagingStreamEvent, Request};
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, SinkExt, StreamExt};
 
     #[tokio::test]
     async fn subscribe_unsubscribe_otherparty() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let admin = client.admin.me().await;
+        let admin = http_client.admin.me().await;
         let mut stream = client
             .user
             .channel(Request::Otherparty(admin.id))
@@ -55,8 +56,9 @@ mod tests {
 
     #[tokio::test]
     async fn subscribe_unsubscribe_group() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let group = client
+        let group = http_client
             .test(crate::endpoint::users::groups::create::Request {
                 name: "test".to_string(),
             })
@@ -67,9 +69,10 @@ mod tests {
 
     #[tokio::test]
     async fn stream_message() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let user = client.user.me().await;
-        let admin = client.admin.me().await;
+        let user = http_client.user.me().await;
+        let admin = http_client.admin.me().await;
         let mut stream = client
             .user
             .channel(Request::Otherparty(admin.id))
@@ -77,7 +80,7 @@ mod tests {
             .unwrap();
 
         future::join(
-            client
+            http_client
                 .admin
                 .test(crate::endpoint::messaging::messages::create::Request {
                     text: Some("hi".to_string()),
@@ -99,10 +102,11 @@ mod tests {
 
     #[tokio::test]
     async fn stream_deleted() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let user = client.user.me().await;
-        let admin = client.admin.me().await;
-        let message = client
+        let user = http_client.user.me().await;
+        let admin = http_client.admin.me().await;
+        let message = http_client
             .admin
             .test(crate::endpoint::messaging::messages::create::Request {
                 text: Some("hi".to_string()),
@@ -118,7 +122,7 @@ mod tests {
             .unwrap();
 
         future::join(
-            client
+            http_client
                 .admin
                 .test(crate::endpoint::messaging::messages::delete::Request {
                     message_id: message.id,
@@ -137,10 +141,11 @@ mod tests {
 
     #[tokio::test]
     async fn stream_read() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let admin = client.admin.me().await;
-        let user = client.user.me().await;
-        let message = client
+        let admin = http_client.admin.me().await;
+        let user = http_client.user.me().await;
+        let message = http_client
             .user
             .test(crate::endpoint::messaging::messages::create::Request {
                 text: Some("hi".to_string()),

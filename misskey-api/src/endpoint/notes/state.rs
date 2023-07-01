@@ -12,7 +12,12 @@ pub struct Request {
 #[serde(rename_all = "camelCase")]
 pub struct Response {
     pub is_favorited: bool,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub is_watching: bool,
+    #[cfg(feature = "12-95-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
+    pub is_muted_thread: bool,
 }
 
 impl misskey_core::Request for Request {
