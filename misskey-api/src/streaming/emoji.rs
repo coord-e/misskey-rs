@@ -15,18 +15,19 @@ impl misskey_core::streaming::BroadcastEvent for EmojiAddedEvent {
 #[cfg(test)]
 mod tests {
     use super::EmojiAddedEvent;
-    use crate::test::{websocket::TestClient, ClientExt};
+    use crate::test::{http::TestClient as HttpTestClient, websocket::TestClient, ClientExt};
 
     use futures::{future, StreamExt};
 
     #[tokio::test]
     async fn broadcast() {
+        let http_client = HttpTestClient::new();
         let client = TestClient::new().await;
-        let url = client.avatar_url().await;
+        let url = http_client.avatar_url().await;
 
         let mut stream = client.broadcast::<EmojiAddedEvent>().await.unwrap();
 
-        future::join(client.admin.add_emoji_from_url(url), async {
+        future::join(http_client.admin.add_emoji_from_url(url), async {
             stream.next().await.unwrap().unwrap()
         })
         .await;

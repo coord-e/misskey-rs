@@ -3,12 +3,17 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
 
-use crate::broker::channel::{ChannelPongSender, ResponseSender, ResponseStreamSender};
+#[cfg(not(feature = "12-111-0"))]
+use crate::broker::channel::ResponseSender;
+use crate::broker::channel::{ChannelPongSender, ResponseStreamSender};
 use crate::error::Error;
-use crate::model::{ApiRequestId, ChannelId, SubNoteId};
+#[cfg(not(feature = "12-111-0"))]
+use crate::model::ApiRequestId;
+use crate::model::{ChannelId, SubNoteId};
 
 use async_rwlock::RwLock;
 use futures_util::future::{BoxFuture, Future, FutureExt};
+#[cfg(not(feature = "12-111-0"))]
 use misskey_core::model::ApiResult;
 use serde_json::Value;
 use uuid::Uuid;
@@ -24,6 +29,7 @@ impl BroadcastId {
 
 #[derive(Debug)]
 pub(crate) enum BrokerControl {
+    #[cfg(not(feature = "12-111-0"))]
     Api {
         id: ApiRequestId,
         endpoint: &'static str,

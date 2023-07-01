@@ -43,15 +43,38 @@ pub enum NotificationBody {
     Follow,
     FollowRequestAccepted,
     ReceiveFollowRequest,
-    Mention { note: Note },
-    Reply { note: Note },
-    Renote { note: Note },
-    Quote { note: Note },
-    Reaction { note: Note, reaction: Reaction },
-    PollVote { note: Note, choice: u64 },
-    GroupInvited { invitation: UserGroupInvitation },
-    // TODO: Implement
-    App {},
+    Mention {
+        note: Note,
+    },
+    Reply {
+        note: Note,
+    },
+    Renote {
+        note: Note,
+    },
+    Quote {
+        note: Note,
+    },
+    Reaction {
+        note: Note,
+        reaction: Reaction,
+    },
+    PollVote {
+        note: Note,
+        choice: u64,
+    },
+    #[cfg(feature = "12-108-0")]
+    PollEnded {
+        note: Note,
+    },
+    GroupInvited {
+        invitation: UserGroupInvitation,
+    },
+    App {
+        body: Option<String>,
+        header: Option<String>,
+        icon: Option<String>,
+    },
 }
 
 #[derive(Debug, Error, Clone)]
@@ -78,6 +101,8 @@ impl std::str::FromStr for NotificationType {
             "quote" | "Quote" => Ok(NotificationType::Quote),
             "reaction" | "Reaction" => Ok(NotificationType::Reaction),
             "pollVote" | "PollVote" => Ok(NotificationType::PollVote),
+            #[cfg(feature = "12-108-0")]
+            "pollEnded" | "PollEnded" => Ok(NotificationType::PollEnded),
             "groupInvited" | "GroupInvited" => Ok(NotificationType::GroupInvited),
             "app" | "App" => Ok(NotificationType::App),
             _ => Err(ParseNotificationTypeError { _priv: () }),

@@ -25,6 +25,7 @@ mod tests {
         client.test(Request::default()).await;
     }
 
+    #[cfg(not(feature = "12-109-0"))]
     #[tokio::test]
     async fn request_by_admin() {
         let client = TestClient::new();
