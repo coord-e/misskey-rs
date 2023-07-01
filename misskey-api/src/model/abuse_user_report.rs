@@ -32,6 +32,9 @@ pub struct AbuseUserReport {
     #[cfg(feature = "12-49-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-49-0")))]
     pub resolved: bool,
+    #[cfg(feature = "12-102-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-102-0")))]
+    pub forwarded: bool,
 }
 
 impl_entity!(AbuseUserReport);

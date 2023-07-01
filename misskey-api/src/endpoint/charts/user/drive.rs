@@ -1,8 +1,8 @@
-use crate::model::{
-    chart::{ChartSpan, DriveChart},
-    id::Id,
-    user::User,
-};
+#[cfg(not(feature = "12-104-0"))]
+use crate::model::chart::DriveChart;
+#[cfg(feature = "12-104-0")]
+use crate::model::chart::UserDriveChart;
+use crate::model::{chart::ChartSpan, id::Id, user::User};
 
 use serde::Serialize;
 use typed_builder::TypedBuilder;
@@ -22,7 +22,10 @@ pub struct Request {
 }
 
 impl misskey_core::Request for Request {
+    #[cfg(not(feature = "12-104-0"))]
     type Response = DriveChart;
+    #[cfg(feature = "12-104-0")]
+    type Response = UserDriveChart;
     const ENDPOINT: &'static str = "charts/user/drive";
 }
 

@@ -59,7 +59,6 @@ pub mod notes;
 pub mod notifications;
 pub mod pages;
 pub mod pinned_users;
-pub mod stats;
 pub mod username;
 pub mod users;
 
@@ -78,3 +77,32 @@ pub mod server_info;
 #[cfg(feature = "12-67-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
 pub mod ping;
+
+#[cfg(feature = "12-79-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+pub mod gallery;
+
+#[cfg(feature = "12-92-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+pub mod email_address;
+
+// misskey-dev/misskey#8308
+#[cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))]
+#[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))))]
+pub mod stats;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod emojis;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod flash;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod invite;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod retention;

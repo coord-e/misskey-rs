@@ -35,11 +35,11 @@ mod tests {
     async fn request_with_name() {
         let client = TestClient::new();
         let channel = client
-            .test(crate::endpoint::channels::create::Request {
-                name: "test channel".to_string(),
-                description: None,
-                banner_id: None,
-            })
+            .test(
+                crate::endpoint::channels::create::Request::builder()
+                    .name("test channel")
+                    .build(),
+            )
             .await;
 
         client.test(Request {
@@ -55,11 +55,11 @@ mod tests {
     async fn request_with_description() {
         let client = TestClient::new();
         let channel = client
-            .test(crate::endpoint::channels::create::Request {
-                name: "test channel".to_string(),
-                description: None,
-                banner_id: None,
-            })
+            .test(
+                crate::endpoint::channels::create::Request::builder()
+                    .name("test channel")
+                    .build(),
+            )
             .await;
 
         client
@@ -84,11 +84,11 @@ mod tests {
     async fn request_with_banner() {
         let client = TestClient::new();
         let channel = client
-            .test(crate::endpoint::channels::create::Request {
-                name: "test channel".to_string(),
-                description: None,
-                banner_id: None,
-            })
+            .test(
+                crate::endpoint::channels::create::Request::builder()
+                    .name("test channel")
+                    .build(),
+            )
             .await;
         let url = client.avatar_url().await;
         let file = client.upload_from_url(url).await;

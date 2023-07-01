@@ -24,7 +24,7 @@ services:
 
   db:
     restart: always
-    image: postgres:11.2-alpine
+    image: postgres:15-alpine
     environment:
       - POSTGRES_PASSWORD=misskey-test
       - POSTGRES_USER=misskey-test

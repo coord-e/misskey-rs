@@ -26,13 +26,17 @@ pub struct Antenna {
     pub notify: bool,
     pub with_file: bool,
     pub with_replies: bool,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    pub has_unread_note: bool,
 }
 
 impl_entity!(Antenna);
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Serialize, Deserialize, Default, Debug, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub enum AntennaSource {
+    #[default]
     All,
     Home,
     Users,

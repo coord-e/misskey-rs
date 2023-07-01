@@ -5,4 +5,4 @@ pub mod note;
 
 #[cfg(feature = "12-29-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-29-0")))]
-pub mod emoji;
+pub mod broadcast;

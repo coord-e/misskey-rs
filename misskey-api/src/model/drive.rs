@@ -14,6 +14,9 @@ pub struct DriveFileProperties {
     #[cfg(feature = "12-75-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
     pub height: Option<u64>,
+    #[cfg(feature = "12-98-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-98-0")))]
+    pub orientation: Option<u8>,
     #[cfg(feature = "12-75-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-75-0")))]
     pub avg_color: Option<String>,
