@@ -14,6 +14,7 @@ pub struct Request {
     pub name: String,
     #[builder(default, setter(strip_option, into))]
     pub category: Option<String>,
+    #[builder(default)]
     pub aliases: Vec<String>,
     #[cfg(any(docsrs, not(feature = "12-9-0")))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "12-9-0"))))]

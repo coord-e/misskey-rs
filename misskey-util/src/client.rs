@@ -4,18 +4,33 @@ use std::path::Path;
 
 #[cfg(feature = "12-9-0")]
 use crate::builder::EmojiUpdateBuilder;
+#[cfg(feature = "12-79-0")]
+use crate::builder::GalleryPostBuilder;
+#[cfg(feature = "12-79-2")]
+use crate::builder::GalleryPostUpdateBuilder;
+#[cfg(not(feature = "13-7-0"))]
+use crate::builder::MessagingMessageBuilder;
 #[cfg(feature = "12-27-0")]
 use crate::builder::NotificationBuilder;
+#[cfg(not(feature = "12-93-0"))]
+use crate::builder::ServerLogListBuilder;
+#[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+use crate::builder::UserListBuilder;
+#[cfg(feature = "12-80-0")]
+use crate::builder::{AdBuilder, AdUpdateBuilder};
 use crate::builder::{
     AnnouncementUpdateBuilder, AntennaBuilder, AntennaUpdateBuilder, DriveFileBuilder,
     DriveFileListBuilder, DriveFileUpdateBuilder, DriveFileUrlBuilder, DriveFolderUpdateBuilder,
-    MeUpdateBuilder, MessagingMessageBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder,
-    PageUpdateBuilder, ServerLogListBuilder, UserListBuilder,
+    MeUpdateBuilder, MetaUpdateBuilder, NoteBuilder, PageBuilder, PageUpdateBuilder,
 };
 #[cfg(feature = "12-47-0")]
 use crate::builder::{ChannelBuilder, ChannelUpdateBuilder};
 #[cfg(feature = "12-57-0")]
 use crate::builder::{ClipBuilder, ClipUpdateBuilder};
+#[cfg(feature = "13-0-0")]
+use crate::builder::{
+    DefaultPoliciesUpdateBuilder, FlashBuilder, FlashUpdateBuilder, RoleBuilder, RoleUpdateBuilder,
+};
 use crate::pager::{BackwardPager, BoxPager, ForwardPager, OffsetPager, PagerStream};
 use crate::Error;
 use crate::{TimelineCursor, TimelineRange};
@@ -25,10 +40,18 @@ use chrono::DateTime;
 use chrono::Utc;
 use futures::{future::BoxFuture, stream::TryStreamExt};
 use mime::Mime;
+#[cfg(feature = "12-80-0")]
+use misskey_api::model::ad::Ad;
 #[cfg(feature = "12-47-0")]
 use misskey_api::model::channel::Channel;
+#[cfg(feature = "12-79-0")]
+use misskey_api::model::gallery::GalleryPost;
+#[cfg(feature = "12-109-0")]
+use misskey_api::model::meta::AdminMeta;
 #[cfg(feature = "12-67-0")]
 use misskey_api::model::registry::{RegistryKey, RegistryScope, RegistryValue};
+#[cfg(feature = "12-93-0")]
+use misskey_api::model::user::UserOrigin;
 use misskey_api::model::{
     abuse_user_report::AbuseUserReport,
     announcement::Announcement,
@@ -39,15 +62,25 @@ use misskey_api::model::{
     following::FollowRequest,
     id::Id,
     log::ModerationLog,
-    messaging::MessagingMessage,
     meta::Meta,
     note::{Note, Reaction, Tag},
+    note_reaction::NoteReaction,
     notification::Notification,
     page::Page,
     query::Query,
     user::{User, UserRelation},
-    user_group::{UserGroup, UserGroupInvitation},
     user_list::UserList,
+};
+#[cfg(feature = "13-0-0")]
+use misskey_api::model::{
+    emoji::EmojiSimple,
+    flash::Flash,
+    role::{PoliciesSimple, Role},
+};
+#[cfg(not(feature = "13-7-0"))]
+use misskey_api::model::{
+    messaging::MessagingMessage,
+    user_group::{UserGroup, UserGroupInvitation},
 };
 use misskey_api::{endpoint, EntityRef};
 use misskey_core::{Client, UploadFileClient};
@@ -76,10 +109,12 @@ macro_rules! impl_timeline_method {
             /// # #[tokio::main]
             /// # async fn main() -> anyhow::Result<()> {
             /// # let client = misskey_test::test_client().await?;
-            /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # let user = client.me().await?;
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
+            /// # #[cfg(feature = "12-98-0")]
+            /// # let antenna = client.create_antenna("antenna", "misskey").await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             ///
             #[doc = "// `notes` variable here is a `Stream` to enumerate first 100 " $timeline " notes."]
@@ -102,10 +137,12 @@ macro_rules! impl_timeline_method {
             /// # #[tokio::main]
             /// # async fn main() -> anyhow::Result<()> {
             /// # let client = misskey_test::test_client().await?;
-            /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # let user = client.me().await?;
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
+            /// # #[cfg(feature = "12-98-0")]
+            /// # let antenna = client.create_antenna("antenna", "misskey").await?;
             /// use chrono::Utc;
             ///
             #[doc = "// Get the " $timeline " notes since `time`."]
@@ -174,10 +211,12 @@ macro_rules! impl_timeline_method {
             /// # #[tokio::main]
             /// # async fn main() -> anyhow::Result<()> {
             /// # let client = misskey_test::test_client().await?;
-            /// # let user = client.users().list().try_next().await?.unwrap();
+            /// # let user = client.me().await?;
             /// # #[cfg(feature = "12-47-0")]
             /// # let channel = client.create_channel("test").await?;
             /// # let list = client.create_user_list("test").await?;
+            /// # #[cfg(feature = "12-98-0")]
+            /// # let antenna = client.create_antenna("antenna", "misskey").await?;
             /// use futures::stream::{StreamExt, TryStreamExt};
             /// use chrono::Utc;
             ///
@@ -347,14 +386,36 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    #[cfg(feature = "12-98-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-98-0")))]
+    /// Removes follow from the specified user.
+    fn remove_follower(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<User, Error<Self::Error>>> {
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            let user = self
+                .request(endpoint::following::invalidate::Request { user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(user)
+        })
+    }
+
     /// Mutes the specified user.
     fn mute(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let user_id = user.entity_ref();
         Box::pin(async move {
-            self.request(endpoint::mute::create::Request { user_id })
-                .await
-                .map_err(Error::Client)?
-                .into_result()?;
+            self.request(endpoint::mute::create::Request {
+                user_id,
+                #[cfg(feature = "12-108-0")]
+                expires_at: None,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
             Ok(())
         })
     }
@@ -639,7 +700,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -665,7 +727,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -691,7 +754,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -717,7 +781,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -743,7 +808,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -766,7 +832,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -797,7 +864,8 @@ pub trait ClientExt: Client + Sync {
     ///
     /// [user_relation]: ClientExt::user_relation
     ///
-    /// ```
+    #[cfg_attr(any(not(feature = "12-88-0"), feature = "12-89-0"), doc = "```")]
+    #[cfg_attr(all(feature = "12-88-0", not(feature = "12-89-0")), doc = "```ignore")]
     /// # use misskey_util::ClientExt;
     /// # use futures::stream::TryStreamExt;
     /// # #[tokio::main]
@@ -878,6 +946,34 @@ pub trait ClientExt: Client + Sync {
         PagerStream::new(Box::pin(pager))
     }
 
+    /// Searches for users in the instance with the specified query string.
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn search_local_users(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::users::search::Request::builder()
+                .query(query)
+                .origin(UserOrigin::Local)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Searches for users in remote instances with the specified query string.
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn search_remote_users(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::users::search::Request::builder()
+                .query(query)
+                .origin(UserOrigin::Remote)
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
     /// Lists the users in the instance.
     ///
     /// This method actually returns a builder, namely [`UserListBuilder`].
@@ -899,11 +995,10 @@ pub trait ClientExt: Client + Sync {
     /// use futures::stream::TryStreamExt;
     /// use misskey::model::user::{User, UserSortKey};
     ///
-    /// // Get a list of local moderator users sorted by number of followers.
+    /// // Get a list of local users sorted by number of followers.
     /// let users: Vec<User> = client
     ///     .users()
     ///     .local()
-    ///     .moderator()
     ///     .sort_by_followers()
     ///     .list()
     ///     .try_collect()
@@ -911,11 +1006,17 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    // misskey-dev/misskey#7656
+    #[cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-88-0"), feature = "12-89-0"))))]
     fn users(&self) -> UserListBuilder<&Self> {
         UserListBuilder::new(self)
     }
 
     /// Lists the recommended users of the instance.
+    // misskey-dev/misskey#7656
+    #[cfg(not(feature = "12-88-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-88-0"))))]
     fn recommended_users(&self) -> PagerStream<BoxPager<Self, User>> {
         let pager = OffsetPager::new(self, endpoint::users::recommendation::Request::default());
         PagerStream::new(Box::pin(pager))
@@ -1167,6 +1268,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Watches the specified note.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn watch(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let note_id = note.entity_ref();
         Box::pin(async move {
@@ -1179,10 +1282,43 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Unwatches the specified note.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn unwatch(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let note_id = note.entity_ref();
         Box::pin(async move {
             self.request(endpoint::notes::watching::delete::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Mutes notifications from threads where the specified note belongs to.
+    #[cfg(feature = "12-95-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
+    fn mute_thread(&self, note: impl EntityRef<Note>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::thread_muting::create::Request { note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Unmutes notifications from threads where the specified note belongs to.
+    #[cfg(feature = "12-95-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-95-0")))]
+    fn unmute_thread(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notes::thread_muting::delete::Request { note_id })
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
@@ -1207,6 +1343,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Checks if the specified note is watched by the user logged in with this client.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn is_watched(
         &self,
         note: impl EntityRef<Note>,
@@ -1314,6 +1452,9 @@ pub trait ClientExt: Client + Sync {
 
     #[cfg(feature = "12-47-0")]
     impl_timeline_method! { channel, channels::timeline, channel_id = channel : Channel }
+
+    #[cfg(feature = "12-98-0")]
+    impl_timeline_method! { antenna, antennas::notes, antenna_id = antenna : Antenna }
 
     /// Lists the notes with tags as specified in the given query.
     ///
@@ -1535,6 +1676,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn create_user_group(
         &self,
         name: impl Into<String>,
@@ -1564,6 +1707,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn delete_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1593,6 +1738,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn rename_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1611,6 +1758,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Gets the corresponding user group from the ID.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn get_user_group(
         &self,
         id: Id<UserGroup>,
@@ -1626,6 +1775,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Invites the user to the specified user group.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn invite_to_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1649,6 +1800,8 @@ pub trait ClientExt: Client + Sync {
     /// [`transfer_user_group`][transfer].
     ///
     /// [transfer]: ClientExt::transfer_user_group
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn pull_from_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1665,9 +1818,30 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Leaves the specified user group.
+    ///
+    /// Note that the owner cannot leave the group.
+    #[cfg(all(feature = "12-92-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-92-0", not(feature = "13-7-0")))))]
+    fn leave_group(
+        &self,
+        group: impl EntityRef<UserGroup>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let group_id = group.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::users::groups::leave::Request { group_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Transfers the specified user group.
     ///
     /// Note that you can only transfer the group to one of its members.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn transfer_user_group(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -1712,12 +1886,16 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn user_group_invitations(&self) -> PagerStream<BoxPager<Self, UserGroupInvitation>> {
         let pager = BackwardPager::new(self, endpoint::i::user_group_invites::Request::default());
         PagerStream::new(Box::pin(pager))
     }
 
     /// Accepts the specified user group invitation sent to the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn accept_user_group_invitation(
         &self,
         invitation: impl EntityRef<UserGroupInvitation>,
@@ -1733,6 +1911,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Rejects the specified user group invitation sent to the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn reject_user_group_invitation(
         &self,
         invitation: impl EntityRef<UserGroupInvitation>,
@@ -1748,6 +1928,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the user groups joined by the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn joined_user_groups(&self) -> BoxFuture<Result<Vec<UserGroup>, Error<Self::Error>>> {
         Box::pin(async move {
             let groups = self
@@ -1760,6 +1942,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the user groups owned by the user logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn owned_user_groups(&self) -> BoxFuture<Result<Vec<UserGroup>, Error<Self::Error>>> {
         Box::pin(async move {
             let groups = self
@@ -1933,6 +2117,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the notes that hit the specified antenna.
+    #[cfg(not(feature = "12-98-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-98-0"))))]
     fn antenna_notes(&self, antenna: impl EntityRef<Antenna>) -> PagerStream<BoxPager<Self, Note>> {
         let pager = BackwardPager::new(
             self,
@@ -2110,6 +2296,22 @@ pub trait ClientExt: Client + Sync {
             Ok(channels)
         })
     }
+
+    /// Lists the featured notes on the specified channel.
+    #[cfg(feature = "13-8-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-8-0")))]
+    fn channel_featured_notes(
+        &self,
+        channel: impl EntityRef<Channel>,
+    ) -> PagerStream<BoxPager<Self, Note>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::notes::featured::Request::builder()
+                .channel_id(channel.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
     // }}}
 
     // {{{ Clip
@@ -2254,6 +2456,25 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Removes the specified note from the clip.
+    #[cfg(feature = "12-112-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-112-0")))]
+    fn unclip_note(
+        &self,
+        clip: impl EntityRef<Clip>,
+        note: impl EntityRef<Note>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let clip_id = clip.entity_ref();
+        let note_id = note.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::clips::remove_note::Request { clip_id, note_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Lists the notes that are clipped to the specified clip.
     fn clip_notes(&self, clip: impl EntityRef<Clip>) -> PagerStream<BoxPager<Self, Note>> {
         let pager = BackwardPager::new(
@@ -2346,6 +2567,8 @@ pub trait ClientExt: Client + Sync {
 
     // {{{ Messaging
     /// Sends a message to the user with the given text.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn create_message(
         &self,
         recipient: impl EntityRef<User>,
@@ -2363,6 +2586,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Sends a message to the user group with the given text.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn create_group_message(
         &self,
         recipient: impl EntityRef<UserGroup>,
@@ -2387,11 +2612,15 @@ pub trait ClientExt: Client + Sync {
     /// See [`MessagingMessageBuilder`] for the provided methods.
     ///
     /// [builder_create]: MessagingMessageBuilder::create
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn build_message(&self) -> MessagingMessageBuilder<&Self> {
         MessagingMessageBuilder::new(self)
     }
 
     /// Deletes the specified message.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn delete_message(
         &self,
         message: impl EntityRef<MessagingMessage>,
@@ -2407,6 +2636,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Marks the specified message as read.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn read_message(
         &self,
         message: impl EntityRef<MessagingMessage>,
@@ -2422,6 +2653,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the messages with the specified user.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn user_messages(
         &self,
         user: impl EntityRef<User>,
@@ -2437,6 +2670,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Lists the messages in the specified user group.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn group_messages(
         &self,
         group: impl EntityRef<UserGroup>,
@@ -2452,6 +2687,8 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Gets message logs for the user who is logged in with this client.
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
     fn messaging_history(&self) -> BoxFuture<Result<Vec<MessagingMessage>, Error<Self::Error>>> {
         Box::pin(async move {
             let mut messages = self
@@ -3199,12 +3436,16 @@ pub trait ClientExt: Client + Sync {
     }
 
     /// Pins the specified page to the profile.
+    #[cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))))]
     fn pin_page(&self, page: impl EntityRef<Page>) -> BoxFuture<Result<User, Error<Self::Error>>> {
         let page_id = page.entity_ref();
         Box::pin(async move { self.update_me().set_pinned_page(page_id).update().await })
     }
 
     /// Unpins the page from the profile.
+    #[cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-108-0"), feature = "13-0-0"))))]
     fn unpin_page(&self) -> BoxFuture<Result<User, Error<Self::Error>>> {
         Box::pin(async move { self.update_me().delete_pinned_page().update().await })
     }
@@ -3250,10 +3491,646 @@ pub trait ClientExt: Client + Sync {
     }
     // }}}
 
+    // {{{ Gallery
+    /// Creates a gallery post with the given title and files.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn create_gallery_post(
+        &self,
+        title: impl Into<String>,
+        files: impl IntoIterator<Item = impl EntityRef<DriveFile>>,
+    ) -> BoxFuture<Result<GalleryPost, Error<Self::Error>>> {
+        let title = title.into();
+        let files: Vec<Id<DriveFile>> = files.into_iter().map(|file| file.entity_ref()).collect();
+        Box::pin(async move {
+            self.build_gallery_post()
+                .title(title)
+                .files(files)
+                .create()
+                .await
+        })
+    }
+
+    /// Returns a builder for creating a gallery post.
+    ///
+    /// The returned builder provides methods to customize details of the post,
+    /// and you can chain them to create a post incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a post.
+    /// See [`GalleryPostBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: GalleryPostBuilder::create
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn build_gallery_post(&self) -> GalleryPostBuilder<&Self> {
+        GalleryPostBuilder::new(self)
+    }
+
+    /// Deletes the specified gallery post.
+    #[cfg(feature = "12-79-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+    fn delete_gallery_post(
+        &self,
+        post: impl EntityRef<GalleryPost>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let post_id = post.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::gallery::posts::delete::Request { post_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding gallery post from the ID.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn get_gallery_post(
+        &self,
+        id: Id<GalleryPost>,
+    ) -> BoxFuture<Result<GalleryPost, Error<Self::Error>>> {
+        Box::pin(async move {
+            let post = self
+                .request(endpoint::gallery::posts::show::Request { post_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(post)
+        })
+    }
+
+    /// Updates the gallery post.
+    ///
+    /// This method actually returns a builder, namely [`GalleryPostUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`GalleryPostUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: GalleryPostUpdateBuilder::update
+    #[cfg(feature = "12-79-2")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-2")))]
+    fn update_gallery_post(&self, post: GalleryPost) -> GalleryPostUpdateBuilder<&Self> {
+        GalleryPostUpdateBuilder::new(self, post)
+    }
+
+    /// Gives a like to the specified gallery post.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn like_gallery_post(
+        &self,
+        post: impl EntityRef<GalleryPost>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let post_id = post.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::gallery::posts::like::Request { post_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a like from the specified gallery post.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn unlike_gallery_post(
+        &self,
+        post: impl EntityRef<GalleryPost>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let post_id = post.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::gallery::posts::unlike::Request { post_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the gallery posts created by the user logged in with this client.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn gallery_posts(&self) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(self, endpoint::i::gallery::posts::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the gallery posts liked by the user logged in with this client.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn liked_gallery_posts(&self) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(self, endpoint::i::gallery::likes::Request::default())
+            .map_ok(|v| v.into_iter().map(|l| l.post).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the gallery posts created by the specified user.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn user_gallery_posts(
+        &self,
+        user: impl EntityRef<User>,
+    ) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::users::gallery::posts::Request::builder()
+                .user_id(user.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the gallery posts in the instance.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn all_gallery_posts(&self) -> PagerStream<BoxPager<Self, GalleryPost>> {
+        let pager = BackwardPager::new(self, endpoint::gallery::posts::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured gallery posts.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn featured_gallery_posts(&self) -> BoxFuture<Result<Vec<GalleryPost>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let posts = self
+                .request(endpoint::gallery::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(posts)
+        })
+    }
+
+    /// Lists the popular gallery posts.
+    #[cfg(feature = "12-79-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+    fn popular_gallery_posts(&self) -> BoxFuture<Result<Vec<GalleryPost>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let posts = self
+                .request(endpoint::gallery::popular::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(posts)
+        })
+    }
+    // }}}
+
+    // {{{ Reactions
+    /// Lists the reactions to the specified note.
+    fn note_reactions(
+        &self,
+        note: impl EntityRef<Note>,
+    ) -> PagerStream<BoxPager<Self, NoteReaction>> {
+        let pager = OffsetPager::new(
+            self,
+            endpoint::notes::reactions::Request::builder()
+                .note_id(note.entity_ref())
+                .build(),
+        );
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the reactions from the specified user in the specified range of time.
+    ///
+    /// The bound `Into<TimelineRange<NoteReaction>>` on the argument type is satisfied by the type
+    /// of some range expressions such as `..` or `start..` (which are desugared into [`RangeFull`][range_full] and
+    /// [`RangeFrom`][range_from] respectively). A reaction or [`DateTime<Utc>`][datetime] can
+    /// be used to specify the start and end bounds of the range.
+    ///
+    /// [range_full]: std::ops::RangeFull
+    /// [range_from]: std::ops::RangeFrom
+    /// [datetime]: chrono::DateTime
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.me().await?;
+    /// use futures::stream::{StreamExt, TryStreamExt};
+    /// use chrono::Utc;
+    ///
+    /// // `reactions` variable here is a `Stream` to enumerate first 100 reactions.
+    /// let mut reactions = client.user_reactions(&user, ..).take(100);
+    ///
+    /// // Retrieve all reactions until there are no more.
+    /// while let Some(reaction) = reactions.try_next().await? {
+    ///     // Print the type of reaction.
+    ///     println!("{}", reaction.type_);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.me().await?;
+    /// use chrono::{Duration, Utc};
+    ///
+    /// // Get the user reactions since `time`.
+    /// let time = Utc::now() - Duration::days(1);
+    /// let mut notes = client.user_notes(&user, time..);
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn user_reactions(
+        &self,
+        user: impl EntityRef<User>,
+        range: impl Into<TimelineRange<NoteReaction>>,
+    ) -> PagerStream<BoxPager<Self, NoteReaction>> {
+        let user_id = user.entity_ref();
+        let base_request = endpoint::users::reactions::Request::builder()
+            .user_id(user_id)
+            .build();
+        let pager = match range.into() {
+            TimelineRange::Id {
+                since_id,
+                until_id: None,
+            } => BackwardPager::with_since_id(self, since_id, base_request),
+            TimelineRange::Id {
+                since_id,
+                until_id: Some(until_id),
+            } => BackwardPager::new(
+                self,
+                endpoint::users::reactions::Request {
+                    since_id,
+                    until_id: Some(until_id),
+                    ..base_request
+                },
+            ),
+            TimelineRange::DateTime {
+                since_date,
+                until_date,
+            } => BackwardPager::new(
+                self,
+                endpoint::users::reactions::Request {
+                    since_date,
+                    until_date: Some(until_date.unwrap_or_else(Utc::now)),
+                    ..base_request
+                },
+            ),
+            TimelineRange::Unbounded => BackwardPager::new(self, base_request),
+        };
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the reactions from the specified user since the specified point in reverse order (i.e. the old reaction comes first, the new reaction comes after).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// # let user = client.me().await?;
+    /// use futures::stream::{StreamExt, TryStreamExt};
+    /// use chrono::{Duration, Utc};
+    ///
+    /// let time = Utc::now() - Duration::days(1);
+    ///
+    /// // `reactions_since` variable here is a `Stream` to enumerate first 100 reactions.
+    /// let mut reactions_since = client.user_reactions_since(&user, time).take(100);
+    ///
+    /// // Retrieve all reactions until there are no more.
+    /// while let Some(reaction) = reactions_since.try_next().await? {
+    ///     // Print the type of reaction.
+    ///     println!("{}", reaction.type_);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn user_reactions_since(
+        &self,
+        user: impl EntityRef<User>,
+        since: impl Into<TimelineCursor<NoteReaction>>,
+    ) -> PagerStream<BoxPager<Self, NoteReaction>> {
+        let user_id = user.entity_ref();
+        let base_request = endpoint::users::reactions::Request::builder()
+            .user_id(user_id)
+            .build();
+        let request = match since.into() {
+            TimelineCursor::DateTime(since_date) => endpoint::users::reactions::Request {
+                since_date: Some(since_date),
+                ..base_request
+            },
+            TimelineCursor::Id(since_id) => endpoint::users::reactions::Request {
+                since_id: Some(since_id),
+                ..base_request
+            },
+        };
+        let pager = ForwardPager::new(self, request);
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Returns a set of streams that fetch reactions from the specified user around the specified point.
+    #[cfg(feature = "12-93-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-93-0")))]
+    fn user_reactions_around(
+        &self,
+        user: impl EntityRef<User>,
+        cursor: impl Into<TimelineCursor<NoteReaction>>,
+    ) -> (
+        PagerStream<BoxPager<Self, NoteReaction>>,
+        PagerStream<BoxPager<Self, NoteReaction>>,
+    ) {
+        let cursor = cursor.into();
+        let user_id = user.entity_ref();
+        (
+            self.user_reactions_since(user_id, cursor),
+            self.user_reactions(user_id, TimelineRange::until(cursor)),
+        )
+    }
+    // }}}
+
+    // {{{ Play
+    /// Creates a Play with the given title and files.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// // Create a Play that says "Hello World!"
+    /// let script = r#"/// @ 0.12.2
+    /// Ui:render([
+    ///   Ui:C:text({ text: "Hello, World!" })
+    /// ])"#;
+    /// let play = client.create_play("My Play", script).await?;
+    ///
+    /// assert_eq!(play.title, "My Play");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn create_play(
+        &self,
+        title: impl Into<String>,
+        script: impl Into<String>,
+    ) -> BoxFuture<Result<Flash, Error<Self::Error>>> {
+        let title = title.into();
+        let script = script.into();
+        Box::pin(async move {
+            let flash = self
+                .request(endpoint::flash::create::Request {
+                    title,
+                    summary: String::new(),
+                    script,
+                    permissions: Vec::new(),
+                })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(flash)
+        })
+    }
+
+    /// Returns a builder for creating a Play.
+    ///
+    /// The returned builder provides methods to customize details of the Play,
+    /// and you can chain them to create a Play incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a post.
+    /// See [`FlashBuilder`] for the provided methods.
+    ///
+    /// [builder_create]: FlashBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let script = r#"/// @ 0.12.2
+    /// Ui:render([
+    ///   Ui:C:text({ text: "Hello, World!" })
+    /// ])"#;
+    /// let play = client
+    ///     .build_play()
+    ///     .title("title")
+    ///     .summary("summary")
+    ///     .script(script)
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(play.title, "title");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn build_play(&self) -> FlashBuilder<&Self> {
+        FlashBuilder::new(self)
+    }
+
+    /// Deletes the specified Play.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let play = client.create_play("My Play", "").await?;
+    /// client.delete_play(&play).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn delete_play(
+        &self,
+        play: impl EntityRef<Flash>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let flash_id = play.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::flash::delete::Request { flash_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding Play from the ID.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn get_play(&self, id: Id<Flash>) -> BoxFuture<Result<Flash, Error<Self::Error>>> {
+        Box::pin(async move {
+            let flash = self
+                .request(endpoint::flash::show::Request { flash_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(flash)
+        })
+    }
+
+    /// Updates the Play.
+    ///
+    /// This method actually returns a builder, namely [`FlashUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`FlashUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// [builder_update]: FlashUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_client().await?;
+    /// let play = client.create_play("My Play", "").await?;
+    /// client
+    ///     .update_play(play)
+    ///     .summary("summary")
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn update_play(&self, play: Flash) -> FlashUpdateBuilder<&Self> {
+        FlashUpdateBuilder::new(self, play)
+    }
+
+    /// Gives a like to the specified Play.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn like_play(&self, play: impl EntityRef<Flash>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let flash_id = play.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::flash::like::Request { flash_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a like from the specified Play.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn unlike_play(
+        &self,
+        play: impl EntityRef<Flash>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let flash_id = play.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::flash::unlike::Request { flash_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the Plays created by the user logged in with this client.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn plays(&self) -> PagerStream<BoxPager<Self, Flash>> {
+        let pager = BackwardPager::new(self, endpoint::flash::my::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the Plays liked by the user logged in with this client.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn liked_plays(&self) -> PagerStream<BoxPager<Self, Flash>> {
+        let pager = BackwardPager::new(self, endpoint::flash::my_likes::Request::default())
+            .map_ok(|v| v.into_iter().map(|l| l.flash).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the featured Plays.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn featured_plays(&self) -> BoxFuture<Result<Vec<Flash>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let flashes = self
+                .request(endpoint::flash::featured::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(flashes)
+        })
+    }
+    // }}}
+
+    // {{{ Roles
+    /// Gets the corresponding public role from the ID.
+    ///
+    /// Use [`get_role`][`ClientExt::get_role`] method with moderator privileges if you want to get private roles.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn get_public_role(&self, id: Id<Role>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
+        Box::pin(async move {
+            let role = self
+                .request(endpoint::roles::show::Request { role_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(role)
+        })
+    }
+
+    /// Lists the public roles of the instance.
+    ///
+    /// Use [`roles`][`ClientExt::roles`] method with moderator privileges if you want to get a list of all roles.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn public_roles(&self) -> BoxFuture<Result<Vec<Role>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let roles = self
+                .request(endpoint::roles::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(roles)
+        })
+    }
+
+    /// Lists the members of the public role.
+    ///
+    /// Use [`role_users`][`ClientExt::role_users`] method with moderator privileges if you want to get members of private roles.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn public_role_users(&self, role: impl EntityRef<Role>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::roles::users::Request::builder()
+                .role_id(role.entity_ref())
+                .build(),
+        )
+        .map_ok(|v| v.into_iter().map(|a| a.user).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+    // }}}
+
     // {{{ Admin
     /// Sets moderator privileges for the specified user.
     ///
     /// This operation may require this client to be logged in with an admin account.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn add_moderator(
         &self,
         user: impl EntityRef<User>,
@@ -3271,6 +4148,8 @@ pub trait ClientExt: Client + Sync {
     /// Removes moderator privileges for the specified user.
     ///
     /// This operation may require this client to be logged in with an admin account.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn remove_moderator(
         &self,
         user: impl EntityRef<User>,
@@ -3349,10 +4228,14 @@ pub trait ClientExt: Client + Sync {
     ) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let report_id = report.entity_ref();
         Box::pin(async move {
-            self.request(endpoint::admin::resolve_abuse_user_report::Request { report_id })
-                .await
-                .map_err(Error::Client)?
-                .into_result()?;
+            self.request(endpoint::admin::resolve_abuse_user_report::Request {
+                report_id,
+                #[cfg(feature = "12-102-0")]
+                forward: None,
+            })
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
             Ok(())
         })
     }
@@ -3386,6 +4269,8 @@ pub trait ClientExt: Client + Sync {
     /// # Ok(())
     /// # }
     /// ```
+    #[cfg(not(feature = "12-93-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-93-0"))))]
     fn server_logs(&self) -> ServerLogListBuilder<&Self> {
         ServerLogListBuilder::new(self)
     }
@@ -3404,6 +4289,8 @@ pub trait ClientExt: Client + Sync {
     /// Silences the specified user.
     ///
     /// This operation may require moderator privileges.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn silence(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let user_id = user.entity_ref();
         Box::pin(async move {
@@ -3432,6 +4319,8 @@ pub trait ClientExt: Client + Sync {
     /// Unsilences the specified user.
     ///
     /// This operation may require moderator privileges.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn unsilence(&self, user: impl EntityRef<User>) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let user_id = user.entity_ref();
         Box::pin(async move {
@@ -3464,7 +4353,14 @@ pub trait ClientExt: Client + Sync {
     /// Finally, calling [`update`][builder_update] method will actually perform the update.
     /// See [`MetaUpdateBuilder`] for the fields that can be updated.
     ///
-    /// This operation may require this client to be logged in with an admin account.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require this client to be logged in with an admin account."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require administrator privileges."
+    )]
     ///
     /// [builder_update]: MetaUpdateBuilder::update
     ///
@@ -3478,7 +4374,6 @@ pub trait ClientExt: Client + Sync {
     /// client
     ///     .update_meta()
     ///     .set_name("The Instance of Saturn")
-    ///     .max_note_text_length(5000)
     ///     .update()
     ///     .await?;
     /// # Ok(())
@@ -3572,7 +4467,14 @@ pub trait ClientExt: Client + Sync {
 
     /// Creates a custom emoji from the given file.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     #[cfg(feature = "12-9-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-9-0")))]
     fn create_emoji(
@@ -3593,14 +4495,25 @@ pub trait ClientExt: Client + Sync {
 
     /// Deletes the specified emoji.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     fn delete_emoji(
         &self,
         emoji: impl EntityRef<Emoji>,
     ) -> BoxFuture<Result<(), Error<Self::Error>>> {
         let emoji_id = emoji.entity_ref();
+        #[cfg(not(feature = "12-102-0"))]
+        let request = endpoint::admin::emoji::remove::Request { id: emoji_id };
+        #[cfg(feature = "12-102-0")]
+        let request = endpoint::admin::emoji::delete::Request { id: emoji_id };
         Box::pin(async move {
-            self.request(endpoint::admin::emoji::remove::Request { id: emoji_id })
+            self.request(request)
                 .await
                 .map_err(Error::Client)?
                 .into_result()?;
@@ -3615,7 +4528,14 @@ pub trait ClientExt: Client + Sync {
     /// Finally, calling [`update`][builder_update] method will actually perform the update.
     /// See [`EmojiUpdateBuilder`] for the fields that can be updated.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     ///
     /// [builder_update]: EmojiUpdateBuilder::update
     #[cfg(feature = "12-9-0")]
@@ -3626,7 +4546,14 @@ pub trait ClientExt: Client + Sync {
 
     /// Copies the specified emoji.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     fn copy_emoji(
         &self,
         emoji: impl EntityRef<Emoji>,
@@ -3645,16 +4572,50 @@ pub trait ClientExt: Client + Sync {
 
     /// Lists the emojis in the instance.
     ///
-    /// This operation may require moderator privileges.
-    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of custom emojis from normal users,
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
+    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of custom emojis from normal users.
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     fn emojis(&self) -> PagerStream<BoxPager<Self, Emoji>> {
+        let pager = BackwardPager::new(self, endpoint::admin::emoji::list::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Lists the emojis in the instance.
+    ///
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
+    /// Use [`emojis`][`ClientExt::emojis`] method if you want to get a list of custom emojis from normal users.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn admin_emojis(&self) -> PagerStream<BoxPager<Self, Emoji>> {
         let pager = BackwardPager::new(self, endpoint::admin::emoji::list::Request::default());
         PagerStream::new(Box::pin(pager))
     }
 
     /// Searches the emojis using the given query string.
     ///
-    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        not(feature = "13-0-0"),
+        doc = "This operation may require moderator privileges."
+    )]
+    #[cfg_attr(
+        feature = "13-0-0",
+        doc = "This operation may require `canManageCustomEmojis` policy."
+    )]
     #[cfg(feature = "12-48-0")]
     fn search_emojis(&self, query: impl Into<String>) -> PagerStream<BoxPager<Self, Emoji>> {
         let pager = BackwardPager::new(
@@ -3665,6 +4626,391 @@ pub trait ClientExt: Client + Sync {
             },
         );
         PagerStream::new(Box::pin(pager))
+    }
+
+    /// Creates an ad from the given urls.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn create_ad(
+        &self,
+        url: impl Into<String>,
+        image_url: impl Into<String>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let url = url.into();
+        let image_url = image_url.into();
+        Box::pin(async move { self.build_ad().url(url).image_url(image_url).create().await })
+    }
+
+    /// Returns a builder for creating an ad.
+    ///
+    /// This method actually returns a builder, namely [`AdBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`create`][builder_create] method will actually perform the update.
+    /// See [`AdBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_create]: AdBuilder::create
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn build_ad(&self) -> AdBuilder<&Self> {
+        AdBuilder::new(self)
+    }
+
+    /// Deletes the specified ad.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn delete_ad(&self, ad: impl EntityRef<Ad>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let ad_id = ad.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::ad::delete::Request { id: ad_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Updates the specified ad.
+    ///
+    /// This method actually returns a builder, namely [`AdUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`AdUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require moderator privileges.
+    ///
+    /// [builder_update]: AdUpdateBuilder::update
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn update_ad(&self, ad: Ad) -> AdUpdateBuilder<&Self> {
+        AdUpdateBuilder::new(self, ad)
+    }
+
+    /// Lists the ads in the instance.
+    ///
+    /// This operation may require moderator privileges.
+    /// Use [`meta`][`ClientExt::meta`] method if you want to get a list of ads from normal users.
+    #[cfg(feature = "12-80-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-80-0")))]
+    fn ads(&self) -> PagerStream<BoxPager<Self, Ad>> {
+        let pager = BackwardPager::new(self, endpoint::admin::ad::list::Request::default());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Gets detailed information about the instance.
+    ///
+    /// This operation may require administrator privileges.
+    #[cfg(feature = "12-109-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-109-0")))]
+    fn admin_meta(&self) -> BoxFuture<Result<AdminMeta, Error<Self::Error>>> {
+        Box::pin(async move {
+            let meta = self
+                .request(endpoint::admin::meta::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(meta)
+        })
+    }
+
+    /// Creates a role with the given name.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let role = client.create_role("name").await?;
+    /// assert_eq!(role.name, "name");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn create_role(&self, name: impl Into<String>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
+        let name = name.into();
+        Box::pin(async move { self.build_role().name(name).create().await })
+    }
+
+    /// Returns a builder for creating a role.
+    ///
+    /// The returned builder provides methods to customize details of the role,
+    /// and you can chain them to create a role incrementally.
+    /// Finally, calling [`create`][builder_create] method will actually create a role.
+    /// See [`RoleBuilder`] for the provided methods.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// [builder_create]: RoleBuilder::create
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// // Create a role whose members cannot post public notes.
+    /// let role = client
+    ///     .build_role()
+    ///     .name("Silence")
+    ///     .allow_public_note(|mut builder| builder.value(false).use_default(false).build())
+    ///     .create()
+    ///     .await?;
+    ///
+    /// assert_eq!(role.name, "Silence");
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn build_role(&self) -> RoleBuilder<&Self> {
+        RoleBuilder::new(self)
+    }
+
+    /// Deletes the specified role.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let role = client.create_role("role").await?;
+    /// client.delete_role(&role).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn delete_role(&self, role: impl EntityRef<Role>) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::roles::delete::Request { role_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Gets the corresponding role from the ID.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        feature = "13-7-0",
+        doc = "Use [`get_public_role`][`ClientExt::get_public_role`] method if you want to get roles from normal users."
+    )]
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn get_role(&self, id: Id<Role>) -> BoxFuture<Result<Role, Error<Self::Error>>> {
+        Box::pin(async move {
+            let role = self
+                .request(endpoint::admin::roles::show::Request { role_id: id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(role)
+        })
+    }
+
+    /// Updates the role.
+    ///
+    /// This method actually returns a builder, namely [`RoleUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`RoleUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// [builder_update]: RoleUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let role = client
+    ///     .create_role("role")
+    ///     .await?;
+    ///
+    /// // Change description and rate limit factor of the role
+    /// client
+    ///     .update_role(role)
+    ///     .description("description")
+    ///     .rate_limit_factor(|mut builder| builder.value(0.3).use_default(false).build())
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn update_role(&self, role: Role) -> RoleUpdateBuilder<&Self> {
+        RoleUpdateBuilder::new(self, role)
+    }
+
+    /// Assigns a user to the role.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn assign_role(
+        &self,
+        role: impl EntityRef<Role>,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(
+                endpoint::admin::roles::assign::Request::builder()
+                    .role_id(role_id)
+                    .user_id(user_id)
+                    .build(),
+            )
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Assigns a user to the role with time limit.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-9-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-9-0")))]
+    fn assign_role_with_time_limit(
+        &self,
+        role: impl EntityRef<Role>,
+        user: impl EntityRef<User>,
+        expires_at: DateTime<Utc>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(
+                endpoint::admin::roles::assign::Request::builder()
+                    .role_id(role_id)
+                    .user_id(user_id)
+                    .expires_at(expires_at)
+                    .build(),
+            )
+            .await
+            .map_err(Error::Client)?
+            .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Removes a user from the role.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn unassign_role(
+        &self,
+        role: impl EntityRef<Role>,
+        user: impl EntityRef<User>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let role_id = role.entity_ref();
+        let user_id = user.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::admin::roles::unassign::Request { role_id, user_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
+    /// Lists the roles of the instance.
+    ///
+    /// This operation may require moderator privileges.
+    #[cfg_attr(
+        feature = "13-7-0",
+        doc = "Use [`public_roles`][`ClientExt::public_roles`] method if you want to get a list of roles from normal users."
+    )]
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn roles(&self) -> BoxFuture<Result<Vec<Role>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let roles = self
+                .request(endpoint::admin::roles::list::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(roles)
+        })
+    }
+
+    /// Lists the members of the role.
+    ///
+    /// This operation may require moderator privileges.
+    /// Use [`public_role_users`][`ClientExt::public_role_users`] method if you want to get a list of members from normal users.
+    #[cfg(feature = "13-7-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+    fn role_users(&self, role: impl EntityRef<Role>) -> PagerStream<BoxPager<Self, User>> {
+        let pager = BackwardPager::new(
+            self,
+            endpoint::admin::roles::users::Request::builder()
+                .role_id(role.entity_ref())
+                .build(),
+        )
+        .map_ok(|v| v.into_iter().map(|a| a.user).collect());
+        PagerStream::new(Box::pin(pager))
+    }
+
+    /// Updates the default policies of the instance.
+    ///
+    /// This method actually returns a builder, namely [`DefaultPoliciesUpdateBuilder`].
+    /// You can chain the method calls to it corresponding to the fields you want to update.
+    /// Finally, calling [`update`][builder_update] method will actually perform the update.
+    /// See [`DefaultPoliciesUpdateBuilder`] for the fields that can be updated.
+    ///
+    /// This operation may require administrator privileges.
+    ///
+    /// [builder_update]: DefaultPoliciesUpdateBuilder::update
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use misskey_util::ClientExt;
+    /// # #[tokio::main]
+    /// # async fn main() -> anyhow::Result<()> {
+    /// # let client = misskey_test::test_admin_client().await?;
+    /// let policies = client.admin_meta().await?.policies;
+    /// client
+    ///     .update_default_policies(policies)
+    ///     .allow_hiding_ads(true)
+    ///     .drive_capacity(5000)
+    ///     .update()
+    ///     .await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn update_default_policies(
+        &self,
+        policies: PoliciesSimple,
+    ) -> DefaultPoliciesUpdateBuilder<&Self> {
+        DefaultPoliciesUpdateBuilder::new(self, policies)
     }
     // }}}
 
@@ -3699,6 +5045,23 @@ pub trait ClientExt: Client + Sync {
         })
     }
 
+    /// Marks the specified notification as read.
+    #[cfg(feature = "12-77-1")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-77-1")))]
+    fn mark_notification_as_read(
+        &self,
+        notification: impl EntityRef<Notification>,
+    ) -> BoxFuture<Result<(), Error<Self::Error>>> {
+        let notification_id = notification.entity_ref();
+        Box::pin(async move {
+            self.request(endpoint::notifications::read::Request { notification_id })
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(())
+        })
+    }
+
     /// Creates a notification with the given text.
     #[cfg(feature = "12-27-0")]
     #[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
@@ -3722,6 +5085,22 @@ pub trait ClientExt: Client + Sync {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-27-0")))]
     fn build_notification(&self) -> NotificationBuilder<&Self> {
         NotificationBuilder::new(self)
+    }
+
+    /// Lists the emojis in the instance.
+    ///
+    /// Use [`admin_emojis`][`ClientExt::admin_emojis`] method if you want to get a list of custom emojis with details.
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    fn emojis(&self) -> BoxFuture<Result<Vec<EmojiSimple>, Error<Self::Error>>> {
+        Box::pin(async move {
+            let response = self
+                .request(endpoint::emojis::Request::default())
+                .await
+                .map_err(Error::Client)?
+                .into_result()?;
+            Ok(response.emojis)
+        })
     }
     // }}}
 }

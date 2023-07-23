@@ -1,6 +1,6 @@
 use crate::Error;
 
-#[cfg(feature = "12-10-0")]
+#[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
 use misskey_api::model::user_group::UserGroup;
 use misskey_api::model::{
     antenna::{Antenna, AntennaSource},
@@ -23,7 +23,7 @@ impl<C> AntennaBuilder<C> {
             name: String::default(),
             src: AntennaSource::All,
             user_list_id: None,
-            #[cfg(feature = "12-10-0")]
+            #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
             user_group_id: None,
             keywords: Query::default(),
             #[cfg(feature = "12-19-0")]
@@ -75,8 +75,8 @@ impl<C> AntennaBuilder<C> {
     }
 
     /// Makes the antenna watch for notes by users in the specified user group.
-    #[cfg(feature = "12-10-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     pub fn user_group(&mut self, user_group: impl EntityRef<UserGroup>) -> &mut Self {
         self.request.src = AntennaSource::Group;
         self.request.user_group_id.replace(user_group.entity_ref());
@@ -153,7 +153,7 @@ impl<C> AntennaUpdateBuilder<C> {
             exclude_keywords,
             keywords,
             src,
-            #[cfg(feature = "12-10-0")]
+            #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
             user_group_id,
             user_list_id,
             users,
@@ -167,7 +167,7 @@ impl<C> AntennaUpdateBuilder<C> {
             name,
             src,
             user_list_id,
-            #[cfg(feature = "12-10-0")]
+            #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
             user_group_id,
             keywords,
             #[cfg(feature = "12-19-0")]
@@ -219,8 +219,8 @@ impl<C> AntennaUpdateBuilder<C> {
     }
 
     /// Makes the antenna watch for notes by users in the specified user group.
-    #[cfg(feature = "12-10-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     pub fn user_group(&mut self, user_group: impl EntityRef<UserGroup>) -> &mut Self {
         self.request.src = AntennaSource::Group;
         self.request.user_group_id.replace(user_group.entity_ref());

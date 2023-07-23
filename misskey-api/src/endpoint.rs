@@ -52,14 +52,12 @@ pub mod endpoint;
 pub mod endpoints;
 pub mod following;
 pub mod i;
-pub mod messaging;
 pub mod meta;
 pub mod mute;
 pub mod notes;
 pub mod notifications;
 pub mod pages;
 pub mod pinned_users;
-pub mod stats;
 pub mod username;
 pub mod users;
 
@@ -78,3 +76,40 @@ pub mod server_info;
 #[cfg(feature = "12-67-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-67-0")))]
 pub mod ping;
+
+#[cfg(feature = "12-79-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-79-0")))]
+pub mod gallery;
+
+#[cfg(feature = "12-92-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "12-92-0")))]
+pub mod email_address;
+
+// misskey-dev/misskey#8308
+#[cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))]
+#[cfg_attr(docsrs, doc(cfg(any(not(feature = "12-106-0"), feature = "12-107-0"))))]
+pub mod stats;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod emojis;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod flash;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod invite;
+
+#[cfg(feature = "13-0-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+pub mod retention;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod messaging;
+
+#[cfg(feature = "13-7-0")]
+#[cfg_attr(docsrs, doc(cfg(feature = "13-7-0")))]
+pub mod roles;

@@ -24,9 +24,11 @@ mod tests {
         let (user, _) = client.admin.create_user().await;
         client
             .user
-            .test(crate::endpoint::mute::create::Request {
-                user_id: user.id.clone(),
-            })
+            .test(
+                crate::endpoint::mute::create::Request::builder()
+                    .user_id(user.id.clone())
+                    .build(),
+            )
             .await;
 
         client.user.test(Request { user_id: user.id }).await;

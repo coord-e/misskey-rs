@@ -83,11 +83,11 @@ mod tests {
     async fn request_with_channel_id() {
         let client = TestClient::new();
         let channel = client
-            .test(crate::endpoint::channels::create::Request {
-                name: "test channel".to_string(),
-                description: None,
-                banner_id: None,
-            })
+            .test(
+                crate::endpoint::channels::create::Request::builder()
+                    .name("test channel")
+                    .build(),
+            )
             .await;
 
         client

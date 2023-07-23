@@ -1,4 +1,4 @@
-#[cfg(feature = "12-10-0")]
+#[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
 use crate::model::user_group::UserGroup;
 use crate::model::{
     antenna::{Antenna, AntennaSource},
@@ -17,11 +17,12 @@ pub struct Request {
     /// [ 1 .. 100 ] characters
     #[builder(setter(into))]
     pub name: String,
+    #[builder(default)]
     pub src: AntennaSource,
     #[builder(default, setter(strip_option))]
     pub user_list_id: Option<Id<UserList>>,
-    #[cfg(feature = "12-10-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     #[builder(default, setter(strip_option))]
     pub user_group_id: Option<Id<UserGroup>>,
     #[builder(default, setter(into))]
@@ -30,10 +31,15 @@ pub struct Request {
     #[cfg_attr(docsrs, doc(cfg(feature = "12-19-0")))]
     #[builder(default, setter(into))]
     pub exclude_keywords: Query<String>,
+    #[builder(default)]
     pub users: Vec<String>,
+    #[builder(default)]
     pub case_sensitive: bool,
+    #[builder(default)]
     pub with_replies: bool,
+    #[builder(default)]
     pub with_file: bool,
+    #[builder(default)]
     pub notify: bool,
 }
 
@@ -58,7 +64,7 @@ mod tests {
                 name: "z0LnEV7NljIUEFFBkjTMW7BN2f6GhfnkbjrNWTqsPikqBzbd02jAvN1axE9h9ZyYCIklKt4WIeeyCNxB31TxJW6hJyHAJVnjTPJC".to_string(),
                 src: AntennaSource::All,
                 user_list_id: None,
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
                 #[cfg(feature = "12-19-0")]
@@ -82,7 +88,7 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::Home,
                 user_list_id: None,
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![vec!["hey".to_string()], vec!["wow".to_string()]]),
                 #[cfg(feature = "12-19-0")]
@@ -112,7 +118,7 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::List,
                 user_list_id: Some(list.id),
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![
                     vec!["kawaii".to_string()],
@@ -133,7 +139,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[cfg(feature = "12-10-0")]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
     async fn request_group() {
         use crate::model::{antenna::AntennaSource, query::Query};
 
@@ -178,7 +184,7 @@ mod tests {
                 name: "test".to_string(),
                 src: AntennaSource::Users,
                 user_list_id: None,
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![
                     vec!["annoucement".to_string()],

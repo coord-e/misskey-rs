@@ -1,4 +1,4 @@
-#[cfg(feature = "12-10-0")]
+#[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
 use crate::model::user_group::UserGroup;
 use crate::model::{
     antenna::{Antenna, AntennaSource},
@@ -21,8 +21,8 @@ pub struct Request {
     pub src: AntennaSource,
     #[builder(default, setter(strip_option))]
     pub user_list_id: Option<Id<UserList>>,
-    #[cfg(feature = "12-10-0")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "12-10-0")))]
+    #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "12-10-0", not(feature = "13-7-0")))))]
     #[builder(default, setter(strip_option))]
     pub user_group_id: Option<Id<UserGroup>>,
     #[builder(default, setter(into))]
@@ -55,21 +55,17 @@ mod tests {
         let client = TestClient::new();
         let antenna = client
             .user
-            .test(crate::endpoint::antennas::create::Request {
-                name: "test".to_string(),
-                src: AntennaSource::All,
-                user_list_id: None,
-                #[cfg(feature = "12-10-0")]
-                user_group_id: None,
-                keywords: Query::from_vec(vec![vec!["hello".to_string(), "awesome".to_string()]]),
-                #[cfg(feature = "12-19-0")]
-                exclude_keywords: Query::default(),
-                users: Vec::new(),
-                case_sensitive: true,
-                with_replies: false,
-                with_file: true,
-                notify: false,
-            })
+            .test(
+                crate::endpoint::antennas::create::Request::builder()
+                    .name("test")
+                    .keywords(Query::from_vec(vec![vec![
+                        "hello".to_string(),
+                        "awesome".to_string(),
+                    ]]))
+                    .case_sensitive(true)
+                    .with_file(true)
+                    .build(),
+            )
             .await;
 
         let list = client
@@ -84,7 +80,7 @@ mod tests {
                 name: "test2".to_string(),
                 src: AntennaSource::List,
                 user_list_id: Some(list.id),
-                #[cfg(feature = "12-10-0")]
+                #[cfg(all(feature = "12-10-0", not(feature = "13-7-0")))]
                 user_group_id: None,
                 keywords: Query::from_vec(vec![vec!["cool".to_string()], vec!["nice".to_string()]]),
                 #[cfg(feature = "12-19-0")]

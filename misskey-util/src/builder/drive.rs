@@ -187,6 +187,8 @@ impl<C> DriveFileBuilder<C> {
         let path = path.as_ref().to_owned();
         let request = endpoint::drive::files::create::Request {
             name: path.file_name().map(|s| s.to_string_lossy().into_owned()),
+            #[cfg(feature = "12-102-0")]
+            comment: None,
             folder_id: None,
             is_sensitive: Some(false),
             force: Some(false),
@@ -220,6 +222,14 @@ impl<C> DriveFileBuilder<C> {
     /// Sets the name of the file.
     pub fn name(&mut self, name: impl Into<String>) -> &mut Self {
         self.request.name.replace(name.into());
+        self
+    }
+
+    #[cfg(feature = "12-102-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-102-0")))]
+    /// Sets the comment of the file.
+    pub fn comment(&mut self, comment: impl Into<String>) -> &mut Self {
+        self.request.comment.replace(comment.into());
         self
     }
 
@@ -270,6 +280,8 @@ impl<C> DriveFileUpdateBuilder<C> {
             folder_id: None,
             name: None,
             is_sensitive: None,
+            #[cfg(feature = "12-82-0")]
+            comment: None,
         };
         DriveFileUpdateBuilder { client, request }
     }
@@ -300,6 +312,14 @@ impl<C> DriveFileUpdateBuilder<C> {
     /// Sets whether the file contains NSFW content.
     pub fn sensitive(&mut self, sensitive: bool) -> &mut Self {
         self.request.is_sensitive = Some(sensitive);
+        self
+    }
+
+    #[cfg(feature = "12-82-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-82-0")))]
+    /// Sets the comment of the file.
+    pub fn comment(&mut self, comment: impl Into<String>) -> &mut Self {
+        self.request.comment.replace(comment.into());
         self
     }
 }

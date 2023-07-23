@@ -7,6 +7,7 @@ use crate::model::{channel::Channel, drive::DriveFile, id::Id, user::User};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+#[cfg(any(not(feature = "13-0-0"), feature = "13-2-4"))]
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
@@ -105,6 +106,8 @@ pub struct Poll {
 }
 
 // packed `Emoji` for `Note`
+#[cfg(not(feature = "13-0-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NoteEmoji {
     pub name: String,
@@ -136,6 +139,8 @@ pub struct Note {
     pub reply: Option<Box<Note>>,
     #[serde(default)]
     pub renote: Option<Box<Note>>,
+    #[cfg(not(feature = "12-96-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-96-0"))))]
     #[serde(default = "default_false")]
     pub via_mobile: bool,
     #[serde(default = "default_false")]
@@ -154,7 +159,16 @@ pub struct Note {
     #[serde(default)]
     pub poll: Option<Poll>,
     pub reactions: HashMap<Reaction, u64>,
+    #[cfg(feature = "13-2-4")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-2-4")))]
+    pub reaction_emojis: HashMap<Reaction, Url>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     pub emojis: Vec<NoteEmoji>,
+    #[cfg(feature = "13-2-4")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-2-4")))]
+    #[serde(default)]
+    pub emojis: Option<HashMap<String, Url>>,
     pub renote_count: u64,
     pub replies_count: u64,
     #[cfg(feature = "12-47-0")]

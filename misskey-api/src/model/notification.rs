@@ -1,8 +1,9 @@
+#[cfg(not(feature = "13-7-0"))]
+use crate::model::user_group::UserGroupInvitation;
 use crate::model::{
     id::Id,
     note::{Note, Reaction},
     user::User,
-    user_group::UserGroupInvitation,
 };
 
 use chrono::{DateTime, Utc};
@@ -43,15 +44,46 @@ pub enum NotificationBody {
     Follow,
     FollowRequestAccepted,
     ReceiveFollowRequest,
-    Mention { note: Note },
-    Reply { note: Note },
-    Renote { note: Note },
-    Quote { note: Note },
-    Reaction { note: Note, reaction: Reaction },
-    PollVote { note: Note, choice: u64 },
-    GroupInvited { invitation: UserGroupInvitation },
-    // TODO: Implement
-    App {},
+    Mention {
+        note: Note,
+    },
+    Reply {
+        note: Note,
+    },
+    Renote {
+        note: Note,
+    },
+    Quote {
+        note: Note,
+    },
+    Reaction {
+        note: Note,
+        reaction: Reaction,
+    },
+    PollVote {
+        note: Note,
+        choice: u64,
+    },
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    PollEnded {
+        note: Note,
+    },
+    #[cfg(not(feature = "13-7-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+    GroupInvited {
+        invitation: UserGroupInvitation,
+    },
+    #[cfg(feature = "13-1-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-1-0")))]
+    AchievementEarned {
+        achievement: Option<String>,
+    },
+    App {
+        body: Option<String>,
+        header: Option<String>,
+        icon: Option<String>,
+    },
 }
 
 #[derive(Debug, Error, Clone)]
@@ -78,6 +110,9 @@ impl std::str::FromStr for NotificationType {
             "quote" | "Quote" => Ok(NotificationType::Quote),
             "reaction" | "Reaction" => Ok(NotificationType::Reaction),
             "pollVote" | "PollVote" => Ok(NotificationType::PollVote),
+            #[cfg(feature = "12-108-0")]
+            "pollEnded" | "PollEnded" => Ok(NotificationType::PollEnded),
+            #[cfg(not(feature = "13-7-0"))]
             "groupInvited" | "GroupInvited" => Ok(NotificationType::GroupInvited),
             "app" | "App" => Ok(NotificationType::App),
             _ => Err(ParseNotificationTypeError { _priv: () }),

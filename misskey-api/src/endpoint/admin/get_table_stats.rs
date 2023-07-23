@@ -9,7 +9,7 @@ pub struct Request {}
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Stat {
-    pub count: u64,
+    pub count: i64,
     pub size: u64,
 }
 

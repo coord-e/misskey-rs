@@ -20,8 +20,6 @@ pub mod home_timeline;
 pub mod hybrid_timeline;
 pub mod local_timeline;
 pub mod main;
-pub mod messaging;
-pub mod messaging_index;
 pub mod queue_stats;
 pub mod server_stats;
 pub mod user_list;
@@ -30,3 +28,11 @@ pub mod user_list;
 #[cfg(feature = "12-47-0")]
 #[cfg_attr(docsrs, doc(cfg(feature = "12-47-0")))]
 pub mod channel;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod messaging;
+
+#[cfg(not(feature = "13-7-0"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "13-7-0"))))]
+pub mod messaging_index;

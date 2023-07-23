@@ -19,6 +19,8 @@ inspect-contents = []
 tokio-runtime = ["tokio", "async-tungstenite/tokio-runtime", "async-tungstenite/tokio-rustls-webpki-roots"]
 async-std-runtime = ["async-std", "async-tungstenite/async-std-runtime", "async-tungstenite/async-tls"]
 
+12-111-0 = []
+
 [dependencies]
 misskey-core = { path = "../misskey-core", version = "0.2.0" }
 serde = { version = "1.0.83", features = ["derive"] }

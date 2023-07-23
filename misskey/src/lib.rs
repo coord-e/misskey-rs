@@ -36,18 +36,22 @@
 //! use futures::stream::TryStreamExt;
 //! use misskey::prelude::*;
 //! use misskey::streaming::channel::main::MainStreamEvent;
-//! use misskey::WebSocketClient;
+//! use misskey::{HttpClient, WebSocketClient};
 //!
 //! # #[tokio::main]
 //! # async fn main() -> anyhow::Result<()> {
-//! let client = WebSocketClient::builder("wss://your.instance.example/streaming")
+//! let http_client = HttpClient::builder("https://your.instance.example/api/")
+//!     .token("API_TOKEN")
+//!     .build()?;
+//!
+//! let ws_client = WebSocketClient::builder("wss://your.instance.example/streaming")
 //!     .token("YOUR_API_TOKEN")
 //!     .connect()
 //!     .await?;
 //!
 //! // Connect to the main stream.
 //! // The main stream is a channel that streams events about the connected account.
-//! let mut stream = client.main_stream().await?;
+//! let mut stream = ws_client.main_stream().await?;
 //!
 //! // Wait for the next event in the main stream.
 //! while let Some(event) = stream.try_next().await? {
@@ -57,8 +61,8 @@
 //!             println!("followed from @{}", user.username);
 //!
 //!             // Follow back `user` if you haven't already.
-//!             if !client.is_following(&user).await? {
-//!                 client.follow(&user).await?;
+//!             if !http_client.is_following(&user).await? {
+//!                 http_client.follow(&user).await?;
 //!             }
 //!         }
 //!         // other events are just ignored here
@@ -102,7 +106,45 @@
 //!
 //! | Feature                    | Supported Misskey versions (inclusive) | Tested Misskey version |
 //! | -------------------------- | -------------------------------------- | ---------------------- |
-//! | `12-75-0`                  | v12.75.0 ~ v12.75.1                    | v12.75.0               |
+//! | `13-9-0`                   | v13.9.0 ~ v13.9.2                      | v13.9.0                |
+//! | `13-8-0`                   | v13.8.0 ~ v13.8.1                      | v13.8.0                |
+//! | `13-7-0`                   | v13.7.0 ~ v13.7.5                      | v13.7.0                |
+//! | `13-4-0`                   | v13.4.0 ~ v13.6.1                      | v13.4.0                |
+//! | `13-3-2`                   | v13.3.2 ~ v13.3.4                      | v13.3.2                |
+//! | `13-3-0`                   | v13.3.0 ~ v13.3.1                      | v13.3.0                |
+//! | `13-2-4`                   | v13.2.4 ~ v13.2.6                      | v13.2.5                |
+//! | `13-2-3`                   | v13.2.3                                | v13.2.3                |
+//! | `13-1-1`                   | v13.1.1 ~ v13.2.2                      | v13.1.1                |
+//! | `13-1-0`                   | v13.1.0                                | v13.1.0                |
+//! | `13-0-0`                   | v13.0.0                                | v13.0.0                |
+//! | `12-112-3`                 | v12.112.3 ~ v12.119.2                  | v12.112.3              |
+//! | `12-112-0`                 | v12.112.0 ~ v12.112.2                  | v12.112.2              |
+//! | `12-111-0`                 | v12.111.0 ~ v12.111.1                  | v12.111.0              |
+//! | `12-109-0`                 | v12.109.0 ~ v12.110.1                  | v12.109.2              |
+//! | `12-108-0`                 | v12.108.0 ~ v12.108.1                  | v12.108.1              |
+//! | `12-107-0`                 | v12.107.0                              | v12.107.0              |
+//! | `12-106-0`                 | v12.106.0 ~ v12.106.3                  | v12.106.0              |
+//! | `12-105-0`                 | v12.105.0                              | v12.105.0              |
+//! | `12-104-0`                 | v12.104.0                              | v12.104.0              |
+//! | `12-102-0`                 | v12.102.0 ~ v12.103.1                  | v12.102.0              |
+//! | `12-99-0`                  | v12.99.0 ~ v12.101.1                   | v12.99.1               |
+//! | `12-98-0`                  | v12.98.0                               | v12.98.0               |
+//! | `12-96-0`                  | v12.96.0 ~ v12.97.1                    | v12.97.0               |
+//! | `12-95-0`                  | v12.95.0                               | v12.95.0               |
+//! | `12-93-0`                  | v12.93.0 ~ v12.94.1                    | v12.93.0               |
+//! | `12-92-0`                  | v12.92.0                               | v12.92.0               |
+//! | `12-91-0`                  | v12.91.0                               | v12.91.0               |
+//! | `12-89-1`                  | v12.89.1 ~ v12.90.1                    | v12.89.1               |
+//! | `12-89-0`                  | v12.89.0                               | v12.89.0               |
+//! | `12-88-0`                  | v12.88.0                               | v12.88.0               |
+//! | `12-82-0`                  | v12.82.0 ~ v12.87.0                    | v12.82.0               |
+//! | `12-81-0`                  | v12.81.0 ~ v12.81.2                    | v12.81.0               |
+//! | `12-80-0`                  | v12.80.0 ~ v12.80.3                    | v12.80.0               |
+//! | `12-79-2`                  | v12.79.2 ~ v12.79.3                    | v12.79.2               |
+//! | `12-79-0`                  | v12.79.0 ~ v12.79.1                    | v12.79.0               |
+//! | `12-77-1`                  | v12.77.1 ~ v12.78.0                    | v12.77.1               |
+//! | `12-77-0`                  | v12.77.0                               | v12.77.0               |
+//! | `12-75-0`                  | v12.75.0 ~ v12.76.1                    | v12.75.0               |
 //! | `12-71-0`                  | v12.71.0 ~ v12.74.1                    | v12.71.0               |
 //! | `12-70-0`                  | v12.70.0                               | v12.70.0               |
 //! | `12-69-0`                  | v12.69.0                               | v12.69.0               |
@@ -276,7 +318,7 @@ pub mod streaming {
     //!
     //! ```no_run
     //! use futures::stream::StreamExt;
-    //! use misskey::streaming::emoji::EmojiAddedEvent;
+    //! use misskey::streaming::broadcast::emoji_added::EmojiAddedEvent;
     //! # use misskey::WebSocketClient;
     //! # #[tokio::main]
     //! # async fn main() -> anyhow::Result<()> {

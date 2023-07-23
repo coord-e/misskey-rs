@@ -50,6 +50,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub target_user_origin: Option<UserOrigin>,
+    #[cfg(feature = "12-102-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-102-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub forwarded: Option<bool>,
     /// 1 .. 100
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
@@ -95,6 +100,8 @@ mod tests {
                 reporter_origin: None,
                 #[cfg(feature = "12-49-0")]
                 target_user_origin: None,
+                #[cfg(feature = "12-102-0")]
+                forwarded: None,
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -118,6 +125,8 @@ mod tests {
                 reporter_origin: Some(UserOrigin::Remote),
                 #[cfg(feature = "12-49-0")]
                 target_user_origin: Some(UserOrigin::Combined),
+                #[cfg(feature = "12-102-0")]
+                forwarded: None,
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -133,6 +142,8 @@ mod tests {
                 reporter_origin: Some(UserOrigin::Combined),
                 #[cfg(feature = "12-49-0")]
                 target_user_origin: Some(UserOrigin::Local),
+                #[cfg(feature = "12-102-0")]
+                forwarded: None,
                 limit: Some(100),
                 since_id: None,
                 until_id: None,
@@ -162,6 +173,8 @@ mod tests {
                 reporter_origin: None,
                 #[cfg(feature = "12-49-0")]
                 target_user_origin: None,
+                #[cfg(feature = "12-102-0")]
+                forwarded: None,
                 limit: None,
                 since_id: None,
                 until_id: None,
@@ -177,6 +190,8 @@ mod tests {
                 reporter_origin: None,
                 #[cfg(feature = "12-49-0")]
                 target_user_origin: None,
+                #[cfg(feature = "12-102-0")]
+                forwarded: None,
                 limit: None,
                 since_id: Some(reports[0].id.clone()),
                 until_id: Some(reports[0].id.clone()),

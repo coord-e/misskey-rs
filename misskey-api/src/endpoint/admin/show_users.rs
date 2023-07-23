@@ -1,6 +1,10 @@
+#[cfg(feature = "13-0-0")]
+use crate::model::user::AdminUserSortKey;
+#[cfg(not(feature = "13-0-0"))]
+use crate::model::user::UserSortKey;
 use crate::model::{
     sort::SortOrder,
-    user::{User, UserOrigin, UserSortKey},
+    user::{User, UserOrigin},
 };
 
 use serde::Serialize;
@@ -16,6 +20,8 @@ pub enum UserState {
     Admin,
     Moderator,
     AdminOrModerator,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     Silenced,
     Suspended,
 }
@@ -37,6 +43,7 @@ impl std::str::FromStr for UserState {
             "admin" | "Admin" => Ok(UserState::Admin),
             "moderator" | "Moderator" => Ok(UserState::Moderator),
             "adminOrModerator" | "AdminOrModerator" => Ok(UserState::AdminOrModerator),
+            #[cfg(not(feature = "13-0-0"))]
             "silenced" | "Silenced" => Ok(UserState::Silenced),
             "suspended" | "Suspended" => Ok(UserState::Suspended),
             _ => Err(ParseUserStateError { _priv: () }),
@@ -55,21 +62,40 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub offset: Option<u64>,
+    #[cfg(not(feature = "13-0-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "13-0-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub sort: Option<SortOrder<UserSortKey>>,
+    #[cfg(feature = "13-0-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "13-0-0")))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[builder(default, setter(strip_option))]
+    pub sort: Option<SortOrder<AdminUserSortKey>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub state: Option<UserState>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option))]
     pub origin: Option<UserOrigin>,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub username: Option<String>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[builder(default)]
+    pub username: String,
+    #[cfg(not(feature = "12-108-0"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "12-108-0"))))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default, setter(strip_option, into))]
     pub hostname: Option<String>,
+    #[cfg(feature = "12-108-0")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "12-108-0")))]
+    #[builder(default)]
+    pub hostname: String,
 }
 
 impl misskey_core::Request for Request {
@@ -101,8 +127,14 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
     }
@@ -118,15 +150,25 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
     }
 
     #[tokio::test]
     async fn request_with_sort() {
-        use crate::model::{sort::SortOrder, user::UserSortKey};
+        use crate::model::sort::SortOrder;
+        #[cfg(feature = "13-0-0")]
+        use crate::model::user::AdminUserSortKey;
+        #[cfg(not(feature = "13-0-0"))]
+        use crate::model::user::UserSortKey;
 
         let client = TestClient::new();
 
@@ -135,11 +177,20 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
+                #[cfg(not(feature = "13-0-0"))]
                 sort: Some(SortOrder::Ascending(UserSortKey::Follower)),
+                #[cfg(feature = "13-0-0")]
+                sort: Some(SortOrder::Ascending(AdminUserSortKey::Follower)),
                 state: None,
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -147,11 +198,20 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
+                #[cfg(not(feature = "13-0-0"))]
                 sort: Some(SortOrder::Ascending(UserSortKey::CreatedAt)),
+                #[cfg(feature = "13-0-0")]
+                sort: Some(SortOrder::Ascending(AdminUserSortKey::CreatedAt)),
                 state: None,
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -159,11 +219,33 @@ mod tests {
             .test(Request {
                 limit: None,
                 offset: None,
+                #[cfg(not(feature = "13-0-0"))]
                 sort: Some(SortOrder::Descending(UserSortKey::UpdatedAt)),
+                #[cfg(feature = "13-0-0")]
+                sort: Some(SortOrder::Descending(AdminUserSortKey::UpdatedAt)),
                 state: None,
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
+            })
+            .await;
+        #[cfg(feature = "13-0-0")]
+        client
+            .admin
+            .test(Request {
+                limit: None,
+                offset: None,
+                sort: Some(SortOrder::Descending(AdminUserSortKey::LastActiveDate)),
+                state: None,
+                origin: None,
+                username: String::new(),
+                hostname: String::new(),
             })
             .await;
     }
@@ -180,8 +262,14 @@ mod tests {
                 sort: None,
                 state: Some(UserState::All),
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -192,8 +280,14 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Admin),
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -204,8 +298,14 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Available),
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         // client
@@ -228,8 +328,14 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Moderator),
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         // TODO: Uncomment with cfg when `adminOrModerator` value is fixed in Misskey
@@ -243,6 +349,7 @@ mod tests {
         //         origin: None,
         //     })
         //     .await;
+        #[cfg(not(feature = "13-0-0"))]
         client
             .admin
             .test(Request {
@@ -251,8 +358,14 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Silenced),
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -263,8 +376,14 @@ mod tests {
                 sort: None,
                 state: Some(UserState::Suspended),
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
     }
@@ -283,8 +402,14 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Local),
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -295,8 +420,14 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Remote),
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
         client
@@ -307,8 +438,14 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: Some(UserOrigin::Combined),
+                #[cfg(not(feature = "12-108-0"))]
                 username: None,
+                #[cfg(feature = "12-108-0")]
+                username: String::new(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: None,
+                #[cfg(feature = "12-108-0")]
+                hostname: String::new(),
             })
             .await;
     }
@@ -325,8 +462,14 @@ mod tests {
                 sort: None,
                 state: None,
                 origin: None,
+                #[cfg(not(feature = "12-108-0"))]
                 username: Some("admin".to_string()),
+                #[cfg(feature = "12-108-0")]
+                username: "admin".to_string(),
+                #[cfg(not(feature = "12-108-0"))]
                 hostname: Some("host".to_string()),
+                #[cfg(feature = "12-108-0")]
+                hostname: "host".to_string(),
             })
             .await;
     }

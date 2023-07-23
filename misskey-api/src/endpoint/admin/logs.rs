@@ -60,7 +60,10 @@ mod tests {
             .test(Request {
                 limit: None,
                 level: Some(LogLevel::Debug),
+                #[cfg(not(feature = "12-89-0"))]
                 domain: Some("chart remote -resolve-user".to_string()),
+                #[cfg(feature = "12-89-0")]
+                domain: Some("chart".to_string()),
             })
             .await;
     }
